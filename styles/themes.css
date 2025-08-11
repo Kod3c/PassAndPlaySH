@@ -22,6 +22,7 @@
     --text-muted: #6c757d;
     
     /* Accent Colors */
+    --accent-color: #007bff;
     --accent-success: #28a745;
     --accent-danger: #dc3545;
     --accent-warning: #ffc107;
@@ -29,6 +30,7 @@
     --accent-purple: #6f42c1;
     
     /* Border Colors */
+    --border-color: #e9ecef;
     --border-primary: #e9ecef;
     --border-secondary: #dee2e6;
     --border-focus: var(--primary-color);
@@ -76,6 +78,14 @@
     /* Feature Section Colors */
     --feature-bg: var(--bg-tertiary);
     --feature-border: var(--border-secondary);
+    
+    /* Rules Page Colors */
+    --accent-bg: rgba(255, 255, 255, 0.1);
+    --accent-hover: rgba(255, 255, 255, 0.2);
+    
+    /* Game Page Colors */
+    --success-color: #28a745;
+    --warning-color: #ffc107;
 }
 
 /* Dark Theme */
@@ -89,6 +99,21 @@
     --text-light: #ecf0f1;
     --text-muted: #95a5a6;
     
+    --accent-color: #3498db;
+    --accent-success: #27ae60;
+    --accent-danger: #e74c3c;
+    --accent-warning: #f39c12;
+    --accent-info: #17a2b8;
+    --accent-purple: #9b59b6;
+    
+    --accent-bg: rgba(52, 73, 94, 0.3);
+    --accent-hover: rgba(52, 73, 94, 0.5);
+    
+    /* Game Page Colors */
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    
+    --border-color: #34495e;
     --border-primary: #34495e;
     --border-secondary: #2c3e50;
     
@@ -116,6 +141,21 @@
     --primary-color: #0000ff;
     --primary-hover: #0000cc;
     
+    --accent-color: #ff6b35;
+    --accent-success: #00ff00;
+    --accent-danger: #ff0000;
+    --accent-warning: #ffff00;
+    --accent-info: #00ffff;
+    --accent-purple: #ff00ff;
+    
+    --accent-bg: rgba(255, 255, 255, 0.2);
+    --accent-hover: rgba(255, 255, 255, 0.3);
+    
+    /* Game Page Colors */
+    --success-color: #00ff00;
+    --warning-color: #ffff00;
+    
+    --border-color: #000000;
     --border-primary: #000000;
     --border-secondary: #333333;
     
@@ -137,12 +177,21 @@
     --primary-color: #e17055;
     --primary-hover: #d63031;
     
-    --accent-success: #00b894;
-    --accent-danger: #e17055;
-    --accent-warning: #fdcb6e;
-    --accent-info: #74b9ff;
-    --accent-purple: #a29bfe;
+    --accent-color: #ff6b35;
+    --accent-success: #27ae60;
+    --accent-danger: #e74c3c;
+    --accent-warning: #f39c12;
+    --accent-info: #17a2b8;
+    --accent-purple: #9b59b6;
     
+    --accent-bg: rgba(255, 107, 53, 0.1);
+    --accent-hover: rgba(255, 107, 53, 0.2);
+    
+    /* Game Page Colors */
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    
+    --border-color: #ffeaa7;
     --border-primary: #ffeaa7;
     --border-secondary: #fdcb6e;
     
@@ -164,12 +213,21 @@
     --primary-color: #0984e3;
     --primary-hover: #0652dd;
     
+    --accent-color: #74b9ff;
     --accent-success: #00b894;
-    --accent-danger: #e17055;
+    --accent-danger: #fd79a8;
     --accent-warning: #fdcb6e;
     --accent-info: #74b9ff;
     --accent-purple: #a29bfe;
     
+    --accent-bg: rgba(116, 185, 255, 0.1);
+    --accent-hover: rgba(116, 185, 255, 0.2);
+    
+    /* Game Page Colors */
+    --success-color: #00b894;
+    --warning-color: #fdcb6e;
+    
+    --border-color: #dfe6e9;
     --border-primary: #dfe6e9;
     --border-secondary: #b2bec3;
     
@@ -189,12 +247,15 @@
     padding: 10px;
     box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .theme-switcher.disabled {
-    opacity: 0.3;
+    opacity: 0;
     pointer-events: none;
     transform: scale(0.9);
+    visibility: hidden;
 }
 
 .theme-switcher h4 {
@@ -202,6 +263,7 @@
     color: var(--text-primary);
     font-size: 14px;
     text-align: center;
+    font-weight: 600;
 }
 
 .theme-options {
@@ -219,12 +281,17 @@
     cursor: pointer;
     font-size: 12px;
     transition: all 0.2s ease;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .theme-option:hover:not(:disabled) {
     background: var(--primary-color);
     color: var(--text-light);
     border-color: var(--primary-color);
+    transform: translateY(-1px);
 }
 
 .theme-option.active {
@@ -249,21 +316,59 @@
 @media (max-width: 768px) {
     .theme-switcher {
         position: fixed;
-        top: 10px;
-        right: 10px;
-        padding: 8px;
-        border-radius: 6px;
-        max-width: 120px;
+        top: 15px;
+        right: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 130px;
+        z-index: 1001;
     }
     
     .theme-switcher.disabled {
-        opacity: 0.2;
+        opacity: 0;
         transform: scale(0.85);
+        visibility: hidden;
+    }
+    
+    .theme-switcher h4 {
+        font-size: 13px;
+        margin: 0 0 8px 0;
+    }
+    
+    .theme-options {
+        gap: 4px;
+    }
+    
+    .theme-option {
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 4px;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-switcher {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 8px;
+        max-width: 110px;
+        border-radius: 6px;
+    }
+    
+    .theme-switcher.disabled {
+        opacity: 0;
+        transform: scale(0.8);
+        visibility: hidden;
     }
     
     .theme-switcher h4 {
         font-size: 12px;
-        margin: 0 0 8px 0;
+        margin: 0 0 6px 0;
     }
     
     .theme-options {
@@ -271,13 +376,15 @@
     }
     
     .theme-option {
-        padding: 4px 8px;
+        padding: 5px 8px;
         font-size: 11px;
         border-radius: 3px;
+        min-height: 28px;
     }
 }
 
-@media (max-width: 480px) {
+/* Extra small mobile devices */
+@media (max-width: 360px) {
     .theme-switcher {
         position: fixed;
         top: 8px;
@@ -286,23 +393,14 @@
         max-width: 100px;
     }
     
-    .theme-switcher.disabled {
-        opacity: 0.15;
-        transform: scale(0.8);
-    }
-    
     .theme-switcher h4 {
         font-size: 11px;
-        margin: 0 0 6px 0;
-    }
-    
-    .theme-options {
-        gap: 2px;
+        margin: 0 0 5px 0;
     }
     
     .theme-option {
-        padding: 3px 6px;
+        padding: 4px 6px;
         font-size: 10px;
-        border-radius: 2px;
+        min-height: 26px;
     }
 }

@@ -1,5 +1,270 @@
 # Changelog
 
+## [0.6.5] - 2024-12-19
+
+### 🎮 Player Count Button Mobile Fixes
+- **Consistent Button Sizing** - Fixed inconsistent button sizes across different mobile breakpoints
+- **Mobile Screen Optimization** - Buttons now properly fit on all mobile screen sizes without overflow
+- **Responsive Breakpoint Consistency** - Standardized button sizing across 768px, 480px, and 360px breakpoints
+- **Touch Target Optimization** - Ensured all buttons meet minimum touch target requirements for mobile devices
+- **Layout Stability** - Prevented button wrapping and layout shifts on small screens
+
+### 📱 Mobile Responsive Improvements
+- **768px Breakpoint** - Buttons sized at 4rem with 1.2rem gaps for tablet devices
+- **480px Breakpoint** - Buttons sized at 3.5rem with 1rem gaps for mobile devices
+- **360px Breakpoint** - Buttons sized at 3rem with 0.8rem gaps for very small mobile devices
+- **Flexbox Layout** - Added `flex-shrink: 0` and proper flex properties to prevent size distortion
+- **Container Constraints** - Added max-width constraints to prevent layout overflow
+
+### 🔧 Technical Fixes
+- **Button Consistency** - All player count buttons now maintain consistent sizing within their breakpoints
+- **CSS Architecture** - Improved responsive design with better breakpoint management
+- **Layout Stability** - Added `flex-wrap: nowrap` and proper flex properties to prevent unwanted wrapping
+- **Touch Optimization** - Maintained minimum 3rem touch targets across all screen sizes
+- **Performance** - Optimized transitions and prevented layout thrashing on mobile
+
+### 📁 Files Modified
+- `styles/main.css` - Fixed player count button sizing and responsive breakpoints
+
+### 🧪 Testing & Verification
+- **Button Sizing** - All buttons maintain consistent sizes within their respective breakpoints
+- **Mobile Layout** - Buttons fit properly on all mobile screen sizes without overflow
+- **Touch Targets** - All buttons meet minimum 3rem touch target requirements
+- **Responsive Behavior** - Smooth transitions between breakpoints without layout jumps
+- **Cross-Device Compatibility** - Tested across tablet, mobile, and small mobile screen sizes
+
+### 🌟 User Experience Benefits
+- **Better Mobile Experience** - Player count buttons now fit properly on all mobile devices
+- **Consistent Interface** - Buttons maintain consistent sizing and spacing across all screen sizes
+- **Improved Touch Interaction** - Optimized touch targets for better mobile usability
+- **Professional Appearance** - Clean, stable layout that looks polished on all devices
+- **Accessibility** - Maintained proper touch target sizes for all users
+
+---
+
+## [0.6.4] - 2024-12-19
+
+### 🎮 Comprehensive Rules Page Redesign
+- **Complete Visual Overhaul** - Transformed basic rules page into engaging, interactive learning experience
+- **Tab-Based Navigation** - Added 6 organized sections: Overview, Setup, Gameplay, Roles, Special Powers, and Winning
+- **Rich Visual Content** - Integrated emojis, icons, color-coded elements, and interactive cards throughout
+- **Modern Design System** - Implemented consistent styling with hover effects, animations, and responsive layouts
+- **Professional Appearance** - Rules page now looks polished and engaging for new players
+
+### 🎯 Rules Page Sections & Features
+
+#### **Overview Section**
+- **Game Statistics Cards** - Visual display of players (5-10), duration (30-45 min), type (Social Deduction), theme (Political intrigue)
+- **Objective Cards** - Clear visual representation of Liberal vs Fascist victory conditions
+- **Interactive Elements** - Hover effects and smooth transitions on all cards
+
+#### **Setup Section**
+- **Step-by-Step Process** - Numbered setup steps with visual role distribution examples
+- **Role Badges** - Color-coded role examples (Liberal=Blue, Fascist=Red, Hitler=Purple)
+- **Policy Deck Visualization** - Visual representation of Liberal (6) vs Fascist (11) policy cards
+- **Game Board Preview** - Interactive policy tracks showing win conditions and power spaces
+
+#### **Gameplay Section**
+- **Visual Flow Diagram** - Step-by-step game progression with icons and arrows
+- **Voting Examples** - Interactive Ja/Nein vote cards with hover effects
+- **Phase Explanations** - Clear breakdown of election, legislation, and executive phases
+
+#### **Roles Section**
+- **Detailed Role Cards** - Comprehensive information for Liberal, Fascist, and Hitler roles
+- **Goals & Knowledge** - Clear explanation of what each role knows and must accomplish
+- **Visual Hierarchy** - Consistent card design with proper spacing and typography
+
+#### **Special Powers Section**
+- **Executive Power Cards** - Visual representation of Policy Peek, Investigation, and Special Election
+- **Power Usage Tips** - Strategic advice for using each special ability effectively
+- **Interactive Visuals** - Card stacks, player targets, and power effects
+
+#### **Winning Section**
+- **Victory Condition Cards** - Clear display of how each team can win
+- **Policy Track Completion** - Visual representation of Liberal (5) vs Fascist (6) policy requirements
+- **End Game Considerations** - Strategic tips and important game mechanics
+
+### 🎨 Design & Visual Improvements
+- **Color-Coded Elements** - Consistent use of blue (Liberal), red (Fascist), purple (Hitler) throughout
+- **Interactive Cards** - Hover effects, smooth animations, and visual feedback on all elements
+- **Responsive Grid Layouts** - CSS Grid and Flexbox for modern, adaptive layouts
+- **Consistent Theming** - All visual elements work seamlessly with all 5 available themes
+- **Mobile Optimization** - Touch-friendly design with appropriate sizing and spacing
+
+### 🔧 Technical Implementation
+- **Tab Navigation System** - JavaScript-powered section switching with active state management
+- **CSS Custom Properties** - Theme integration using CSS variables for consistent theming
+- **Responsive Breakpoints** - Mobile-first design with specific optimizations for different screen sizes
+- **Performance Optimization** - Smooth transitions and animations without performance impact
+- **Accessibility Features** - Proper contrast, touch targets, and visual hierarchy
+
+### 📱 Mobile Experience
+- **Touch-Friendly Interface** - Large touch targets and intuitive navigation on mobile devices
+- **Responsive Design** - Layout adapts perfectly to all screen sizes from desktop to mobile
+- **Mobile Navigation** - Tab buttons sized appropriately for mobile interaction
+- **Optimized Spacing** - Proper margins and padding for mobile viewing
+
+### 🎯 Player Count Selector Improvements
+- **Centered Layout** - Player count section now perfectly centered with clean organization
+- **Enhanced Button Styling** - Improved circular buttons with better hover effects and transitions
+- **Mobile Optimization** - Larger touch targets (4.5rem on mobile) with better visual feedback
+- **Visual Enhancements** - Enhanced player count display with background, borders, and shadows
+- **Responsive Design** - Buttons scale appropriately for different screen sizes
+
+### 🎨 Footer Centering
+- **Centered Layout** - Footer content now perfectly centered both horizontally and vertically
+- **Improved Spacing** - Better padding and margins for professional appearance
+- **Flexbox Layout** - Modern CSS layout for consistent centering across all themes
+
+### 📁 Files Modified
+- `index.html` - Complete rules page redesign with 6 interactive sections and rich content
+- `styles/main.css` - Comprehensive styling for new rules page, improved player count selector, and centered footer
+- `styles/themes.css` - Added missing CSS variables for consistent theming across all themes
+- `js/app.js` - Added tab navigation functionality for rules page sections
+
+### 🧪 Testing & Verification
+- **Rules Page Navigation** - All 6 tabs work correctly with proper active states
+- **Responsive Design** - Rules page displays correctly on all screen sizes
+- **Theme Integration** - All visual elements work with all 5 available themes
+- **Player Count Selector** - Buttons function correctly with proper styling and centering
+- **Mobile Experience** - Touch-friendly interface works perfectly on mobile devices
+- **Footer Layout** - Content properly centered across all themes and screen sizes
+
+### 🌟 User Experience Benefits
+- **Engaging Learning Experience** - Rules page now serves as an interactive tutorial for new players
+- **Professional Appearance** - Game looks polished and well-designed, improving player confidence
+- **Better Mobile Experience** - Touch-friendly interface works perfectly on all devices
+- **Clear Information Architecture** - Organized tab structure makes rules easy to navigate and understand
+- **Visual Learning** - Graphics and interactive elements help players understand complex game mechanics
+- **Consistent Design** - All elements follow the same design language for cohesive user experience
+
+---
+
+## [0.6.3] - 2024-12-19
+
+### 📱 Mobile Experience Improvements
+- **Theme Selector Mobile Fixes** - Fixed positioning and overlap issues on mobile devices
+- **Player Selector Touch Optimization** - Improved touch targets and visual feedback for mobile
+- **Responsive Layout Enhancements** - Better spacing and sizing across all mobile screen sizes
+- **Header Positioning** - Prevented theme selector overlap with game title on small screens
+- **Touch-Friendly Controls** - Enhanced button interactions with better active states and feedback
+
+### 🎯 Theme Selector Mobile Fixes
+- **Better Positioning** - Adjusted top/right positioning to prevent overlap with content
+- **Improved Sizing** - Better padding and sizing for different screen sizes (768px, 480px, 360px)
+- **Touch Optimization** - Added minimum heights and better touch targets for mobile
+- **Visual Enhancements** - Added backdrop blur, better shadows, and improved typography
+- **Responsive Breakpoints** - Specific styles for tablet, mobile, and small mobile devices
+
+### 🎮 Player Selector Mobile Improvements
+- **Larger Touch Targets** - Increased button sizes from 3rem to 4.5rem on mobile devices
+- **Enhanced Spacing** - Improved gaps, margins, and padding for mobile layouts
+- **Visual Feedback** - Added active states, shadows, transitions, and hover effects
+- **Better Display Styling** - Enhanced player count display with background, borders, and shadows
+- **Touch Optimization** - Added user-select: none, tap highlight removal, and better interactions
+
+### 🔧 Technical Enhancements
+- **Z-Index Management** - Proper layering to prevent overlap issues between components
+- **Touch Interactions** - Better active states, feedback, and mobile-specific behaviors
+- **Performance Optimization** - Optimized transitions and animations for mobile devices
+- **Accessibility Improvements** - Better contrast, touch targets, and visual feedback
+- **CSS Architecture** - Enhanced responsive design with better breakpoint management
+
+### 📁 Files Modified
+- `styles/themes.css` - Enhanced mobile responsive styles and positioning for theme switcher
+- `styles/main.css` - Improved mobile styles for player selector, header, and container
+
+### 🧪 Testing & Verification
+- **Theme Selector Positioning** - No more overlap with game title on mobile devices
+- **Player Selector Touch Targets** - Buttons are appropriately sized for mobile interaction
+- **Responsive Breakpoints** - All screen sizes (768px, 480px, 360px) display correctly
+- **Touch Interactions** - Buttons respond properly to touch with visual feedback
+- **Layout Consistency** - No visual overlap or spacing issues across different mobile devices
+
+### 🌟 User Experience Benefits
+- **Better Mobile Experience** - Theme selector no longer blocks or overlaps important content
+- **Improved Touch Interaction** - Player selector buttons are easier to tap and provide better feedback
+- **Cleaner Mobile Layout** - Better spacing and sizing prevents visual clutter on small screens
+- **Professional Appearance** - Mobile interface now looks polished and well-designed
+- **Accessibility** - Better touch targets and visual feedback improve usability for all users
+
+---
+
+## [0.6.2] - 2024-12-19
+
+### 🎯 Mobile Player Selection System
+- **Replaced Player Count Buttons** - Changed from individual "5 Players", "6 Players" buttons to intuitive +/- system
+- **Mobile-First Design** - Large touch-friendly +/- buttons (4rem on mobile) for easy player count adjustment
+- **Centered Layout** - Player count section now properly centered with clean, organized appearance
+- **Simplified Interface** - Removed complex player management in favor of simple count control
+- **Range Display** - Added "Range: 5-10 players" text below the controls for clarity
+
+### 🔧 Technical Improvements
+- **Dynamic Player Count Updates** - +/- buttons automatically update role distribution and player input fields
+- **Smart Button States** - Minus button disabled at 5 players, plus button disabled at 10 players
+- **Event-Driven Updates** - Player count changes trigger immediate UI updates throughout the system
+- **Responsive Button Sizing** - Buttons scale appropriately for different screen sizes (3rem desktop, 4rem mobile)
+
+### 📱 Mobile Optimization
+- **Touch-Friendly Controls** - Large circular buttons perfect for mobile devices
+- **Responsive Spacing** - Optimized gaps and margins for mobile screens
+- **Clean Visual Hierarchy** - Simplified layout that works well on small screens
+- **Intuitive Interaction** - Users can quickly adjust player count with simple +/- taps
+
+### 🎨 UI/UX Improvements
+- **Modern Button Design** - Circular buttons with hover effects and smooth transitions
+- **Consistent Styling** - Matches existing design language and color scheme
+- **Visual Feedback** - Buttons show disabled state clearly when limits are reached
+- **Professional Appearance** - Clean, centered layout that looks polished on all devices
+
+### 📁 Files Modified
+- `js/app.js` - Replaced player count button logic with +/- button system and dynamic updates
+- `index.html` - Updated player count section to use +/- buttons instead of individual count buttons
+- `styles/main.css` - Added styles for new +/- button system and removed old player count button styles
+
+### 🧪 Testing & Verification
+- **Button Functionality** - +/- buttons correctly increment/decrement player count
+- **Range Limits** - Buttons properly disabled at 5 and 10 player limits
+- **UI Updates** - Role distribution and player input fields update correctly with count changes
+- **Mobile Responsiveness** - Interface works perfectly on mobile devices with appropriate button sizes
+- **Visual States** - Disabled button states clearly visible and functional
+
+### 🌟 User Experience Benefits
+- **Faster Setup** - Users can quickly adjust player count without scrolling through multiple buttons
+- **Mobile Friendly** - Much better experience on touch devices with large, easy-to-tap controls
+- **Cleaner Interface** - Simplified design reduces visual clutter and improves usability
+- **Intuitive Controls** - +/- buttons are universally understood and easy to use
+
+---
+
+## [0.6.1] - 2024-12-19
+
+### 🎨 Theme Selector Improvements
+- **Disabled by Default** - Theme selector now starts in disabled state for cleaner interface
+- **Enable Button** - Added "Enable Theme Selector" button at bottom of page for user control
+- **Complete Hiding** - Disabled theme selector is completely invisible (no visual clutter)
+- **Mobile Optimization** - Theme selector takes up much less space on mobile devices
+- **Persistent State** - User's enable/disable preference is saved and restored
+
+### 🔧 Technical Improvements
+- **Smart State Management** - JavaScript handles enabling/disabling theme switcher
+- **CSS Visibility Control** - Uses `visibility: hidden` and `opacity: 0` for complete hiding
+- **Button State Changes** - Enable button text and styling changes based on current state
+- **localStorage Integration** - Remembers if user has enabled theme selector
+
+### 📁 Files Modified
+- `styles/themes.css` - Added disabled state styles and mobile responsive hiding
+- `js/app.js` - Added theme switcher enable/disable functionality
+- `index.html` - Added enable button in footer and disabled state to theme switcher
+
+### 🎯 User Experience Benefits
+- **Cleaner Interface** - No theme selector clutter by default
+- **User Control** - Users can enable themes when they want customization
+- **Mobile Friendly** - Much less intrusive on small screens
+- **Progressive Disclosure** - Advanced features hidden until needed
+
+---
+
 ## [0.6.0] - 2024-12-19
 
 ### 🎨 New Features

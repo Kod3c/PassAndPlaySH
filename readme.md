@@ -4,31 +4,7 @@
 
 **Scope**: One device, offline‑capable, no accounts/servers, no networking. Clean, dependency‑free HTML/CSS/JS across a small number of focused pages where needed.
 
----
-
-## Current Implementation Status
-
-### ✅ Completed (Phase 0-1)
-- **Basic PWA structure** with service worker and manifest
-- **SPA routing system** with client-side navigation
-- **Setup page** with player count selection (5-10 players) and role distribution display
-- **Player name input system** with dynamic form generation
-- **Rules page** with comprehensive game rules and instructions
-- **Responsive design** with modern UI components
-- **Basic offline capability** with service worker caching
-- **Complete theme system** with 5 different themes and theme switcher
-
-### 🚧 In Progress (Phase 2)
-- **Core game engine** implementation
-- **Game state management** and local storage persistence
-- **Role reveal system** with secure handoff screens
-
-### 📋 Next Steps (Phase 3-4)
-- **Main game board** with policy tracking
-- **Election system** with nomination and voting
-- **Legislation flow** with policy drawing and enactment
-- **Executive powers** implementation
-- **Complete game flow** from setup to win conditions
+**Current Version**: 0.6.2 (2024-12-19)
 
 ---
 
@@ -39,27 +15,64 @@
 - **PWA Setup**: Service worker, manifest, basic offline functionality
 - **SPA Architecture**: Client-side routing with URL management
 - **Basic UI**: Setup page, rules page, and responsive design system
+- **Theme System**: Complete theming with 5 themes and switcher
+- **Mobile Optimization**: Touch-friendly controls and responsive design
 
-### Phase 2: Core Game Engine 🚧 IN PROGRESS
-**Goal**: Implement the fundamental game mechanics and state management
+### Phase 2: Game Builder & Setup System 🚧 IN PROGRESS - CURRENT
+**Goal**: Complete the game setup and configuration system to enable proper game initialization
+
+#### 🎯 Specific TODOs for Phase 2 Completion:
+
+**Game Setup Flow (Priority 1)**
+- [ ] Complete role assignment system with secure distribution
+- [ ] Implement player handoff screens for role reveals
+- [ ] Add setup validation to ensure proper game configuration
+- [ ] Create game initialization and start functionality
+- [ ] Build setup completion and game transition flow
+
+**Game Configuration Interface (Priority 2)**
+- [ ] Add game parameter customization (optional rules, variants)
+- [ ] Implement setup preferences and defaults
+- [ ] Create configuration validation and error handling
+- [ ] Add setup recovery and modification capabilities
+- [ ] Build setup export/import for saved configurations
+
+**Setup System Architecture (Priority 3)**
+- [ ] Design robust setup state management
+- [ ] Implement setup data persistence and recovery
+- [ ] Add setup undo/redo functionality
+- [ ] Create setup error recovery mechanisms
+- [ ] Build setup testing and validation tools
+
+**User Experience & Polish (Priority 4)**
+- [ ] Enhance setup flow with progress indicators
+- [ ] Add setup help and guidance system
+- [ ] Implement setup accessibility features
+- [ ] Create setup tutorial and onboarding
+- [ ] Polish setup animations and transitions
+
+#### 🔧 Technical Requirements for Phase 2:
+- **Setup Engine**: Complete game initialization system
+- **State Management**: Setup state persistence and validation
+- **Role System**: Secure role assignment and distribution
+- **Validation Logic**: Game setup rule enforcement
+- **User Interface**: Intuitive setup flow and configuration
+
+### Phase 3: Basic Gameplay (Planned)
+**Goal**: Implement core game mechanics and basic gameplay
 - **Game Engine**: Core Secret Hitler rules implementation
-- **State Management**: Game state persistence and local storage
-- **Role System**: Hidden role assignment and secure handoffs
-- **Basic Game Flow**: Initial game setup and role distribution
-
-### Phase 3: Game Mechanics (Planned)
-**Goal**: Implement the complete game loop with all core mechanics
-- **Election System**: Nomination and voting interfaces
-- **Legislation Flow**: Policy drawing, discarding, and enactment
-- **Executive Powers**: Special abilities implementation
 - **Game Board**: Main game interface with policy tracking
+- **Election System**: Nomination, voting, and government formation
+- **Basic Game Flow**: Turn progression and win condition checking
+- **Game State Management**: Local storage and persistence
 
-### Phase 4: Polish and Enhancement (Planned)
+### Phase 4: Advanced Gameplay & Polish (Planned)
 **Goal**: Complete the game experience with advanced features
-- **Game Flow**: Complete round progression and win conditions
-- **UI Polish**: Enhanced animations, transitions, and visual feedback
-- **Advanced Accessibility**: Screen reader support, high contrast modes
-- **Performance Optimization**: Smooth operation on all devices
+- **Legislation Flow**: Policy drawing, discarding, and enactment
+- **Executive Powers**: Special abilities and advanced mechanics
+- **Game Enhancement**: Undo/redo, game export/import, advanced rules
+- **UI Polish**: Enhanced animations, accessibility, and performance
+- **Testing & Refinement**: Comprehensive testing and bug fixes
 
 ---
 
@@ -133,7 +146,8 @@ PassAndPlaySH/
 ├── manifest.json           # PWA manifest
 ├── sw.js                  # Service worker
 ├── styles/
-│   └── main.css          # Complete stylesheet with all game pages
+│   ├── main.css          # Complete stylesheet with all game pages
+│   └── themes.css        # Theme system and CSS variables
 ├── js/
 │   └── app.js            # Main application logic with SPA routing
 ├── pages/                 # (Directory exists but currently empty)
@@ -153,20 +167,25 @@ PassAndPlaySH/
 - **Responsive design** optimized for mobile and desktop
 - **Service worker** for basic offline functionality and caching
 - **Modern UI components** with consistent styling and animations
+- **Complete theme system** with 5 themes and theme switcher
+- **Mobile-optimized player selection** with +/- controls
+- **Subdirectory hosting compatibility** for various deployment scenarios
 
 ### 🔄 In Progress Features
-- **Core game engine** implementation
-- **Game state management** and persistence
-- **Role assignment system** with secure handoffs
+- **Game builder/setup system** implementation
+- **Complete game setup flow** with role assignment and handoffs
+- **Game configuration interface** for customizing game parameters
+- **Setup validation and error handling** for proper game initialization
 
 ### 📋 Planned Features
-- **Main game board** with policy tracking
-- **Election and voting system** 
-- **Policy legislation flow**
-- **Executive powers implementation**
+- **Basic gameplay mechanics** with core game engine
+- **Main game board** with policy tracking and game state
+- **Election and voting system** with nomination and ballot functionality
+- **Policy legislation flow** with drawing, discarding, and enactment
+- **Executive powers** and special abilities
 - **Complete game loop** from setup to win conditions
-- **Undo/redo system** for mistake correction
-- **Game export/import** functionality
+- **Game state persistence** and recovery
+- **Advanced game mechanics** and rule enforcement
 
 ---
 
@@ -179,7 +198,7 @@ Secret Hitler is a social deduction game where:
 
 ### Game Flow
 1. **Setup**: 🔄 Roles are secretly assigned with secure handoffs
-2. **Election**: 📋 Players nominate and vote for President and Chancellor
+2. **Election**: 🔄 Players nominate and vote for President and Chancellor
 3. **Legislation**: 📋 President draws 3 policies, discards 1, Chancellor chooses from remaining 2
 4. **Executive Powers**: 📋 Certain Fascist policies unlock special abilities
 5. **Repeat**: 📋 Continue until win condition is met
@@ -194,17 +213,20 @@ Secret Hitler is a social deduction game where:
 - **Service Worker** - Enables basic offline functionality and PWA features
 - **Local Storage** - Planned for game state persistence
 - **Modular design** - Clean separation between routing logic and UI
+- **CSS Custom Properties** - Theme system using CSS variables
 
 ### Browser Support
 - Modern browsers with ES6+ support
 - Service Worker support for offline functionality
 - Local Storage support for game persistence (planned)
+- CSS Custom Properties support for theming
 
 ### Performance
 - Lightweight implementation (< 100KB total)
 - Fast page transitions with SPA routing
 - Efficient routing and state management
 - Minimal memory footprint
+- Optimized mobile experience with touch-friendly controls
 
 ---
 
@@ -221,12 +243,38 @@ Secret Hitler is a social deduction game where:
 - **Subdirectory hosting** - App works properly when hosted in subdirectories
 - **Responsive design** - Layout works correctly on different screen sizes
 - **Basic PWA functionality** - Service worker and manifest are properly configured
+- **Theme system** - Complete theming with 5 themes and switcher
+- **Mobile player selection** - Intuitive +/- controls for player count adjustment
+- **Touch-friendly interface** - Optimized for mobile devices with large touch targets
+
+---
+
+## Recent Updates (Version 0.6.2)
+
+### 🎯 Mobile Player Selection System
+- Replaced individual player count buttons with intuitive +/- system
+- Mobile-first design with large touch-friendly controls (4rem on mobile)
+- Centered layout with clean, organized appearance
+- Dynamic updates for role distribution and player input fields
+
+### 🔧 Technical Improvements
+- Smart button states (disabled at limits)
+- Event-driven UI updates throughout the system
+- Responsive button sizing for different screen sizes
+- Improved mobile experience and touch interaction
 
 ---
 
 ## Contributing
 
-This is a personal project in early development. The project has successfully completed the foundation phase with SPA routing and basic UI, but the core game mechanics are still being implemented. Contributions for the game engine, game state management, and game interface development would be particularly valuable.
+This is a personal project in active development. The project has successfully completed the foundation phase with SPA routing, basic UI, and mobile optimization. We are currently in Phase 2 implementing the complete game builder and setup system. Contributions for the setup system, role management, game configuration, and setup user experience would be particularly valuable.
+
+**Current Focus Areas:**
+- Game setup flow and role assignment system
+- Game configuration interface and customization
+- Setup validation and error handling
+- Setup state management and persistence
+- Setup user experience and accessibility
 
 ---
 
