@@ -11,14 +11,14 @@
 </head>
 <body>
     <!-- Theme Switcher -->
-    <div class="theme-switcher">
+    <div class="theme-switcher disabled">
         <h4>Theme</h4>
         <div class="theme-options">
-            <button class="theme-option active" data-theme="default">Default</button>
-            <button class="theme-option" data-theme="dark">Dark</button>
-            <button class="theme-option" data-theme="high-contrast">High Contrast</button>
-            <button class="theme-option" data-theme="warm">Warm</button>
-            <button class="theme-option" data-theme="cool">Cool</button>
+            <button class="theme-option active" data-theme="default" disabled>Default</button>
+            <button class="theme-option" data-theme="dark" disabled>Dark</button>
+            <button class="theme-option" data-theme="high-contrast" disabled>High Contrast</button>
+            <button class="theme-option" data-theme="warm" disabled>Warm</button>
+            <button class="theme-option" data-theme="cool" disabled>Cool</button>
         </div>
     </div>
 
@@ -131,6 +131,7 @@
         
         <footer>
             <p>Built for offline play - no accounts or servers required</p>
+            <button id="enable-theme-btn" class="btn btn-outline">Enable Theme Selector</button>
         </footer>
     </div>
     

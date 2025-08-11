@@ -209,20 +209,234 @@ class App {
             </div>
         `;
 
-        // Generate player input fields
-        playerInputs.innerHTML = '';
-        for (let i = 1; i <= count; i++) {
-            const inputGroup = document.createElement('div');
-            inputGroup.className = 'player-input-group';
-            inputGroup.innerHTML = `
-                <label for="player-${i}">Player ${i}:</label>
-                <input type="text" id="player-${i}" class="player-name-input" placeholder="Enter player name">
-            `;
-            playerInputs.appendChild(inputGroup);
-        }
+        // Generate mobile-friendly player selection with +/- buttons
+        playerInputs.innerHTML = `
+            <div class="player-selection-container">
+                <div class="player-count-display">
+                    <span class="current-count">5</span> / <span class="max-count">${count}</span> players
+                </div>
+                <div class="player-controls">
+                    <button class="player-btn player-minus" id="player-minus" disabled>-</button>
+                    <button class="player-btn player-plus" id="player-plus">+</button>
+                </div>
+                <div class="player-list" id="player-list">
+                    <!-- Player items will be generated here -->
+                </div>
+                <div class="add-player-section">
+                    <input type="text" id="new-player-input" class="new-player-input" placeholder="Enter player name">
+                    <button class="btn btn-primary" id="add-player-btn">Add Player</button>
+                </div>
+            </div>
+        `;
+
+        // Initialize player list with 5 players
+        this.initializePlayerList(5);
+        
+        // Setup player control event listeners
+        this.setupPlayerControls(count);
 
         // Enable start game button
         startGameBtn.disabled = false;
+    }
+
+    initializePlayerList(initialCount) {
+        const playerList = document.getElementById('player-list');
+        if (!playerList) return;
+
+        playerList.innerHTML = '';
+        for (let i = 1; i <= initialCount; i++) {
+            const playerItem = document.createElement('div');
+            playerItem.className = 'player-item';
+            playerItem.innerHTML = `
+                <span class="player-name">Player ${i}</span>
+                <button class="remove-player-btn" data-index="${i-1}">×</button>
+            `;
+            playerList.appendChild(playerItem);
+        }
+
+        // Update current count display
+        const currentCountSpan = document.querySelector('.current-count');
+        if (currentCountSpan) {
+            currentCountSpan.textContent = initialCount;
+        }
+
+        // Update minus button state
+        const minusBtn = document.getElementById('player-minus');
+        if (minusBtn) {
+            minusBtn.disabled = initialCount <= 5;
+        }
+    }
+
+    setupPlayerControls(maxCount) {
+        const plusBtn = document.getElementById('player-plus');
+        const minusBtn = document.getElementById('player-minus');
+        const addPlayerBtn = document.getElementById('add-player-btn');
+        const newPlayerInput = document.getElementById('new-player-input');
+
+        if (!plusBtn || !minusBtn || !addPlayerBtn || !newPlayerInput) return;
+
+        // Plus button - add player
+        plusBtn.addEventListener('click', () => {
+            const currentCount = this.getCurrentPlayerCount();
+            if (currentCount < maxCount) {
+                this.addPlayer();
+            }
+        });
+
+        // Minus button - remove player
+        minusBtn.addEventListener('click', () => {
+            const currentCount = this.getCurrentPlayerCount();
+            if (currentCount > 5) {
+                this.removePlayer();
+            }
+        });
+
+        // Add player button
+        addPlayerBtn.addEventListener('click', () => {
+            this.addPlayerByName();
+        });
+
+        // Enter key in input field
+        newPlayerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.addPlayerByName();
+            }
+        });
+
+        // Setup event delegation for removing individual players
+        this.setupPlayerRemovalListeners();
+    }
+
+    setupPlayerRemovalListeners() {
+        // Use event delegation for dynamically added player items
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-player-btn')) {
+                const playerItem = event.target.closest('.player-item');
+                if (playerItem) {
+                    this.removeSpecificPlayer(playerItem);
+                }
+            }
+        });
+    }
+
+    removeSpecificPlayer(playerItem) {
+        const currentCount = this.getCurrentPlayerCount();
+        
+        if (currentCount <= 5) {
+            alert('Minimum 5 players required');
+            return;
+        }
+
+        // Remove the specific player item
+        playerItem.remove();
+
+        // Update count display
+        const currentCountSpan = document.querySelector('.current-count');
+        if (currentCountSpan) {
+            currentCountSpan.textContent = currentCount - 1;
+        }
+
+        // Update button states
+        this.updatePlayerButtonStates();
+    }
+
+    getCurrentPlayerCount() {
+        const playerItems = document.querySelectorAll('.player-item');
+        return playerItems.length;
+    }
+
+    addPlayer() {
+        const playerList = document.getElementById('player-list');
+        const currentCount = this.getCurrentPlayerCount();
+        const maxCount = parseInt(document.querySelector('.max-count').textContent);
+
+        if (currentCount >= maxCount) return;
+
+        const playerItem = document.createElement('div');
+        playerItem.className = 'player-item';
+        playerItem.innerHTML = `
+            <span class="player-name">Player ${currentCount + 1}</span>
+            <button class="remove-player-btn" data-index="${currentCount}">×</button>
+        `;
+        playerList.appendChild(playerItem);
+
+        // Update count display
+        const currentCountSpan = document.querySelector('.current-count');
+        if (currentCountSpan) {
+            currentCountSpan.textContent = currentCount + 1;
+        }
+
+        // Update button states
+        this.updatePlayerButtonStates();
+    }
+
+    removePlayer() {
+        const playerItems = document.querySelectorAll('.player-item');
+        const currentCount = playerItems.length;
+
+        if (currentCount <= 5) return;
+
+        // Remove the last player
+        playerItems[currentCount - 1].remove();
+
+        // Update count display
+        const currentCountSpan = document.querySelector('.current-count');
+        if (currentCountSpan) {
+            currentCountSpan.textContent = currentCount - 1;
+        }
+
+        // Update button states
+        this.updatePlayerButtonStates();
+    }
+
+    addPlayerByName() {
+        const input = document.getElementById('new-player-input');
+        const name = input.value.trim();
+
+        if (!name) return;
+
+        const playerList = document.getElementById('player-list');
+        const currentCount = this.getCurrentPlayerCount();
+        const maxCount = parseInt(document.querySelector('.max-count').textContent);
+
+        if (currentCount >= maxCount) {
+            alert(`Maximum ${maxCount} players allowed`);
+            return;
+        }
+
+        const playerItem = document.createElement('div');
+        playerItem.className = 'player-item';
+        playerItem.innerHTML = `
+            <span class="player-name">${name}</span>
+            <button class="remove-player-btn" data-index="${currentCount}">×</button>
+        `;
+        playerList.appendChild(playerItem);
+
+        // Clear input
+        input.value = '';
+
+        // Update count display
+        const currentCountSpan = document.querySelector('.current-count');
+        if (currentCountSpan) {
+            currentCountSpan.textContent = currentCount + 1;
+        }
+
+        // Update button states
+        this.updatePlayerButtonStates();
+    }
+
+    updatePlayerButtonStates() {
+        const currentCount = this.getCurrentPlayerCount();
+        const maxCount = parseInt(document.querySelector('.max-count').textContent);
+        const minusBtn = document.getElementById('player-minus');
+        const plusBtn = document.getElementById('player-plus');
+
+        if (minusBtn) {
+            minusBtn.disabled = currentCount <= 5;
+        }
+        if (plusBtn) {
+            plusBtn.disabled = currentCount >= maxCount;
+        }
     }
 
     getRoleDistribution(playerCount) {
@@ -238,14 +452,14 @@ class App {
     }
 
     startGame() {
-        // Collect player names
-        const playerInputs = document.querySelectorAll('.player-name-input');
-        const players = Array.from(playerInputs)
-            .map(input => input.value.trim())
+        // Collect player names from the new player list
+        const playerItems = document.querySelectorAll('.player-item .player-name');
+        const players = Array.from(playerItems)
+            .map(span => span.textContent.trim())
             .filter(name => name.length > 0);
 
         if (players.length < 5) {
-            alert('Please enter at least 5 player names');
+            alert('Please add at least 5 players');
             return;
         }
 

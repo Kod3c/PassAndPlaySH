@@ -188,6 +188,13 @@
     border-radius: 8px;
     padding: 10px;
     box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.theme-switcher.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+    transform: scale(0.9);
 }
 
 .theme-switcher h4 {
@@ -214,7 +221,7 @@
     transition: all 0.2s ease;
 }
 
-.theme-option:hover {
+.theme-option:hover:not(:disabled) {
     background: var(--primary-color);
     color: var(--text-light);
     border-color: var(--primary-color);
@@ -224,4 +231,78 @@
     background: var(--primary-color);
     color: var(--text-light);
     border-color: var(--primary-color);
+}
+
+.theme-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Enable Theme Button */
+#enable-theme-btn {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+/* Mobile responsive styles for theme switcher */
+@media (max-width: 768px) {
+    .theme-switcher {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 8px;
+        border-radius: 6px;
+        max-width: 120px;
+    }
+    
+    .theme-switcher.disabled {
+        opacity: 0.2;
+        transform: scale(0.85);
+    }
+    
+    .theme-switcher h4 {
+        font-size: 12px;
+        margin: 0 0 8px 0;
+    }
+    
+    .theme-options {
+        gap: 3px;
+    }
+    
+    .theme-option {
+        padding: 4px 8px;
+        font-size: 11px;
+        border-radius: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-switcher {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        padding: 6px;
+        max-width: 100px;
+    }
+    
+    .theme-switcher.disabled {
+        opacity: 0.15;
+        transform: scale(0.8);
+    }
+    
+    .theme-switcher h4 {
+        font-size: 11px;
+        margin: 0 0 6px 0;
+    }
+    
+    .theme-options {
+        gap: 2px;
+    }
+    
+    .theme-option {
+        padding: 3px 6px;
+        font-size: 10px;
+        border-radius: 2px;
+    }
 }
