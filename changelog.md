@@ -1,5 +1,70 @@
 # Changelog
 
+## [0.5.4] - 2024-12-19
+
+### 🎯 New Features
+- **Complete SPA routing system** - Implemented client-side routing for `/setup`, `/game`, `/rules` routes
+- **Setup page functionality** - Full player count selection (5-10 players) with role distribution display
+- **Player name input system** - Dynamic form generation for entering player names
+- **Rules page** - Comprehensive game rules and instructions
+- **Modern responsive UI** - Professional design with smooth animations and mobile optimization
+
+### 🚨 Critical Bug Fixes
+- **Fixed "not found" error on /setup route** - SPA routing now handles all routes correctly
+- **Resolved direct URL access issues** - Routes like `http://localhost/PassAndPlaySH/setup` now work properly
+- **Fixed browser history management** - Back/forward navigation now works correctly
+- **Eliminated 404 errors** - All routes now display appropriate content instead of server errors
+
+### 🔧 Technical Improvements
+- **Implemented SPA architecture** - Single page application with client-side routing
+- **Added .htaccess configuration** - Server-side routing support for SPA applications
+- **Enhanced JavaScript routing logic** - Robust route handling with base path detection
+- **Improved page state management** - Pages maintain state and handle direct URL access
+- **Added comprehensive CSS styling** - Modern, responsive design system
+
+### 📁 Files Modified
+- `js/app.js` - Complete rewrite with SPA routing system and setup page functionality
+- `index.html` - Restructured with all page content and proper navigation
+- `styles/main.css` - Comprehensive styling for all pages and components
+- `.htaccess` - Added SPA routing support and performance optimizations
+
+### 🎨 UI/UX Improvements
+- **Professional design system** - Consistent button styles, spacing, and typography
+- **Responsive layout** - Optimized for both desktop and mobile devices
+- **Interactive elements** - Hover effects, transitions, and visual feedback
+- **Accessibility features** - Proper labeling, focus states, and semantic HTML
+- **Modern color scheme** - Gradient backgrounds and consistent color palette
+
+### 🧪 Testing & Verification
+- **Route testing** - All routes (`/`, `/setup`, `/rules`, `/game`) work correctly
+- **Navigation testing** - Button navigation, browser back/forward, and direct URL access
+- **Responsive testing** - Layout works correctly on different screen sizes
+- **Cross-browser compatibility** - Tested on modern browsers with consistent behavior
+
+### 🌐 Hosting Compatibility
+- **Subdirectory hosting support** - Works correctly in `/PassAndPlaySH/` and similar paths
+- **Server configuration** - .htaccess handles SPA routing for Apache servers
+- **Static file serving** - All assets load correctly with proper MIME types
+
+### 🔍 Implementation Details
+The SPA routing system works by:
+1. **Client-side routing** - JavaScript handles navigation without page reloads
+2. **URL management** - Browser history is updated with proper routes
+3. **Page switching** - Content is shown/hidden based on current route
+4. **State restoration** - Direct URL access restores correct page state
+5. **Server fallback** - .htaccess redirects all routes to index.html
+
+### ✅ Verification
+- `/setup` route now displays complete game setup interface
+- Player count selection shows role distribution for 5-10 players
+- Player name input fields generate dynamically based on selection
+- All navigation buttons work correctly
+- Browser back/forward navigation functions properly
+- Direct URL access to any route works without errors
+- Responsive design works on all device sizes
+
+---
+
 ## [0.5.3] - 2024-12-19
 
 ### 🚨 Critical Bug Fixes

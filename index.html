@@ -15,15 +15,16 @@
             <p class="subtitle">Pass & Play Edition</p>
         </header>
         
-        <main>
+        <!-- Home Page Content -->
+        <main id="home-page" class="page-content">
             <div class="welcome-section">
                 <h2>Welcome to Secret Hitler</h2>
                 <p>A digital implementation of the social deduction game for 5-10 players on one device.</p>
                 
                 <div class="game-options">
-                    <button id="new-game-btn" class="btn btn-primary">Start New Game</button>
+                    <button data-navigate="setup" class="btn btn-primary">Start New Game</button>
                     <button id="load-game-btn" class="btn btn-secondary">Load Saved Game</button>
-                    <button id="rules-btn" class="btn btn-outline">View Rules</button>
+                    <button data-navigate="rules" class="btn btn-outline">View Rules</button>
                 </div>
             </div>
             
@@ -39,6 +40,81 @@
                 </ul>
             </div>
         </main>
+
+        <!-- Setup Page Content -->
+        <main id="setup-page" class="page-content" style="display: none;">
+            <div class="setup-page">
+                <h2>Game Setup</h2>
+
+                <div class="setup-section">
+                    <h3>Player Count</h3>
+                    <div class="player-count-selector">
+                        <button class="player-count-btn" data-count="5">5 Players</button>
+                        <button class="player-count-btn" data-count="6">6 Players</button>
+                        <button class="player-count-btn" data-count="7">7 Players</button>
+                        <button class="player-count-btn" data-count="8">8 Players</button>
+                        <button class="player-count-btn" data-count="9">9 Players</button>
+                        <button class="player-count-btn" data-count="10">10 Players</button>
+                    </div>
+
+                    <div class="role-distribution">
+                        <h4>Role Distribution</h4>
+                        <div id="role-info" class="role-info">
+                            <p>Select player count to see role distribution</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setup-section">
+                    <h3>Player Names</h3>
+                    <div id="player-inputs" class="player-inputs">
+                        <!-- Player input fields will be generated here -->
+                    </div>
+                </div>
+
+                <div class="setup-actions">
+                    <button id="start-game-btn" class="btn btn-primary" disabled>Start Game</button>
+                    <button id="back-to-home-btn" class="btn btn-outline">Back to Home</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Rules Page Content -->
+        <main id="rules-page" class="page-content" style="display: none;">
+            <div class="rules-page">
+                <h2>Game Rules</h2>
+                <div class="rules-content">
+                    <h3>Objective</h3>
+                    <p>Liberals must pass 5 Liberal policies to win. Fascists must either pass 6 Fascist policies or have Hitler elected Chancellor.</p>
+                    
+                    <h3>Game Flow</h3>
+                    <ol>
+                        <li>Players are secretly assigned roles (Liberal, Fascist, or Hitler)</li>
+                        <li>Each round, a President is elected who nominates a Chancellor</li>
+                        <li>Players vote on the Chancellor</li>
+                        <li>If elected, the President and Chancellor draw and play policy cards</li>
+                        <li>Special powers are activated based on Fascist policies passed</li>
+                    </ol>
+                    
+                    <h3>Roles</h3>
+                    <ul>
+                        <li><strong>Liberals:</strong> Must work together to pass Liberal policies</li>
+                        <li><strong>Fascists:</strong> Must deceive others and pass Fascist policies</li>
+                        <li><strong>Hitler:</strong> Must avoid being elected Chancellor while helping Fascists</li>
+                    </ul>
+                </div>
+                <button data-navigate="home" class="btn btn-primary">Back to Home</button>
+            </div>
+        </main>
+
+        <!-- Game Page Content (placeholder) -->
+        <main id="game-page" class="page-content" style="display: none;">
+            <div class="game-page">
+                <h2>Game in Progress</h2>
+                <p>Game functionality coming soon...</p>
+                <button data-navigate="home" class="btn btn-primary">Back to Home</button>
+            </div>
+        </main>
         
         <footer>
             <p>Built for offline play - no accounts or servers required</p>
@@ -46,8 +122,5 @@
     </div>
     
     <script src="js/app.js"></script>
-    <script src="js/gameEngine.js"></script>
-    <script src="js/player-setup.js"></script>
-    <script src="js/setup-enhancement.js"></script>
 </body>
 </html>
