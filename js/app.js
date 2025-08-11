@@ -10,6 +10,7 @@ class App {
         this.setupRouting();
         this.restorePageFromURL();
         this.setupEventListeners();
+        this.setupThemeSwitcher();
     }
 
     getBasePath() {
@@ -107,6 +108,45 @@ class App {
         this.setupGameSetupListeners();
     }
 
+    setupThemeSwitcher() {
+        // Get saved theme or default to 'default'
+        const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+        this.setTheme(savedTheme);
+        
+        // Setup theme switcher event listeners
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const theme = option.dataset.theme;
+                this.setTheme(theme);
+                
+                // Update active state
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                // Save theme preference
+                localStorage.setItem('selectedTheme', theme);
+            });
+        });
+        
+        // Set initial active state
+        themeOptions.forEach(option => {
+            if (option.dataset.theme === savedTheme) {
+                option.classList.add('active');
+            }
+        });
+    }
+
+    setTheme(themeName) {
+        // Remove all theme attributes
+        document.documentElement.removeAttribute('data-theme');
+        
+        // Apply the selected theme
+        if (themeName !== 'default') {
+            document.documentElement.setAttribute('data-theme', themeName);
+        }
+    }
+
     setupGameSetupListeners() {
         // Player count selection
         const playerCountBtns = document.querySelectorAll('.player-count-btn');
@@ -145,11 +185,27 @@ class App {
 
         // Update role distribution display
         const distribution = this.getRoleDistribution(count);
+        const liberalPercent = Math.round((distribution.liberals / count) * 100);
+        const fascistPercent = Math.round((distribution.fascists / count) * 100);
+        const hitlerPercent = Math.round((distribution.hitler / count) * 100);
+        
         roleInfo.innerHTML = `
             <div class="role-distribution-grid">
-                <div class="role liberal">Liberals: ${distribution.liberals}</div>
-                <div class="role fascist">Fascists: ${distribution.fascists}</div>
-                <div class="role hitler">Hitler: ${distribution.hitler}</div>
+                <div class="role liberal">
+                    <div class="role-label">Liberal</div>
+                    <div class="role-count">${distribution.liberals}</div>
+                    <div class="role-percentage">${liberalPercent}%</div>
+                </div>
+                <div class="role fascist">
+                    <div class="role-label">Fascist</div>
+                    <div class="role-count">${distribution.fascists}</div>
+                    <div class="role-percentage">${fascistPercent}%</div>
+                </div>
+                <div class="role hitler">
+                    <div class="role-label">Hitler</div>
+                    <div class="role-count">${distribution.hitler}</div>
+                    <div class="role-percentage">${hitlerPercent}%</div>
+                </div>
             </div>
         `;
 

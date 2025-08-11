@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.6.0] - 2024-12-19
+
+### 🎨 New Features
+- **Complete Theme System** - Added comprehensive theming with 5 different themes
+- **Theme Switcher UI** - Fixed position theme switcher in top-right corner
+- **CSS Custom Properties** - Implemented CSS variables for all colors and design tokens
+- **Multiple Theme Options** - Default, Dark, High Contrast, Warm, and Cool themes
+- **Theme Persistence** - User's theme choice is saved in localStorage and restored on page reload
+
+### 🎯 Theme Variants
+- **Default Theme** - Original blue gradient design with white cards
+- **Dark Theme** - Dark backgrounds with light text for reduced eye strain
+- **High Contrast Theme** - High contrast colors for accessibility
+- **Warm Theme** - Warm orange/red gradient with cozy color palette
+- **Cool Theme** - Cool blue gradient with modern color scheme
+
+### 🔧 Technical Improvements
+- **CSS Architecture** - Separated theme definitions into `themes.css` file
+- **Variable-based Styling** - All colors now use CSS custom properties for easy theming
+- **Theme Switching Logic** - JavaScript-based theme system with smooth transitions
+- **Responsive Theme Switcher** - Mobile-friendly theme selection interface
+- **Consistent Theming** - All UI components automatically adapt to selected theme
+
+### 📁 Files Modified
+- `styles/themes.css` - New file containing all theme definitions and CSS variables
+- `styles/main.css` - Updated to use CSS custom properties instead of hardcoded colors
+- `js/app.js` - Added theme system initialization and theme switching functionality
+- `index.html` - Added theme switcher UI and linked themes.css
+- `theme-demo.html` - New demo page showcasing all themes and UI components
+
+### 🎨 UI/UX Improvements
+- **Dynamic Color Schemes** - All components automatically adapt to theme changes
+- **Consistent Visual Hierarchy** - Typography, spacing, and layout remain consistent across themes
+- **Accessibility Features** - High contrast theme for better readability
+- **Professional Appearance** - Each theme maintains the app's professional look and feel
+- **Smooth Transitions** - Theme changes apply instantly without page reload
+
+### 🧪 Testing & Verification
+- **Theme Switching** - All themes apply correctly to all UI components
+- **Persistence Testing** - Theme selection is saved and restored correctly
+- **Component Coverage** - Buttons, forms, cards, and all UI elements adapt to themes
+- **Mobile Responsiveness** - Theme switcher works correctly on all device sizes
+- **Cross-browser Compatibility** - CSS custom properties work in all modern browsers
+
+### 🌟 Theme Features
+Each theme includes:
+- **Background gradients** - Unique gradient backgrounds for each theme
+- **Color palettes** - Consistent color schemes for all UI elements
+- **Text colors** - Appropriate contrast ratios for readability
+- **Border colors** - Themed borders and dividers
+- **Shadow effects** - Consistent shadow styling across themes
+- **Role colors** - Themed colors for Liberal, Fascist, and Hitler roles
+
+---
+
 ## [0.5.4] - 2024-12-19
 
 ### 🎯 New Features

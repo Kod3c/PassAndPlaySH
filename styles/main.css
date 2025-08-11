@@ -8,8 +8,8 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--text-primary);
+    background: var(--bg-primary);
     min-height: 100vh;
 }
 
@@ -23,13 +23,13 @@ body {
 header {
     text-align: center;
     margin-bottom: 3rem;
-    color: white;
+    color: var(--header-text);
 }
 
 header h1 {
     font-size: 3rem;
     margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-shadow: var(--header-shadow);
 }
 
 .subtitle {
@@ -39,10 +39,10 @@ header h1 {
 
 /* Page content styles */
 .page-content {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: var(--card-shadow);
     margin-bottom: 2rem;
 }
 
@@ -62,34 +62,34 @@ header h1 {
 }
 
 .btn-primary {
-    background: #007bff;
-    color: white;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
 }
 
 .btn-primary:hover {
-    background: #0056b3;
+    background: var(--btn-primary-hover);
     transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background: #6c757d;
-    color: white;
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
 }
 
 .btn-secondary:hover {
-    background: #545b62;
+    background: var(--btn-secondary-hover);
     transform: translateY(-2px);
 }
 
 .btn-outline {
-    background: transparent;
-    color: #007bff;
-    border: 2px solid #007bff;
+    background: var(--btn-outline-bg);
+    color: var(--btn-outline-text);
+    border: 2px solid var(--btn-outline-border);
 }
 
 .btn-outline:hover {
-    background: #007bff;
-    color: white;
+    background: var(--btn-outline-hover-bg);
+    color: var(--btn-outline-hover-text);
     transform: translateY(-2px);
 }
 
@@ -108,13 +108,13 @@ header h1 {
 .welcome-section h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
-    color: #2c3e50;
+    color: var(--text-primary);
 }
 
 .welcome-section p {
     font-size: 1.1rem;
     margin-bottom: 2rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .game-options {
@@ -123,14 +123,14 @@ header h1 {
 
 /* Features section */
 .features {
-    background: #f8f9fa;
+    background: var(--feature-bg);
     padding: 2rem;
     border-radius: 8px;
     margin-top: 2rem;
 }
 
 .features h3 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
@@ -141,7 +141,7 @@ header h1 {
 
 .features li {
     padding: 0.5rem 0;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--feature-border);
 }
 
 .features li:last-child {
@@ -151,19 +151,19 @@ header h1 {
 /* Setup page styles */
 .setup-page h2 {
     text-align: center;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 2rem;
 }
 
 .setup-section {
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: #f8f9fa;
+    background: var(--feature-bg);
     border-radius: 8px;
 }
 
 .setup-section h3 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
@@ -176,9 +176,9 @@ header h1 {
 
 .player-count-btn {
     padding: 0.75rem 1.5rem;
-    border: 2px solid #007bff;
-    background: white;
-    color: #007bff;
+    border: 2px solid var(--primary-color);
+    background: var(--bg-secondary);
+    color: var(--primary-color);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -187,8 +187,8 @@ header h1 {
 
 .player-count-btn:hover,
 .player-count-btn.active {
-    background: #007bff;
-    color: white;
+    background: var(--primary-color);
+    color: var(--text-light);
 }
 
 .role-distribution {
@@ -196,42 +196,105 @@ header h1 {
 }
 
 .role-distribution h4 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
 .role-info {
-    background: white;
+    background: var(--bg-secondary);
     padding: 1rem;
     border-radius: 6px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--border-primary);
 }
 
 .role-distribution-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
     margin-top: 1rem;
 }
 
-.role {
-    padding: 0.75rem;
-    border-radius: 6px;
+/* Improved Role Distribution Styles */
+.role-distribution-grid .role {
+    padding: 1.5rem;
+    border-radius: 12px;
     text-align: center;
+    border: 2px solid;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+}
+
+.role-distribution-grid .role:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.role-distribution-grid .role::before {
+    content: "";
+    display: block;
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 1rem auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.role-distribution-grid .role.liberal::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2328a745'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
+}
+
+.role-distribution-grid .role.fascist::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc3545'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
+}
+
+.role-distribution-grid .role.hitler::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236f42c1'%3E%3Cpath d='M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z'/%3E%3C/svg%3E");
+}
+
+.role-distribution-grid .role.liberal {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-color: #28a745;
+    color: #155724;
+}
+
+.role-distribution-grid .role.fascist {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.role-distribution-grid .role.hitler {
+    background: linear-gradient(135deg, #e2d9f3 0%, #d1c7e8 100%);
+    border-color: #6f42c1;
+    color: #4a148c;
+}
+
+.role-distribution-grid .role-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+}
+
+.role-distribution-grid .role-count {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.role-distribution-grid .role-percentage {
+    font-size: 0.9rem;
     font-weight: 500;
-    color: white;
-}
-
-.role.liberal {
-    background: #28a745;
-}
-
-.role.fascist {
-    background: #dc3545;
-}
-
-.role.hitler {
-    background: #6f42c1;
+    opacity: 0.8;
 }
 
 .player-inputs {
@@ -248,34 +311,36 @@ header h1 {
 .player-input-group label {
     min-width: 100px;
     font-weight: 500;
-    color: #2c3e50;
+    color: var(--text-primary);
 }
 
 .player-name-input {
     flex: 1;
     padding: 0.75rem;
-    border: 2px solid #e9ecef;
+    border: 2px solid var(--input-border);
     border-radius: 6px;
     font-size: 1rem;
     transition: border-color 0.3s ease;
+    background: var(--input-bg);
+    color: var(--input-text);
 }
 
 .player-name-input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: var(--input-focus-border);
 }
 
 .setup-actions {
     text-align: center;
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #e9ecef;
+    border-top: 1px solid var(--border-primary);
 }
 
 /* Rules page styles */
 .rules-page h2 {
     text-align: center;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 2rem;
 }
 
@@ -284,14 +349,14 @@ header h1 {
 }
 
 .rules-content h3 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin: 1.5rem 0 1rem 0;
 }
 
 .rules-content p,
 .rules-content li {
     margin-bottom: 0.75rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .rules-content ol,
@@ -306,19 +371,19 @@ header h1 {
 }
 
 .game-page h2 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
 .game-page p {
-    color: #666;
+    color: var(--text-secondary);
     margin-bottom: 2rem;
 }
 
 /* Footer styles */
 footer {
     text-align: center;
-    color: white;
+    color: var(--text-light);
     opacity: 0.8;
     margin-top: 2rem;
 }
