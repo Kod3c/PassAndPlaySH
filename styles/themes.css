@@ -1,44 +1,44 @@
 /* Theme System - CSS Custom Properties */
 :root {
-    /* Primary Colors */
-    --primary-color: #007bff;
-    --primary-hover: #0056b3;
-    --primary-light: #e3f2fd;
+    /* Primary Colors - Secret Hitler Orange */
+    --primary-color: #E05B3B;
+    --primary-hover: #C04A2A;
+    --primary-light: #F8E5C0;
     
     /* Secondary Colors */
-    --secondary-color: #6c757d;
-    --secondary-hover: #545b62;
-    --secondary-light: #f8f9fa;
+    --secondary-color: #2A2A2A;
+    --secondary-hover: #1A1A1A;
+    --secondary-light: #FDFBF7;
     
-    /* Background Colors */
-    --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f8f9fa;
+    /* Background Colors - Clean, flat design */
+    --bg-primary: #FDFBF7;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #F8E5C0;
     
     /* Text Colors */
-    --text-primary: #333333;
+    --text-primary: #2A2A2A;
     --text-secondary: #666666;
-    --text-light: #ffffff;
-    --text-muted: #6c757d;
+    --text-light: #FFFFFF;
+    --text-muted: #999999;
     
     /* Accent Colors */
-    --accent-color: #007bff;
+    --accent-color: #E05B3B;
     --accent-success: #28a745;
     --accent-danger: #dc3545;
     --accent-warning: #ffc107;
     --accent-info: #17a2b8;
     --accent-purple: #6f42c1;
     
-    /* Border Colors */
-    --border-color: #e9ecef;
-    --border-primary: #e9ecef;
-    --border-secondary: #dee2e6;
+    /* Border Colors - Subtle, flat borders */
+    --border-color: #EBD5B3;
+    --border-primary: #EBD5B3;
+    --border-secondary: #F8E5C0;
     --border-focus: var(--primary-color);
     
-    /* Shadow Colors */
-    --shadow-light: rgba(0, 0, 0, 0.1);
-    --shadow-medium: rgba(0, 0, 0, 0.2);
-    --shadow-heavy: rgba(0, 0, 0, 0.3);
+    /* Shadow Colors - Minimal, flat shadows */
+    --shadow-light: rgba(42, 42, 42, 0.05);
+    --shadow-medium: rgba(42, 42, 42, 0.1);
+    --shadow-heavy: rgba(42, 42, 42, 0.15);
     
     /* Role-specific Colors */
     --role-liberal: var(--accent-success);
@@ -50,9 +50,9 @@
     --btn-primary-text: var(--text-light);
     --btn-primary-hover: var(--primary-hover);
     
-    --btn-secondary-bg: var(--secondary-color);
-    --btn-secondary-text: var(--text-light);
-    --btn-secondary-hover: var(--secondary-hover);
+    --btn-secondary-bg: transparent;
+    --btn-secondary-text: var(--primary-color);
+    --btn-secondary-hover: var(--primary-light);
     
     --btn-outline-bg: transparent;
     --btn-outline-text: var(--primary-color);
@@ -66,22 +66,22 @@
     --input-focus-border: var(--border-focus);
     --input-text: var(--text-primary);
     
-    /* Card Colors */
+    /* Card Colors - Clean, flat cards */
     --card-bg: var(--bg-secondary);
     --card-border: var(--border-primary);
-    --card-shadow: 0 10px 30px var(--shadow-medium);
+    --card-shadow: 0 2px 8px var(--shadow-light);
     
     /* Header Colors */
-    --header-text: var(--text-light);
-    --header-shadow: 2px 2px 4px var(--shadow-heavy);
+    --header-text: var(--text-primary);
+    --header-shadow: none;
     
     /* Feature Section Colors */
     --feature-bg: var(--bg-tertiary);
     --feature-border: var(--border-secondary);
     
     /* Rules Page Colors */
-    --accent-bg: rgba(255, 255, 255, 0.1);
-    --accent-hover: rgba(255, 255, 255, 0.2);
+    --accent-bg: var(--bg-tertiary);
+    --accent-hover: var(--primary-light);
     
     /* Game Page Colors */
     --success-color: #28a745;
@@ -242,13 +242,11 @@
     right: 20px;
     z-index: 1000;
     background: var(--card-bg);
-    border: 2px solid var(--border-primary);
-    border-radius: 8px;
-    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 15px;
     box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
 
 .theme-switcher.disabled {
@@ -264,6 +262,7 @@
     font-size: 14px;
     text-align: center;
     font-weight: 600;
+    font-family: 'Inter', sans-serif;
 }
 
 .theme-options {
@@ -273,18 +272,19 @@
 }
 
 .theme-option {
-    padding: 5px 10px;
-    border: 1px solid var(--border-primary);
-    border-radius: 4px;
+    padding: 8px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
     background: var(--bg-secondary);
     color: var(--text-primary);
     cursor: pointer;
     font-size: 12px;
-    transition: all 0.2s ease;
-    min-height: 28px;
+    transition: all 0.3s ease;
+    min-height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Inter', sans-serif;
 }
 
 .theme-option:hover:not(:disabled) {
@@ -292,12 +292,14 @@
     color: var(--text-light);
     border-color: var(--primary-color);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .theme-option.active {
     background: var(--primary-color);
     color: var(--text-light);
     border-color: var(--primary-color);
+    box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .theme-option:disabled {

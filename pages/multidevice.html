@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Hitler - Multi-Device Setup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles/themes.css">
     <link rel="stylesheet" href="../styles/main.css">
     <style>
@@ -19,6 +22,11 @@
             border-radius: 8px;
             padding: 20px;
             margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .role-distribution, .enhanced-section {
+            transition: all 0.3s ease;
         }
         
         .game-creation, .game-joining {
@@ -1108,53 +1116,57 @@
         /* Enhanced header styling to match home page */
         header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 1.5rem;
             color: var(--header-text);
             position: relative;
             z-index: 1;
-            padding: 2rem 0;
+            padding: 1rem 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         
         .header-content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
+            gap: 0.75rem;
         }
         
         .game-logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
         }
         
         .logo-icon {
-            font-size: 3.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
+            font-size: 2.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.6rem;
             border-radius: 50%;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             animation: float 3s ease-in-out infinite;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-5px); }
         }
         
         .logo-icon:hover {
             animation-play-state: paused;
-            transform: scale(1.1);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
         
         .logo-text h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            margin-bottom: 0.25rem;
             text-shadow: var(--header-shadow);
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1162,43 +1174,45 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-weight: 600;
         }
         
         .logo-text h1:hover {
-            transform: scale(1.05);
-            text-shadow: var(--header-shadow), 0 0 20px rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+            text-shadow: var(--header-shadow), 0 0 15px rgba(255, 255, 255, 0.2);
         }
         
         .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            font-weight: 300;
-            letter-spacing: 1px;
+            font-size: 1rem;
+            opacity: 0.8;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
         }
         
         .header-decoration {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
         
         .decoration-line {
-            width: 60px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            width: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
             transition: all 0.3s ease;
         }
         
         .header-decoration:hover .decoration-line {
             background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-            transform: scaleX(1.2);
+            transform: scaleX(1.1);
         }
         
         .decoration-dot {
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.8);
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 50%;
             animation: pulse 2s ease-in-out infinite;
             transition: all 0.3s ease;
@@ -1206,76 +1220,77 @@
         
         .header-decoration:hover .decoration-dot {
             background: var(--primary-color);
-            transform: scale(1.3);
-            box-shadow: 0 0 10px var(--primary-color);
+            transform: scale(1.2);
+            box-shadow: 0 0 8px var(--primary-color);
         }
         
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; }
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
+        
         /* Responsive header design */
         @media (max-width: 768px) {
             header {
-                margin-bottom: 2.5rem;
-                padding-top: 1rem;
+                margin-bottom: 1.25rem;
+                padding: 0.75rem 0;
             }
             
             .game-logo {
                 flex-direction: column;
-                gap: 0.5rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .logo-icon {
-                font-size: 3rem;
-                padding: 0.8rem;
-            }
-            
-            .logo-text h1 {
-                font-size: 2.5rem;
+                gap: 0.4rem;
                 margin-bottom: 0.4rem;
             }
             
+            .logo-icon {
+                font-size: 2.2rem;
+                padding: 0.5rem;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.9rem;
+                margin-bottom: 0.2rem;
+            }
+            
             .subtitle {
-                font-size: 1.1rem;
+                font-size: 0.9rem;
             }
             
             .header-decoration {
-                margin-top: 0.5rem;
+                margin-top: 0.4rem;
             }
             
             .decoration-line {
-                width: 40px;
+                width: 30px;
             }
         }
         
         @media (max-width: 480px) {
             header {
-                margin-bottom: 2rem;
-                padding-top: 0.5rem;
+                margin-bottom: 1rem;
+                padding: 0.5rem 0;
             }
             
             .game-logo {
-                gap: 0.3rem;
+                gap: 0.25rem;
             }
             
             .logo-icon {
-                font-size: 2.5rem;
-                padding: 0.6rem;
+                font-size: 2rem;
+                padding: 0.4rem;
             }
             
             .logo-text h1 {
-                font-size: 2.2rem;
-                margin-bottom: 0.3rem;
+                font-size: 1.7rem;
+                margin-bottom: 0.15rem;
             }
             
             .subtitle {
-                font-size: 1rem;
+                font-size: 0.85rem;
             }
             
             .decoration-line {
-                width: 30px;
+                width: 25px;
             }
         }
     </style>
@@ -1332,7 +1347,7 @@
                         </div>
                     </div>
                     
-                    <div class="role-distribution">
+                    <div class="role-distribution" id="role-distribution-section" style="display: none;">
                         <h4>Role Distribution</h4>
                         <div id="role-info" class="role-info">
                             <!-- Role distribution will be populated here -->
@@ -1340,7 +1355,7 @@
                     </div>
                 </div>
                     
-                <div class="setup-section enhanced-section">
+                <div class="setup-section enhanced-section" id="player-names-section" style="display: none;">
                     <div class="section-header">
                         <div class="section-icon">✏️</div>
                         <h3>Player Names</h3>
@@ -1670,15 +1685,23 @@
                 const roleInfo = document.getElementById('role-info');
                 const playerInputs = document.getElementById('player-inputs');
                 const createGameBtn = document.getElementById('create-game-btn');
+                const roleDistributionSection = document.getElementById('role-distribution-section');
+                const playerNamesSection = document.getElementById('player-names-section');
                 
                 if (newCount === 0) {
                     // Hide role distribution and player inputs when count is 0
                     roleInfo.innerHTML = '<p>Select player count to see role distribution</p>';
                     playerInputs.innerHTML = '';
                     createGameBtn.disabled = true;
+                    roleDistributionSection.style.display = 'none';
+                    playerNamesSection.style.display = 'none';
                     return;
                 }
 
+                // Show role distribution and player names sections
+                roleDistributionSection.style.display = 'block';
+                playerNamesSection.style.display = 'block';
+                
                 // Update role distribution display - EXACTLY like pass-and-play
                 const distribution = this.getRoleDistribution(newCount);
                 const liberalPercent = Math.round((distribution.liberals / newCount) * 100);
