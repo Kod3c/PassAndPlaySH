@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Test Page</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Secret Hitler - Test Page</h1>
+            <p class="subtitle">Testing the basic setup</p>
+        </header>
+        
+        <main>
+            <div class="welcome-section">
+                <h2>Setup Test</h2>
+                <p>This page tests that all the basic components are working correctly.</p>
+                
+                <div class="test-results">
+                    <h3>Test Results:</h3>
+                    <div id="test-output">
+                        <p>Running tests...</p>
+                    </div>
+                </div>
+                
+                <div class="test-actions">
+                    <button id="run-tests-btn" class="btn btn-primary">Run Tests</button>
+                    <button id="back-to-home-btn" class="btn btn-outline">Back to Home</button>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Test page for development verification</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Simple test script
+        document.addEventListener('DOMContentLoaded', () => {
+            const testOutput = document.getElementById('test-output');
+            const runTestsBtn = document.getElementById('run-tests-btn');
+            const backToHomeBtn = document.getElementById('back-to-home-btn');
+            
+            // Test function
+            function runTests() {
+                testOutput.innerHTML = '<p>Running tests...</p>';
+                
+                const tests = [
+                    { name: 'CSS Loading', test: () => document.querySelector('.btn')?.classList.contains('btn') },
+                    { name: 'JavaScript Loading', test: () => typeof window !== 'undefined' },
+                    { name: 'Local Storage', test: () => typeof localStorage !== 'undefined' },
+                    { name: 'Service Worker', test: () => 'serviceWorker' in navigator },
+                    { name: 'Fetch API', test: () => typeof fetch !== 'undefined' }
+                ];
+                
+                let results = '<h4>Test Results:</h4><ul>';
+                let passed = 0;
+                
+                tests.forEach(test => {
+                    try {
+                        const result = test.test();
+                        if (result) {
+                            results += `<li>✅ ${test.name}: PASSED</li>`;
+                            passed++;
+                        } else {
+                            results += `<li>❌ ${test.name}: FAILED</li>`;
+                        }
+                    } catch (error) {
+                        results += `<li>❌ ${test.name}: ERROR - ${error.message}</li>`;
+                    }
+                });
+                
+                results += '</ul>';
+                results += `<p><strong>${passed}/${tests.length} tests passed</strong></p>`;
+                
+                if (passed === tests.length) {
+                    results += '<p style="color: green;">🎉 All tests passed! The setup is working correctly.</p>';
+                } else {
+                    results += '<p style="color: orange;">⚠️ Some tests failed. Check the console for details.</p>';
+                }
+                
+                testOutput.innerHTML = results;
+            }
+            
+            // Event listeners
+            runTestsBtn.addEventListener('click', runTests);
+            backToHomeBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            // Run tests automatically
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<div class="election-page">
+    <div class="election-header">
+        <h2>Election Phase</h2>
+        <div class="election-info">
+            <p>Election <span id="election-number">1</span> of the round</p>
+            <p>Failed Elections: <span id="failed-elections">0</span></p>
+        </div>
+    </div>
+    
+    <div class="current-government">
+        <h3>Current Government</h3>
+        <div class="government-members">
+            <div class="member">
+                <span class="role-label">President:</span>
+                <span class="player-name" id="current-president">Player Name</span>
+            </div>
+            <div class="member">
+                <span class="role-label">Chancellor:</span>
+                <span class="player-name" id="current-chancellor">Player Name</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="election-phase" id="nomination-phase">
+        <h3>Nomination Phase</h3>
+        <p>President <span id="president-name">Player Name</span> is selecting a Chancellor candidate</p>
+        
+        <div class="chancellor-nominees">
+            <h4>Select Chancellor Candidate:</h4>
+            <div class="nominees-grid" id="nominees-grid">
+                <!-- Nominee buttons will be generated here -->
+            </div>
+        </div>
+        
+        <div class="nomination-actions">
+            <button id="confirm-nomination-btn" class="btn btn-primary" disabled>Confirm Nomination</button>
+        </div>
+    </div>
+    
+    <div class="election-phase" id="voting-phase" style="display: none;">
+        <h3>Voting Phase</h3>
+        <p>All players vote on the government: <span id="government-candidates">President and Chancellor</span></p>
+        
+        <div class="voting-options">
+            <h4>Your Vote:</h4>
+            <div class="vote-buttons">
+                <button class="vote-btn vote-ja" data-vote="ja">Ja (Yes)</button>
+                <button class="vote-btn vote-nein" data-vote="nein">Nein (No)</button>
+            </div>
+        </div>
+        
+        <div class="voting-progress">
+            <p>Votes cast: <span id="votes-cast">0</span> / <span id="total-votes">0</span></p>
+        </div>
+    </div>
+    
+    <div class="election-phase" id="election-result" style="display: none;">
+        <h3>Election Result</h3>
+        <div class="vote-results">
+            <div class="vote-counts">
+                <div class="vote-count">
+                    <span class="vote-label">Ja:</span>
+                    <span class="vote-number" id="ja-votes">0</span>
+                </div>
+                <div class="vote-count">
+                    <span class="vote-label">Nein:</span>
+                    <span class="vote-number" id="nein-votes">0</span>
+                </div>
+            </div>
+            
+            <div class="vote-outcome" id="vote-outcome">
+                <!-- Vote outcome will be displayed here -->
+            </div>
+        </div>
+        
+        <div class="election-actions">
+            <button id="continue-btn" class="btn btn-primary">Continue</button>
+        </div>
+    </div>
+    
+    <div class="election-tracker">
+        <h4>Election Tracker</h4>
+        <div class="tracker-slots">
+            <div class="tracker-slot" data-position="1"></div>
+            <div class="tracker-slot" data-position="2"></div>
+            <div class="tracker-slot" data-position="3"></div>
+        </div>
+        <p class="tracker-note">3 failed elections in a row triggers a policy enactment</p>
+    </div>
+</div>

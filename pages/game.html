@@ -1,0 +1,88 @@
+<div class="game-page">
+    <div class="game-header">
+        <h2>Secret Hitler</h2>
+        <div class="game-status">
+            <p>Round: <span id="current-round">1</span></p>
+            <p>Phase: <span id="current-phase">Setup</span></p>
+        </div>
+    </div>
+    
+    <div class="game-board">
+        <div class="policy-tracks">
+            <div class="policy-track liberal">
+                <h3>Liberal Policies</h3>
+                <div class="policy-slots" id="liberal-policy-slots">
+                    <!-- Liberal policy slots will be generated here -->
+                </div>
+                <p class="policy-count">Enacted: <span id="liberal-count">0</span>/5</p>
+            </div>
+            
+            <div class="policy-track fascist">
+                <h3>Fascist Policies</h3>
+                <div class="policy-slots" id="fascist-policy-slots">
+                    <!-- Fascist policy slots will be generated here -->
+                </div>
+                <p class="policy-count">Enacted: <span id="fascist-count">0</span>/6</p>
+            </div>
+        </div>
+        
+        <div class="election-tracker">
+            <h3>Election Tracker</h3>
+            <div class="tracker-slots">
+                <div class="tracker-slot" data-position="1"></div>
+                <div class="tracker-slot" data-position="2"></div>
+                <div class="tracker-slot" data-position="3"></div>
+            </div>
+            <p class="tracker-note">3 failed elections trigger a policy enactment</p>
+        </div>
+        
+        <div class="current-government">
+            <h3>Current Government</h3>
+            <div class="government-members">
+                <div class="member">
+                    <span class="role-label">President:</span>
+                    <span class="player-name" id="current-president">None</span>
+                </div>
+                <div class="member">
+                    <span class="role-label">Chancellor:</span>
+                    <span class="player-name" id="current-chancellor">None</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="player-list">
+        <h3>Players</h3>
+        <div class="players-grid" id="players-grid">
+            <!-- Player cards will be generated here -->
+        </div>
+    </div>
+    
+    <div class="game-actions">
+        <h3>Game Actions</h3>
+        <div class="action-buttons">
+            <button id="start-election-btn" class="btn btn-primary">Start Election</button>
+            <button id="view-rules-btn" class="btn btn-outline">View Rules</button>
+            <button id="save-game-btn" class="btn btn-outline">Save Game</button>
+            <button id="new-game-btn" class="btn btn-outline">New Game</button>
+        </div>
+    </div>
+    
+    <div class="game-log">
+        <h3>Game Log</h3>
+        <div class="log-entries" id="log-entries">
+            <!-- Game log entries will be generated here -->
+        </div>
+    </div>
+    
+    <div class="game-footer">
+        <div class="deck-status">
+            <p>Policy deck: <span id="deck-count">0</span> cards</p>
+            <p>Discard pile: <span id="discard-count">0</span> cards</p>
+        </div>
+        <div class="game-controls">
+            <button id="undo-btn" class="btn btn-outline" disabled>Undo</button>
+            <button id="redo-btn" class="btn btn-outline" disabled>Redo</button>
+        </div>
+    </div>
+</div>

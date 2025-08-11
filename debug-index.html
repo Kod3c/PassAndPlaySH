@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Pass & Play (Debug)</title>
+    <meta name="description" content="Play Secret Hitler on one device with pass-and-play mechanics">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Secret Hitler</h1>
+            <p class="subtitle">Pass & Play Edition (Debug Mode)</p>
+        </header>
+        
+        <main>
+            <div class="welcome-section">
+                <h2>Welcome to Secret Hitler</h2>
+                <p>A digital implementation of the social deduction game for 5-10 players on one device.</p>
+                
+                <div class="game-options">
+                    <button id="new-game-btn" class="btn btn-primary">Start New Game</button>
+                    <button id="load-game-btn" class="btn btn-secondary">Load Saved Game</button>
+                    <button id="rules-btn" class="btn btn-outline">View Rules</button>
+                </div>
+            </div>
+            
+            <div class="features">
+                <h3>Features</h3>
+                <ul>
+                    <li>✅ Hidden role management</li>
+                    <li>✅ Election and voting system</li>
+                    <li>✅ Policy legislation</li>
+                    <li>✅ Executive powers</li>
+                    <li>✅ Pass-and-play privacy</li>
+                    <li>✅ Offline capable</li>
+                </ul>
+            </div>
+            
+            <div id="debug-info" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #007bff;">
+                <h4>Debug Information</h4>
+                <div id="debug-output">Loading...</div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Built for offline play - no accounts or servers required</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Debug logging
+        console.log('Debug: Page loading...');
+        
+        // Test basic functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug: DOM loaded');
+            
+            const debugOutput = document.getElementById('debug-output');
+            debugOutput.innerHTML = 'DOM loaded successfully<br>';
+            
+            // Test button elements
+            const newGameBtn = document.getElementById('new-game-btn');
+            const loadGameBtn = document.getElementById('load-game-btn');
+            const rulesBtn = document.getElementById('rules-btn');
+            
+            console.log('Debug: Buttons found:', {
+                newGame: newGameBtn,
+                loadGame: loadGameBtn,
+                rules: rulesBtn
+            });
+            
+            debugOutput.innerHTML += `New Game button: ${newGameBtn ? 'Found' : 'Missing'}<br>`;
+            debugOutput.innerHTML += `Load Game button: ${loadGameBtn ? 'Found' : 'Missing'}<br>`;
+            debugOutput.innerHTML += `Rules button: ${rulesBtn ? 'Found' : 'Missing'}<br>`;
+            
+            // Test basic click functionality
+            if (newGameBtn) {
+                newGameBtn.addEventListener('click', function() {
+                    console.log('Debug: New Game button clicked');
+                    debugOutput.innerHTML += '✅ New Game button clicked!<br>';
+                    alert('New Game button works!');
+                });
+                debugOutput.innerHTML += '✅ New Game button event listener attached<br>';
+            }
+            
+            if (loadGameBtn) {
+                loadGameBtn.addEventListener('click', function() {
+                    console.log('Debug: Load Game button clicked');
+                    debugOutput.innerHTML += '✅ Load Game button clicked!<br>';
+                    alert('Load Game button works!');
+                });
+                debugOutput.innerHTML += '✅ Load Game button event listener attached<br>';
+            }
+            
+            if (rulesBtn) {
+                rulesBtn.addEventListener('click', function() {
+                    console.log('Debug: Rules button clicked');
+                    debugOutput.innerHTML += '✅ Rules button clicked!<br>';
+                    alert('Rules button works!');
+                });
+                debugOutput.innerHTML += '✅ Rules button event listener attached<br>';
+            }
+            
+            debugOutput.innerHTML += '<br>Basic button functionality test complete!';
+        });
+        
+        // Test JavaScript loading
+        console.log('Debug: JavaScript is running');
+    </script>
+    
+    <!-- Load the main app scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/player-setup.js"></script>
+    <script src="js/setup-enhancement.js"></script>
+    
+    <script>
+        // Test if main app loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const debugOutput = document.getElementById('debug-output');
+                if (window.secretHitlerApp) {
+                    debugOutput.innerHTML += '<br>✅ Main app loaded successfully';
+                    console.log('Debug: Main app loaded:', window.secretHitlerApp);
+                } else {
+                    debugOutput.innerHTML += '<br>❌ Main app failed to load';
+                    console.error('Debug: Main app not found');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

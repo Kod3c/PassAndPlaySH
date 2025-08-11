@@ -1,0 +1,50 @@
+<div class="setup-page">
+    <h2>Game Setup</h2>
+    
+    <div class="setup-section">
+        <h3>Player Count</h3>
+        <div class="player-count-selector">
+            <button class="player-count-btn" data-count="5">5 Players</button>
+            <button class="player-count-btn" data-count="6">6 Players</button>
+            <button class="player-count-btn" data-count="7">7 Players</button>
+            <button class="player-count-btn" data-count="8">8 Players</button>
+            <button class="player-count-btn" data-count="9">9 Players</button>
+            <button class="player-count-btn" data-count="10">10 Players</button>
+        </div>
+        
+        <div class="role-distribution">
+            <h4>Role Distribution</h4>
+            <div id="role-info" class="role-info">
+                <p>Select player count to see role distribution</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Player Names</h3>
+        <div id="player-inputs" class="player-inputs">
+            <!-- Player input fields will be generated here -->
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Game Options</h3>
+        <div class="game-options">
+            <label class="checkbox-label">
+                <input type="checkbox" id="public-vote-reveal">
+                <span class="checkmark"></span>
+                Public vote reveal (house rule)
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="policy-peek-variant">
+                <span class="checkmark"></span>
+                Policy peek variant
+            </label>
+        </div>
+    </div>
+    
+    <div class="setup-actions">
+        <button id="start-game-btn" class="btn btn-primary" disabled>Start Game</button>
+        <button id="back-to-home-btn" class="btn btn-outline">Back to Home</button>
+    </div>
+</div>
