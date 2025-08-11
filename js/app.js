@@ -119,16 +119,33 @@ class App {
     setupEventListeners() {
         // Setup navigation event listeners
         document.addEventListener('click', (event) => {
-            if (event.target.matches('[data-navigate]')) {
-                const page = event.target.dataset.navigate;
+            // Check if the clicked element or any of its parents have data-navigate
+            let navigateElement = event.target.closest('[data-navigate]');
+            
+            // Fallback: if closest() doesn't work, check the element and all its parents manually
+            if (!navigateElement) {
+                let currentElement = event.target;
+                while (currentElement && currentElement !== document.body) {
+                    if (currentElement.hasAttribute('data-navigate')) {
+                        navigateElement = currentElement;
+                        break;
+                    }
+                    currentElement = currentElement.parentElement;
+                }
+            }
+            
+            if (navigateElement) {
+                const page = navigateElement.dataset.navigate;
                 this.navigateToPage(page);
             }
         });
 
         // Setup rules page navigation
         document.addEventListener('click', (event) => {
-            if (event.target.matches('.rule-nav-btn')) {
-                const section = event.target.dataset.section;
+            // Check if the clicked element or any of its parents have the rule-nav-btn class
+            const ruleNavElement = event.target.closest('.rule-nav-btn');
+            if (ruleNavElement) {
+                const section = ruleNavElement.dataset.section;
                 this.showRulesSection(section);
             }
         });
@@ -136,6 +153,8 @@ class App {
         // Setup other event listeners
         this.setupHeaderNavigation();
         this.setupGameSetupListeners();
+        this.setupMultiDeviceNavigation();
+        this.setupBetaAccess();
     }
 
     setupHeaderNavigation() {
@@ -276,6 +295,54 @@ class App {
                 this.startGame();
             });
         }
+        
+        // Initialize with 5 players if starting at 0
+        if (this.getCurrentPlayerCount() === 0) {
+            this.updatePlayerCount(5);
+        }
+    }
+    
+    setupMultiDeviceNavigation() {
+        // Handle multi-device navigation for create game
+        const createGameBtn = document.querySelector('[data-navigate="multidevice"]');
+        if (createGameBtn) {
+            createGameBtn.addEventListener('click', () => {
+                // Navigate to the multi-device page with create mode
+                window.location.href = 'pages/multidevice.html?mode=create';
+            });
+        }
+
+        // Handle multi-device navigation for join game
+        const joinGameBtn = document.querySelectorAll('[data-navigate="multidevice"]')[1];
+        if (joinGameBtn) {
+            joinGameBtn.addEventListener('click', () => {
+                // Navigate to the multi-device page with join mode
+                window.location.href = 'pages/multidevice.html?mode=join';
+            });
+        }
+    }
+
+    setupBetaAccess() {
+        // Check if beta access is enabled via URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasBetaAccess = urlParams.has('beta') || urlParams.has('beta_access');
+        
+        if (hasBetaAccess) {
+            // Enable the beta button
+            const betaBtn = document.querySelector('[data-navigate="setup"]');
+            if (betaBtn) {
+                betaBtn.disabled = false;
+                betaBtn.classList.remove('btn-primary');
+                betaBtn.classList.add('btn-secondary');
+                
+                // Add a visual indicator that beta is active
+                const betaTag = betaBtn.querySelector('.beta-tag');
+                if (betaTag) {
+                    betaTag.style.background = '#28a745'; // Green background for active beta
+                    betaTag.textContent = 'BETA ACTIVE';
+                }
+            }
+        }
     }
 
     getCurrentPlayerCount() {
@@ -284,47 +351,34 @@ class App {
     }
 
     updatePlayerCount(newCount) {
-        // Update the display
-        const currentCountSpan = document.querySelector('.current-count');
-        if (currentCountSpan) {
-            currentCountSpan.textContent = newCount;
-        }
-
-        // Update button states
-        const minusBtn = document.getElementById('player-minus');
-        const plusBtn = document.getElementById('player-plus');
+        const currentCount = this.getCurrentPlayerCount();
         
-        if (minusBtn) {
-            minusBtn.disabled = newCount === 0;
+        if (newCount === currentCount) return;
+        
+        // Update the display
+        const countDisplay = document.querySelector('.current-count');
+        if (countDisplay) {
+            countDisplay.textContent = newCount;
         }
-        if (plusBtn) {
-            plusBtn.disabled = newCount >= 10;
-        }
-
+        
         // Update role distribution and player inputs
-        this.selectPlayerCount(newCount);
-    }
-
-    selectPlayerCount(count) {
-        const playerInputs = document.getElementById('player-inputs');
         const roleInfo = document.getElementById('role-info');
+        const playerInputs = document.getElementById('player-inputs');
         const startGameBtn = document.getElementById('start-game-btn');
         
-        if (!playerInputs || !roleInfo || !startGameBtn) return;
-
-        if (count === 0) {
+        if (newCount === 0) {
             // Hide role distribution and player inputs when count is 0
             roleInfo.innerHTML = '<p>Select player count to see role distribution</p>';
-            playerInputs.innerHTML = '<p>Select player count to add players</p>';
+            playerInputs.innerHTML = '';
             startGameBtn.disabled = true;
             return;
         }
 
         // Update role distribution display
-        const distribution = this.getRoleDistribution(count);
-        const liberalPercent = Math.round((distribution.liberals / count) * 100);
-        const fascistPercent = Math.round((distribution.fascists / count) * 100);
-        const hitlerPercent = Math.round((distribution.hitler / count) * 100);
+        const distribution = this.getRoleDistribution(newCount);
+        const liberalPercent = Math.round((distribution.liberals / newCount) * 100);
+        const fascistPercent = Math.round((distribution.fascists / newCount) * 100);
+        const hitlerPercent = Math.round((distribution.hitler / newCount) * 100);
         
         roleInfo.innerHTML = `
             <div class="role-distribution-compact">
@@ -352,20 +406,68 @@ class App {
             </div>
         `;
 
-        // Generate player input fields based on selected count
+        // Smart player input management - preserve existing names
+        const existingInputs = playerInputs.querySelectorAll('.player-input-group');
+        const existingNames = Array.from(existingInputs).map(group => {
+            const input = group.querySelector('.player-name-input');
+            return input ? input.value.trim() : '';
+        });
+        
+        // Clear existing inputs
         playerInputs.innerHTML = '';
-        for (let i = 1; i <= count; i++) {
+        
+        // Add new inputs, preserving names where possible
+        for (let i = 1; i <= newCount; i++) {
             const inputGroup = document.createElement('div');
             inputGroup.className = 'player-input-group';
+            
+            // Preserve existing name if available, otherwise use empty placeholder
+            const existingName = existingNames[i - 1] || '';
+            const placeholder = existingName || `Enter player name`;
+            
             inputGroup.innerHTML = `
                 <label for="player-${i}">Player ${i}:</label>
-                <input type="text" id="player-${i}" class="player-name-input" placeholder="Enter player name">
+                <input type="text" id="player-${i}" class="player-name-input" 
+                       placeholder="${placeholder}" value="${existingName}">
             `;
             playerInputs.appendChild(inputGroup);
         }
 
         // Enable start game button
         startGameBtn.disabled = false;
+        
+        // Update button states
+        const minusBtn = document.getElementById('player-minus');
+        const plusBtn = document.getElementById('player-plus');
+        
+        if (minusBtn) {
+            minusBtn.disabled = newCount <= 5;
+        }
+        if (plusBtn) {
+            plusBtn.disabled = newCount >= 10;
+        }
+    }
+
+    selectPlayerCount(count) {
+        // Update the current count display
+        const countDisplay = document.querySelector('.current-count');
+        if (countDisplay) {
+            countDisplay.textContent = count;
+        }
+        
+        // Update button states
+        const minusBtn = document.getElementById('player-minus');
+        const plusBtn = document.getElementById('player-plus');
+        
+        if (minusBtn) {
+            minusBtn.disabled = count <= 5;
+        }
+        if (plusBtn) {
+            plusBtn.disabled = count >= 10;
+        }
+        
+        // Don't call updatePlayerCount here to avoid infinite loops
+        // The button click handlers will call updatePlayerCount directly
     }
 
     getRoleDistribution(playerCount) {

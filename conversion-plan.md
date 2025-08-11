@@ -75,18 +75,18 @@ CREATE TABLE game_state (
     FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
 );
 
--- NEW: Policy board tracking for visual representation
+-- Policy board tracking for visual representation
 CREATE TABLE policy_board (
     game_id VARCHAR(36) PRIMARY KEY,
-    liberal_track JSON NOT NULL DEFAULT '[]', -- Array of enacted liberal policies
-    fascist_track JSON NOT NULL DEFAULT '[]', -- Array of enacted fascist policies
-    election_tracker_position INT DEFAULT 0, -- Current position on election tracker
+    liberal_track JSON NOT NULL DEFAULT '[]',
+    fascist_track JSON NOT NULL DEFAULT '[]',
+    election_tracker_position INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (game_id) REFERENCES games(game_id) ON DELETE CASCADE
 );
 
--- NEW: Vote tracking table for current election
+-- Vote tracking table for current election
 CREATE TABLE current_votes (
     id VARCHAR(36) PRIMARY KEY,
     game_id VARCHAR(36) NOT NULL,
@@ -98,45 +98,45 @@ CREATE TABLE current_votes (
     UNIQUE KEY unique_player_vote (game_id, player_id)
 );
 
--- NEW: Game actions log for history and recovery
+-- Game actions log for history and recovery
 CREATE TABLE game_actions (
     id VARCHAR(36) PRIMARY KEY,
     game_id VARCHAR(36) NOT NULL,
-    player_id VARCHAR(36) NULL, -- NULL for system actions
+    player_id VARCHAR(36) NULL,
     action_type ENUM('game_start', 'role_assignment', 'election_start', 'nomination', 'vote_submitted', 'election_result', 'policy_enacted', 'power_used', 'turn_advance', 'game_end') NOT NULL,
-    action_data JSON NOT NULL, -- Flexible data storage for different action types
+    action_data JSON NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
     FOREIGN KEY (player_id) REFERENCES players(player_id) ON DELETE SET NULL
 );
 
--- NEW: Executive powers tracking
+-- Executive powers tracking
 CREATE TABLE executive_powers (
     id VARCHAR(36) PRIMARY KEY,
     game_id VARCHAR(36) NOT NULL,
     power_type ENUM('investigate', 'special_election', 'policy_peek', 'execution') NOT NULL,
-    target_player_id VARCHAR(36) NULL, -- For investigate/execution
+    target_player_id VARCHAR(36) NULL,
     used_by_player_id VARCHAR(36) NOT NULL,
-    power_result JSON, -- Store power results (investigation result, etc.)
+    power_result JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (game_id) REFERENCES games(game_id) ON DELETE CASCADE,
     FOREIGN KEY (target_player_id) REFERENCES players(player_id) ON DELETE SET NULL,
     FOREIGN KEY (used_by_player_id) REFERENCES players(player_id) ON DELETE CASCADE
 );
 
--- NEW: Game phase and turn management
+-- Game phase and turn management
 CREATE TABLE game_phases (
     game_id VARCHAR(36) PRIMARY KEY,
     current_phase ENUM('election', 'legislation', 'executive') DEFAULT 'election',
     phase_step ENUM('nomination', 'voting', 'president_choice', 'chancellor_choice', 'power_usage') DEFAULT 'nomination',
-    last_chancellor_id VARCHAR(36) NULL, -- Track term limits
+    last_chancellor_id VARCHAR(36) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (game_id) REFERENCES games(game_id) ON DELETE CASCADE,
     FOREIGN KEY (last_chancellor_id) REFERENCES players(player_id) ON DELETE SET NULL
 );
 
--- NEW: Game statistics for completed games
+-- Game statistics for completed games
 CREATE TABLE game_statistics (
     id VARCHAR(36) PRIMARY KEY,
     game_id VARCHAR(36) NOT NULL,
@@ -187,9 +187,9 @@ backend/
     └── server.php
 ```
 
-#### 1.4 Data Tracking & State Management
+#### 1.4 Core Game Mechanics Implementation
 
-**How Role Assignment and Management Works:**
+**Role Assignment and Management:**
 ```php
 class RoleManager {
     private $db;
@@ -225,64 +225,19 @@ class RoleManager {
     
     private function getRoleDistribution($playerCount) {
         switch ($playerCount) {
-            case 5:
-                return ['liberal', 'liberal', 'liberal', 'fascist', 'hitler'];
-            case 6:
-                return ['liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'hitler'];
-            case 7:
-                return ['liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'hitler'];
-            case 8:
-                return ['liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'hitler'];
-            case 9:
-                return ['liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'fascist', 'hitler'];
-            case 10:
-                return ['liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'fascist', 'hitler'];
-            default:
-                throw new Exception("Invalid player count: $playerCount");
-        }
-    }
-    
-    public function getPlayerRole($gameId, $playerId) {
-        return $this->db->query(
-            "SELECT role FROM players WHERE game_id = ? AND id = ?",
-            [$gameId, $playerId]
-        );
-    }
-    
-    public function getFascistPlayers($gameId) {
-        return $this->db->queryAll(
-            "SELECT id, name FROM players WHERE game_id = ? AND role IN ('fascist', 'hitler')",
-            [$gameId]
-        );
-    }
-    
-    public function getHitlerPlayer($gameId) {
-        return $this->db->query(
-            "SELECT id, name FROM players WHERE game_id = ? AND role = 'hitler'",
-            [$gameId]
-        );
-    }
-    
-    private function notifyPlayersOfRoles($gameId, $players) {
-        foreach ($players as $player) {
-            $role = $this->getPlayerRole($gameId, $player['id']);
-            $otherFascists = [];
-            
-            if (in_array($role['role'], ['fascist', 'hitler'])) {
-                // Fascists see other fascists (but Hitler doesn't see fascists)
-                if ($role['role'] === 'fascist') {
-                    $otherFascists = $this->getFascistPlayers($gameId);
-                }
-            }
-            
-            // Send role information to player
-            $this->sendRoleNotification($gameId, $player['id'], $role['role'], $otherFascists);
+            case 5: return ['liberal', 'liberal', 'liberal', 'fascist', 'hitler'];
+            case 6: return ['liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'hitler'];
+            case 7: return ['liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'hitler'];
+            case 8: return ['liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'hitler'];
+            case 9: return ['liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'fascist', 'hitler'];
+            case 10: return ['liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'liberal', 'fascist', 'fascist', 'fascist', 'hitler'];
+            default: throw new Exception("Invalid player count: $playerCount");
         }
     }
 }
 ```
 
-**How Policy Deck and Board Management Works:**
+**Policy Deck and Board Management:**
 ```php
 class PolicyManager {
     private $db;
@@ -290,8 +245,8 @@ class PolicyManager {
     public function initializePolicyDeck($gameId) {
         // Create standard Secret Hitler policy deck
         $policyDeck = [
-            'liberal' => array_fill(0, 6, 'liberal'),    // 6 liberal policies
-            'fascist' => array_fill(0, 11, 'fascist')    // 11 fascist policies
+            'liberal' => array_fill(0, 6, 'liberal'),
+            'fascist' => array_fill(0, 11, 'fascist')
         ];
         
         // Shuffle the deck
@@ -313,37 +268,6 @@ class PolicyManager {
         $this->logAction($gameId, null, 'game_start', [
             'policy_deck_size' => count($policyDeck['liberal']) + count($policyDeck['fascist'])
         ]);
-    }
-    
-    public function drawPolicyCards($gameId, $count = 3) {
-        $gameState = $this->db->query(
-            "SELECT policy_deck FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        $policyDeck = json_decode($gameState['policy_deck'], true);
-        $drawnCards = [];
-        
-        // Draw cards from the top of the deck
-        for ($i = 0; $i < $count && !empty($policyDeck); $i++) {
-            $drawnCards[] = array_shift($policyDeck);
-        }
-        
-        // If deck is empty, shuffle discard pile back
-        if (empty($policyDeck)) {
-            $discardPile = $this->getDiscardPile($gameId);
-            $policyDeck = $discardPile;
-            $this->clearDiscardPile($gameId);
-            $this->shufflePolicyDeck($policyDeck);
-        }
-        
-        // Update deck in database
-        $this->db->execute(
-            "UPDATE game_state SET policy_deck = ? WHERE game_id = ?",
-            [json_encode($policyDeck), $gameId]
-        );
-        
-        return $drawnCards;
     }
     
     public function enactPolicy($gameId, $policyType) {
@@ -384,87 +308,15 @@ class PolicyManager {
             'fascist_count' => count($fascistTrack)
         ]);
     }
-    
-    public function discardPolicy($gameId, $policyType) {
-        $discardPile = $this->getDiscardPile($gameId);
-        $discardPile[] = $policyType;
-        
-        $this->db->execute(
-            "UPDATE game_state SET discard_pile = ? WHERE game_id = ?",
-            [json_encode($discardPile), $gameId]
-        );
-        
-        // Log discard action
-        $this->logAction($gameId, null, 'policy_discarded', [
-            'policy_type' => $policyType
-        ]);
-    }
-    
-    public function getPolicyBoard($gameId) {
-        $board = $this->db->query(
-            "SELECT * FROM policy_board WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        $gameState = $this->db->query(
-            "SELECT policy_deck, discard_pile FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        return [
-            'liberal_track' => json_decode($board['liberal_track'], true),
-            'fascist_track' => json_decode($board['fascist_track'], true),
-            'election_tracker' => $board['election_tracker_position'],
-            'deck_size' => count(json_decode($gameState['policy_deck'], true)),
-            'discard_size' => count(json_decode($gameState['discard_pile'], true))
-        ];
-    }
-    
-    private function shufflePolicyDeck(&$deck) {
-        // Fisher-Yates shuffle for both liberal and fascist cards
-        shuffle($deck['liberal']);
-        shuffle($deck['fascist']);
-        
-        // Interleave the cards randomly
-        $shuffled = [];
-        $liberalIndex = 0;
-        $fascistIndex = 0;
-        
-        while ($liberalIndex < count($deck['liberal']) || $fascistIndex < count($deck['fascist'])) {
-            if ($liberalIndex < count($deck['liberal']) && 
-                ($fascistIndex >= count($deck['fascist']) || rand(0, 1))) {
-                $shuffled[] = $deck['liberal'][$liberalIndex++];
-            } else {
-                $shuffled[] = $deck['fascist'][$fascistIndex++];
-            }
-        }
-        
-        $deck = $shuffled;
-    }
-    
-    private function checkWinConditions($gameId, $liberalCount, $fascistCount) {
-        // Liberal win: 5 liberal policies enacted
-        if ($liberalCount >= 5) {
-            $this->endGame($gameId, 'liberal', 'policy_victory');
-        }
-        
-        // Fascist win: 6 fascist policies enacted
-        if ($fascistCount >= 6) {
-            $this->endGame($gameId, 'fascist', 'policy_victory');
-        }
-        
-        // Hitler assassination win (handled separately in executive powers)
-        // Election tracker win (handled in election resolution)
-    }
 }
+```
 
-**How Win Conditions Are Checked:**
+**Win Condition Checking:**
 ```php
 class WinConditionManager {
     private $db;
     
     public function checkAllWinConditions($gameId) {
-        // Get current game state
         $gameState = $this->db->query(
             "SELECT liberal_policies, fascist_policies, election_tracker FROM game_state WHERE game_id = ?",
             [$gameId]
@@ -495,210 +347,10 @@ class WinConditionManager {
         
         return null; // No win condition met
     }
-    
-    private function checkHitlerChancellorWin($gameId) {
-        $gameState = $this->db->query(
-            "SELECT current_chancellor FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        if (!$gameState['current_chancellor']) {
-            return false;
-        }
-        
-        $chancellorRole = $this->db->query(
-            "SELECT role FROM players WHERE id = ?",
-            [$gameState['current_chancellor']]
-        );
-        
-        // Hitler becomes Chancellor after 3 fascist policies enacted
-        $fascistCount = $this->getFascistPolicyCount($gameId);
-        return ($chancellorRole['role'] === 'hitler' && $fascistCount >= 3);
-    }
-    
-    public function endGame($gameId, $winner, $reason) {
-        // Update game status
-        $this->db->execute(
-            "UPDATE games SET status = 'completed' WHERE id = ?",
-            [$gameId]
-        );
-        
-        // Log game end
-        $this->logAction($gameId, null, 'game_end', [
-            'winner' => $winner,
-            'reason' => $reason,
-            'timestamp' => time()
-        ]);
-        
-        // Broadcast game end to all players
-        $this->broadcastGameEnd($gameId, $winner, $reason);
-        
-        // Store final game statistics
-        $this->storeGameStatistics($gameId, $winner, $reason);
-    }
-    
-    private function storeGameStatistics($gameId, $winner, $reason) {
-        // Store final game state for analysis
-        $finalState = $this->getFinalGameState($gameId);
-        
-        $this->db->execute(
-            "INSERT INTO game_statistics (game_id, winner, reason, final_state, completed_at) VALUES (?, ?, ?, ?, NOW())",
-            [$gameId, $winner, $reason, json_encode($finalState)]
-        );
-    }
-}
-
-**How Executive Powers Work:**
-```php
-class ExecutivePowerManager {
-    private $db;
-    
-    public function checkPowerActivation($gameId, $fascistCount) {
-        // Check if fascist policies unlock new powers
-        $powers = [];
-        
-        if ($fascistCount >= 1) {
-            $powers[] = 'investigate';
-        }
-        if ($fascistCount >= 2) {
-            $powers[] = 'special_election';
-        }
-        if ($fascistCount >= 3) {
-            $powers[] = 'policy_peek';
-        }
-        if ($fascistCount >= 4) {
-            $powers[] = 'execution';
-        }
-        
-        return $powers;
-    }
-    
-    public function usePower($gameId, $powerType, $usedByPlayerId, $targetPlayerId = null) {
-        // Validate power usage
-        if (!$this->canUsePower($gameId, $powerType, $usedByPlayerId)) {
-            throw new Exception("Cannot use power: $powerType");
-        }
-        
-        $powerResult = null;
-        
-        switch ($powerType) {
-            case 'investigate':
-                $powerResult = $this->investigatePlayer($gameId, $targetPlayerId);
-                break;
-            case 'special_election':
-                $powerResult = $this->triggerSpecialElection($gameId);
-                break;
-            case 'policy_peek':
-                $powerResult = $this->peekAtPolicyDeck($gameId);
-                break;
-            case 'execution':
-                $powerResult = $this->executePlayer($gameId, $targetPlayerId);
-                break;
-        }
-        
-        // Log power usage
-        $this->db->execute(
-            "INSERT INTO executive_powers (id, game_id, power_type, target_player_id, used_by_player_id, power_result) VALUES (?, ?, ?, ?, ?, ?)",
-            [generateUUID(), $gameId, $powerType, $targetPlayerId, $usedByPlayerId, json_encode($powerResult)]
-        );
-        
-        // Log action
-        $this->logAction($gameId, $usedByPlayerId, 'power_used', [
-            'power_type' => $powerType,
-            'target_player' => $targetPlayerId,
-            'result' => $powerResult
-        ]);
-        
-        return $powerResult;
-    }
-    
-    private function investigatePlayer($gameId, $targetPlayerId) {
-        $targetRole = $this->db->query(
-            "SELECT role FROM players WHERE id = ?",
-            [$targetPlayerId]
-        );
-        
-        // Return investigation result (only visible to president)
-        return [
-            'target_player' => $targetPlayerId,
-            'role' => $targetRole['role'],
-            'message' => "This player is a " . $targetRole['role']
-        ];
-    }
-    
-    private function triggerSpecialElection($gameId) {
-        // Reset election tracker and allow immediate re-election
-        $this->db->execute(
-            "UPDATE game_state SET election_tracker = 0 WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        return [
-            'message' => 'Special election triggered - election tracker reset'
-        ];
-    }
-    
-    private function peekAtPolicyDeck($gameId) {
-        $gameState = $this->db->query(
-            "SELECT policy_deck FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        $deck = json_decode($gameState['policy_deck'], true);
-        $topThree = array_slice($deck, 0, 3);
-        
-        return [
-            'top_three_cards' => $topThree,
-            'message' => 'Top 3 policy cards revealed'
-        ];
-    }
-    
-    private function executePlayer($gameId, $targetPlayerId) {
-        // Check if executed player is Hitler (liberal win)
-        $targetRole = $this->db->query(
-            "SELECT role FROM players WHERE id = ?",
-            [$targetPlayerId]
-        );
-        
-        if ($targetRole['role'] === 'hitler') {
-            $this->endGame($gameId, 'liberal', 'hitler_assassination');
-        }
-        
-        // Mark player as executed (can't participate further)
-        $this->db->execute(
-            "UPDATE players SET is_connected = FALSE WHERE id = ?",
-            [$targetPlayerId]
-        );
-        
-        return [
-            'target_player' => $targetPlayerId,
-            'role' => $targetRole['role'],
-            'message' => 'Player executed',
-            'game_continues' => $targetRole['role'] !== 'hitler'
-        ];
-    }
-    
-    private function canUsePower($gameId, $powerType, $playerId) {
-        // Check if player is current president
-        $gameState = $this->db->query(
-            "SELECT current_president FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        if ($gameState['current_president'] !== $playerId) {
-            return false;
-        }
-        
-        // Check if power is available based on fascist policy count
-        $fascistCount = $this->getFascistPolicyCount($gameId);
-        $availablePowers = $this->checkPowerActivation($gameId, $fascistCount);
-        
-        return in_array($powerType, $availablePowers);
-    }
 }
 ```
 
-**How Votes Are Tracked:**
+**Vote Tracking:**
 ```php
 class VoteManager {
     private $db;
@@ -739,161 +391,10 @@ class VoteManager {
             [$gameId]
         );
     }
-    
-    public function clearVotes($gameId) {
-        // Clear votes after election resolution
-        $this->db->execute("DELETE FROM current_votes WHERE game_id = ?", [$gameId]);
-    }
 }
 ```
 
-**How Current Player is Tracked:**
-```php
-class GameState {
-    private $db;
-    
-    public function getCurrentGameState($gameId) {
-        $state = $this->db->query(
-            "SELECT * FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        // Get current president and chancellor info
-        $president = $this->db->query(
-            "SELECT id, name FROM players WHERE game_id = ? AND id = ?",
-            [$gameId, $state['current_president']]
-        );
-        
-        $chancellor = null;
-        if ($state['current_chancellor']) {
-            $chancellor = $this->db->query(
-                "SELECT id, name FROM players WHERE id = ?",
-                [$state['current_chancellor']]
-            );
-        }
-        
-        return [
-            'state' => $state,
-            'current_president' => $president,
-            'current_chancellor' => $chancellor,
-            'current_phase' => $this->determineCurrentPhase($state)
-        ];
-    }
-    
-    public function advanceTurn($gameId) {
-        $players = $this->getPlayersInOrder($gameId);
-        $currentState = $this->getCurrentGameState($gameId);
-        
-        // Find next president
-        $currentIndex = array_search($currentState['state']['current_president'], array_column($players, 'id'));
-        $nextIndex = ($currentIndex + 1) % count($players);
-        $nextPresident = $players[$nextIndex]['id'];
-        
-        // Update game state
-        $this->db->execute(
-            "UPDATE game_state SET current_turn = current_turn + 1, current_president = ? WHERE game_id = ?",
-            [$nextPresident, $gameId]
-        );
-        
-        // Log turn advancement
-        $this->logAction($gameId, null, 'turn_advance', [
-            'new_turn' => $currentState['state']['current_turn'] + 1,
-            'new_president' => $nextPresident
-        ]);
-    }
-}
-```
-
-**How Game Phases and Turn Management Work:**
-```php
-class GamePhaseManager {
-    private $db;
-    
-    public function initializeGamePhases($gameId) {
-        $this->db->execute(
-            "INSERT INTO game_phases (game_id) VALUES (?)",
-            [$gameId]
-        );
-    }
-    
-    public function advancePhase($gameId, $newPhase, $newStep = null) {
-        $updateData = ['current_phase' => $newPhase];
-        if ($newStep) {
-            $updateData['phase_step'] = $newStep;
-        }
-        
-        $this->db->execute(
-            "UPDATE game_phases SET current_phase = ?, phase_step = ?, updated_at = NOW() WHERE game_id = ?",
-            [$newPhase, $newStep ?? 'nomination', $gameId]
-        );
-        
-        // Log phase change
-        $this->logAction($gameId, null, 'phase_change', [
-            'new_phase' => $newPhase,
-            'new_step' => $newStep
-        ]);
-        
-        // Broadcast phase change to all players
-        $this->broadcastPhaseChange($gameId, $newPhase, $newStep);
-    }
-    
-    public function getCurrentPhase($gameId) {
-        return $this->db->query(
-            "SELECT * FROM game_phases WHERE game_id = ?",
-            [$gameId]
-        );
-    }
-    
-    public function validateChancellorNomination($gameId, $chancellorId) {
-        // Check term limits (same person can't be chancellor twice in a row)
-        $lastChancellor = $this->db->query(
-            "SELECT last_chancellor_id FROM game_phases WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        if ($lastChancellor['last_chancellor_id'] === $chancellorId) {
-            return false; // Term limit violation
-        }
-        
-        return true;
-    }
-    
-    public function setChancellor($gameId, $chancellorId) {
-        $this->db->execute(
-            "UPDATE game_phases SET last_chancellor_id = ? WHERE game_id = ?",
-            [$chancellorId, $gameId]
-        );
-    }
-    
-    public function checkElectionTrackerWin($gameId) {
-        $gameState = $this->db->query(
-            "SELECT election_tracker FROM game_state WHERE game_id = ?",
-            [$gameId]
-        );
-        
-        if ($gameState['election_tracker'] >= 3) {
-            $this->endGame($gameId, 'fascist', 'election_tracker');
-            return true;
-        }
-        
-        return false;
-    }
-    
-    private function broadcastPhaseChange($gameId, $phase, $step) {
-        // Send phase change notification to all players
-        $message = [
-            'type' => 'phase_change',
-            'phase' => $phase,
-            'step' => $step,
-            'timestamp' => time()
-        ];
-        
-        $this->broadcastToGame($gameId, $message);
-    }
-}
-```
-
-**How Game Data is Logged and Recovered:**
+**Action Logging and Recovery:**
 ```php
 class ActionLogger {
     private $db;
@@ -902,18 +403,6 @@ class ActionLogger {
         $this->db->execute(
             "INSERT INTO game_actions (id, game_id, player_id, action_type, action_data) VALUES (?, ?, ?, ?, ?)",
             [generateUUID(), $gameId, $playerId, $actionType, json_encode($actionData)]
-        );
-    }
-    
-    public function getGameHistory($gameId, $limit = 50) {
-        return $this->db->queryAll(
-            "SELECT ga.*, p.name as player_name 
-             FROM game_actions ga 
-             LEFT JOIN players p ON ga.player_id = p.id 
-             WHERE ga.game_id = ? 
-             ORDER BY ga.created_at DESC 
-             LIMIT ?",
-            [$gameId, $limit]
         );
     }
     
@@ -962,21 +451,6 @@ class Game {
 }
 ```
 
-#### 2.2 Action Processing
-```php
-class GameActions {
-    public function submitVote($gameId, $playerId, $vote) {
-        // Validate player can vote, record vote, check if all votes in
-        // If complete, resolve election and broadcast result
-    }
-    
-    public function enactPolicy($gameId, $policyType) {
-        // Update policy track, check win conditions
-        // Broadcast policy enactment and game state
-    }
-}
-```
-
 ### **Phase 3: Real-time Communication (Week 5-6)**
 **Goal**: Establish WebSocket infrastructure
 
@@ -1003,7 +477,6 @@ class GameWebSocket implements MessageComponentInterface {
             case 'use_power':
                 $this->processPowerUsage($from, $data);
                 break;
-            // ... other actions
         }
     }
     
@@ -1034,95 +507,6 @@ class GameWebSocket implements MessageComponentInterface {
             $this->resolveElection($data['gameId']);
         }
     }
-    
-    private function processPolicyEnactment($from, $data) {
-        $policyManager = new PolicyManager($this->db);
-        
-        // Validate that this player can enact policies
-        $gameState = $this->getCurrentGameState($data['gameId']);
-        if (!$this->canEnactPolicy($data['gameId'], $data['playerId'], $gameState)) {
-            $this->sendError($from, 'Not authorized to enact policy');
-            return;
-        }
-        
-        // Enact the chosen policy
-        $policyManager->enactPolicy($data['gameId'], $data['policyType']);
-        
-        // Get updated policy board
-        $policyBoard = $policyManager->getPolicyBoard($data['gameId']);
-        
-        // Broadcast policy enactment to all players
-        $this->broadcastToGame($data['gameId'], [
-            'type' => 'policy_enacted',
-            'policy_type' => $data['policyType'],
-            'policy_board' => $policyBoard,
-            'enacted_by' => $data['playerId']
-        ]);
-        
-        // Check if game should end due to policy victory
-        if ($this->checkPolicyVictory($data['gameId'])) {
-            $this->endGame($data['gameId']);
-        } else {
-            // Move to next phase or turn
-            $this->advanceGamePhase($data['gameId']);
-        }
-    }
-    
-    private function processPolicyChoice($from, $data) {
-        $policyManager = new PolicyManager($this->db);
-        
-        // President draws 3 cards, chooses 2 to pass to Chancellor
-        if ($data['phase'] === 'president_choice') {
-            $drawnCards = $policyManager->drawPolicyCards($data['gameId'], 3);
-            
-            // Send cards to president (only visible to them)
-            $this->sendToPlayer($from, [
-                'type' => 'policy_cards_drawn',
-                'cards' => $drawnCards,
-                'action_required' => 'choose_2_cards'
-            ]);
-        }
-        
-        // Chancellor receives 2 cards from president, chooses 1 to enact
-        if ($data['phase'] === 'chancellor_choice') {
-            $this->sendToPlayer($from, [
-                'type' => 'chancellor_choice',
-                'cards' => $data['received_cards'],
-                'action_required' => 'choose_1_card'
-            ]);
-        }
-    }
-    
-    private function resolveElection($gameId) {
-        $voteManager = new VoteManager($this->db);
-        $votes = $voteManager->getCurrentVotes($gameId);
-        
-        $jaVotes = count(array_filter($votes, fn($v) => $v['vote'] === 'ja'));
-        $neinVotes = count(array_filter($votes, fn($v) => $v['vote'] === 'nein'));
-        
-        $result = $jaVotes > $neinVotes ? 'passed' : 'failed';
-        
-        // Update game state
-        $gameState = new GameState($this->db);
-        if ($result === 'failed') {
-            $gameState->incrementElectionTracker($gameId);
-        }
-        
-        // Clear votes for next election
-        $voteManager->clearVotes($gameId);
-        
-        // Broadcast election result
-        $this->broadcastToGame($gameId, [
-            'type' => 'election_result',
-            'result' => $result,
-            'ja_votes' => $jaVotes,
-            'nein_votes' => $neinVotes,
-            'election_tracker' => $gameState->getElectionTracker($gameId)
-        ]);
-        
-        // Move to next phase
-        $this->advanceGamePhase($gameId);
-    }
 }
 ```
 
@@ -1139,80 +523,18 @@ Player Action → WebSocket → Server Processing → Database Update → Broadc
 
 **Key Data Synchronization Points:**
 
-1. **Vote Submission:**
-   - Player submits vote via WebSocket
-   - Server stores in `current_votes` table
-   - Server broadcasts vote count to all players
-   - When all votes received, election resolves automatically
-
-2. **Turn Advancement:**
-   - Current player completes action
-   - Server updates `game_state.current_president`
-   - Server broadcasts turn change to all players
-   - All clients update UI to show new current player
-
-3. **Policy Enactment:**
-   - President/Chancellor make choices
-   - Server updates `game_state.policy_deck` and policy counts
-   - Server broadcasts new game state
-   - All clients update policy tracks and check win conditions
-
-4. **Game Phase Changes:**
-   - Server tracks current phase in `game_state`
-   - Phase changes trigger different UI states
-   - All clients receive phase change notifications
-   - UI adapts to show appropriate actions and information
-
-5. **Policy Board Updates:**
-   - Policy enacted → `policy_board` table updated
-   - Board state broadcast to all players
-   - Frontend renders visual policy tracks
-   - Win conditions checked automatically
-
-6. **Policy Deck Management:**
-   - Cards drawn from `game_state.policy_deck`
-   - Deck reshuffled when empty using discard pile
-   - Deck size tracked and displayed to all players
-   - Card choices remain private to selecting player
-
-#### 3.2 Frontend WebSocket Integration
-```javascript
-class GameWebSocket {
-    constructor(gameId, playerId) {
-        this.ws = new WebSocket(`ws://localhost:8080`);
-        this.gameId = gameId;
-        this.playerId = playerId;
-        this.setupEventHandlers();
-    }
-    
-    setupEventHandlers() {
-        this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            this.handleGameUpdate(data);
-        };
-        
-        this.ws.onclose = () => {
-            this.handleDisconnection();
-        };
-    }
-    
-    sendAction(action, data) {
-        this.ws.send(JSON.stringify({
-            action,
-            gameId: this.gameId,
-            playerId: this.playerId,
-            ...data
-        }));
-    }
-}
-```
+1. **Vote Submission:** Player submits vote → stored in `current_votes` → broadcast to all players
+2. **Turn Advancement:** Current player completes action → update `game_state.current_president` → broadcast turn change
+3. **Policy Enactment:** Choices made → update policy deck and counts → broadcast new game state
+4. **Game Phase Changes:** Server tracks current phase → trigger different UI states → notify all clients
+5. **Policy Board Updates:** Policy enacted → `policy_board` updated → broadcast to all players
 
 ### **Phase 4: Frontend Conversion (Week 7-8)**
 **Goal**: Transform existing UI for multi-device use
 
-#### 4.1 Game Creation Flow
+#### 4.1 Game Creation and Joining Flow
 ```html
-<!-- Replace current setup page -->
+<!-- Game Creation -->
 <div id="game-creation" class="page-content">
     <h2>Create New Game</h2>
     <form id="create-game-form">
@@ -1226,10 +548,8 @@ class GameWebSocket {
         <button type="submit">Create Game</button>
     </form>
 </div>
-```
 
-#### 4.2 Game Joining Flow
-```html
+<!-- Game Joining -->
 <div id="game-join" class="page-content">
     <h2>Join Existing Game</h2>
     <form id="join-game-form">
@@ -1238,10 +558,8 @@ class GameWebSocket {
         <button type="submit">Join Game</button>
     </form>
 </div>
-```
 
-#### 4.3 Game Lobby
-```html
+<!-- Game Lobby -->
 <div id="game-lobby" class="page-content">
     <div class="game-info">
         <h3 id="game-name-display"></h3>
@@ -1265,35 +583,7 @@ class GameWebSocket {
 ### **Phase 5: Game Flow Implementation (Week 9-10)**
 **Goal**: Implement core game mechanics
 
-#### 5.1 Turn Management
-```javascript
-class GameFlow {
-    constructor(gameState) {
-        this.state = gameState;
-        this.currentPlayer = gameState.currentPresident;
-    }
-    
-    startElection() {
-        // Highlight current president and chancellor
-        // Enable voting for all players
-        // Start vote timer
-    }
-    
-    processVotes() {
-        // Collect all votes, resolve election
-        // Update election tracker if failed
-        // Move to legislation phase
-    }
-    
-    legislationPhase() {
-        // President draws 3 cards, chooses 2
-        // Chancellor sees 2 cards, chooses 1
-        // Enact policy, check win conditions
-    }
-}
-```
-
-#### 5.2 Policy Management & Board Visualization
+#### 5.1 Policy Management & Board Visualization
 ```javascript
 class PolicyManager {
     constructor(gameId) {
@@ -1308,14 +598,12 @@ class PolicyManager {
         };
     }
     
-    // Update policy board from server data
     updatePolicyBoard(boardData) {
         this.policyBoard = boardData;
         this.renderPolicyBoard();
         this.checkWinConditions();
     }
     
-    // Render the visual policy board
     renderPolicyBoard() {
         const boardContainer = document.getElementById('policy-board');
         if (!boardContainer) return;
@@ -1382,54 +670,6 @@ class PolicyManager {
         boardContainer.appendChild(deckInfo);
     }
     
-    // Handle policy card drawing and selection
-    handlePolicyPhase(phase, cards) {
-        const policyPhaseContainer = document.getElementById('policy-phase');
-        if (!policyPhaseContainer) return;
-        
-        policyPhaseContainer.innerHTML = '';
-        
-        if (phase === 'president_choice') {
-            this.renderPresidentChoice(cards, policyPhaseContainer);
-        } else if (phase === 'chancellor_choice') {
-            this.renderChancellorChoice(cards, policyPhaseContainer);
-        }
-    }
-    
-    renderPresidentChoice(cards, container) {
-        container.innerHTML = `
-            <h3>President: Choose 2 cards to pass to Chancellor</h3>
-            <div class="policy-cards">
-                ${cards.map((card, index) => `
-                    <div class="policy-card ${card}" data-index="${index}">
-                        <span class="policy-type">${card.toUpperCase()}</span>
-                    </div>
-                `).join('')}
-            </div>
-            <p>Click 2 cards to select them, then click "Pass to Chancellor"</p>
-            <button id="pass-to-chancellor" disabled>Pass to Chancellor</button>
-        `;
-        
-        this.setupPresidentChoiceHandlers(cards);
-    }
-    
-    renderChancellorChoice(cards, container) {
-        container.innerHTML = `
-            <h3>Chancellor: Choose 1 card to enact</h3>
-            <div class="policy-cards">
-                ${cards.map((card, index) => `
-                    <div class="policy-card ${card}" data-index="${index}">
-                        <span class="card-type">${card.toUpperCase()}</span>
-                    </div>
-                `).join('')}
-            </div>
-            <p>Click 1 card to enact it</p>
-        `;
-        
-        this.setupChancellorChoiceHandlers(cards);
-    }
-    
-    // Check win conditions based on policy board
     checkWinConditions() {
         const liberalCount = this.policyBoard.liberalTrack.length;
         const fascistCount = this.policyBoard.fascistTrack.length;
@@ -1439,13 +679,6 @@ class PolicyManager {
         } else if (fascistCount >= 6) {
             this.endGame('fascist', 'Fascist Victory: 6 fascist policies enacted!');
         }
-    }
-    
-    // Handle policy enactment
-    enactPolicy(policyType) {
-        this.websocket.sendAction('enact_policy', {
-            policyType: policyType
-        });
     }
 }
 ```
@@ -1644,88 +877,30 @@ class GameTest extends TestCase {
 
 ### **Complete Secret Hitler Game Elements Covered:**
 
-✅ **Player Role Management:**
-- Role assignment (liberal, fascist, hitler) based on player count
-- Role visibility (fascists see each other, Hitler doesn't see fascists)
-- Role-based permissions and actions
-
-✅ **Policy Board & Deck:**
-- Visual policy tracks (5 liberal, 6 fascist spaces)
-- Policy deck management with shuffle and discard
-- Policy enactment and win condition checking
-
-✅ **Voting System:**
-- Real-time vote collection and display
-- Automatic election resolution
-- Election tracker for failed elections
-
-✅ **Executive Powers:**
-- Power activation based on fascist policy count
-- Investigate, special election, policy peek, execution
-- Power usage tracking and results
-
-✅ **Game Phases:**
-- Election phase (nomination, voting)
-- Legislation phase (policy choices)
-- Executive phase (power usage)
-- Phase transitions and validation
-
-✅ **Win Conditions:**
-- Liberal: 5 liberal policies OR Hitler assassination
-- Fascist: 6 fascist policies OR Hitler as Chancellor OR 3 failed elections
-- Automatic win detection and game ending
-
-✅ **Turn Management:**
-- President rotation (clockwise)
-- Chancellor nomination with term limits
-- Current player highlighting
+✅ **Player Role Management:** Role assignment, visibility, and permissions
+✅ **Policy Board & Deck:** Visual tracks, deck management, policy enactment
+✅ **Voting System:** Real-time vote collection, election resolution, tracker
+✅ **Executive Powers:** Power activation, usage tracking, results
+✅ **Game Phases:** Election, legislation, executive phases with transitions
+✅ **Win Conditions:** All official Secret Hitler victory paths
+✅ **Turn Management:** President rotation, chancellor nomination, limits
 
 ### **How Everything Works Together:**
 
-**1. Vote Tracking:**
-- **Table**: `current_votes` - stores only the current election's votes
-- **Process**: Each player submits vote → stored in database → broadcast to all players
-- **Resolution**: When all votes received → automatic election resolution → votes cleared for next election
-- **Real-time**: All players see vote count updates instantly
+**1. Vote Tracking:** `current_votes` table → real-time updates → automatic resolution
+**2. Current Player Tracking:** `game_state.current_president` → turn rotation → real-time highlighting
+**3. Game State Management:** `game_state` table → action logging → recovery capability
+**4. Policy Board & Deck:** `policy_board` + `game_state.policy_deck` → visual updates → win checking
+**5. Action History & Recovery:** `game_actions` table → complete audit trail → state reconstruction
+**6. Real-time Synchronization:** WebSocket connections → instant broadcasting → consistent state
 
-**2. Current Player Tracking:**
-- **Table**: `game_state.current_president` - stores who's currently president
-- **Process**: Turn advances → database updated → all players notified
-- **Rotation**: Automatic clockwise rotation through player list
-- **Real-time**: Current player highlighted on all devices
-
-**3. Game State Management:**
-- **Table**: `game_state` - stores current game status (policies, election tracker, etc.)
-- **Process**: Actions change state → database updated → broadcast to all players
-- **Recovery**: If server crashes, game state can be reconstructed from action log
-- **Real-time**: All players see game changes simultaneously
-
-**4. Policy Board & Deck Management:**
-- **Tables**: `policy_board` + `game_state.policy_deck` - visual board state and card deck
-- **Process**: Cards drawn → choices made → policies enacted → board updated → broadcast
-- **Visual**: Frontend renders policy tracks, election tracker, and deck info
-- **Privacy**: Card choices visible only to selecting player, results visible to all
-
-**5. Action History & Recovery:**
-- **Table**: `game_actions` - logs every action for audit trail and recovery
-- **Process**: Every action logged with timestamp and data
-- **Recovery**: Can rebuild entire game state from action log
-- **Audit**: Complete history of who did what and when
-
-**6. Real-time Synchronization:**
-- **WebSocket**: Persistent connections for instant updates
-- **Broadcasting**: Server sends updates to all connected players
-- **Fallback**: If WebSocket fails, fallback to AJAX polling
-- **Consistency**: All players always see the same game state
-
-### **Key Benefits of This Approach:**
-
-✅ **No Data Loss**: Every action is logged and can be recovered
-✅ **Real-time Updates**: All players see changes instantly
-✅ **Scalable**: Can handle multiple concurrent games
+### **Key Benefits:**
+✅ **No Data Loss**: Every action logged and recoverable
+✅ **Real-time Updates**: Instant synchronization across devices
+✅ **Scalable**: Multiple concurrent games supported
 ✅ **Reliable**: Automatic recovery from server issues
 ✅ **Auditable**: Complete history of all game actions
-✅ **Efficient**: Only essential data stored, JSON for complex structures
+✅ **Efficient**: Essential data only, JSON for complex structures
 
 ---
 
@@ -1741,10 +916,10 @@ This revised conversion plan addresses the major issues in the original plan whi
 6. **Deployment Clarity**: Specific server requirements and deployment steps
 7. **Data Tracking**: Clear explanation of how votes, players, and game state are managed
 
-**Next Steps**:
+**Next Steps:**
 1. Set up development environment
-2. Implement database schema (5 tables total)
-3. Create basic PHP backend with VoteManager and ActionLogger
+2. Implement database schema (9 tables total)
+3. Create basic PHP backend with core managers
 4. Begin WebSocket server development
 5. Start frontend conversion process
 

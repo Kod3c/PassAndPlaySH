@@ -1,6 +1,454 @@
 # Changelog
 
-## [0.6.5] - 2024-12-19
+## Version Meaning
+
+The version number follows this format: **Production Release Version . Current Development Phase . Major Version Change . Minor Version Change**
+
+- **Production Release Version**: Indicates the production readiness (0 = Development, 1 = Production Ready)
+- **Current Development Phase**: Shows the current development stage (0-4 based on project phases)
+- **Major Version Change**: Significant feature additions or architectural changes
+- **Minor Version Change**: Bug fixes, small improvements, or minor updates
+
+### Development Phases:
+- **Phase 0-1**: Foundation (PWA setup, SPA routing, basic UI, theme system, mobile optimization)
+- **Phase 2**: Game Builder & Setup System (Game setup, role assignment, configuration)
+- **Phase 3**: Basic Gameplay (Core game mechanics, game board, election system)
+- **Phase 4**: Advanced Gameplay & Polish (Advanced features, UI polish, testing)
+
+### Examples:
+- `0.1.8.0` = Development Phase 1, Major Version 8, Minor Version 0
+- `1.2.3.1` = Production Ready, Phase 2, Major Version 3, Minor Version 1
+
+---
+
+## [0.1.8.2] - 2024-12-19
+
+### 🐛 Button Click Event Fix
+- **Fixed Text/Icon Click Issues** - Resolved problem where clicking on button text or icons didn't trigger navigation
+- **Enhanced Event Delegation** - Improved JavaScript event handling to properly detect clicks on all button elements
+- **CSS Layer Fix** - Fixed z-index issues with pseudo-elements that were blocking click events
+- **Better User Experience** - Users can now click anywhere on buttons (text, icons, or background) to navigate
+
+### 🔧 Technical Improvements
+- **Event Delegation Enhancement** - Added fallback parent element traversal for better click detection
+- **CSS Optimization** - Fixed pseudo-element layering that was interfering with pointer events
+- **Robust Click Handling** - Improved reliability of navigation events across all button elements
+
+---
+
+## [0.1.8.1] - 2024-12-19
+
+### 🎨 Create Game Page Design Overhaul
+- **Complete Visual Modernization** - Transformed create game page to match home page design aesthetic
+- **Enhanced Visual Hierarchy** - Improved typography, spacing, and layout for better user experience
+- **Modern Card-Based Design** - Replaced basic sections with interactive enhanced sections
+- **Professional Button System** - Enhanced buttons with icons, better shadows, and smooth animations
+
+### 🚀 Enhanced Header Design
+- **Floating Game Logo** - Added animated game icon (🎭) with backdrop blur effects and floating animation
+- **Interactive Decorative Elements** - Subtle lines and pulsing dots that respond to hover interactions
+- **Gradient Typography** - Modern text effects with improved font weights and letter spacing
+- **Better Visual Balance** - Improved spacing and layout for professional appearance
+
+### 🎯 Modern Section Headers
+- **Icon Integration** - Added relevant emojis (👥 for Player Count, ✏️ for Player Names, 🏠 for Game Lobby)
+- **Enhanced Typography** - Better font weights, colors, and spacing for improved readability
+- **Visual Separators** - Subtle borders and hover effects for better section distinction
+- **Interactive Elements** - Icons that respond to hover with color changes and scaling
+
+### 🔘 Enhanced Player Count Selector
+- **Modern Button Design** - Larger, more touch-friendly buttons with icons (➖/➕)
+- **Better Visual Feedback** - Hover animations, shadows, shimmer effects, and smooth transitions
+- **Improved Display** - Better typography and spacing for the player count display
+- **Range Information** - Added "Range: 5-10 players" text for user clarity
+- **Enhanced Interactions** - Smooth cubic-bezier transitions and hover states
+
+### ✏️ Enhanced Player Input Fields
+- **Card-Based Layout** - Each player input now in a modern card with hover effects and shadows
+- **Better Spacing** - Improved padding and margins for better readability and touch interaction
+- **Interactive Elements** - Hover animations, focus states, and smooth transitions
+- **Professional Appearance** - Consistent with the overall design language and theme system
+
+### 🎴 Modern Button System
+- **Icon Integration** - Added relevant emojis (🚀 for Create Game, 🎯 for Join Game, 🚪 for Leave Game)
+- **Size Variants** - Large buttons for primary actions, medium for secondary actions
+- **Enhanced Hover Effects** - Scale, shadow, and transform animations with smooth transitions
+- **Better Visual Hierarchy** - Clear distinction between primary and secondary actions
+- **Touch-Friendly Design** - Optimized for both desktop and mobile interactions
+
+### 🏠 Enhanced Game Lobby
+- **Modern Header** - Added icon (🏠) and descriptive text for better context
+- **Better Game Info Display** - Enhanced Game ID display with improved typography and spacing
+- **Improved Player List** - Better spacing, hover effects, and visual hierarchy for player items
+- **Enhanced Buttons** - Consistent button styling with icons and modern hover effects
+
+### ✨ Visual Enhancements
+- **Modern Card Design** - Rounded corners, multi-layered shadows, and hover effects
+- **Gradient Accents** - Subtle gradient lines and text effects for visual interest
+- **Smooth Animations** - Cubic-bezier transitions for polished, professional feel
+- **Backdrop Filters** - Modern blur effects for glass-morphism design language
+- **Interactive Elements** - Rich hover states with scale, shadow, and transform effects
+
+### 📱 Responsive Design Improvements
+- **Mobile-First Approach** - Optimized for all screen sizes with proper breakpoints
+- **Touch-Friendly Interface** - Better button sizes and spacing for mobile devices
+- **Adaptive Layout** - Elements adjust gracefully to different screen sizes
+- **Performance Optimized** - Smooth animations that work efficiently on mobile devices
+- **Enhanced Mobile Experience** - Improved touch interactions and visual feedback
+
+### 🔧 Technical Improvements
+- **CSS Custom Properties** - Consistent use of theme variables for maintainability
+- **Modern CSS Features** - Backdrop filters, transforms, animations, and transitions
+- **Performance Optimization** - Optimized transitions and hover effects for smooth performance
+- **Accessibility Enhancements** - Better contrast, larger touch targets, and improved readability
+- **Code Organization** - Better structured CSS with logical grouping and responsive design
+
+### 🌟 User Experience Benefits
+- **Professional Appearance** - Modern, polished interface that builds user confidence
+- **Better Engagement** - Interactive elements and smooth animations increase user engagement
+- **Improved Navigation** - Clear visual hierarchy and better button design improve usability
+- **Consistent Design Language** - Matches the home page aesthetic for brand consistency
+- **Mobile Excellence** - Optimized experience across all devices and screen sizes
+- **Enhanced Setup Flow** - More intuitive and enjoyable game creation process
+
+### 📁 Files Modified
+- `pages/multidevice.html` - Complete design overhaul with modern styling, enhanced sections, and improved user interface
+
+### 🧪 Design Consistency
+- **Visual Harmony** - Create game page now matches home page design aesthetic
+- **Interactive Elements** - Consistent hover effects, animations, and visual feedback
+- **Typography System** - Unified font weights, sizes, and color schemes
+- **Component Library** - Reusable design patterns across all pages
+- **Theme Integration** - Enhanced sections work seamlessly with all available themes
+
+
+## [0.1.8.0] - 2024-12-19
+
+### 🎨 Home Page Visual Overhaul
+- **Complete Design Modernization** - Transformed home page from basic layout to modern, engaging interface
+- **Enhanced Visual Hierarchy** - Improved typography, spacing, and layout for better user experience
+- **Modern Card-Based Design** - Replaced simple feature list with interactive feature cards
+- **Professional Button System** - Enhanced buttons with icons, better shadows, and smooth animations
+
+### 🚀 Enhanced Header Design
+- **Floating Game Logo** - Added animated game icon (🎭) with backdrop blur effects and floating animation
+- **Interactive Decorative Elements** - Subtle lines and pulsing dots that respond to hover interactions
+- **Gradient Typography** - Modern text effects with improved font weights and letter spacing
+- **Better Visual Balance** - Improved spacing and layout for professional appearance
+
+### 🎯 Improved Welcome Section
+- **Enhanced Visual Elements** - Larger welcome icon with bounce animation and drop shadows
+- **Better Typography** - Gradient text effects, improved font weights, and better readability
+- **Visual Separators** - Subtle decorative lines to separate content sections
+- **Improved Spacing** - Better margins and padding for breathing room and visual hierarchy
+
+### 🔘 Modern Button System
+- **Icon Integration** - Added relevant emojis to all buttons for better visual communication
+- **Size Variants** - Large buttons for primary actions, medium for secondary actions
+- **Enhanced Hover Effects** - Scale, shadow, and transform animations with smooth transitions
+- **Better Visual Feedback** - Shimmer effects, improved shadows, and professional animations
+- **Touch-Friendly Design** - Optimized for both desktop and mobile interactions
+
+### 🎴 Feature Cards Redesign
+- **Interactive Card Layout** - Modern rounded corners, multi-layered shadows, and backdrop blur effects
+- **Hover Animations** - Scale, rotation, and transform effects with smooth cubic-bezier transitions
+- **Better Visual Hierarchy** - Improved spacing, typography, and content organization
+- **Enhanced Shadows** - Multi-layered shadows for depth and professional appearance
+- **Glass-Morphism Effects** - Modern backdrop blur and transparency effects
+
+### 📱 Game Info Section
+- **Info Cards Layout** - Horizontal layout with icons and descriptions for key game information
+- **Interactive Elements** - Hover animations with smooth transitions and visual feedback
+- **Better Organization** - Clear presentation of player count, duration, and game type
+- **Visual Enhancements** - Subtle borders, shadows, and backdrop blur effects
+
+### ✨ Overall Visual Improvements
+- **Background Patterns** - Subtle radial gradients for depth and visual interest
+- **Advanced Shadows** - Multi-layered shadows throughout for professional depth
+- **Smooth Animations** - Cubic-bezier transitions for polished, professional feel
+- **Backdrop Filters** - Modern blur effects for glass-morphism design language
+- **Enhanced Responsiveness** - Optimized for all screen sizes with mobile-first approach
+
+### 🎭 Interactive Elements
+- **Hover States** - Rich hover interactions with scale, shadow, and transform effects
+- **Animation Pausing** - Interactive elements pause animations on hover for better control
+- **Visual Feedback** - Immediate response to user interactions with smooth transitions
+- **Enhanced Accessibility** - Better contrast, larger touch targets, and improved readability
+
+### 📱 Mobile Optimizations
+- **Touch-Friendly Interface** - Better button sizes and spacing for mobile devices
+- **Performance Optimized** - Smooth animations optimized for mobile performance
+- **Responsive Layout** - Graceful adaptation to small screens with proper breakpoints
+- **Touch Interactions** - Improved hover states and touch feedback for mobile users
+
+### 🎨 Enhanced Footer
+- **Modern Design** - Glass-morphism effect with backdrop blur and subtle borders
+- **Better Spacing** - Improved margins and padding for visual balance
+- **Visual Elements** - Subtle borders and gradients for professional appearance
+- **Responsive Design** - Adapts gracefully to different screen sizes
+
+### 📁 Files Modified
+- `index.html` - Complete home page structure overhaul with modern layout and content
+- `styles/main.css` - Comprehensive CSS modernization with animations, effects, and responsive design
+
+### 🌟 User Experience Benefits
+- **Professional Appearance** - Modern, polished interface that builds user confidence
+- **Better Engagement** - Interactive elements and smooth animations increase user engagement
+- **Improved Navigation** - Clear visual hierarchy and better button design improve usability
+- **Mobile Excellence** - Optimized experience across all devices and screen sizes
+- **Visual Appeal** - Engaging design that encourages exploration and interaction
+
+### 🧪 Technical Improvements
+- **CSS Animations** - Smooth transitions and transforms using modern CSS properties
+- **Backdrop Filters** - Modern blur effects for glass-morphism design
+- **Responsive Design** - Mobile-first approach with proper breakpoints
+- **Performance** - Optimized animations and effects for smooth performance
+- **Accessibility** - Better contrast, larger touch targets, and improved readability
+
+---
+
+## [0.1.7.1] - 2024-12-19
+
+### 🎯 Multi-Device Setup UI Unification
+- **Identical Pass-and-Play Experience** - Multi-device setup now looks and functions exactly like pass-and-play mode
+- **Player Count Selection** - Same +/- button system starting at 0 players with identical styling
+- **Role Distribution Display** - Exact same visual design with SVG icons and responsive layout
+- **Player Name Inputs** - All usernames collected upfront during game creation with name preservation
+- **Visual Consistency** - Same CSS, layout, colors, and behavior across both modes
+
+### 🔄 Player Count System
+- **Starts at 0 Players** - Multi-device now starts at 0 like pass-and-play (not 5)
+- **Same Button Logic** - +/- buttons work identically with same disabled states
+- **Range: 5-10 Players** - Same player count range and validation
+- **Button States** - Minus disabled at 5, plus disabled at 10 players
+
+### 🎨 Role Distribution Styling
+- **Empty Role Icons** - Uses same SVG icons (checkmark, star, shield) as pass-and-play
+- **Identical CSS** - Same spacing, fonts, colors, hover effects, and responsive behavior
+- **Mobile Optimization** - Same responsive breakpoints and mobile-first design
+- **Theme Integration** - Works seamlessly with all 5 available themes
+
+### 💾 Smart Name Preservation
+- **No Data Loss** - Player names preserved when changing player count
+- **Intelligent Management** - Only adds/removes necessary input fields
+- **Position Preservation** - Names maintain positions when possible
+- **Seamless UX** - Users can experiment with player counts without losing work
+
+### 🎮 Game Setup Flow
+- **All Names Upfront** - Complete player roster collected during game creation
+- **No Game Name Required** - Simplified interface with automatic "Secret Hitler Game" naming
+- **Streamlined Process** - Faster setup with fewer required fields
+- **Better Organization** - More structured approach to game preparation
+
+### 🔧 Technical Improvements
+- **Removed Toggle Buttons** - No more create/join tabs cluttering the interface
+- **Auto-Section Display** - Automatically shows correct section based on URL parameter
+- **Dynamic Page Titles** - Shows "Create New Game" or "Join Existing Game" based on mode
+- **Simplified Navigation** - Cleaner interface focused on single purpose per page
+
+### 📱 User Experience
+- **Cleaner Interface** - No unnecessary toggle buttons or form fields
+- **Focused Purpose** - Each page has single, clear purpose (create OR join)
+- **Better Navigation** - Secret Hitler title clickable to return to home
+- **Consistent Behavior** - Same interaction patterns as pass-and-play mode
+
+### 📁 Files Modified
+- `pages/multidevice.html` - Complete UI unification with pass-and-play styling and behavior
+- `index.html` - Added separate Create Game and Join Game buttons, removed Load Saved Game
+- `js/app.js` - Updated navigation to handle create/join modes with URL parameters
+
+### 🧪 Testing & Verification
+- **Visual Consistency** - Multi-device setup identical to pass-and-play in appearance and behavior
+- **Player Count System** - +/- buttons work exactly the same way
+- **Name Preservation** - Player names saved when changing player count
+- **Role Distribution** - Same styling, icons, and responsive behavior
+- **Navigation** - Create/join modes work correctly with proper section display
+- **Home Navigation** - Secret Hitler title clickable for return to home
+
+### 🌟 User Experience Benefits
+- **Unified Experience** - Both game modes now provide identical setup experience
+- **Better Mobile Experience** - Consistent touch-friendly interface across all modes
+- **Faster Setup** - Streamlined process with fewer required fields
+- **Professional Appearance** - Clean, focused interface without unnecessary elements
+- **Intuitive Navigation** - Clear separation between creating and joining games
+
+---
+
+## [0.2.7.0] - 2024-12-19
+
+### 🚀 Multi-Device Game Conversion - Phase 1 Complete
+- **Backend Infrastructure** - Complete PHP/MySQL backend with RESTful API endpoints
+- **Database Schema** - Comprehensive 9-table MySQL database for game state management
+- **Game Management API** - Full CRUD operations for games, players, and game state
+- **Multi-Device Frontend** - New dedicated page for creating and joining multi-device games
+- **Beta Feature Management** - Pass & Play mode now disabled with beta access control
+
+### 🎮 Multi-Device Game Features
+- **Game Creation System** - Create new games with custom names and player limits
+- **Game Lobby** - Real-time display of available games with player counts and status
+- **Join Game Functionality** - Players can join existing games by entering game ID
+- **Player Management** - Track current vs. maximum players for each game
+- **Game Status Tracking** - Monitor games from lobby to active to completed states
+
+### 🔧 Backend Architecture
+- **PHP Classes** - `Database.php` for database operations, `Game.php` for game logic
+- **RESTful API** - `/api/games.php` for game management, `/api/status.php` for system health
+- **Database Layer** - PDO-based database operations with transaction support
+- **UUID Generation** - Unique identifiers for games, players, and actions
+- **Input Validation** - Sanitized inputs with proper error handling
+
+### 🗄️ Database Schema
+- **Games Table** - Game metadata, status, and player limits
+- **Players Table** - Player information and game associations
+- **Game State Table** - Current game state and turn information
+- **Policy Board Table** - Liberal and Fascist policy tracks
+- **Voting System** - Current votes and election tracking
+- **Action Logging** - Complete game action history
+- **Executive Powers** - Special ability tracking
+- **Game Phases** - Phase progression and timing
+- **Statistics** - Game performance metrics
+
+### 🎨 Frontend Updates
+- **Button Reordering** - "Play Game" (multi-device) now appears first, "Pass & Play Game" moved to second
+- **Beta Tag System** - Pass & Play button shows "BETA" tag and is disabled by default
+- **Beta Access Control** - Add `?beta` or `?beta_access` to URL to enable Pass & Play mode
+- **Multi-Device Page** - Dedicated interface for creating and joining multi-device games
+- **Responsive Design** - Mobile-optimized layout for game creation and joining
+
+### 🔐 Beta Access System
+- **URL Parameter Control** - Use `?beta` or `?beta_access` to enable beta features
+- **Visual Indicators** - Beta tag changes from orange "BETA" to green "BETA ACTIVE"
+- **Button State Management** - Beta button becomes clickable when access is granted
+- **Style Changes** - Button changes from primary to secondary style when enabled
+- **Access Persistence** - Beta access remains active for the session
+
+### 📱 Multi-Device Interface
+- **Game Creation Form** - Simple form to create new games with name and player count
+- **Game Lobby Display** - Real-time list of available games with join buttons
+- **Join Game Form** - Enter game ID to join existing games
+- **Responsive Layout** - Mobile-friendly design with proper touch targets
+- **API Integration** - Frontend communicates with backend via RESTful endpoints
+
+### 🛠️ Technical Implementation
+- **Composer Integration** - PHP dependency management with Ratchet WebSocket library
+- **Database Connection** - Configurable database settings with connection pooling
+- **Error Handling** - Comprehensive error handling with user-friendly messages
+- **Security Features** - Input sanitization and SQL injection prevention
+- **Performance Optimization** - Database indexes and efficient query patterns
+
+### 📁 New Files Created
+- `backend/config/database.php` - Database configuration and connection management
+- `backend/classes/Database.php` - Core database operations class
+- `backend/classes/Game.php` - Game logic and management class
+- `backend/api/games.php` - RESTful API for game operations
+- `backend/api/status.php` - System health and status API
+- `backend/test.php` - Interactive testing interface for backend APIs
+- `backend/README.md` - Comprehensive backend setup and usage documentation
+- `backend/composer.json` - PHP dependency management configuration
+- `database/schema.sql` - Complete database schema with sample data
+- `pages/multidevice.html` - Multi-device game interface
+
+### 📁 Files Modified
+- `index.html` - Button reordering, beta tag addition, and feature list updates
+- `js/app.js` - Beta access control system and multi-device navigation updates
+- `styles/main.css` - Beta tag styling and disabled button states
+
+### 🧪 Testing & Verification
+- **Backend APIs** - All endpoints tested and functional via test.php interface
+- **Database Operations** - Create, read, update operations working correctly
+- **Frontend Integration** - Multi-device page loads and displays correctly
+- **Beta Access System** - URL parameter control works as expected
+- **Button Functionality** - All navigation and game creation buttons working
+- **Responsive Design** - Multi-device interface works on all screen sizes
+
+### 🌟 User Experience Benefits
+- **Clear Feature Priority** - Multi-device mode prominently featured as primary option
+- **Beta Feature Control** - Developers can control access to experimental features
+- **Professional Backend** - Robust server infrastructure for real-time multiplayer
+- **Easy Game Management** - Simple interface for creating and joining games
+- **Future-Ready Architecture** - Foundation for WebSocket real-time communication
+
+### 🔮 Next Steps (Phase 2)
+- **WebSocket Server** - Implement real-time communication using Ratchet
+- **Game Mechanics** - Port existing game logic to backend for multi-device support
+- **Real-Time Updates** - Live game state synchronization between devices
+- **Player Authentication** - Secure player identification and session management
+- **Game Flow Implementation** - Complete multiplayer game experience
+
+---
+
+## [0.1.6.6] - 2024-12-19
+
+### 🎨 Role Distribution Complete Redesign
+- **Mobile-First Compact Design** - Completely redesigned role distribution with ultra-compact mobile layout
+- **Horizontal Card Layout** - Icon on left, role info on right for better mobile proportions
+- **Responsive Design System** - Automatically switches between compact mobile and spacious desktop layouts
+- **Smart Aspect Ratios** - Mobile: 2.5:1 to 3.5:1, Desktop: 2.2:1 for optimal proportions
+- **Modern Visual Style** - Glass-morphism inspired design with subtle shadows and backdrop blur effects
+
+### 📱 Mobile Role Distribution Features
+- **Compact Vertical Stack** - Efficient use of mobile screen space with minimal padding
+- **Touch-Optimized Sizing** - Icons scale from 2.5rem to 1.5rem based on screen size
+- **Responsive Typography** - Font sizes adapt from 0.95rem to 0.75rem for mobile readability
+- **Smart Spacing** - Gaps reduce from 0.75rem to 0.5rem on smaller screens
+- **Mobile Breakpoints** - Optimized for 768px, 480px, and 360px screen sizes
+
+### 🖥️ Desktop Role Distribution Features
+- **Side-by-Side Grid Layout** - 3-column grid layout for larger screens
+- **Centered Card Design** - Icons above text with centered alignment for desktop viewing
+- **Larger Interactive Elements** - 3rem icons and spacious padding for desktop users
+- **Professional Appearance** - Cards sized at 120px height with proper spacing
+- **Responsive Grid** - Automatically adapts from 600px to 800px max-width
+
+### 🧠 Smart Player Name Preservation
+- **No More Data Loss** - Player names are preserved when adjusting player count
+- **Intelligent Addition/Removal** - Only adds/removes necessary input boxes without affecting existing names
+- **Position Preservation** - Names maintain their positions when possible during count changes
+- **Smart Input Management** - Existing names are captured and restored when rebuilding input fields
+- **Seamless User Experience** - Users can experiment with different player counts without losing work
+
+### 🔧 Player Input Mobile Improvements
+- **Vertical Mobile Layout** - Input fields stack vertically on mobile for better space usage
+- **Enhanced Visual Design** - Card-like input groups with subtle backgrounds and shadows
+- **Touch-Friendly Sizing** - Optimized padding and spacing for mobile interaction
+- **Focus State Enhancements** - Blue focus borders with subtle glow effects and micro-animations
+- **Responsive Typography** - Labels and inputs scale appropriately for each screen size
+
+### 🎯 Technical Improvements
+- **Eliminated Code Duplication** - Consolidated player input logic into single `updatePlayerCount` method
+- **Fixed Selector Issues** - Corrected HTML element targeting for role distribution and player inputs
+- **Button State Management** - Proper enable/disable logic for player count buttons
+- **Initialization Fixes** - Page now starts with 5 players instead of 0 for better UX
+- **Infinite Loop Prevention** - Removed redundant method calls that could cause loops
+
+### 📱 Mobile Breakpoint Optimizations
+- **768px and below**: Single column layout with compact spacing
+- **480px and below**: Ultra-compact design with minimal padding
+- **360px and below**: Optimized for very small mobile devices
+- **Responsive Transitions** - Smooth layout changes between breakpoints
+- **Touch Target Optimization** - All interactive elements meet mobile accessibility standards
+
+### 🌟 User Experience Benefits
+- **Better Mobile Experience** - Role distribution now looks professional on all mobile devices
+- **No More Name Loss** - Users can freely adjust player count without losing typed names
+- **Adaptive Layouts** - Automatically provides optimal experience for each device type
+- **Professional Appearance** - Modern, polished design that works seamlessly across all themes
+- **Improved Accessibility** - Better touch targets and visual hierarchy for all users
+
+### 📁 Files Modified
+- `js/app.js` - Complete role distribution logic rewrite and player name preservation
+- `styles/main.css` - New responsive role distribution design and mobile input improvements
+
+### 🧪 Testing & Verification
+- **Mobile Layout** - Role distribution cards properly sized and spaced on all mobile devices
+- **Name Preservation** - Player names maintained when changing player count in both directions
+- **Responsive Behavior** - Smooth transitions between mobile and desktop layouts
+- **Button Functionality** - Player count buttons work correctly with proper state management
+- **Cross-Device Compatibility** - Tested across mobile, tablet, and desktop screen sizes
+
+---
+
+## [0.1.6.5] - 2024-12-19
 
 ### 🎮 Player Count Button Mobile Fixes
 - **Consistent Button Sizing** - Fixed inconsistent button sizes across different mobile breakpoints
@@ -42,7 +490,7 @@
 
 ---
 
-## [0.6.4] - 2024-12-19
+## [0.1.6.4] - 2024-12-19
 
 ### 🎮 Comprehensive Rules Page Redesign
 - **Complete Visual Overhaul** - Transformed basic rules page into engaging, interactive learning experience
@@ -140,7 +588,7 @@
 
 ---
 
-## [0.6.3] - 2024-12-19
+## [0.1.6.3] - 2024-12-19
 
 ### 📱 Mobile Experience Improvements
 - **Theme Selector Mobile Fixes** - Fixed positioning and overlap issues on mobile devices
@@ -190,7 +638,7 @@
 
 ---
 
-## [0.6.2] - 2024-12-19
+## [0.1.6.2] - 2024-12-19
 
 ### 🎯 Mobile Player Selection System
 - **Replaced Player Count Buttons** - Changed from individual "5 Players", "6 Players" buttons to intuitive +/- system
@@ -237,7 +685,7 @@
 
 ---
 
-## [0.6.1] - 2024-12-19
+## [0.1.6.1] - 2024-12-19
 
 ### 🎨 Theme Selector Improvements
 - **Disabled by Default** - Theme selector now starts in disabled state for cleaner interface
@@ -265,7 +713,7 @@
 
 ---
 
-## [0.6.0] - 2024-12-19
+## [0.1.6.0] - 2024-12-19
 
 ### 🎨 New Features
 - **Complete Theme System** - Added comprehensive theming with 5 different themes
@@ -320,7 +768,7 @@ Each theme includes:
 
 ---
 
-## [0.5.4] - 2024-12-19
+## [0.1.5.4] - 2024-12-19
 
 ### 🎯 New Features
 - **Complete SPA routing system** - Implemented client-side routing for `/setup`, `/game`, `/rules` routes
@@ -385,7 +833,7 @@ The SPA routing system works by:
 
 ---
 
-## [0.5.3] - 2024-12-19
+## [0.1.5.3] - 2024-12-19
 
 ### 🚨 Critical Bug Fixes
 - **Fixed subdirectory hosting navigation** - App now works correctly when hosted in subdirectories like `/PassAndPlaySH/`
@@ -445,7 +893,7 @@ The navigation issues were caused by hardcoded absolute paths throughout the app
 
 ---
 
-## [0.5.2] - 2024-12-19
+## [0.1.5.2] - 2024-12-19
 
 ### 🚨 Critical Bug Fixes
 - **Fixed broken button functionality** - All main navigation buttons now work properly
@@ -510,19 +958,20 @@ The button functionality issues were caused by multiple cascading problems:
 
 ---
 
-## [0.5.1] - Initial Release
+## [0.1.5.1] - Initial Release
 
 - Basic game structure and navigation
 - Player setup and role assignment
 - Game engine foundation
 - PWA capabilities
 
-## [0.5.0] - Core Development
+## [0.1.5.0] - Core Development
 
 - Secret Hitler game logic implementation
 - Player management system
 - Basic UI and styling
 - Offline functionality foundation
 
-## [0.5.2] - 2025-08-10
+## [0.1.4.9] - 2025-08-10
 - Enhanced player distribution graphic on new game setup: modernized .players-grid and .player-card styles with improved layout, card shadows, rounded corners, hover effects, and avatar support for a more visually appealing experience.
+

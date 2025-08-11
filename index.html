@@ -24,33 +24,140 @@
 
     <div class="container">
         <header>
-            <h1>Secret Hitler</h1>
-            <p class="subtitle">Pass & Play Edition</p>
+            <div class="header-content">
+                <div class="game-logo">
+                    <div class="logo-icon">🎭</div>
+                    <div class="logo-text">
+                        <h1>Secret Hitler</h1>
+                        <p class="subtitle">Pass & Play Edition</p>
+                    </div>
+                </div>
+                <div class="header-decoration">
+                    <div class="decoration-line"></div>
+                    <div class="decoration-dot"></div>
+                    <div class="decoration-line"></div>
+                </div>
+            </div>
         </header>
         
         <!-- Home Page Content -->
         <main id="home-page" class="page-content">
             <div class="welcome-section">
-                <h2>Welcome to Secret Hitler</h2>
-                <p>A digital implementation of the social deduction game for 5-10 players on one device.</p>
+                <div class="welcome-header">
+                    <div class="welcome-icon">🎮</div>
+                    <h2>Welcome to Secret Hitler</h2>
+                    <p class="welcome-description">Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
+                </div>
                 
                 <div class="game-options">
-                    <button data-navigate="setup" class="btn btn-primary">Start New Game</button>
-                    <button id="load-game-btn" class="btn btn-secondary">Load Saved Game</button>
-                    <button data-navigate="rules" class="btn btn-outline">View Rules</button>
+                    <div class="option-group primary-options">
+                        <button data-navigate="multidevice" class="btn btn-primary btn-large">
+                            <span class="btn-icon">🚀</span>
+                            <span class="btn-text">Create Game</span>
+                        </button>
+                        <button data-navigate="multidevice" class="btn btn-secondary btn-large">
+                            <span class="btn-icon">🔗</span>
+                            <span class="btn-text">Join Game</span>
+                        </button>
+                    </div>
+                    
+                    <div class="option-group secondary-options">
+                        <button data-navigate="setup" class="btn btn-outline btn-medium" disabled>
+                            <span class="btn-icon">📱</span>
+                            <span class="btn-text">Pass & Play Game</span>
+                            <span class="beta-tag">BETA</span>
+                        </button>
+                        <button data-navigate="rules" class="btn btn-outline btn-medium">
+                            <span class="btn-icon">📖</span>
+                            <span class="btn-text">View Rules</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div class="features">
-                <h3>Features</h3>
-                <ul>
-                    <li>✅ Hidden role management</li>
-                    <li>✅ Election and voting system</li>
-                    <li>✅ Policy legislation</li>
-                    <li>✅ Executive powers</li>
-                    <li>✅ Pass-and-play privacy</li>
-                    <li>✅ Offline capable</li>
-                </ul>
+            <div class="features-section">
+                <div class="section-header">
+                    <h3>🎯 Game Features</h3>
+                    <p>Everything you need for an immersive Secret Hitler experience</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎭</div>
+                        <h4>Hidden Role Management</h4>
+                        <p>Seamlessly manage secret identities with our intuitive interface</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🗳️</div>
+                        <h4>Election & Voting</h4>
+                        <p>Streamlined voting system with real-time results</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">📜</div>
+                        <h4>Policy Legislation</h4>
+                        <p>Easy policy tracking and management</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h4>Executive Powers</h4>
+                        <p>Special abilities unlock as the game progresses</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h4>Privacy First</h4>
+                        <p>Pass-and-play mechanics ensure role secrecy</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h4>Multi-Device</h4>
+                        <p>Play across multiple devices or on one screen</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h4>Real-time Multiplayer</h4>
+                        <p>Connect with friends anywhere in the world</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <h4>Offline Capable</h4>
+                        <p>No internet required for local games</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-info-section">
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="info-icon">👥</div>
+                        <div class="info-content">
+                            <h4>5-10 Players</h4>
+                            <p>Perfect for any group size</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">⏱️</div>
+                        <div class="info-content">
+                            <h4>30-45 Minutes</h4>
+                            <p>Quick and engaging gameplay</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">🎯</div>
+                        <div class="info-content">
+                            <h4>Social Deduction</h4>
+                            <p>Test your deception skills</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -97,17 +204,41 @@
         <main id="rules-page" class="page-content" style="display: none;">
             <div class="rules-page">
                 <div class="rules-header">
-                    <h2>🎮 How to Play Secret Hitler</h2>
+                    <div class="rules-icon">📖</div>
+                    <h2>How to Play Secret Hitler</h2>
                     <p class="rules-subtitle">A social deduction game of hidden identities and political intrigue</p>
+                    <div class="rules-decoration">
+                        <div class="decoration-line"></div>
+                        <div class="decoration-dot"></div>
+                        <div class="decoration-line"></div>
+                    </div>
                 </div>
 
                 <div class="rules-navigation">
-                    <button class="rule-nav-btn active" data-section="overview">Overview</button>
-                    <button class="rule-nav-btn" data-section="setup">Setup</button>
-                    <button class="rule-nav-btn" data-section="gameplay">Gameplay</button>
-                    <button class="rule-nav-btn" data-section="roles">Roles</button>
-                    <button class="rule-nav-btn" data-section="powers">Special Powers</button>
-                    <button class="rule-nav-btn" data-section="winning">Winning</button>
+                    <button class="rule-nav-btn active" data-section="overview">
+                        <span class="nav-icon">🎯</span>
+                        <span class="nav-text">Overview</span>
+                    </button>
+                    <button class="rule-nav-btn" data-section="setup">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Setup</span>
+                    </button>
+                    <button class="rule-nav-btn" data-section="gameplay">
+                        <span class="nav-icon">🔄</span>
+                        <span class="nav-text">Gameplay</span>
+                    </button>
+                    <button class="rule-nav-btn" data-section="roles">
+                        <span class="nav-icon">🎭</span>
+                        <span class="nav-text">Roles</span>
+                    </button>
+                    <button class="rule-nav-btn" data-section="powers">
+                        <span class="nav-icon">⚡</span>
+                        <span class="nav-text">Special Powers</span>
+                    </button>
+                    <button class="rule-nav-btn" data-section="winning">
+                        <span class="nav-icon">🏆</span>
+                        <span class="nav-text">Winning</span>
+                    </button>
                 </div>
 
                 <div class="rules-content">
@@ -146,7 +277,10 @@
                         </div>
 
                         <div class="game-objective">
-                            <h4>🎯 The Objective</h4>
+                            <div class="objective-header">
+                                <div class="objective-icon">🎯</div>
+                                <h4>The Objective</h4>
+                            </div>
                             <div class="objective-cards">
                                 <div class="objective-card liberal">
                                     <div class="objective-header">
@@ -181,15 +315,24 @@
                                     <p>Each player secretly receives a role card. The number of each role depends on player count:</p>
                                     <div class="role-distribution-visual">
                                         <div class="role-example">
-                                            <span class="role-badge liberal">Liberal</span>
+                                            <div class="role-badge liberal">
+                                                <span class="role-icon">🟦</span>
+                                                <span class="role-text">Liberal</span>
+                                            </div>
                                             <span class="role-count">3-6 players</span>
                                         </div>
                                         <div class="role-example">
-                                            <span class="role-badge fascist">Fascist</span>
+                                            <div class="role-badge fascist">
+                                                <span class="role-icon">🟥</span>
+                                                <span class="role-text">Fascist</span>
+                                            </div>
                                             <span class="role-count">1-3 players</span>
                                         </div>
                                         <div class="role-example">
-                                            <span class="role-badge hitler">Hitler</span>
+                                            <div class="role-badge hitler">
+                                                <span class="role-icon">👑</span>
+                                                <span class="role-text">Hitler</span>
+                                            </div>
                                             <span class="role-count">1 player</span>
                                         </div>
                                     </div>
@@ -203,12 +346,12 @@
                                     <p>Shuffle the policy deck containing:</p>
                                     <div class="policy-deck-visual">
                                         <div class="policy-card liberal-policy">
-                                            <span class="policy-icon">🟦</span>
+                                            <div class="policy-icon">🟦</div>
                                             <span class="policy-text">Liberal Policy</span>
                                             <span class="policy-count">6 cards</span>
                                         </div>
                                         <div class="policy-card fascist-policy">
-                                            <span class="policy-icon">🟥</span>
+                                            <div class="policy-icon">🟥</div>
                                             <span class="policy-text">Fascist Policy</span>
                                             <span class="policy-count">11 cards</span>
                                         </div>
@@ -299,13 +442,18 @@
                         </div>
 
                         <div class="voting-example">
-                            <h4>🗳️ Voting Example</h4>
+                            <div class="voting-header">
+                                <div class="voting-icon">🗳️</div>
+                                <h4>Voting Example</h4>
+                            </div>
                             <div class="vote-cards">
                                 <div class="vote-card ja">
+                                    <div class="vote-icon">✅</div>
                                     <span class="vote-text">JA</span>
                                     <span class="vote-meaning">Yes</span>
                                 </div>
                                 <div class="vote-card nein">
+                                    <div class="vote-icon">❌</div>
                                     <span class="vote-text">NEIN</span>
                                     <span class="vote-meaning">No</span>
                                 </div>
@@ -374,7 +522,7 @@
                                 <div class="role-info">
                                     <p class="role-description">You are Hitler, the leader of the Fascist party.</p>
                                     <div class="role-abilities">
-                                        <h5>Your Goals:</h4>
+                                        <h5>Your Goals:</h5>
                                         <ul>
                                             <li>Pass Fascist policies</li>
                                             <li>Get elected Chancellor after 3 Fascist policies</li>
@@ -398,7 +546,10 @@
                         </div>
 
                         <div class="powers-intro">
-                            <p>As Fascist policies are enacted, the President gains special abilities that can help their team or gather information.</p>
+                            <div class="powers-header">
+                                <div class="powers-icon">💡</div>
+                                <p>As Fascist policies are enacted, the President gains special abilities that can help their team or gather information.</p>
+                            </div>
                         </div>
 
                         <div class="powers-grid">
@@ -455,7 +606,10 @@
                         </div>
 
                         <div class="power-notes">
-                            <h4>💡 Power Usage Tips</h4>
+                            <div class="notes-header">
+                                <div class="notes-icon">💡</div>
+                                <h4>Power Usage Tips</h4>
+                            </div>
                             <ul>
                                 <li><strong>Policy Peek:</strong> Use to plan future turns or bluff about what you saw</li>
                                 <li><strong>Investigation:</strong> Target players you suspect or want to confirm</li>
@@ -474,7 +628,7 @@
                         <div class="winning-conditions">
                             <div class="win-condition liberal-win">
                                 <div class="win-header">
-                                    <span class="win-icon">🟦</span>
+                                    <div class="win-icon">🟦</div>
                                     <h4>Liberal Victory</h4>
                                 </div>
                                 <div class="win-ways">
@@ -504,7 +658,7 @@
 
                             <div class="win-condition fascist-win">
                                 <div class="win-header">
-                                    <span class="win-icon">🟥</span>
+                                    <div class="win-icon">🟥</div>
                                     <h4>Fascist Victory</h4>
                                 </div>
                                 <div class="win-ways">
@@ -535,7 +689,10 @@
                         </div>
 
                         <div class="game-end-notes">
-                            <h4>🎭 End Game Considerations</h4>
+                            <div class="end-notes-header">
+                                <div class="end-notes-icon">🎭</div>
+                                <h4>End Game Considerations</h4>
+                            </div>
                             <ul>
                                 <li><strong>Liberal Execution:</strong> If Hitler is executed, Liberals win immediately</li>
                                 <li><strong>Policy Victory:</strong> Track progress on both policy tracks</li>
@@ -547,8 +704,14 @@
                 </div>
 
                 <div class="rules-actions">
-                    <button data-navigate="home" class="btn btn-primary">🏠 Back to Home</button>
-                    <button data-navigate="setup" class="btn btn-secondary">🎮 Start New Game</button>
+                    <button data-navigate="home" class="btn btn-primary btn-large">
+                        <span class="btn-icon">🏠</span>
+                        <span class="btn-text">Back to Home</span>
+                    </button>
+                    <button data-navigate="setup" class="btn btn-secondary btn-medium">
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">Start New Game</span>
+                    </button>
                 </div>
             </div>
         </main>
