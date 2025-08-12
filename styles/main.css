@@ -44,6 +44,35 @@ body::before {
     }
 }
 
+/* Mobile responsive improvements for page content and container */
+@media (max-width: 768px) {
+    .page-content {
+        padding: 2rem;
+        border-radius: 16px;
+        margin: 1rem;
+    }
+    
+    .page-content:hover {
+        transform: none;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.1),
+            0 8px 25px rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
+@media (max-width: 480px) {
+    .page-content {
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 0.5rem;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+}
+
 /* Enhanced Header styles */
 header {
     text-align: center;
@@ -465,6 +494,64 @@ header {
     margin-top: 2rem;
 }
 
+/* Mobile responsive improvements for features grid */
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-3px) scale(1.01);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-card h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+}
+
+@media (max-width: 480px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .feature-card {
+        padding: 1.25rem;
+        border-radius: 10px;
+    }
+    
+    .feature-icon {
+        font-size: 2.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .feature-card h4 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.85rem;
+    }
+}
+
 /* Enhanced Feature cards with flat design */
 .feature-card {
     background: var(--card-bg);
@@ -594,596 +681,73 @@ header {
     margin: 0;
 }
 
-/* Mobile responsive improvements */
+/* Mobile responsive improvements for game info section */
 @media (max-width: 768px) {
-    .page-content {
+    .game-info-section {
         padding: 2rem;
-        border-radius: 16px;
-        margin: 1rem;
+        margin-top: 1.5rem;
+        border-radius: 12px;
     }
     
-    .page-content:hover {
-        transform: none;
-        box-shadow: 
-            0 20px 60px rgba(0, 0, 0, 0.1),
-            0 8px 25px rgba(0, 0, 0, 0.05),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-    
-    .welcome-section {
-        margin-bottom: 3rem;
-    }
-    
-    .welcome-icon {
-        font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-    .welcome-section h2 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-    
-    .welcome-description {
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .game-options {
-        gap: 1.5rem;
-    }
-    
-    .option-group {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    
-    .btn-large {
-        min-width: 200px;
-        padding: 1rem 1.5rem;
-    }
-    
-    .btn-medium {
-        min-width: 180px;
-        padding: 0.875rem 1.5rem;
-    }
-    
-    .features-grid {
-        grid-template-columns: 1fr;
+    .info-cards {
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
     
-    .feature-card {
-        padding: 2rem;
-        border-radius: 16px;
+    .info-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
     }
     
-    .feature-card:hover {
-        transform: translateY(-5px) scale(1.01);
+    .info-icon {
+        font-size: 2rem;
+    }
+    
+    .info-content h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-content p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-info-section {
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border-radius: 10px;
     }
     
     .info-cards {
         grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .section-header h3 {
-        font-size: 1.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .game-page {
-        padding: 15px;
-    }
-    
-    .game-header h2 {
-        font-size: 2rem;
-    }
-    
-    .game-info span {
-        font-size: 0.8rem;
-        padding: 6px 12px;
-    }
-    
-    .track-space {
-        width: 30px;
-        height: 30px;
-        font-size: 0.7rem;
-    }
-    
-    /* Extra small mobile improvements */
-    .container {
-        padding: 1rem;
-    }
-    
-    .page-content {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .setup-section {
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .player-count-controls {
-        gap: 1rem;
-        flex-direction: row;
-        flex-wrap: nowrap;
-    }
-    
-    .player-btn {
-        width: 3.5rem;
-        height: 3.5rem;
-        font-size: 1.8rem;
-        border-width: 2px;
-    }
-    
-    .player-count-display {
-        font-size: 1.2rem;
-        min-width: 100px;
-        padding: 0.4rem 0.6rem;
-    }
-    
-    .setup-actions {
-        flex-direction: column;
-        gap: 1.5rem;
-        align-items: center;
-    }
-    
-    .setup-actions .btn {
-        width: 100%;
-        margin: 0;
-    }
-}
-
-/* Extra small mobile devices */
-@media (max-width: 360px) {
-    .container {
-        padding: 0.8rem;
-    }
-    
-    .page-content {
-        padding: 1.2rem;
-        margin-bottom: 1.2rem;
-    }
-    
-    .setup-section {
-        padding: 1.2rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .player-count-controls {
-        gap: 0.8rem;
-    }
-    
-    .player-btn {
-        width: 3rem;
-        height: 3rem;
-        font-size: 1.5rem;
-        border-width: 2px;
-    }
-    
-    .player-count-display {
-        font-size: 1.1rem;
-        min-width: 90px;
-        padding: 0.3rem 0.5rem;
-    }
-    
-    .setup-page h2 {
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .setup-section h3 {
-        font-size: 1.3rem;
-    }
-    
-    .setup-actions {
-        gap: 1.2rem;
-        align-items: center;
-    }
-}
-
-footer {
-    text-align: center;
-    color: var(--text-secondary);
-    margin-top: 3rem;
-    padding: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    background: var(--bg-tertiary);
-    border-radius: 16px;
-    border: 2px solid var(--border-color);
-    position: relative;
-    overflow: hidden;
-}
-
-footer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--primary-color);
-}
-
-footer p {
-    font-size: 1rem;
-    opacity: 0.9;
-    font-weight: 400;
-    margin: 0;
-}
-
-#enable-theme-btn {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-#enable-theme-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-/* Mobile responsive footer */
-@media (max-width: 768px) {
-    footer {
-        margin: 2rem 1rem 0 1rem;
-        padding: 2rem;
-        border-radius: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    footer {
-        margin: 1.5rem 0.5rem 0 0.5rem;
-        padding: 1.5rem;
-        border-radius: 12px;
-    }
-    
-    footer p {
-        font-size: 0.9rem;
-    }
-    
-    #enable-theme-btn {
-        padding: 0.625rem 1.25rem;
-        font-size: 0.85rem;
-    }
-}
-
-/* New Compact Role Distribution Design - Mobile First */
-.role-distribution-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.role-distribution-compact .role-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    border: 2px solid;
-    background: var(--card-bg);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: var(--card-shadow);
-}
-
-.role-distribution-compact .role-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px var(--shadow-medium);
-}
-
-.role-distribution-compact .role-icon {
-    width: 2rem;
-    height: 2rem;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    flex-shrink: 0;
-}
-
-.role-distribution-compact .role-item.liberal .role-icon {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2328a745'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
-}
-
-.role-distribution-compact .role-item.fascist .role-icon {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23dc3545'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
-}
-
-.role-distribution-compact .role-item.hitler .role-icon {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236f42c1'%3E%3Cpath d='M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z'/%3E%3C/svg%3E");
-}
-
-.role-distribution-compact .role-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    flex: 1;
-}
-
-.role-distribution-compact .role-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.role-distribution-compact .role-stats {
-    font-size: 0.75rem;
-    font-weight: 500;
-    opacity: 0.8;
-}
-
-.role-distribution-compact .role-item.liberal {
-    border-color: #28a745;
-    color: #155724;
-}
-
-.role-distribution-compact .role-item.fascist {
-    border-color: #dc3545;
-    color: #721c24;
-}
-
-.role-distribution-compact .role-item.hitler {
-    border-color: #6f42c1;
-    color: #4a148c;
-}
-
-/* Desktop Layout - Side by side cards for wider screens */
-@media (min-width: 768px) {
-    .role-distribution-compact {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    .role-distribution-compact .role-item {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.25rem;
-        min-height: 120px;
-        justify-content: center;
         gap: 0.75rem;
     }
     
-    .role-distribution-compact .role-icon {
-        width: 3rem;
-        height: 3rem;
+    .info-card {
+        padding: 1.25rem;
+        border-radius: 10px;
+        flex-direction: row;
+        text-align: left;
+        gap: 1rem;
     }
     
-    .role-distribution-compact .role-details {
-        align-items: center;
-        gap: 0.5rem;
+    .info-icon {
+        font-size: 1.75rem;
     }
     
-    .role-distribution-compact .role-name {
+    .info-content h4 {
         font-size: 1rem;
         margin-bottom: 0.25rem;
     }
     
-    .role-distribution-compact .role-stats {
-        font-size: 1.25rem;
-        font-weight: 600;
+    .info-content p {
+        font-size: 0.85rem;
     }
-}
-
-/* Tablet Layout - Medium sized cards */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .role-distribution-compact {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.75rem;
-        max-width: 600px;
-    }
-    
-    .role-distribution-compact .role-item {
-        padding: 1rem;
-        min-height: 100px;
-    }
-    
-    .role-distribution-compact .role-icon {
-        width: 2.5rem;
-        height: 2.5rem;
-    }
-    
-    .role-distribution-compact .role-name {
-        font-size: 0.9rem;
-    }
-    
-    .role-distribution-compact .role-stats {
-        font-size: 1.1rem;
-    }
-}
-
-/* Mobile optimizations - Keep compact design */
-@media (max-width: 767px) {
-    .role-distribution-compact {
-        gap: 0.375rem;
-    }
-    
-    .role-distribution-compact .role-item {
-        padding: 0.375rem 0.625rem;
-    }
-    
-    .role-distribution-compact .role-icon {
-        width: 1.75rem;
-        height: 1.75rem;
-    }
-    
-    .role-distribution-compact .role-name {
-        font-size: 0.8rem;
-    }
-    
-    .role-distribution-compact .role-stats {
-        font-size: 0.7rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .role-distribution-compact .role-item {
-        padding: 0.25rem 0.5rem;
-        gap: 0.5rem;
-    }
-    
-    .role-distribution-compact .role-icon {
-        width: 1.5rem;
-        height: 1.5rem;
-    }
-    
-    .role-distribution-compact .role-name {
-        font-size: 0.75rem;
-    }
-    
-    .role-distribution-compact .role-stats {
-        font-size: 0.65rem;
-    }
-}
-
-.rules-navigation {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 2.5rem;
-    flex-wrap: wrap;
-    padding: 1.5rem;
-    background: var(--bg-tertiary);
-    border-radius: 16px;
-    border: 2px solid var(--border-color);
-}
-
-.rule-nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.5rem;
-    border: 2px solid var(--btn-outline-border);
-    background: var(--btn-outline-bg);
-    color: var(--btn-outline-text);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    font-size: 0.95rem;
-    min-width: 140px;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    font-family: 'Inter', sans-serif;
-}
-
-/* Remove complex button effects for flat design */
-.rule-nav-btn::before {
-    display: none;
-}
-
-.rule-nav-btn:hover {
-    background: var(--btn-outline-hover-bg);
-    color: var(--btn-outline-hover-text);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px var(--shadow-medium);
-}
-
-.rule-nav-btn.active {
-    background: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    border-color: var(--btn-primary-bg);
-    box-shadow: 0 4px 16px var(--shadow-medium);
-}
-
-.rule-nav-btn .nav-icon {
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-}
-
-.rule-nav-btn:hover .nav-icon {
-    transform: scale(1.1);
-}
-
-.rule-nav-btn .nav-text {
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-/* Enhanced Overview Section */
-.overview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-}
-
-.overview-card {
-    background: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 16px;
-    padding: 2rem 1.5rem;
-    text-align: center;
-    transition: all 0.3s ease;
-    box-shadow: var(--card-shadow);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Remove complex pseudo-elements for flat design */
-.overview-card::before {
-    display: none;
-}
-
-.overview-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px var(--shadow-medium);
-    border-color: var(--primary-color);
-}
-
-.card-icon {
-    font-size: 3.5rem;
-    margin-bottom: 1.5rem;
-    display: block;
-    transition: transform 0.3s ease;
-    color: var(--primary-color);
-}
-
-.overview-card:hover .card-icon {
-    transform: scale(1.05);
-}
-
-.overview-card h4 {
-    margin-bottom: 0.75rem;
-    color: var(--text-primary);
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.overview-card p {
-    margin-bottom: 0.75rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.card-detail {
-    font-size: 0.9rem;
-    opacity: 0.7;
-    font-style: italic;
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    display: inline-block;
 }
 
 .game-objective {
@@ -2724,4 +2288,99 @@ footer p {
     font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: -0.5px;
+}
+
+/* Mobile responsive improvements for welcome section and game options */
+@media (max-width: 768px) {
+    .welcome-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .welcome-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .welcome-section h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .welcome-description {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .game-options {
+        gap: 1.5rem;
+    }
+    
+    .option-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .btn-large {
+        min-width: 200px;
+        padding: 1rem 1.5rem;
+    }
+    
+    .btn-medium {
+        min-width: 180px;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .section-header h3 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-section {
+        margin-bottom: 2rem;
+    }
+    
+    .welcome-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .welcome-section h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .welcome-description {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .game-options {
+        gap: 1.25rem;
+    }
+    
+    .option-group {
+        gap: 0.5rem;
+    }
+    
+    .btn-large {
+        min-width: 180px;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-medium {
+        min-width: 160px;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .section-header h3 {
+        font-size: 1.6rem;
+    }
+    
+    .section-header p {
+        font-size: 0.95rem;
+    }
 }
