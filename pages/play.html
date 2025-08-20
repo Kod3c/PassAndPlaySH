@@ -2042,8 +2042,18 @@
     <script>
         class MultiDeviceGame {
             constructor() {
-                // Use relative backend URL for current file structure
-                this.backendUrl = '/backend';
+                // Detect backend URL based on current environment
+                if (window.location.hostname === 'sh.cobalt.onl') {
+                    // Production server - use absolute URL
+                    this.backendUrl = 'http://sh.cobalt.onl/backend';
+                } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    // Local development - use relative URL
+                    this.backendUrl = '/backend';
+                } else {
+                    // Fallback - use relative URL
+                    this.backendUrl = '/backend';
+                }
+                
                 this.currentGame = null;
                 this.currentPlayer = null;
                 this.isBackendAvailable = false;
@@ -2083,6 +2093,7 @@
             
             async checkBackendAvailability() {
                 try {
+                    console.log('Checking backend availability at:', this.backendUrl);
                     // Check if we can access the backend status endpoint
                     const response = await fetch(`${this.backendUrl}/api/status.php`, { 
                         method: 'GET',
@@ -2635,17 +2646,22 @@
                 try {
                     this.showStatus('Creating game...', 'info');
                     
+                    const requestBody = {
+                        action: 'create',
+                        name: `Secret Hitler Game`,
+                        maxPlayers: maxPlayers,
+                        hostName: playerNames[0] // First player is the host
+                    };
+                    
+                    console.log('Creating game with request body:', requestBody);
+                    console.log('Sending request to:', `${this.backendUrl}/api/games.php`);
+                    
                     const response = await fetch(`${this.backendUrl}/api/games.php`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            action: 'create',
-                            name: `Secret Hitler Game`,
-                            maxPlayers: maxPlayers,
-                            hostName: playerNames[0] // First player is the host
-                        })
+                        body: JSON.stringify(requestBody)
                     });
                     
                     const data = await response.json();
