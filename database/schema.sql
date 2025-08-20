@@ -73,6 +73,28 @@ CREATE TABLE IF NOT EXISTS `game_votes` (
     INDEX `idx_vote` (`vote`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Create game_state table for storing current game state
+CREATE TABLE IF NOT EXISTS `game_state` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `game_id` VARCHAR(36) NOT NULL,
+    `current_phase` ENUM('setup', 'election', 'legislation', 'executive', 'game_over') NOT NULL DEFAULT 'setup',
+    `current_turn` INT NOT NULL DEFAULT 1,
+    `current_president` INT NOT NULL DEFAULT 0,
+    `current_chancellor` INT NULL,
+    `policy_deck` JSON NOT NULL,
+    `discard_pile` JSON NOT NULL,
+    `liberal_policies` INT NOT NULL DEFAULT 0,
+    `fascist_policies` INT NOT NULL DEFAULT 0,
+    `election_tracker` INT NOT NULL DEFAULT 0,
+    `failed_elections` INT NOT NULL DEFAULT 0,
+    `last_action` JSON NULL,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`game_id`) REFERENCES `games`(`id`) ON DELETE CASCADE,
+    UNIQUE KEY `unique_game_state` (`game_id`),
+    INDEX `idx_game_id` (`game_id`),
+    INDEX `idx_current_phase` (`current_phase`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Insert sample data for testing
 INSERT IGNORE INTO `games` (`id`, `name`, `max_players`, `status`) VALUES
 ('demo-game-001', 'Demo Game', 5, 'lobby');

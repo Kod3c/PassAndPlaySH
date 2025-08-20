@@ -6,7 +6,6 @@
  */
 
 class DatabaseConfig {
-
     // MySQL connection settings for Plesk (Local)
     const DB_HOST = 'localhost';
     const DB_NAME = 'shpassandplay';
@@ -22,7 +21,7 @@ class DatabaseConfig {
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
     ];
     
-    /** 
+    /**
      * Get database connection
      * @return PDO
      * @throws Exception
