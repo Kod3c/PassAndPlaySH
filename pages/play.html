@@ -2047,6 +2047,7 @@
                 this.currentGame = null;
                 this.currentPlayer = null;
                 this.isBackendAvailable = false;
+                this.lastBackendError = null;
                 
                 // Game state for integrated gameplay
                 this.gameState = {
@@ -2099,11 +2100,17 @@
                         }
                     } else {
                         this.isBackendAvailable = false;
+                        const errorText = await response.text();
+                        this.lastBackendError = `HTTP ${response.status}: ${response.statusText}`;
                         console.log('Backend responded with error status:', response.status);
+                        console.log('Error response body:', errorText);
                     }
                 } catch (error) {
                     this.isBackendAvailable = false;
+                    this.lastBackendError = error.message;
                     console.log('Backend not available:', error.message);
+                    console.log('Error details:', error);
+                    console.log('Backend URL attempted:', this.backendUrl);
                     console.log('To use the backend:');
                     console.log('1. Make sure you have PHP installed');
                     console.log('2. Run: php -S localhost:8000 -t backend');
@@ -2173,8 +2180,9 @@
                         statusBanner.style.display = 'block';
                     }
                     
-                    // Show offline notice
-                    this.showStatus('Running in offline mode. Backend server not available.', 'info');
+                    // Show offline notice with error details
+                    const errorMessage = this.lastBackendError || 'Backend server not available';
+                    this.showStatus(`Running in offline mode. ${errorMessage}`, 'error');
                 } else {
                     // Show create game button when backend is available
                     if (createGameBtn) {
