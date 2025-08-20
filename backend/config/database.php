@@ -6,6 +6,7 @@
  */
 
 class DatabaseConfig {
+
     // MySQL connection settings for Plesk (Local)
     const DB_HOST = 'localhost';
     const DB_NAME = 'shpassandplay';

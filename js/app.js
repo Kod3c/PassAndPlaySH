@@ -10,6 +10,7 @@ class App {
         this.setupEventListeners();
         this.setupMultiDeviceNavigation();
         this.setupBetaAccess();
+        this.setupThemeSwitcher();
         this.autoShowSection();
         this.initializePlayerCount();
     }
