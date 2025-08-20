@@ -2,18 +2,23 @@
 /**
  * Database Configuration
  * Secret Hitler Multi-Device Game
- * Using SQLite for simplicity
+ * Using MySQL for XAMPP (Local Development)
  */
 
 class DatabaseConfig {
-    // Database file path (relative to backend directory)
-    const DB_FILE = 'secret_hitler.db';
+    // MySQL connection settings for Plesk (Local)
+    const DB_HOST = 'localhost';
+    const DB_NAME = 'shpassandplay';
+    const DB_USER = 'secrethitler';
+    const DB_PASS = 'Roobear0515!';
+    const DB_PORT = 3306;
     
     // Connection options
     const DB_OPTIONS = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false
+        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
     ];
     
     /**
@@ -23,12 +28,8 @@ class DatabaseConfig {
      */
     public static function getConnection() {
         try {
-            $dbPath = __DIR__ . '/../' . self::DB_FILE;
-            $pdo = new PDO("sqlite:$dbPath", null, null, self::DB_OPTIONS);
-            
-            // Enable foreign keys
-            $pdo->exec('PRAGMA foreign_keys = ON');
-            
+            $dsn = "mysql:host=" . self::DB_HOST . ";port=" . self::DB_PORT . ";dbname=" . self::DB_NAME . ";charset=utf8mb4";
+            $pdo = new PDO($dsn, self::DB_USER, self::DB_PASS, self::DB_OPTIONS);
             return $pdo;
         } catch (PDOException $e) {
             throw new Exception("Database connection failed: " . $e->getMessage());
@@ -58,7 +59,7 @@ class DatabaseConfig {
             $pdo = self::getConnection();
             
             // Check if tables exist
-            $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(PDO::FETCH_COLUMN);
+            $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
             
             // Get game count
             $gameCount = $pdo->query("SELECT COUNT(*) FROM games")->fetchColumn();
@@ -68,6 +69,8 @@ class DatabaseConfig {
             
             return [
                 'connected' => true,
+                'database' => self::DB_NAME,
+                'host' => self::DB_HOST,
                 'tables' => $tables,
                 'game_count' => $gameCount,
                 'player_count' => $playerCount,
@@ -77,6 +80,8 @@ class DatabaseConfig {
             return [
                 'connected' => false,
                 'error' => $e->getMessage(),
+                'database' => self::DB_NAME,
+                'host' => self::DB_HOST,
                 'timestamp' => date('Y-m-d H:i:s')
             ];
         }
@@ -91,10 +96,19 @@ class DatabaseConfig {
             $pdo = self::getConnection();
             
             // Read and execute schema
-            $schemaPath = __DIR__ . '/../../database/schema.sqlite.sql';
+            $schemaPath = __DIR__ . '/../../database/schema.sql';
             if (file_exists($schemaPath)) {
                 $schema = file_get_contents($schemaPath);
-                $pdo->exec($schema);
+                
+                // Split schema into individual statements
+                $statements = array_filter(array_map('trim', explode(';', $schema)));
+                
+                foreach ($statements as $statement) {
+                    if (!empty($statement)) {
+                        $pdo->exec($statement);
+                    }
+                }
+                
                 return true;
             } else {
                 throw new Exception("Schema file not found: $schemaPath");

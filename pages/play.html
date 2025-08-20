@@ -1860,12 +1860,8 @@
                     
                 <div class="setup-actions">
                     <button id="create-game-btn" class="btn btn-primary btn-large">
-                        <span class="btn-icon">🚀</span>
-                        <span class="btn-text">Create Game</span>
-                    </button>
-                    <button id="demo-game-btn" class="btn btn-outline btn-medium">
                         <span class="btn-icon">🎮</span>
-                        <span class="btn-text">Try Demo</span>
+                        <span class="btn-text">Create Game</span>
                     </button>
                     <button type="button" class="btn btn-outline btn-medium" onclick="window.history.back()">
                         <span class="btn-icon">⬅️</span>
@@ -2002,14 +1998,31 @@
                 
                 <!-- Game Log -->
                 <div class="game-log">
-                    <h3>Game Log</h3>
-                    <div class="log-entries" id="game-log-entries">
+                    <div class="log-header">
+                        <h3>Game Log</h3>
+                        <div class="log-controls">
+                            <span class="spoiler-warning">⚠️ Contains game information</span>
+                            <button class="log-toggle-btn btn btn-outline" data-expanded="false">
+                                <span class="toggle-text">Show Log</span>
+                                <span class="toggle-icon">▼</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="log-entries collapsed" id="game-log-entries">
                         <!-- Game log entries will be populated here -->
                     </div>
                 </div>
                 
                 <!-- Game Controls -->
                 <div class="game-controls">
+                    <button id="next-phase-btn" class="btn btn-primary btn-large">
+                        <span class="btn-icon">⏭️</span>
+                        <span class="btn-text">Next Phase</span>
+                    </button>
+                    <button id="reset-game-btn" class="btn btn-outline btn-medium">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">Reset Game</span>
+                    </button>
                     <button id="end-game-btn" class="btn btn-outline btn-medium">
                         <span class="btn-icon">🏁</span>
                         <span class="btn-text">End Game</span>
@@ -2029,10 +2042,33 @@
     <script>
         class MultiDeviceGame {
             constructor() {
-                this.backendUrl = 'http://localhost:8000';
+                // Use relative backend URL for current file structure
+                this.backendUrl = '../backend';
                 this.currentGame = null;
                 this.currentPlayer = null;
                 this.isBackendAvailable = false;
+                
+                // Game state for integrated gameplay
+                this.gameState = {
+                    players: [],
+                    currentTurn: 1,
+                    currentPhase: 'setup',
+                    currentPresident: 0,
+                    currentChancellor: null,
+                    liberalPolicies: 0,
+                    fascistPolicies: 0,
+                    electionTracker: 0,
+                    gameOver: false,
+                    winner: null,
+                    policyStacks: [],
+                    currentPolicyStack: null,
+                    presidentDiscarded: null,
+                    executivePowers: [],
+                    gameLog: [],
+                    lastChancellor: null,
+                    consecutiveFailedElections: 0
+                };
+                
                 this.init();
             }
             
@@ -2046,14 +2082,32 @@
             
             async checkBackendAvailability() {
                 try {
+                    // Check if we can access the backend status endpoint
                     const response = await fetch(`${this.backendUrl}/api/status.php`, { 
                         method: 'GET',
-                        signal: AbortSignal.timeout(3000) // 3 second timeout
+                        signal: AbortSignal.timeout(5000) // 5 second timeout
                     });
-                    this.isBackendAvailable = response.ok;
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isBackendAvailable = data.connected || false;
+                        
+                        if (this.isBackendAvailable) {
+                            console.log('Backend connected successfully:', data);
+                        } else {
+                            console.log('Backend available but database not connected:', data.error);
+                        }
+                    } else {
+                        this.isBackendAvailable = false;
+                        console.log('Backend responded with error status:', response.status);
+                    }
                 } catch (error) {
                     this.isBackendAvailable = false;
-                    console.log('Backend not available, running in offline mode');
+                    console.log('Backend not available:', error.message);
+                    console.log('To use the backend:');
+                    console.log('1. Make sure you have PHP installed');
+                    console.log('2. Run: php -S localhost:8000 -t backend');
+                    console.log('3. Or use XAMPP with project in htdocs/PassAndPlaySH/');
                 }
                 
                 this.updateUIForBackendStatus();
@@ -2065,14 +2119,45 @@
                 const statusBanner = document.getElementById('status-banner');
                 
                 if (!this.isBackendAvailable) {
-                    // Show offline mode indicators
+                    // Show create game button in offline mode with offline styling
                     if (createGameBtn) {
+                        createGameBtn.style.display = 'block';
                         createGameBtn.innerHTML = `
                             <span class="btn-icon">📱</span>
-                            <span class="btn-text">Offline Mode - Pass & Play</span>
+                            <span class="btn-text">Offline Mode - Create Game</span>
                         `;
                         createGameBtn.classList.remove('btn-primary');
                         createGameBtn.classList.add('btn-secondary');
+                    }
+                    
+                    // Show offline mode message
+                    const createSection = document.querySelector('#create-section');
+                    if (createSection) {
+                        const offlineMessage = document.createElement('div');
+                        offlineMessage.className = 'offline-message';
+                        offlineMessage.innerHTML = `
+                            <div class="offline-notice">
+                                <span class="offline-icon">📡</span>
+                                <div class="offline-text">
+                                    <h4>Backend Connection Required</h4>
+                                    <p>To create and join games, you need to connect to the backend server.</p>
+                                    <p><strong>Quick Setup Options:</strong></p>
+                                    <ul style="text-align: left; margin: 0.5rem 0;">
+                                        <li><strong>Option 1:</strong> Use XAMPP - Place project in htdocs/PassAndPlaySH/</li>
+                                        <li><strong>Option 2:</strong> PHP Server - Run: php -S localhost:8000 -t backend</li>
+                                        <li><strong>Option 3:</strong> Use offline mode - Click "Create Game" to play locally</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Remove any existing offline message
+                        const existingMessage = createSection.querySelector('.offline-message');
+                        if (existingMessage) {
+                            existingMessage.remove();
+                        }
+                        
+                        createSection.appendChild(offlineMessage);
                     }
                     
                     if (joinGameBtn) {
@@ -2091,6 +2176,23 @@
                     // Show offline notice
                     this.showStatus('Running in offline mode. Backend server not available.', 'info');
                 } else {
+                    // Show create game button when backend is available
+                    if (createGameBtn) {
+                        createGameBtn.style.display = 'block';
+                        createGameBtn.innerHTML = `
+                            <span class="btn-icon">🎮</span>
+                            <span class="btn-text">Create Game</span>
+                        `;
+                        createGameBtn.classList.remove('btn-secondary');
+                        createGameBtn.classList.add('btn-primary');
+                    }
+                    
+                    // Remove offline message when backend is available
+                    const offlineMessage = document.querySelector('.offline-message');
+                    if (offlineMessage) {
+                        offlineMessage.remove();
+                    }
+                    
                     // Hide status banner
                     if (statusBanner) {
                         statusBanner.style.display = 'none';
@@ -2147,11 +2249,6 @@
                     }
                 });
                 
-                // Demo game button
-                document.getElementById('demo-game-btn').addEventListener('click', () => {
-                    this.startDemoGame();
-                });
-                
                 // Join game form
                 document.getElementById('join-game-form').addEventListener('submit', (e) => {
                     e.preventDefault();
@@ -2192,6 +2289,39 @@
                 document.getElementById('leave-game-btn').addEventListener('click', () => {
                     this.leaveGame();
                 });
+
+                // Next Phase button
+                document.getElementById('next-phase-btn').addEventListener('click', () => {
+                    this.nextPhase();
+                });
+
+                // Reset Game button
+                document.getElementById('reset-game-btn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+
+                // Log toggle button
+                document.addEventListener('click', (event) => {
+                    const logToggleBtn = event.target.closest('.log-toggle-btn');
+                    if (logToggleBtn) {
+                        const logEntries = document.getElementById('game-log-entries');
+                        const isExpanded = logToggleBtn.dataset.expanded === 'true';
+                        
+                        if (isExpanded) {
+                            // Collapse log
+                            logEntries.classList.add('collapsed');
+                            logToggleBtn.dataset.expanded = 'false';
+                            logToggleBtn.querySelector('.toggle-text').textContent = 'Show Log';
+                            logToggleBtn.querySelector('.toggle-icon').textContent = '▼';
+                        } else {
+                            // Expand log
+                            logEntries.classList.remove('collapsed');
+                            logToggleBtn.dataset.expanded = 'true';
+                            logToggleBtn.querySelector('.toggle-text').textContent = 'Hide Log';
+                            logToggleBtn.querySelector('.toggle-icon').textContent = '▲';
+                        }
+                    }
+                });
             }
             
             startOfflineGame() {
@@ -2216,15 +2346,10 @@
                     playerNames.push(name);
                 }
                 
-                this.showStatus('Starting offline game...', 'success');
+                this.showStatus('Starting integrated game...', 'success');
                 
-                // Initialize the Secret Hitler game
-                if (typeof SecretHitlerGame !== 'undefined') {
-                    game = new SecretHitlerGame(playerNames);
-                    this.showGameMechanics();
-                } else {
-                    this.showStatus('Game engine not available. Please refresh the page.', 'error');
-                }
+                // Start the integrated game
+                this.startIntegratedGame(playerNames);
             }
             
             // Load available player names for the specified game
@@ -2758,24 +2883,7 @@
                 }
             }
             
-            // Demo mode for testing game mechanics
-            startDemoGame() {
-                const demoPlayers = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'];
-                if (typeof SecretHitlerGame !== 'undefined') {
-                    game = new SecretHitlerGame(demoPlayers);
-                    this.showGameMechanics();
-                    
-                    // Update page title for demo
-                    const subtitle = document.getElementById('page-subtitle');
-                    if (subtitle) {
-                        subtitle.textContent = 'Demo Mode';
-                    }
-                    
-                    this.showStatus('Demo game started! You can test all game mechanics.', 'info');
-                } else {
-                    this.showStatus('Game engine not available. Please refresh the page.', 'error');
-                }
-            }
+
             
             hideGameLobby() {
                 document.getElementById('game-lobby').classList.remove('active');
@@ -3383,6 +3491,314 @@
                         </div>
                     </div>
                 `;
+            }
+
+            // Integrated Game Methods
+            startIntegratedGame(playerNames) {
+                this.gameState.players = playerNames;
+                this.gameState.playerCount = playerNames.length;
+                this.gameState.currentPhase = 'election';
+                this.gameState.currentTurn = 1;
+                this.gameState.currentPresident = 0;
+                
+                // Initialize policy stacks
+                this.setupPolicyStacks();
+                
+                // Log game start
+                this.logGameEvent('phase', 'Game started with ' + this.gameState.playerCount + ' players');
+                this.logGameEvent('action', 'Roles assigned and policy deck shuffled');
+                
+                // Show game mechanics
+                this.showGameMechanics();
+                this.updateGameDisplay();
+            }
+
+            setupPolicyStacks() {
+                // Create policy stacks for the game
+                this.gameState.policyStacks = [
+                    ['liberal', 'fascist', 'liberal'],
+                    ['fascist', 'fascist', 'liberal'],
+                    ['liberal', 'liberal', 'fascist']
+                ];
+                this.logGameEvent('action', 'Policy cards organized into ' + this.gameState.policyStacks.length + ' stacks');
+            }
+
+            nextPhase() {
+                switch (this.gameState.currentPhase) {
+                    case 'election':
+                        this.gameState.currentPhase = 'legislation';
+                        this.logGameEvent('phase', 'Legislation phase begins');
+                        break;
+                    case 'legislation':
+                        this.gameState.currentPhase = 'president-discard';
+                        this.gameState.currentPolicyStack = this.gameState.policyStacks[0];
+                        this.logGameEvent('phase', 'President must discard one policy card');
+                        break;
+                    case 'president-discard':
+                        this.gameState.currentPhase = 'chancellor-choose';
+                        this.logGameEvent('phase', 'Chancellor must choose one policy to enact');
+                        break;
+                    case 'chancellor-choose':
+                        this.gameState.currentPhase = 'executive';
+                        this.gameState.executivePowers = ['investigate', 'special_election'];
+                        this.logGameEvent('phase', 'Executive powers unlocked!');
+                        break;
+                    case 'executive':
+                        this.gameState.currentPhase = 'election';
+                        this.gameState.currentTurn++;
+                        this.gameState.currentPresident = (this.gameState.currentPresident + 1) % this.gameState.playerCount;
+                        this.logGameEvent('phase', 'Turn ' + this.gameState.currentTurn + ' begins');
+                        this.logGameEvent('action', this.gameState.players[this.gameState.currentPresident] + ' is now President');
+                        break;
+                }
+                this.updateGameDisplay();
+            }
+
+            logGameEvent(type, message) {
+                const timestamp = new Date().toLocaleTimeString();
+                this.gameState.gameLog.push({
+                    type: type,
+                    message: message,
+                    timestamp: timestamp
+                });
+                
+                // Keep only last 50 log entries
+                if (this.gameState.gameLog.length > 50) {
+                    this.gameState.gameLog = this.gameState.gameLog.slice(-50);
+                }
+            }
+
+            updateGameDisplay() {
+                this.updatePhaseDisplay();
+                this.updatePolicyTracks();
+                this.updateElectionTracker();
+                this.updateGameActions();
+                this.updateGameLog();
+            }
+
+            updatePhaseDisplay() {
+                const phaseElement = document.getElementById('current-phase');
+                const turnElement = document.getElementById('current-turn');
+                
+                if (phaseElement) {
+                    phaseElement.textContent = this.gameState.currentPhase.replace('-', ' ').toUpperCase();
+                }
+                if (turnElement) {
+                    turnElement.textContent = this.gameState.currentTurn;
+                }
+            }
+
+            updatePolicyTracks() {
+                const liberalTrack = document.getElementById('liberal-track');
+                const fascistTrack = document.getElementById('fascist-track');
+                
+                if (liberalTrack) {
+                    liberalTrack.innerHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        const space = document.createElement('div');
+                        space.className = `track-space ${i < this.gameState.liberalPolicies ? 'filled' : ''} ${i === 4 && this.gameState.liberalPolicies >= 5 ? 'win' : ''}`;
+                        space.textContent = i + 1;
+                        liberalTrack.appendChild(space);
+                    }
+                }
+                
+                if (fascistTrack) {
+                    fascistTrack.innerHTML = '';
+                    for (let i = 0; i < 6; i++) {
+                        const space = document.createElement('div');
+                        space.className = `track-space ${i < this.gameState.fascistPolicies ? 'filled' : ''} ${i === 5 && this.gameState.fascistPolicies >= 6 ? 'win' : ''} ${i >= 2 && i <= 4 ? 'power' : ''}`;
+                        space.textContent = i + 1;
+                        fascistTrack.appendChild(space);
+                    }
+                }
+                
+                // Update track counts
+                const liberalCount = document.querySelector('.liberal-track .track-count');
+                const fascistCount = document.querySelector('.fascist-track .track-count');
+                
+                if (liberalCount) liberalCount.textContent = this.gameState.liberalPolicies + '/5';
+                if (fascistCount) fascistCount.textContent = this.gameState.fascistPolicies + '/6';
+            }
+
+            updateElectionTracker() {
+                const tracker = document.getElementById('election-tracker');
+                if (!tracker) return;
+                
+                tracker.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const space = document.createElement('div');
+                    space.className = `tracker-space ${i < this.gameState.electionTracker ? 'filled' : ''}`;
+                    space.textContent = i + 1;
+                    tracker.appendChild(space);
+                }
+            }
+
+            updateGameActions() {
+                const actionsContainer = document.getElementById('game-actions');
+                if (!actionsContainer) return;
+                
+                switch (this.gameState.currentPhase) {
+                    case 'election':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Choose Chancellor</h3>
+                                <p class="action-description">
+                                    ${this.gameState.players[this.gameState.currentPresident]} (President) must choose a Chancellor for this election.
+                                </p>
+                                <div class="chancellor-options">
+                                    ${this.gameState.players.map((player, index) => 
+                                        index !== this.gameState.currentPresident ?
+                                            `<button class="chancellor-btn btn btn-primary" onclick="multiDeviceGame.selectChancellor(${index})">${player}</button>` :
+                                            ''
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'legislation':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Choose Policy Stack</h3>
+                                <p class="action-description">
+                                    ${this.gameState.players[this.gameState.currentPresident]} (President) must choose one of the remaining policy stacks.
+                                </p>
+                                <div class="policy-stack-options">
+                                    ${this.gameState.policyStacks.map((stack, index) => 
+                                        `<button class="stack-btn btn btn-primary" onclick="multiDeviceGame.selectPolicyStack(${index})">Stack ${index + 1} (${stack.length} cards)</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'president-discard':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Discard Policy Card</h3>
+                                <p class="action-description">
+                                    ${this.gameState.players[this.gameState.currentPresident]} (President) must discard one policy card from the selected stack.
+                                    Remaining cards: ${this.gameState.currentPolicyStack.join(', ')}
+                                </p>
+                                <div class="discard-options">
+                                    ${this.gameState.currentPolicyStack.map((card, index) => 
+                                        `<button class="discard-btn btn btn-secondary" onclick="multiDeviceGame.discardPolicy(${index})">Discard ${card}</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'chancellor-choose':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Enact Policy</h3>
+                                <p class="action-description">
+                                    ${this.gameState.players[this.gameState.currentChancellor] || 'Chancellor'} must choose one policy to enact.
+                                    Available policies: ${this.gameState.currentPolicyStack.join(', ')}
+                                </p>
+                                <div class="enact-options">
+                                    ${this.gameState.currentPolicyStack.map((card, index) => 
+                                        `<button class="enact-btn btn btn-primary" onclick="multiDeviceGame.enactPolicy(${index})">Enact ${card}</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'executive':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Executive Powers</h3>
+                                <p class="action-description">
+                                    ${this.gameState.players[this.gameState.currentPresident]} (President) has special powers due to fascist policies.
+                                </p>
+                                <div class="power-options">
+                                    ${this.gameState.executivePowers.map(power => 
+                                        `<button class="power-btn btn btn-accent" onclick="multiDeviceGame.useExecutivePower('${power}')">Use ${power.replace('_', ' ')}</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    default:
+                        actionsContainer.innerHTML = '<p>Game phase not recognized</p>';
+                }
+            }
+
+            updateGameLog() {
+                const logContainer = document.getElementById('game-log-entries');
+                if (!logContainer) return;
+                
+                logContainer.innerHTML = '';
+                this.gameState.gameLog.slice().reverse().forEach(entry => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry ${entry.type}`;
+                    logEntry.innerHTML = `
+                        <div class="log-timestamp">${entry.timestamp}</div>
+                        <div class="log-message">${entry.message}</div>
+                    `;
+                    logContainer.appendChild(entry);
+                });
+            }
+
+            // Game action methods
+            selectChancellor(chancellorIndex) {
+                this.gameState.currentChancellor = chancellorIndex;
+                this.gameState.lastChancellor = this.gameState.currentPresident;
+                this.logGameEvent('action', this.gameState.players[chancellorIndex] + ' selected as Chancellor');
+                this.nextPhase();
+            }
+
+            selectPolicyStack(stackIndex) {
+                this.gameState.currentPolicyStack = [...this.gameState.policyStacks[stackIndex]];
+                this.logGameEvent('action', 'Policy stack ' + (stackIndex + 1) + ' selected');
+                this.nextPhase();
+            }
+
+            discardPolicy(cardIndex) {
+                const discarded = this.gameState.currentPolicyStack.splice(cardIndex, 1)[0];
+                this.gameState.presidentDiscarded = discarded;
+                this.logGameEvent('action', discarded + ' policy discarded by President');
+                this.nextPhase();
+            }
+
+            enactPolicy(cardIndex) {
+                const enacted = this.gameState.currentPolicyStack.splice(cardIndex, 1)[0];
+                if (enacted === 'liberal') {
+                    this.gameState.liberalPolicies++;
+                } else {
+                    this.gameState.fascistPolicies++;
+                }
+                this.logGameEvent('policy', enacted + ' policy enacted');
+                this.nextPhase();
+            }
+
+            useExecutivePower(power) {
+                this.logGameEvent('action', power.replace('_', ' ') + ' power used');
+                this.nextPhase();
+            }
+
+            resetGame() {
+                this.gameState = {
+                    players: this.gameState.players,
+                    currentTurn: 1,
+                    currentPhase: 'election',
+                    currentPresident: 0,
+                    currentChancellor: null,
+                    liberalPolicies: 0,
+                    fascistPolicies: 0,
+                    electionTracker: 0,
+                    gameOver: false,
+                    winner: null,
+                    policyStacks: [],
+                    currentPolicyStack: null,
+                    presidentDiscarded: null,
+                    executivePowers: [],
+                    gameLog: [],
+                    lastChancellor: null,
+                    consecutiveFailedElections: 0
+                };
+                
+                this.setupPolicyStacks();
+                this.logGameEvent('phase', 'Game reset');
+                this.updateGameDisplay();
             }
         }
         

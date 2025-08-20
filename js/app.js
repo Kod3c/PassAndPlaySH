@@ -2,16 +2,16 @@
 class App {
     constructor() {
         this.currentPage = 'home';
-        this.basePath = this.getBasePath();
         this.game = null;
         this.init();
     }
 
-    init() {
-        this.setupRouting();
-        this.restorePageFromURL();
+    async init() {
         this.setupEventListeners();
-        this.setupThemeSwitcher();
+        this.setupMultiDeviceNavigation();
+        this.setupBetaAccess();
+        this.autoShowSection();
+        this.initializePlayerCount();
     }
 
     getBasePath() {
@@ -79,8 +79,20 @@ class App {
             this.showPage('home');
         }
         
-        // Update active navigation
-        this.updateActiveNavigation(pageName);
+        // Show the selected page
+        document.querySelectorAll('.page-content').forEach(page => {
+            page.style.display = 'none';
+        });
+        
+        const targetPageElement = document.getElementById(pageName + '-page');
+        if (targetPageElement) {
+            targetPageElement.style.display = 'block';
+        }
+        
+        this.currentPage = pageName;
+        
+        // Update active navigation state
+        this.updateNavigationState(pageName);
     }
 
     showRulesSection(sectionName) {
@@ -288,17 +300,46 @@ class App {
             });
         }
 
-        // Start game button
-        const startGameBtn = document.getElementById('start-game-btn');
-        if (startGameBtn) {
-            startGameBtn.addEventListener('click', () => {
+        // Setup create game button (dynamically created)
+        document.addEventListener('click', (event) => {
+            if (event.target.id === 'create-game-btn') {
                 this.startGame();
-            });
-        }
+            }
+        });
+
+        // Setup create game validation
+        this.setupCreateGameValidation();
         
         // Initialize with 5 players if starting at 0
         if (this.getCurrentPlayerCount() === 0) {
             this.updatePlayerCount(5);
+        }
+    }
+
+    setupCreateGameValidation() {
+        // Add input event listeners to all player name inputs
+        document.addEventListener('input', (event) => {
+            if (event.target.classList.contains('player-name-input')) {
+                this.validateCreateGameButton();
+            }
+        });
+    }
+
+    validateCreateGameButton() {
+        const createGameBtn = document.getElementById('create-game-btn');
+        if (!createGameBtn) return;
+
+        const playerInputs = document.querySelectorAll('.player-name-input');
+        const allFilled = Array.from(playerInputs).every(input => input.value.trim().length > 0);
+        
+        createGameBtn.disabled = !allFilled;
+        
+        if (allFilled) {
+            createGameBtn.classList.remove('btn-secondary');
+            createGameBtn.classList.add('btn-primary');
+        } else {
+            createGameBtn.classList.remove('btn-primary');
+            createGameBtn.classList.add('btn-secondary');
         }
     }
     
@@ -364,13 +405,11 @@ class App {
         // Update role distribution and player inputs
         const roleInfo = document.getElementById('role-info');
         const playerInputs = document.getElementById('player-inputs');
-        const startGameBtn = document.getElementById('start-game-btn');
         
         if (newCount === 0) {
             // Hide role distribution and player inputs when count is 0
             roleInfo.innerHTML = '<p>Select player count to see role distribution</p>';
             playerInputs.innerHTML = '';
-            startGameBtn.disabled = true;
             return;
         }
 
@@ -433,8 +472,23 @@ class App {
             playerInputs.appendChild(inputGroup);
         }
 
+        // Add Create Game button
+        const createGameButton = document.createElement('div');
+        createGameButton.className = 'create-game-section';
+        createGameButton.innerHTML = `
+            <button id="create-game-btn" class="btn btn-primary btn-large" disabled>
+                <span class="btn-icon">🎮</span>
+                <span class="btn-text">Create Game</span>
+            </button>
+            <p class="create-game-hint">Fill in all player names to start the game</p>
+        `;
+        playerInputs.appendChild(createGameButton);
+
+        // Add input validation for the Create Game button
+        this.setupCreateGameValidation();
+
         // Enable start game button
-        startGameBtn.disabled = false;
+        // startGameBtn.disabled = false; // This line is removed as per the edit hint
         
         // Update button states
         const minusBtn = document.getElementById('player-minus');
@@ -604,6 +658,29 @@ class App {
                 // In a real game, this would require a UI to select a player
                 this.game.useExecutivePower(power, null); 
                 this.updateGameDisplay();
+            }
+        });
+
+        // Setup log toggle
+        document.addEventListener('click', (event) => {
+            const logToggleBtn = event.target.closest('.log-toggle-btn');
+            if (logToggleBtn) {
+                const logEntries = document.getElementById('game-log-entries');
+                const isExpanded = logToggleBtn.dataset.expanded === 'true';
+                
+                if (isExpanded) {
+                    // Collapse log
+                    logEntries.classList.add('collapsed');
+                    logToggleBtn.dataset.expanded = 'false';
+                    logToggleBtn.querySelector('.toggle-text').textContent = 'Show Log';
+                    logToggleBtn.querySelector('.toggle-icon').textContent = '▼';
+                } else {
+                    // Expand log
+                    logEntries.classList.remove('collapsed');
+                    logToggleBtn.dataset.expanded = 'true';
+                    logToggleBtn.querySelector('.toggle-text').textContent = 'Hide Log';
+                    logToggleBtn.querySelector('.toggle-icon').textContent = '▲';
+                }
             }
         });
     }
@@ -989,8 +1066,17 @@ class Game {
                 </div>
                 
                 <div class="game-log">
-                    <h3>Game Log</h3>
-                    <div class="log-entries">
+                    <div class="log-header">
+                        <h3>Game Log</h3>
+                        <div class="log-controls">
+                            <span class="spoiler-warning">⚠️ Contains game information</span>
+                            <button class="log-toggle-btn btn btn-outline" data-expanded="false">
+                                <span class="toggle-text">Show Log</span>
+                                <span class="toggle-icon">▼</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="log-entries collapsed" id="game-log-entries">
                         ${this.getGameLogHTML()}
                     </div>
                 </div>

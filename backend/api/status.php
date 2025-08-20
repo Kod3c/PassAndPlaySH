@@ -50,9 +50,10 @@ try {
     
     // Add database configuration info
     $status['database_config'] = [
-        'type' => 'SQLite',
-        'file' => DatabaseConfig::DB_FILE,
-        'path' => realpath(__DIR__ . '/../' . DatabaseConfig::DB_FILE)
+        'type' => 'MySQL',
+        'host' => DatabaseConfig::DB_HOST,
+        'database' => DatabaseConfig::DB_NAME,
+        'port' => DatabaseConfig::DB_PORT
     ];
     
     echo json_encode($status);
