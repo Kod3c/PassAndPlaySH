@@ -2,6 +2,7 @@
 /**
  * Status API Endpoint
  * Checks database connectivity and system health
+ * Auto-initializes database if needed
  */
 
 header('Content-Type: application/json');
@@ -24,7 +25,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 require_once __DIR__ . '/../config/database.php';
 
 try {
+    // Try to get status
     $status = DatabaseConfig::getStatus();
+    
+    // If database doesn't exist or has no tables, initialize it
+    if (!$status['connected'] || empty($status['tables'])) {
+        try {
+            DatabaseConfig::initializeDatabase();
+            $status = DatabaseConfig::getStatus();
+            $status['initialized'] = true;
+        } catch (Exception $e) {
+            $status['initialization_error'] = $e->getMessage();
+        }
+    }
     
     // Add system information
     $status['system'] = [
@@ -35,11 +48,11 @@ try {
         'max_execution_time' => ini_get('max_execution_time')
     ];
     
-    // Add database configuration info (without sensitive data)
+    // Add database configuration info
     $status['database_config'] = [
-        'host' => DatabaseConfig::DB_HOST,
-        'database' => DatabaseConfig::DB_NAME,
-        'charset' => DatabaseConfig::DB_CHARSET
+        'type' => 'SQLite',
+        'file' => DatabaseConfig::DB_FILE,
+        'path' => realpath(__DIR__ . '/../' . DatabaseConfig::DB_FILE)
     ];
     
     echo json_encode($status);

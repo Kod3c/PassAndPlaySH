@@ -382,7 +382,7 @@ header {
 /* Enhanced Welcome section styles */
 .welcome-section {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 2.5rem;
     position: relative;
 }
 
@@ -395,6 +395,23 @@ header {
     width: 100px;
     height: 3px;
     background: var(--primary-color);
+}
+
+/* Mobile responsive adjustments for welcome section decorative line */
+@media (max-width: 768px) {
+    .welcome-section::after {
+        bottom: -1.5rem;
+        width: 80px;
+        height: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-section::after {
+        bottom: -1rem;
+        width: 60px;
+        height: 2px;
+    }
 }
 
 .welcome-header {
@@ -459,7 +476,22 @@ header {
 
 /* Enhanced Features section */
 .features-section {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+}
+
+/* Mobile responsive spacing improvements for features section */
+@media (max-width: 768px) {
+    .features-section {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .features-section {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
 }
 
 .section-header {
@@ -607,7 +639,7 @@ header {
     background: var(--feature-bg);
     border-radius: 16px;
     padding: 2.5rem;
-    margin-top: 2rem;
+    margin-top: 1rem;
     border: 2px solid var(--border-color);
     position: relative;
     overflow: hidden;
@@ -685,7 +717,7 @@ header {
 @media (max-width: 768px) {
     .game-info-section {
         padding: 2rem;
-        margin-top: 1.5rem;
+        margin-top: 1rem;
         border-radius: 12px;
     }
     
@@ -2382,5 +2414,527 @@ header {
     
     .section-header p {
         font-size: 0.95rem;
+    }
+}
+
+/* Game Mechanics Styling */
+.game-mechanics {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* CSS Variables for game mechanics */
+:root {
+    --accent-danger: #dc3545;
+    --accent-danger-hover: #c82333;
+    --accent-info: #17a2b8;
+    --accent-success: #28a745;
+    --accent-warning: #ffc107;
+    --accent-hover: #8b5cf6;
+    --info-bg: rgba(23, 162, 184, 0.1);
+    --success-bg: rgba(40, 167, 69, 0.1);
+    --warning-bg: rgba(255, 193, 7, 0.1);
+    --accent-bg: rgba(102, 16, 242, 0.1);
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+}
+
+/* Game Header */
+.game-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: var(--accent-bg);
+    border-radius: 16px;
+    border: 2px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-color);
+}
+
+.game-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.game-header h2 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.game-description {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Game Phase Display */
+.game-phase-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.phase-indicator, .turn-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.phase-label, .turn-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.phase-value, .turn-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Game Board */
+.game-board {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.policy-tracks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.policy-track {
+    text-align: center;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.policy-track h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.track-spaces {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.track-space {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.track-space.filled {
+    background: var(--primary-color);
+    color: var(--text-light);
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.track-space.win {
+    background: var(--accent-color);
+    color: var(--text-light);
+    border-color: var(--accent-color);
+    animation: winner 1s ease-in-out infinite alternate;
+}
+
+@keyframes winner {
+    from { transform: scale(1.1); }
+    to { transform: scale(1.2); }
+}
+
+.track-space.power {
+    background: var(--accent-color);
+    color: var(--text-light);
+    border-color: var(--accent-color);
+}
+
+.track-count {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Election Tracker */
+.election-tracker {
+    text-align: center;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    margin-bottom: 2rem;
+}
+
+.election-tracker h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.tracker-spaces {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tracker-space {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.tracker-space.filled {
+    background: var(--accent-danger);
+    border-color: var(--accent-danger);
+    transform: scale(1.1);
+    color: var(--text-light);
+}
+
+/* Game Actions */
+.game-actions {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
+
+.action-phase {
+    margin-bottom: 2rem;
+}
+
+.action-phase h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.action-description {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 1rem 2rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--primary-color);
+    color: var(--text-light);
+    min-width: 150px;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-medium);
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.action-btn.secondary {
+    background: transparent;
+    color: var(--primary-color);
+}
+
+.action-btn.secondary:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: var(--text-light);
+}
+
+/* Chancellor and Policy Selection */
+.chancellor-options, .policy-stack-options, .discard-options, .enact-options, .power-options {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.chancellor-btn, .stack-btn, .discard-btn, .enact-btn, .power-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--primary-color);
+    color: var(--text-light);
+    min-width: 120px;
+}
+
+.chancellor-btn:hover, .stack-btn:hover, .enact-btn:hover, .power-btn:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--shadow-medium);
+}
+
+.discard-btn {
+    background: var(--accent-danger);
+    border-color: var(--accent-danger);
+}
+
+.discard-btn:hover {
+    background: var(--accent-danger-hover);
+    border-color: var(--accent-danger-hover);
+}
+
+.power-btn {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.power-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+/* Game Log */
+.game-log {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.game-log h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.log-entries {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--bg-secondary);
+}
+
+.log-entry {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    background: var(--card-bg);
+}
+
+.log-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.log-entry.phase {
+    background: var(--accent-bg);
+    border-left: 4px solid var(--primary-color);
+}
+
+.log-entry.action {
+    background: var(--info-bg);
+    border-left: 4px solid var(--accent-info);
+}
+
+.log-entry.vote {
+    background: var(--success-bg);
+    border-left: 4px solid var(--accent-success);
+}
+
+.log-entry.policy {
+    background: var(--warning-bg);
+    border-left: 4px solid var(--accent-warning);
+}
+
+.log-timestamp {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.log-message {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Game Controls */
+.game-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+/* Game Status Phases */
+.election-phase, .legislation-phase, .president-discard-phase, .chancellor-choose-phase, .executive-phase {
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.election-phase h3, .legislation-phase h3, .president-discard-phase h3, .chancellor-choose-phase h3, .executive-phase h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.election-phase p, .legislation-phase p, .president-discard-phase p, .chancellor-choose-phase p, .executive-phase p {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Responsive Design for Game Mechanics */
+@media (max-width: 768px) {
+    .game-mechanics {
+        padding: 1rem;
+    }
+    
+    .game-header {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .game-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .game-icon {
+        font-size: 2.5rem;
+    }
+    
+    .game-phase-display {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .policy-tracks {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .track-spaces {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+    
+    .track-space {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.8rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .chancellor-options, .policy-stack-options, .discard-options, .enact-options, .power-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .chancellor-btn, .stack-btn, .discard-btn, .enact-btn, .power-btn {
+        width: 100%;
+        max-width: 250px;
     }
 }

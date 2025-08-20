@@ -308,7 +308,7 @@ class App {
         if (createGameBtn) {
             createGameBtn.addEventListener('click', () => {
                 // Navigate to the multi-device page with create mode
-                window.location.href = 'pages/multidevice.html?mode=create';
+                window.location.href = 'pages/play.html?mode=create';
             });
         }
 
@@ -317,7 +317,7 @@ class App {
         if (joinGameBtn) {
             joinGameBtn.addEventListener('click', () => {
                 // Navigate to the multi-device page with join mode
-                window.location.href = 'pages/multidevice.html?mode=join';
+                window.location.href = 'pages/play.html?mode=join';
             });
         }
     }
@@ -553,6 +553,59 @@ class App {
                 this.updateGameDisplay();
             });
         });
+
+        // Setup chancellor selection
+        document.addEventListener('click', (event) => {
+            const chancellorBtn = event.target.closest('.chancellor-btn');
+            if (chancellorBtn) {
+                const chancellorIndex = parseInt(chancellorBtn.dataset.chancellor);
+                this.game.currentChancellor = chancellorIndex;
+                this.game.lastChancellor = this.game.currentPresident; // Set last chancellor to current president
+                this.updateGameDisplay();
+            }
+        });
+
+        // Setup policy stack selection
+        document.addEventListener('click', (event) => {
+            const stackBtn = event.target.closest('.stack-btn');
+            if (stackBtn) {
+                const stackIndex = parseInt(stackBtn.dataset.stack);
+                this.game.choosePolicyStack(stackIndex);
+                this.updateGameDisplay();
+            }
+        });
+
+        // Setup policy discard
+        document.addEventListener('click', (event) => {
+            const discardBtn = event.target.closest('.discard-btn');
+            if (discardBtn) {
+                const cardIndex = parseInt(discardBtn.dataset.discard);
+                this.game.presidentDiscard(cardIndex);
+                this.updateGameDisplay();
+            }
+        });
+
+        // Setup policy enact
+        document.addEventListener('click', (event) => {
+            const enactBtn = event.target.closest('.enact-btn');
+            if (enactBtn) {
+                const cardIndex = parseInt(enactBtn.dataset.enact);
+                this.game.chancellorEnact(cardIndex);
+                this.updateGameDisplay();
+            }
+        });
+
+        // Setup executive power use
+        document.addEventListener('click', (event) => {
+            const powerBtn = event.target.closest('.power-btn');
+            if (powerBtn) {
+                const power = powerBtn.dataset.power;
+                // For simplicity, we'll just use the first player as the target for now
+                // In a real game, this would require a UI to select a player
+                this.game.useExecutivePower(power, null); 
+                this.updateGameDisplay();
+            }
+        });
     }
 }
 
@@ -575,9 +628,20 @@ class Game {
         this.gameOver = false;
         this.winner = null;
         
+        // Enhanced game state
+        this.policyStacks = [];
+        this.currentPolicyStack = null;
+        this.presidentDiscarded = null;
+        this.executivePowers = [];
+        this.gameLog = [];
+        this.lastChancellor = null;
+        this.consecutiveFailedElections = 0;
+        
         this.assignRoles();
         this.shufflePolicyDeck();
-        this.dealInitialCards();
+        this.setupPolicyStacks();
+        this.logGameEvent('phase', 'Game initialized with ' + this.playerCount + ' players');
+        this.logGameEvent('action', 'Roles assigned and policy deck shuffled');
     }
 
     assignRoles() {
@@ -630,24 +694,20 @@ class Game {
         this.shuffleArray(this.policyDeck);
     }
 
+    setupPolicyStacks() {
+        // Create stacks of three cards
+        this.policyStacks = [];
+        while (this.policyDeck.length >= 3) {
+            this.policyStacks.push(this.policyDeck.splice(0, 3));
+        }
+        this.logGameEvent('action', 'Policy cards organized into ' + this.policyStacks.length + ' stacks');
+    }
+
     shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
-    }
-
-    dealInitialCards() {
-        // Deal 3 policy cards to each player
-        this.playerCards = {};
-        this.players.forEach(player => {
-            this.playerCards[player] = [];
-            for (let i = 0; i < 3; i++) {
-                if (this.policyDeck.length > 0) {
-                    this.playerCards[player].push(this.policyDeck.pop());
-                }
-            }
-        });
     }
 
     nextTurn() {
@@ -658,19 +718,24 @@ class Game {
         this.currentChancellor = null;
         this.gamePhase = 'election';
         this.votes = [];
-        this.electionTracker = 0;
+        this.consecutiveFailedElections = 0;
         
         // Check for election tracker failure
         if (this.electionTracker >= 3) {
             this.enactTopPolicy();
             this.electionTracker = 0;
+            this.logGameEvent('action', 'Election tracker failure! Top policy enacted automatically');
         }
+        
+        this.logGameEvent('phase', 'Turn ' + this.currentTurn + ' begins');
+        this.logGameEvent('action', this.players[this.currentPresident] + ' is now President');
     }
 
     submitVote(vote) {
         if (this.gamePhase !== 'election') return;
         
         this.votes.push(vote);
+        this.logGameEvent('vote', 'Vote submitted: ' + vote);
         
         if (this.votes.length === this.playerCount) {
             this.resolveElection();
@@ -686,12 +751,69 @@ class Game {
             this.gamePhase = 'legislation';
             this.electionTracker = 0;
             this.lastElection = 'success';
+            this.consecutiveFailedElections = 0;
+            this.logGameEvent('action', 'Election successful! ' + jaVotes + ' Ja vs ' + neinVotes + ' Nein');
+            this.logGameEvent('phase', 'Legislation phase begins');
         } else {
             // Election failed
             this.electionTracker++;
+            this.consecutiveFailedElections++;
             this.lastElection = 'failed';
+            this.logGameEvent('action', 'Election failed! ' + neinVotes + ' Nein vs ' + jaVotes + ' Ja');
+            this.logGameEvent('action', 'Election tracker: ' + this.electionTracker + '/3');
+            
+            if (this.electionTracker >= 3) {
+                this.enactTopPolicy();
+                this.electionTracker = 0;
+            }
+            
             this.nextTurn();
         }
+    }
+
+    choosePolicyStack(stackIndex) {
+        if (this.gamePhase !== 'legislation') return false;
+        if (stackIndex < 0 || stackIndex >= this.policyStacks.length) return false;
+        
+        this.currentPolicyStack = this.policyStacks[stackIndex];
+        this.gamePhase = 'president-discard';
+        this.logGameEvent('action', this.players[this.currentPresident] + ' chose policy stack ' + (stackIndex + 1));
+        this.logGameEvent('phase', 'President must discard one policy card');
+        return true;
+    }
+
+    presidentDiscard(cardIndex) {
+        if (this.gamePhase !== 'president-discard') return false;
+        if (cardIndex < 0 || cardIndex >= this.currentPolicyStack.length) return false;
+        
+        this.presidentDiscarded = this.currentPolicyStack.splice(cardIndex, 1)[0];
+        this.discardPile.push(this.presidentDiscarded);
+        this.gamePhase = 'chancellor-choose';
+        
+        this.logGameEvent('action', this.players[this.currentPresident] + ' discarded ' + this.presidentDiscarded + ' policy');
+        this.logGameEvent('phase', 'Chancellor must choose one policy to enact');
+        return true;
+    }
+
+    chancellorEnact(cardIndex) {
+        if (this.gamePhase !== 'chancellor-choose') return false;
+        if (cardIndex < 0 || cardIndex >= this.currentPolicyStack.length) return false;
+        
+        const enactedPolicy = this.currentPolicyStack.splice(cardIndex, 1)[0];
+        this.enactPolicy(enactedPolicy);
+        
+        // Remove the used stack
+        this.policyStacks = this.policyStacks.filter(stack => stack !== this.currentPolicyStack);
+        
+        // Check for executive powers
+        this.checkExecutivePowers();
+        
+        // Check for win conditions
+        if (!this.checkWinConditions()) {
+            this.nextTurn();
+        }
+        
+        return true;
     }
 
     choosePolicy(policy) {
@@ -717,17 +839,73 @@ class Game {
         }
     }
 
+    enactPolicy(policy) {
+        if (policy === 'liberal') {
+            this.liberalPolicies++;
+            this.logGameEvent('policy', 'Liberal policy enacted! Total: ' + this.liberalPolicies + '/5');
+        } else {
+            this.fascistPolicies++;
+            this.logGameEvent('action', 'Fascist policy enacted! Total: ' + this.fascistPolicies + '/6');
+        }
+        
+        // Check for win conditions
+        this.checkWinConditions();
+    }
+
     enactTopPolicy() {
         if (this.policyDeck.length === 0) return;
         
         const policy = this.policyDeck.pop();
-        if (policy === 'liberal') {
-            this.liberalPolicies++;
-        } else {
-            this.fascistPolicies++;
+        this.enactPolicy(policy);
+        this.logGameEvent('action', 'Top policy enacted due to election tracker failure');
+    }
+
+    checkExecutivePowers() {
+        if (this.fascistPolicies >= 3 && this.fascistPolicies <= 5) {
+            this.gamePhase = 'executive';
+            this.logGameEvent('action', 'Executive powers unlocked! President gains special abilities');
+            
+            // Add available powers based on fascist policy count
+            this.executivePowers = [];
+            if (this.fascistPolicies >= 3) this.executivePowers.push('investigate');
+            if (this.fascistPolicies >= 4) this.executivePowers.push('special_election');
+            if (this.fascistPolicies >= 5) this.executivePowers.push('policy_peek');
+        }
+    }
+
+    useExecutivePower(power, targetPlayer = null) {
+        if (this.gamePhase !== 'executive') return false;
+        if (!this.executivePowers.includes(power)) return false;
+        
+        switch (power) {
+            case 'investigate':
+                if (targetPlayer !== null) {
+                    const role = this.playerRoles[this.players[targetPlayer]];
+                    this.logGameEvent('action', this.players[this.currentPresident] + ' investigated ' + this.players[targetPlayer] + ' (Role: ' + role + ')');
+                }
+                break;
+            case 'special_election':
+                if (targetPlayer !== null) {
+                    this.currentPresident = targetPlayer;
+                    this.logGameEvent('action', this.players[targetPlayer] + ' appointed as President through special election');
+                }
+                break;
+            case 'policy_peek':
+                const topCards = this.policyDeck.slice(-3);
+                this.logGameEvent('action', this.players[this.currentPresident] + ' peeked at top 3 policy cards');
+                this.logGameEvent('action', 'Top cards: ' + topCards.join(', '));
+                break;
         }
         
-        this.checkWinConditions();
+        // Remove used power
+        this.executivePowers = this.executivePowers.filter(p => p !== power);
+        
+        // If no more powers, continue to next turn
+        if (this.executivePowers.length === 0) {
+            this.nextTurn();
+        }
+        
+        return true;
     }
 
     checkWinConditions() {
@@ -735,6 +913,7 @@ class Game {
         if (this.liberalPolicies >= 5) {
             this.gameOver = true;
             this.winner = 'liberal';
+            this.logGameEvent('phase', 'GAME OVER! Liberals win with 5 policies!');
             return true;
         }
         
@@ -742,12 +921,27 @@ class Game {
         if (this.fascistPolicies >= 6) {
             this.gameOver = true;
             this.winner = 'fascist';
+            this.logGameEvent('phase', 'GAME OVER! Fascists win with 6 policies!');
             return true;
         }
         
         // Hitler execution win (would be implemented in executive phase)
         
         return false;
+    }
+
+    logGameEvent(type, message) {
+        const timestamp = new Date().toLocaleTimeString();
+        this.gameLog.push({
+            type: type,
+            message: message,
+            timestamp: timestamp
+        });
+        
+        // Keep only last 50 log entries
+        if (this.gameLog.length > 50) {
+            this.gameLog = this.gameLog.slice(-50);
+        }
     }
 
     getGameHTML() {
@@ -762,7 +956,7 @@ class Game {
                     <div class="game-info">
                         <span>Turn: ${this.currentTurn + 1}</span>
                         <span>President: ${this.players[this.currentPresident]}</span>
-                        <span>Phase: ${this.gamePhase}</span>
+                        <span>Phase: ${this.gamePhase.replace('-', ' ').toUpperCase()}</span>
                     </div>
                 </div>
                 
@@ -782,17 +976,122 @@ class Game {
                         </div>
                     </div>
                     
+                    <div class="election-tracker">
+                        <h3>Election Tracker: ${this.electionTracker}/3</h3>
+                        <div class="tracker-spaces">
+                            ${this.getTrackerSpaces()}
+                        </div>
+                    </div>
+                    
                     <div class="game-status">
                         ${this.getGameStatusHTML()}
                     </div>
                 </div>
                 
+                <div class="game-log">
+                    <h3>Game Log</h3>
+                    <div class="log-entries">
+                        ${this.getGameLogHTML()}
+                    </div>
+                </div>
+                
                 <div class="game-actions">
+                    ${this.getGameActionsHTML()}
+                </div>
+                
+                <div class="game-controls">
                     <button id="next-turn-btn" class="btn btn-primary">Next Turn</button>
                     <button id="game-back-home-btn" class="btn btn-outline">Back to Home</button>
                 </div>
             </div>
         `;
+    }
+
+    getTrackerSpaces() {
+        let spaces = '';
+        for (let i = 0; i < 3; i++) {
+            const filled = i < this.electionTracker;
+            spaces += `<span class="tracker-space ${filled ? 'filled' : ''}">${i + 1}</span>`;
+        }
+        return spaces;
+    }
+
+    getGameLogHTML() {
+        return this.gameLog.slice().reverse().map(entry => `
+            <div class="log-entry ${entry.type}">
+                <div class="log-timestamp">${entry.timestamp}</div>
+                <div class="log-message">${entry.message}</div>
+            </div>
+        `).join('');
+    }
+
+    getGameActionsHTML() {
+        switch (this.gamePhase) {
+            case 'election':
+                return `
+                    <div class="action-phase">
+                        <h3>Choose Chancellor</h3>
+                        <p>${this.players[this.currentPresident]} (President) must choose a Chancellor</p>
+                        <div class="chancellor-options">
+                            ${this.players.map((player, index) => 
+                                index !== this.currentPresident && index !== this.lastChancellor ?
+                                    `<button class="chancellor-btn btn btn-primary" data-chancellor="${index}">${player}</button>` :
+                                    ''
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            case 'legislation':
+                return `
+                    <div class="action-phase">
+                        <h3>Choose Policy Stack</h3>
+                        <p>${this.players[this.currentPresident]} (President) must choose a policy stack</p>
+                        <div class="policy-stack-options">
+                            ${this.policyStacks.map((stack, index) => 
+                                `<button class="stack-btn btn btn-primary" data-stack="${index}">Stack ${index + 1} (${stack.length} cards)</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            case 'president-discard':
+                return `
+                    <div class="action-phase">
+                        <h3>Discard Policy Card</h3>
+                        <p>${this.players[this.currentPresident]} (President) must discard one card</p>
+                        <div class="discard-options">
+                            ${this.currentPolicyStack.map((policy, index) => 
+                                `<button class="discard-btn btn btn-secondary" data-discard="${index}">Discard ${policy}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            case 'chancellor-choose':
+                return `
+                    <div class="action-phase">
+                        <h3>Enact Policy</h3>
+                        <p>${this.players[this.currentChancellor]} (Chancellor) must choose one policy to enact</p>
+                        <div class="enact-options">
+                            ${this.currentPolicyStack.map((policy, index) => 
+                                `<button class="enact-btn btn btn-primary" data-enact="${index}">Enact ${policy}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            case 'executive':
+                return `
+                    <div class="action-phase">
+                        <h3>Executive Powers</h3>
+                        <p>${this.players[this.currentPresident]} (President) has special powers</p>
+                        <div class="power-options">
+                            ${this.executivePowers.map(power => 
+                                `<button class="power-btn btn btn-accent" data-power="${power}">Use ${power.replace('_', ' ')}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            default:
+                return '<p>Game phase not recognized</p>';
+        }
     }
 
     getTrackSpaces(current, max, type) {
@@ -827,11 +1126,24 @@ class Game {
                 return `
                     <div class="legislation-phase">
                         <h3>Policy Legislation</h3>
-                        <p>Choose a policy to enact:</p>
-                        <div class="policy-choices">
-                            <button class="policy-btn btn btn-primary" data-policy="liberal">Liberal Policy</button>
-                            <button class="policy-btn btn btn-secondary" data-policy="fascist">Fascist Policy</button>
-                        </div>
+                        <p>Choose a policy stack to work with</p>
+                        <p>Available stacks: ${this.policyStacks.length}</p>
+                    </div>
+                `;
+            case 'president-discard':
+                return `
+                    <div class="president-discard-phase">
+                        <h3>President's Choice</h3>
+                        <p>Discard one policy card from the selected stack</p>
+                        <p>Stack contains: ${this.currentPolicyStack.join(', ')}</p>
+                    </div>
+                `;
+            case 'chancellor-choose':
+                return `
+                    <div class="chancellor-choose-phase">
+                        <h3>Chancellor's Choice</h3>
+                        <p>Choose one policy to enact</p>
+                        <p>Available policies: ${this.currentPolicyStack.join(', ')}</p>
                     </div>
                 `;
             case 'executive':
@@ -839,6 +1151,7 @@ class Game {
                     <div class="executive-phase">
                         <h3>Executive Powers</h3>
                         <p>President has special powers due to ${this.fascistPolicies} Fascist policies</p>
+                        <p>Available powers: ${this.executivePowers.join(', ')}</p>
                     </div>
                 `;
             default:

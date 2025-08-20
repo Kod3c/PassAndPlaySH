@@ -1192,6 +1192,435 @@
             }
         }
 
+        /* Game Mechanics Styling */
+        .game-mechanics {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* CSS Variables for game mechanics */
+        :root {
+            --accent-danger: #dc3545;
+            --accent-danger-hover: #c82333;
+            --accent-info: #17a2b8;
+            --accent-success: #28a745;
+            --accent-warning: #ffc107;
+            --info-bg: rgba(23, 162, 184, 0.1);
+            --success-bg: rgba(40, 167, 69, 0.1);
+            --warning-bg: rgba(255, 193, 7, 0.1);
+            --accent-bg: rgba(102, 16, 242, 0.1);
+        }
+        
+        /* Game Header */
+        .game-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: var(--accent-bg);
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-color);
+        }
+        
+        .game-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .game-header h2 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .game-description {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        /* Game Phase Display */
+        .game-phase-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .phase-indicator, .turn-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .phase-label, .turn-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .phase-value, .turn-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        /* Game Board */
+        .game-board {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .policy-tracks {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .policy-track {
+            text-align: center;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+        
+        .policy-track h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .track-spaces {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .track-space {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
+        .track-space.filled {
+            background: var(--primary-color);
+            color: var(--text-light);
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+        
+        .track-space.win {
+            background: var(--accent-color);
+            color: var(--text-light);
+            border-color: var(--accent-color);
+            animation: winner 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes winner {
+            from { transform: scale(1.1); }
+            to { transform: scale(1.2); }
+        }
+        
+        .track-space.power {
+            background: var(--accent-color);
+            color: var(--text-light);
+            border-color: var(--accent-color);
+        }
+        
+        .track-count {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .election-tracker {
+            text-align: center;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+        
+        .election-tracker h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .tracker-spaces {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .tracker-space {
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            transition: all 0.3s ease;
+        }
+        
+        .tracker-space.filled {
+            background: var(--accent-danger);
+            border-color: var(--accent-danger);
+            transform: scale(1.1);
+        }
+        
+        /* Game Actions */
+        .game-actions {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+        
+        .action-phase {
+            margin-bottom: 2rem;
+        }
+        
+        .action-phase h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .action-description {
+            margin: 0 0 1.5rem 0;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 1rem 2rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--primary-color);
+            color: var(--text-light);
+            min-width: 150px;
+        }
+        
+        .action-btn:hover:not(:disabled) {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-medium);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--primary-color);
+        }
+        
+        .action-btn.secondary:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+        
+        /* Game Log */
+        .game-log {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .game-log h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .log-entries {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            background: var(--bg-secondary);
+        }
+        
+        .log-entry {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            background: var(--card-bg);
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .log-entry.phase {
+            background: var(--accent-bg);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .log-entry.action {
+            background: var(--info-bg);
+            border-left: 4px solid var(--accent-info);
+        }
+        
+        .log-entry.vote {
+            background: var(--success-bg);
+            border-left: 4px solid var(--accent-success);
+        }
+        
+        .log-entry.policy {
+            background: var(--warning-bg);
+            border-left: 4px solid var(--accent-warning);
+        }
+        
+        .log-timestamp {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .log-message {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        /* Game Controls */
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        /* Responsive Design for Game Mechanics */
+        @media (max-width: 768px) {
+            .game-mechanics {
+                padding: 1rem;
+            }
+            
+            .game-header {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .game-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .game-icon {
+                font-size: 2.5rem;
+            }
+            
+            .game-phase-display {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .policy-tracks {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .track-spaces {
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+            
+            .track-space {
+                width: 2rem;
+                height: 2rem;
+                font-size: 0.8rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
         /* Enhanced header styling to match home page */
         header {
             text-align: center;
@@ -1291,6 +1720,64 @@
             background: var(--primary-hover);
             transform: scale(1.2);
         }
+        
+        /* Status Messages */
+        .status-message {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: var(--success-bg);
+            color: var(--success-color);
+            border: 1px solid var(--success-border);
+        }
+        
+        .status-error {
+            background: var(--error-bg);
+            color: var(--error-color);
+            border: 1px solid var(--error-border);
+        }
+        
+        .status-info {
+            background: var(--info-bg);
+            color: var(--info-color);
+            border: 1px solid var(--info-border);
+        }
+        
+        /* Status Banner */
+        .status-banner {
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .banner-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+        
+        .banner-icon {
+            font-size: 1.2rem;
+        }
+        
+        .banner-text {
+            font-weight: 600;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -1313,6 +1800,14 @@
         </header>
         
         <main class="multi-device-setup">
+            
+            <!-- Status Banner -->
+            <div id="status-banner" class="status-banner" style="display: none;">
+                <div class="banner-content">
+                    <span class="banner-icon">📱</span>
+                    <span class="banner-text">Running in offline mode. Backend server not available.</span>
+                </div>
+            </div>
             
             <!-- Game Creation Section -->
             <div id="create-section" class="setup-section game-creation active">
@@ -1367,6 +1862,10 @@
                     <button id="create-game-btn" class="btn btn-primary btn-large">
                         <span class="btn-icon">🚀</span>
                         <span class="btn-text">Create Game</span>
+                    </button>
+                    <button id="demo-game-btn" class="btn btn-outline btn-medium">
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">Try Demo</span>
                     </button>
                     <button type="button" class="btn btn-outline btn-medium" onclick="window.history.back()">
                         <span class="btn-icon">⬅️</span>
@@ -1449,6 +1948,79 @@
                 </div>
             </div>
             
+            <!-- Game Mechanics Section -->
+            <div id="game-mechanics" class="setup-section game-mechanics" style="display: none;">
+                <div class="game-header">
+                    <div class="game-icon">🎭</div>
+                    <h2>Secret Hitler - Game in Progress</h2>
+                    <p class="game-description">Follow the game flow and make your decisions</p>
+                </div>
+                
+                <!-- Game Phase Display -->
+                <div class="game-phase-display">
+                    <div class="phase-indicator">
+                        <span class="phase-label">Current Phase:</span>
+                        <span id="current-phase" class="phase-value">Setup</span>
+                    </div>
+                    <div class="turn-info">
+                        <span class="turn-label">Turn:</span>
+                        <span id="current-turn" class="turn-value">1</span>
+                    </div>
+                </div>
+                
+                <!-- Game Board -->
+                <div class="game-board">
+                    <div class="policy-tracks">
+                        <div class="policy-track liberal-track">
+                            <h3>Liberal Policies</h3>
+                            <div class="track-spaces" id="liberal-track">
+                                <!-- Liberal policy spaces will be populated here -->
+                            </div>
+                            <div class="track-count">0/5</div>
+                        </div>
+                        <div class="policy-track fascist-track">
+                            <h3>Fascist Policies</h3>
+                            <div class="track-spaces" id="fascist-track">
+                                <!-- Fascist policy spaces will be populated here -->
+                            </div>
+                            <div class="track-count">0/6</div>
+                        </div>
+                    </div>
+                    
+                    <div class="election-tracker">
+                        <h3>Election Tracker</h3>
+                        <div class="tracker-spaces" id="election-tracker">
+                            <!-- Election tracker spaces will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Game Actions -->
+                <div class="game-actions" id="game-actions">
+                    <!-- Game actions will be populated based on current phase -->
+                </div>
+                
+                <!-- Game Log -->
+                <div class="game-log">
+                    <h3>Game Log</h3>
+                    <div class="log-entries" id="game-log-entries">
+                        <!-- Game log entries will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Game Controls -->
+                <div class="game-controls">
+                    <button id="end-game-btn" class="btn btn-outline btn-medium">
+                        <span class="btn-icon">🏁</span>
+                        <span class="btn-text">End Game</span>
+                    </button>
+                    <button id="back-to-lobby-btn" class="btn btn-outline btn-medium">
+                        <span class="btn-icon">⬅️</span>
+                        <span class="btn-text">Back to Lobby</span>
+                    </button>
+                </div>
+            </div>
+            
             <!-- Status Messages -->
             <div id="status-container"></div>
         </main>
@@ -1460,14 +2032,70 @@
                 this.backendUrl = 'http://localhost:8000';
                 this.currentGame = null;
                 this.currentPlayer = null;
+                this.isBackendAvailable = false;
                 this.init();
             }
             
-            init() {
+            async init() {
                 this.setupEventListeners();
                 this.setupHeaderNavigation();
                 this.autoShowSection();
                 this.initializePlayerCount();
+                await this.checkBackendAvailability();
+            }
+            
+            async checkBackendAvailability() {
+                try {
+                    const response = await fetch(`${this.backendUrl}/api/status.php`, { 
+                        method: 'GET',
+                        signal: AbortSignal.timeout(3000) // 3 second timeout
+                    });
+                    this.isBackendAvailable = response.ok;
+                } catch (error) {
+                    this.isBackendAvailable = false;
+                    console.log('Backend not available, running in offline mode');
+                }
+                
+                this.updateUIForBackendStatus();
+            }
+            
+            updateUIForBackendStatus() {
+                const createGameBtn = document.getElementById('create-game-btn');
+                const joinGameBtn = document.querySelector('#join-game-form .btn-primary');
+                const statusBanner = document.getElementById('status-banner');
+                
+                if (!this.isBackendAvailable) {
+                    // Show offline mode indicators
+                    if (createGameBtn) {
+                        createGameBtn.innerHTML = `
+                            <span class="btn-icon">📱</span>
+                            <span class="btn-text">Offline Mode - Pass & Play</span>
+                        `;
+                        createGameBtn.classList.remove('btn-primary');
+                        createGameBtn.classList.add('btn-secondary');
+                    }
+                    
+                    if (joinGameBtn) {
+                        joinGameBtn.disabled = true;
+                        joinGameBtn.innerHTML = `
+                            <span class="btn-icon">⚠️</span>
+                            <span class="btn-text">Backend Unavailable</span>
+                        `;
+                    }
+                    
+                    // Show status banner
+                    if (statusBanner) {
+                        statusBanner.style.display = 'block';
+                    }
+                    
+                    // Show offline notice
+                    this.showStatus('Running in offline mode. Backend server not available.', 'info');
+                } else {
+                    // Hide status banner
+                    if (statusBanner) {
+                        statusBanner.style.display = 'none';
+                    }
+                }
             }
             
             initializePlayerCount() {
@@ -1512,17 +2140,35 @@
 
                 // Create game button
                 document.getElementById('create-game-btn').addEventListener('click', () => {
-                    this.createGame();
+                    if (this.isBackendAvailable) {
+                        this.createGame();
+                    } else {
+                        this.startOfflineGame();
+                    }
+                });
+                
+                // Demo game button
+                document.getElementById('demo-game-btn').addEventListener('click', () => {
+                    this.startDemoGame();
                 });
                 
                 // Join game form
                 document.getElementById('join-game-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    this.joinGame();
+                    if (this.isBackendAvailable) {
+                        this.joinGame();
+                    } else {
+                        this.showStatus('Cannot join games in offline mode. Backend server required.', 'error');
+                    }
                 });
                 
                 // Game ID input - load player names when game ID is entered
                 document.getElementById('game-id-input').addEventListener('input', (e) => {
+                    if (!this.isBackendAvailable) {
+                        e.target.disabled = true;
+                        return;
+                    }
+                    
                     const gameId = e.target.value.trim();
                     if (gameId.length >= 3) { // Load names after 3+ characters
                         this.loadAvailablePlayerNames(gameId);
@@ -1548,8 +2194,43 @@
                 });
             }
             
+            startOfflineGame() {
+                const maxPlayers = this.getCurrentPlayerCount();
+                
+                // Validate inputs
+                if (maxPlayers === 0) {
+                    this.showStatus('Please select a player count', 'error');
+                    return;
+                }
+                
+                // Collect all player names
+                const playerNames = [];
+                for (let i = 1; i <= maxPlayers; i++) {
+                    const input = document.getElementById(`player-${i}`);
+                    const name = input.value.trim();
+                    if (!name) {
+                        this.showStatus(`Please enter a name for Player ${i}`, 'error');
+                        input.focus();
+                        return;
+                    }
+                    playerNames.push(name);
+                }
+                
+                this.showStatus('Starting offline game...', 'success');
+                
+                // Initialize the Secret Hitler game
+                if (typeof SecretHitlerGame !== 'undefined') {
+                    game = new SecretHitlerGame(playerNames);
+                    this.showGameMechanics();
+                } else {
+                    this.showStatus('Game engine not available. Please refresh the page.', 'error');
+                }
+            }
+            
             // Load available player names for the specified game
             async loadAvailablePlayerNames(gameId) {
+                if (!this.isBackendAvailable) return;
+                
                 const formGroup = document.querySelector('#join-section .form-group:last-child');
                 const select = document.getElementById('player-name-select');
                 const helpText = document.querySelector('.form-help');
@@ -1630,8 +2311,13 @@
                 select.innerHTML = '<option value="">Choose your name from the game...</option>';
                 
                 if (helpText) {
-                    helpText.textContent = 'Available names will load after entering the Game ID';
-                    helpText.style.color = 'var(--text-secondary)';
+                    if (this.isBackendAvailable) {
+                        helpText.textContent = 'Available names will load after entering the Game ID';
+                        helpText.style.color = 'var(--text-secondary)';
+                    } else {
+                        helpText.textContent = 'Backend server not available';
+                        helpText.style.color = 'var(--accent-danger)';
+                    }
                 }
                 
                 // Update join button state
@@ -1787,6 +2473,11 @@
             }
             
             async createGame() {
+                if (!this.isBackendAvailable) {
+                    this.startOfflineGame();
+                    return;
+                }
+                
                 const maxPlayers = this.getCurrentPlayerCount();
                 
                 // Validate inputs
@@ -1847,11 +2538,18 @@
                     }
                     
                 } catch (error) {
-                    this.showStatus(`Error: ${error.message}`, 'error');
+                    console.error('Error creating game:', error);
+                    this.showStatus('Failed to create game. Backend server may be unavailable.', 'error');
+                    this.showStatus('Try using offline mode instead.', 'info');
                 }
             }
             
             async joinGame() {
+                if (!this.isBackendAvailable) {
+                    this.showStatus('Cannot join games in offline mode. Backend server required.', 'error');
+                    return;
+                }
+                
                 const gameId = document.getElementById('game-id-input').value.trim();
                 const playerName = document.getElementById('player-name-select').value;
                 
@@ -1899,12 +2597,13 @@
                     }
                     
                 } catch (error) {
-                    this.showStatus(`Error: ${error.message}`, 'error');
+                    console.error('Error joining game:', error);
+                    this.showStatus('Failed to join game. Backend server may be unavailable.', 'error');
                 }
             }
             
             async refreshGameInfo() {
-                if (!this.currentGame) return;
+                if (!this.currentGame || !this.isBackendAvailable) return;
                 
                 try {
                     const response = await fetch(`${this.backendUrl}/api/games.php?id=${this.currentGame.id}`);
@@ -1969,19 +2668,70 @@
                     const data = await response.json();
                     
                     if (data.success) {
-                        this.showStatus('Game started! Redirecting to game...', 'success');
-                        // TODO: Redirect to game page
-                        setTimeout(() => {
-                            // For now, just refresh the lobby
-                            this.refreshGameInfo();
-                        }, 2000);
+                        this.showStatus('Game started! Initializing game mechanics...', 'success');
+                        
+                        // Initialize the Secret Hitler game
+                        const playerNames = this.currentGame.playerNames || [];
+                        if (playerNames.length > 0) {
+                            game = new SecretHitlerGame(playerNames);
+                            this.showGameMechanics();
+                        } else {
+                            this.showStatus('Error: No player names available', 'error');
+                        }
                     } else {
                         this.showStatus(`Error: ${data.error}`, 'error');
                     }
                     
                 } catch (error) {
-                    this.showStatus(`Error: ${error.message}`, 'error');
+                    console.error('Error starting game:', error);
+                    this.showStatus('Failed to start game. Backend server may be unavailable.', 'error');
                 }
+            }
+            
+            showGameMechanics() {
+                // Hide lobby and show game mechanics
+                document.getElementById('game-lobby').classList.remove('active');
+                document.getElementById('game-mechanics').style.display = 'block';
+                
+                // Update page title
+                const subtitle = document.getElementById('page-subtitle');
+                if (subtitle) {
+                    subtitle.textContent = 'Game in Progress';
+                }
+                
+                // Setup game control event listeners
+                this.setupGameControlListeners();
+            }
+            
+            setupGameControlListeners() {
+                // End game button
+                const endGameBtn = document.getElementById('end-game-btn');
+                if (endGameBtn) {
+                    endGameBtn.addEventListener('click', () => {
+                        if (confirm('Are you sure you want to end the game?')) {
+                            this.endGame();
+                        }
+                    });
+                }
+                
+                // Back to lobby button
+                const backToLobbyBtn = document.getElementById('back-to-lobby-btn');
+                if (backToLobbyBtn) {
+                    backToLobbyBtn.addEventListener('click', () => {
+                        this.showGameLobby();
+                    });
+                }
+            }
+            
+            endGame() {
+                if (game) {
+                    game.gameOver = true;
+                    game.winner = 'ended';
+                    game.logGameEvent('phase', 'Game ended by host');
+                    game.updateGameDisplay();
+                }
+                
+                this.showStatus('Game ended', 'info');
             }
             
             leaveGame() {
@@ -1992,9 +2742,39 @@
             }
             
             showGameLobby() {
+                // Hide game mechanics and show lobby
+                document.getElementById('game-mechanics').style.display = 'none';
                 document.getElementById('game-lobby').classList.add('active');
-                document.getElementById('create-section').classList.remove('active');
-                document.getElementById('join-section').classList.remove('active');
+                
+                // Update page title
+                const subtitle = document.getElementById('page-subtitle');
+                if (subtitle) {
+                    subtitle.textContent = 'Game Lobby';
+                }
+                
+                // Reset game if exists
+                if (game) {
+                    game = null;
+                }
+            }
+            
+            // Demo mode for testing game mechanics
+            startDemoGame() {
+                const demoPlayers = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'];
+                if (typeof SecretHitlerGame !== 'undefined') {
+                    game = new SecretHitlerGame(demoPlayers);
+                    this.showGameMechanics();
+                    
+                    // Update page title for demo
+                    const subtitle = document.getElementById('page-subtitle');
+                    if (subtitle) {
+                        subtitle.textContent = 'Demo Mode';
+                    }
+                    
+                    this.showStatus('Demo game started! You can test all game mechanics.', 'info');
+                } else {
+                    this.showStatus('Game engine not available. Please refresh the page.', 'error');
+                }
             }
             
             hideGameLobby() {
@@ -2024,7 +2804,7 @@
                     const gameId = gameIdInput.value.trim();
                     const playerName = playerNameSelect.value;
 
-                    if (gameId.length >= 3 && playerName) {
+                    if (gameId.length >= 3 && playerName && this.isBackendAvailable) {
                         joinBtn.disabled = false;
                     } else {
                         joinBtn.disabled = true;
@@ -2042,6 +2822,572 @@
                 multiDeviceGame.refreshGameInfo();
             }
         }, 5000);
+        
+        // Secret Hitler Game Engine
+        class SecretHitlerGame {
+            constructor(players) {
+                this.players = players;
+                this.playerCount = players.length;
+                this.currentTurn = 1;
+                this.currentPhase = 'setup';
+                this.currentPresident = 0;
+                this.currentChancellor = null;
+                this.liberalPolicies = 0;
+                this.fascistPolicies = 0;
+                this.electionTracker = 0;
+                this.gameOver = false;
+                this.winner = null;
+                
+                // Game state
+                this.playerRoles = {};
+                this.policyDeck = [];
+                this.discardPile = [];
+                this.policyStacks = [];
+                this.bonusCard = null;
+                this.votes = [];
+                this.gameLog = [];
+                
+                this.initializeGame();
+            }
+            
+            initializeGame() {
+                this.logGameEvent('phase', 'Game initialized with ' + this.playerCount + ' players');
+                this.randomizePlayerOrder();
+                this.assignRoles();
+                this.revealCompanions();
+                this.chooseFirstPresident();
+                this.setupPolicyCards();
+                this.logGameEvent('phase', 'Game setup complete. Ready to begin!');
+            }
+            
+            randomizePlayerOrder() {
+                // Fisher-Yates shuffle
+                for (let i = this.players.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.players[i], this.players[j]] = [this.players[j], this.players[i]];
+                }
+                this.logGameEvent('action', 'Player order randomized');
+            }
+            
+            assignRoles() {
+                const distribution = this.getRoleDistribution();
+                const roles = [];
+                
+                // Add roles based on distribution
+                for (let i = 0; i < distribution.liberals; i++) {
+                    roles.push('liberal');
+                }
+                for (let i = 0; i < distribution.fascists; i++) {
+                    roles.push('fascist');
+                }
+                roles.push('hitler');
+                
+                // Shuffle roles and assign to players
+                this.shuffleArray(roles);
+                this.playerRoles = {};
+                this.players.forEach((player, index) => {
+                    this.playerRoles[player] = roles[index];
+                });
+                
+                this.logGameEvent('action', 'Roles assigned to players');
+            }
+            
+            getRoleDistribution() {
+                const distributions = {
+                    5: { liberals: 3, fascists: 1, hitler: 1 },
+                    6: { liberals: 4, fascists: 1, hitler: 1 },
+                    7: { liberals: 4, fascists: 2, hitler: 1 },
+                    8: { liberals: 5, fascists: 2, hitler: 1 },
+                    9: { liberals: 6, fascists: 2, hitler: 1 },
+                    10: { liberals: 6, fascists: 3, hitler: 1 }
+                };
+                return distributions[this.playerCount] || distributions[5];
+            }
+            
+            revealCompanions() {
+                // Reveal fascist companions to fascists and Hitler
+                const fascists = this.players.filter(player => 
+                    this.playerRoles[player] === 'fascist' || this.playerRoles[player] === 'hitler'
+                );
+                
+                this.logGameEvent('action', 'Fascist companions revealed to fascist team');
+                this.logGameEvent('action', 'Fascist team: ' + fascists.join(', '));
+            }
+            
+            chooseFirstPresident() {
+                // Randomly choose first president
+                this.currentPresident = Math.floor(Math.random() * this.playerCount);
+                this.logGameEvent('action', this.players[this.currentPresident] + ' chosen as first President');
+            }
+            
+            setupPolicyCards() {
+                // Create policy deck: 6 Liberal, 11 Fascist
+                this.policyDeck = [];
+                for (let i = 0; i < 6; i++) {
+                    this.policyDeck.push('liberal');
+                }
+                for (let i = 0; i < 11; i++) {
+                    this.policyDeck.push('fascist');
+                }
+                
+                this.shuffleArray(this.policyDeck);
+                
+                // Create stacks of three
+                this.policyStacks = [];
+                while (this.policyDeck.length >= 3) {
+                    this.policyStacks.push(this.policyDeck.splice(0, 3));
+                }
+                
+                // Set aside remaining cards as bonus
+                this.bonusCard = this.policyDeck.length > 0 ? this.policyDeck.pop() : null;
+                
+                this.logGameEvent('action', 'Policy cards shuffled into ' + this.policyStacks.length + ' stacks of three');
+                if (this.bonusCard) {
+                    this.logGameEvent('action', 'Bonus card set aside');
+                }
+            }
+            
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+            
+            startElection() {
+                this.currentPhase = 'election';
+                this.votes = [];
+                this.logGameEvent('phase', 'Election phase begins');
+                this.logGameEvent('action', this.players[this.currentPresident] + ' must choose a Chancellor');
+                this.updateGameDisplay();
+            }
+            
+            chooseChancellor(chancellorIndex) {
+                if (this.currentPhase !== 'election') return false;
+                
+                // Cannot choose the same person as last election
+                if (this.currentChancellor === chancellorIndex) {
+                    this.logGameEvent('action', 'Cannot choose the same Chancellor twice in a row');
+                    return false;
+                }
+                
+                this.currentChancellor = chancellorIndex;
+                this.logGameEvent('action', this.players[this.currentPresident] + ' chose ' + this.players[this.currentChancellor] + ' as Chancellor');
+                this.startVoting();
+                return true;
+            }
+            
+            startVoting() {
+                this.currentPhase = 'voting';
+                this.logGameEvent('phase', 'Voting phase begins');
+                this.logGameEvent('action', 'All players must vote Ja or Nein on the election');
+                this.updateGameDisplay();
+            }
+            
+            submitVote(playerIndex, vote) {
+                if (this.currentPhase !== 'voting') return false;
+                if (this.votes.some(v => v.player === playerIndex)) return false;
+                
+                this.votes.push({ player: playerIndex, vote: vote });
+                this.logGameEvent('vote', this.players[playerIndex] + ' voted ' + vote);
+                
+                if (this.votes.length === this.playerCount) {
+                    this.resolveElection();
+                }
+                
+                this.updateGameDisplay();
+                return true;
+            }
+            
+            resolveElection() {
+                const jaVotes = this.votes.filter(v => v.vote === 'ja').length;
+                const neinVotes = this.votes.filter(v => v.vote === 'nein').length;
+                
+                if (jaVotes > neinVotes) {
+                    // Election successful
+                    this.electionTracker = 0;
+                    this.logGameEvent('action', 'Election successful! ' + jaVotes + ' Ja vs ' + neinVotes + ' Nein');
+                    this.startLegislation();
+                } else {
+                    // Election failed
+                    this.electionTracker++;
+                    this.logGameEvent('action', 'Election failed! ' + neinVotes + ' Nein vs ' + jaVotes + ' Ja');
+                    this.logGameEvent('action', 'Election tracker: ' + this.electionTracker + '/3');
+                    
+                    if (this.electionTracker >= 3) {
+                        this.enactTopPolicy();
+                        this.electionTracker = 0;
+                    }
+                    
+                    this.nextTurn();
+                }
+            }
+            
+            startLegislation() {
+                this.currentPhase = 'legislation';
+                this.logGameEvent('phase', 'Legislation phase begins');
+                this.logGameEvent('action', 'President must choose a policy stack');
+                this.updateGameDisplay();
+            }
+            
+            choosePolicyStack(stackIndex) {
+                if (this.currentPhase !== 'legislation') return false;
+                if (stackIndex < 0 || stackIndex >= this.policyStacks.length) return false;
+                
+                const selectedStack = this.policyStacks[stackIndex];
+                this.logGameEvent('action', this.players[this.currentPresident] + ' chose policy stack ' + (stackIndex + 1));
+                this.logGameEvent('action', 'Stack contains: ' + selectedStack.join(', '));
+                
+                // President discards one card
+                this.currentPhase = 'president-discard';
+                this.logGameEvent('phase', this.players[this.currentPresident] + ' must discard one policy card');
+                this.updateGameDisplay();
+                return true;
+            }
+            
+            presidentDiscard(cardIndex) {
+                if (this.currentPhase !== 'president-discard') return false;
+                
+                const selectedStack = this.policyStacks.find(stack => stack.length === 3);
+                if (!selectedStack || cardIndex < 0 || cardIndex >= selectedStack.length) return false;
+                
+                const discardedCard = selectedStack.splice(cardIndex, 1)[0];
+                this.discardPile.push(discardedCard);
+                this.logGameEvent('action', this.players[this.currentPresident] + ' discarded ' + discardedCard + ' policy');
+                
+                // Chancellor chooses one to enact
+                this.currentPhase = 'chancellor-choose';
+                this.logGameEvent('phase', this.players[this.currentChancellor] + ' must choose one policy to enact');
+                this.updateGameDisplay();
+                return true;
+            }
+            
+            chancellorEnact(cardIndex) {
+                if (this.currentPhase !== 'chancellor-choose') return false;
+                
+                const selectedStack = this.policyStacks.find(stack => stack.length === 2);
+                if (!selectedStack || cardIndex < 0 || cardIndex >= selectedStack.length) return false;
+                
+                const enactedCard = selectedStack.splice(cardIndex, 1)[0];
+                this.enactPolicy(enactedCard);
+                
+                // Remove the stack
+                this.policyStacks = this.policyStacks.filter(stack => stack.length > 0);
+                
+                // Check for superpowers
+                this.checkSuperpowers();
+                
+                // Check win conditions
+                if (!this.checkWinConditions()) {
+                    this.nextTurn();
+                }
+                
+                return true;
+            }
+            
+            enactPolicy(policy) {
+                if (policy === 'liberal') {
+                    this.liberalPolicies++;
+                    this.logGameEvent('policy', 'Liberal policy enacted! Total: ' + this.liberalPolicies + '/5');
+                } else {
+                    this.fascistPolicies++;
+                    this.logGameEvent('policy', 'Fascist policy enacted! Total: ' + this.fascistPolicies + '/6');
+                }
+                
+                this.updateGameDisplay();
+            }
+            
+            enactTopPolicy() {
+                if (this.policyDeck.length === 0) return;
+                
+                const policy = this.policyDeck.pop();
+                this.enactPolicy(policy);
+                this.logGameEvent('action', 'Top policy enacted due to election tracker failure');
+            }
+            
+            checkSuperpowers() {
+                if (this.fascistPolicies >= 3 && this.fascistPolicies <= 5) {
+                    this.logGameEvent('action', 'Superpower unlocked! President gains special abilities');
+                    // TODO: Implement superpower mechanics
+                }
+            }
+            
+            checkWinConditions() {
+                // Liberal win
+                if (this.liberalPolicies >= 5) {
+                    this.gameOver = true;
+                    this.winner = 'liberal';
+                    this.logGameEvent('phase', 'GAME OVER! Liberals win with 5 policies!');
+                    this.updateGameDisplay();
+                    return true;
+                }
+                
+                // Fascist win
+                if (this.fascistPolicies >= 6) {
+                    this.gameOver = true;
+                    this.winner = 'fascist';
+                    this.logGameEvent('phase', 'GAME OVER! Fascists win with 6 policies!');
+                    this.updateGameDisplay();
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            nextTurn() {
+                this.currentTurn++;
+                this.currentPresident = (this.currentPresident + 1) % this.playerCount;
+                this.currentChancellor = null;
+                this.votes = [];
+                
+                this.logGameEvent('phase', 'Turn ' + this.currentTurn + ' begins');
+                this.logGameEvent('action', this.players[this.currentPresident] + ' is now President');
+                
+                this.startElection();
+            }
+            
+            logGameEvent(type, message) {
+                const timestamp = new Date().toLocaleTimeString();
+                this.gameLog.push({
+                    type: type,
+                    message: message,
+                    timestamp: timestamp
+                });
+                
+                // Keep only last 50 log entries
+                if (this.gameLog.length > 50) {
+                    this.gameLog = this.gameLog.slice(-50);
+                }
+                
+                this.updateGameLog();
+            }
+            
+            updateGameLog() {
+                const logContainer = document.getElementById('game-log-entries');
+                if (!logContainer) return;
+                
+                logContainer.innerHTML = '';
+                this.gameLog.slice().reverse().forEach(entry => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry ${entry.type}`;
+                    logEntry.innerHTML = `
+                        <div class="log-timestamp">${entry.timestamp}</div>
+                        <div class="log-message">${entry.message}</div>
+                    `;
+                    logContainer.appendChild(logEntry);
+                });
+            }
+            
+            updateGameDisplay() {
+                this.updatePhaseDisplay();
+                this.updatePolicyTracks();
+                this.updateElectionTracker();
+                this.updateGameActions();
+            }
+            
+            updatePhaseDisplay() {
+                const phaseElement = document.getElementById('current-phase');
+                const turnElement = document.getElementById('current-turn');
+                
+                if (phaseElement) {
+                    phaseElement.textContent = this.currentPhase.replace('-', ' ').toUpperCase();
+                }
+                if (turnElement) {
+                    turnElement.textContent = this.currentTurn;
+                }
+            }
+            
+            updatePolicyTracks() {
+                const liberalTrack = document.getElementById('liberal-track');
+                const fascistTrack = document.getElementById('fascist-track');
+                
+                if (liberalTrack) {
+                    liberalTrack.innerHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        const space = document.createElement('div');
+                        space.className = `track-space ${i < this.liberalPolicies ? 'filled' : ''} ${i === 4 && this.liberalPolicies >= 5 ? 'win' : ''}`;
+                        space.textContent = i + 1;
+                        liberalTrack.appendChild(space);
+                    }
+                }
+                
+                if (fascistTrack) {
+                    fascistTrack.innerHTML = '';
+                    for (let i = 0; i < 6; i++) {
+                        const space = document.createElement('div');
+                        space.className = `track-space ${i < this.fascistPolicies ? 'filled' : ''} ${i === 5 && this.fascistPolicies >= 6 ? 'win' : ''} ${i >= 2 && i <= 4 ? 'power' : ''}`;
+                        space.textContent = i + 1;
+                        fascistTrack.appendChild(space);
+                    }
+                }
+                
+                // Update track counts
+                const liberalCount = document.querySelector('.liberal-track .track-count');
+                const fascistCount = document.querySelector('.fascist-track .track-count');
+                
+                if (liberalCount) liberalCount.textContent = this.liberalPolicies + '/5';
+                if (fascistCount) fascistCount.textContent = this.fascistPolicies + '/6';
+            }
+            
+            updateElectionTracker() {
+                const tracker = document.getElementById('election-tracker');
+                if (!tracker) return;
+                
+                tracker.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const space = document.createElement('div');
+                    space.className = `tracker-space ${i < this.electionTracker ? 'filled' : ''}`;
+                    tracker.appendChild(space);
+                }
+            }
+            
+            updateGameActions() {
+                const actionsContainer = document.getElementById('game-actions');
+                if (!actionsContainer) return;
+                
+                if (this.gameOver) {
+                    this.showGameOverActions(actionsContainer);
+                    return;
+                }
+                
+                switch (this.currentPhase) {
+                    case 'election':
+                        this.showElectionActions(actionsContainer);
+                        break;
+                    case 'voting':
+                        this.showVotingActions(actionsContainer);
+                        break;
+                    case 'legislation':
+                        this.showLegislationActions(actionsContainer);
+                        break;
+                    case 'president-discard':
+                        this.showPresidentDiscardActions(actionsContainer);
+                        break;
+                    case 'chancellor-choose':
+                        this.showChancellorChooseActions(actionsContainer);
+                        break;
+                    default:
+                        actionsContainer.innerHTML = '<p>Game phase not recognized</p>';
+                }
+            }
+            
+            showElectionActions(container) {
+                container.innerHTML = `
+                    <div class="action-phase">
+                        <h3>Choose Chancellor</h3>
+                        <p class="action-description">
+                            ${this.players[this.currentPresident]} (President) must choose a Chancellor for this election.
+                        </p>
+                        <div class="action-buttons">
+                            ${this.players.map((player, index) => 
+                                index !== this.currentPresident && index !== this.currentChancellor ?
+                                    `<button class="action-btn" onclick="game.chooseChancellor(${index})">${player}</button>` :
+                                    ''
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            showVotingActions(container) {
+                const remainingVotes = this.playerCount - this.votes.length;
+                container.innerHTML = `
+                    <div class="action-phase">
+                        <h3>Vote on Election</h3>
+                        <p class="action-description">
+                            All players must vote Ja or Nein on the election of ${this.players[this.currentChancellor]} as Chancellor.
+                            ${remainingVotes > 0 ? remainingVotes + ' votes remaining.' : 'All votes submitted.'}
+                        </p>
+                        <div class="action-buttons">
+                            ${this.players.map((player, index) => {
+                                const hasVoted = this.votes.some(v => v.player === index);
+                                return hasVoted ? 
+                                    `<button class="action-btn secondary" disabled>${player} - Voted</button>` :
+                                    `<div style="display: inline-block; margin: 0 0.5rem;">
+                                        <button class="action-btn" onclick="game.submitVote(${index}, 'ja')">${player} - Ja</button>
+                                        <button class="action-btn secondary" onclick="game.submitVote(${index}, 'nein')">${player} - Nein</button>
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            showLegislationActions(container) {
+                container.innerHTML = `
+                    <div class="action-phase">
+                        <h3>Choose Policy Stack</h3>
+                        <p class="action-description">
+                            ${this.players[this.currentPresident]} (President) must choose one of the remaining policy stacks.
+                        </p>
+                        <div class="action-buttons">
+                            ${this.policyStacks.map((stack, index) => 
+                                `<button class="action-btn" onclick="game.choosePolicyStack(${index})">Stack ${index + 1} (${stack.length} cards)</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            showPresidentDiscardActions(container) {
+                const selectedStack = this.policyStacks.find(stack => stack.length === 3);
+                if (!selectedStack) return;
+                
+                container.innerHTML = `
+                    <div class="action-phase">
+                        <h3>Discard Policy Card</h3>
+                        <p class="action-description">
+                            ${this.players[this.currentPresident]} (President) must discard one policy card from the selected stack.
+                            Remaining cards: ${selectedStack.join(', ')}
+                        </p>
+                        <div class="action-buttons">
+                            ${selectedStack.map((card, index) => 
+                                `<button class="action-btn" onclick="game.presidentDiscard(${index})">Discard ${card}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            showChancellorChooseActions(container) {
+                const selectedStack = this.policyStacks.find(stack => stack.length === 2);
+                if (!selectedStack) return;
+                
+                container.innerHTML = `
+                    <div class="action-phase">
+                        <h3>Enact Policy</h3>
+                        <p class="action-description">
+                            ${this.players[this.currentChancellor]} (Chancellor) must choose one policy to enact.
+                            Available policies: ${selectedStack.join(', ')}
+                        </p>
+                        <div class="action-buttons">
+                            ${selectedStack.map((card, index) => 
+                                `<button class="action-btn" onclick="game.chancellorEnact(${index})">Enact ${card}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            showGameOverActions(container) {
+                container.innerHTML = `
+                    <div class="action-phase">
+                        <h3>Game Over!</h3>
+                        <p class="action-description">
+                            The ${this.winner} team has won the game!
+                        </p>
+                        <div class="final-score">
+                            <p><strong>Final Score:</strong></p>
+                            <p>Liberal Policies: ${this.liberalPolicies}/5</p>
+                            <p>Fascist Policies: ${this.fascistPolicies}/6</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Global game instance
+        let game = null;
     </script>
 </body>
 </html>

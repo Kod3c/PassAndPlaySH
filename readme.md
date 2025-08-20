@@ -130,7 +130,7 @@ PassAndPlaySH/
 ├── js/
 │   └── app.js            # Main application logic with SPA routing
 ├── pages/                 # Multi-device game interface
-│   └── multidevice.html  # Multi-device game creation and joining
+│   └── play.html  # Multi-device game creation and joining
 ├── backend/               # Backend infrastructure for multi-device games
 │   ├── api/              # RESTful API endpoints
 │   ├── classes/          # PHP classes for database and game logic
@@ -289,7 +289,7 @@ Secret Hitler is a social deduction game where:
 - **Engaging Interactions** - Smooth animations and visual feedback throughout
 
 ### 📁 Files Modified
-- **`pages/multidevice.html`** - Enhanced join game page structure and styling
+- **`pages/play.html`** - Enhanced join game page structure and styling
 - **`changelog.md`** - Added documentation for join game page improvements
 
 ### 🎨 Design Consistency
@@ -441,7 +441,7 @@ Secret Hitler is a social deduction game where:
 - **Enhanced Setup Flow** - More intuitive and enjoyable game creation process
 
 ### 📁 Files Modified
-- `pages/multidevice.html` - Complete design overhaul with modern styling, enhanced sections, and improved user interface
+- `pages/play.html` - Complete design overhaul with modern styling, enhanced sections, and improved user interface
 
 ### 🧪 Design Consistency
 - **Visual Harmony** - Create game page now matches home page design aesthetic

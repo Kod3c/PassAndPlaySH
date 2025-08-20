@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Gameplay Demo</title>
+    <meta name="description" content="Demo of Secret Hitler gameplay mechanics">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/themes.css">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="game-logo">
+                    <div class="logo-icon">🎭</div>
+                    <div class="logo-text">
+                        <h1>Secret Hitler</h1>
+                        <p class="subtitle">Gameplay Demo</p>
+                    </div>
+                </div>
+                <div class="header-decoration">
+                    <div class="decoration-line"></div>
+                    <div class="decoration-dot"></div>
+                    <div class="decoration-line"></div>
+                </div>
+            </div>
+        </header>
+        
+        <main class="game-mechanics">
+            <div class="game-header">
+                <div class="game-icon">🎮</div>
+                <h2>Secret Hitler - Game in Progress</h2>
+                <p class="game-description">Experience the complete gameplay flow with all phases and mechanics</p>
+            </div>
+            
+            <!-- Game Phase Display -->
+            <div class="game-phase-display">
+                <div class="phase-indicator">
+                    <span class="phase-label">Current Phase:</span>
+                    <span id="current-phase" class="phase-value">Election</span>
+                </div>
+                <div class="turn-info">
+                    <span class="turn-label">Turn:</span>
+                    <span id="current-turn" class="turn-value">1</span>
+                </div>
+            </div>
+            
+            <!-- Game Board -->
+            <div class="game-board">
+                <div class="policy-tracks">
+                    <div class="policy-track liberal-track">
+                        <h3>Liberal Policies</h3>
+                        <div class="track-spaces" id="liberal-track">
+                            <!-- Liberal policy spaces will be populated here -->
+                        </div>
+                        <div class="track-count">0/5</div>
+                    </div>
+                    <div class="policy-track fascist-track">
+                        <h3>Fascist Policies</h3>
+                        <div class="track-spaces" id="fascist-track">
+                            <!-- Fascist policy spaces will be populated here -->
+                        </div>
+                        <div class="track-count">0/6</div>
+                    </div>
+                </div>
+                
+                <div class="election-tracker">
+                    <h3>Election Tracker</h3>
+                    <div class="tracker-spaces" id="election-tracker">
+                        <!-- Election tracker spaces will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Actions -->
+            <div class="game-actions" id="game-actions">
+                <!-- Game actions will be populated based on current phase -->
+            </div>
+            
+            <!-- Game Log -->
+            <div class="game-log">
+                <h3>Game Log</h3>
+                <div class="log-entries" id="game-log-entries">
+                    <!-- Game log entries will be populated here -->
+                </div>
+            </div>
+            
+            <!-- Game Controls -->
+            <div class="game-controls">
+                <button id="demo-next-btn" class="btn btn-primary btn-large">
+                    <span class="btn-icon">⏭️</span>
+                    <span class="btn-text">Next Phase</span>
+                </button>
+                <button id="demo-reset-btn" class="btn btn-outline btn-medium">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text">Reset Demo</span>
+                </button>
+                <button onclick="window.location.href='index.html'" class="btn btn-outline btn-medium">
+                    <span class="btn-icon">🏠</span>
+                    <span class="btn-text">Back to Home</span>
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Demo Game Engine
+        class DemoGame {
+            constructor() {
+                this.players = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'];
+                this.playerCount = this.players.length;
+                this.currentTurn = 1;
+                this.currentPhase = 'election';
+                this.currentPresident = 0;
+                this.currentChancellor = null;
+                this.liberalPolicies = 0;
+                this.fascistPolicies = 0;
+                this.electionTracker = 0;
+                this.gameOver = false;
+                this.winner = null;
+                
+                // Enhanced game state
+                this.policyStacks = [];
+                this.currentPolicyStack = null;
+                this.presidentDiscarded = null;
+                this.executivePowers = [];
+                this.gameLog = [];
+                this.lastChancellor = null;
+                this.consecutiveFailedElections = 0;
+                
+                this.initializeGame();
+            }
+            
+            initializeGame() {
+                this.logGameEvent('phase', 'Demo game initialized with ' + this.playerCount + ' players');
+                this.logGameEvent('action', 'Roles assigned and policy deck shuffled');
+                this.setupPolicyStacks();
+                this.updateGameDisplay();
+            }
+            
+            setupPolicyStacks() {
+                // Create demo policy stacks
+                this.policyStacks = [
+                    ['liberal', 'fascist', 'liberal'],
+                    ['fascist', 'fascist', 'liberal'],
+                    ['liberal', 'liberal', 'fascist']
+                ];
+                this.logGameEvent('action', 'Policy cards organized into ' + this.policyStacks.length + ' stacks');
+            }
+            
+            nextPhase() {
+                switch (this.currentPhase) {
+                    case 'election':
+                        this.currentPhase = 'legislation';
+                        this.logGameEvent('phase', 'Legislation phase begins');
+                        break;
+                    case 'legislation':
+                        this.currentPhase = 'president-discard';
+                        this.currentPolicyStack = this.policyStacks[0];
+                        this.logGameEvent('phase', 'President must discard one policy card');
+                        break;
+                    case 'president-discard':
+                        this.currentPhase = 'chancellor-choose';
+                        this.logGameEvent('phase', 'Chancellor must choose one policy to enact');
+                        break;
+                    case 'chancellor-choose':
+                        this.currentPhase = 'executive';
+                        this.executivePowers = ['investigate', 'special_election'];
+                        this.logGameEvent('phase', 'Executive powers unlocked!');
+                        break;
+                    case 'executive':
+                        this.currentPhase = 'election';
+                        this.currentTurn++;
+                        this.currentPresident = (this.currentPresident + 1) % this.playerCount;
+                        this.logGameEvent('phase', 'Turn ' + this.currentTurn + ' begins');
+                        this.logGameEvent('action', this.players[this.currentPresident] + ' is now President');
+                        break;
+                }
+                this.updateGameDisplay();
+            }
+            
+            logGameEvent(type, message) {
+                const timestamp = new Date().toLocaleTimeString();
+                this.gameLog.push({
+                    type: type,
+                    message: message,
+                    timestamp: timestamp
+                });
+                
+                // Keep only last 50 log entries
+                if (this.gameLog.length > 50) {
+                    this.gameLog = this.gameLog.slice(-50);
+                }
+            }
+            
+            updateGameDisplay() {
+                this.updatePhaseDisplay();
+                this.updatePolicyTracks();
+                this.updateElectionTracker();
+                this.updateGameActions();
+                this.updateGameLog();
+            }
+            
+            updatePhaseDisplay() {
+                const phaseElement = document.getElementById('current-phase');
+                const turnElement = document.getElementById('current-turn');
+                
+                if (phaseElement) {
+                    phaseElement.textContent = this.currentPhase.replace('-', ' ').toUpperCase();
+                }
+                if (turnElement) {
+                    turnElement.textContent = this.currentTurn;
+                }
+            }
+            
+            updatePolicyTracks() {
+                const liberalTrack = document.getElementById('liberal-track');
+                const fascistTrack = document.getElementById('fascist-track');
+                
+                if (liberalTrack) {
+                    liberalTrack.innerHTML = '';
+                    for (let i = 0; i < 5; i++) {
+                        const space = document.createElement('div');
+                        space.className = `track-space ${i < this.liberalPolicies ? 'filled' : ''} ${i === 4 && this.liberalPolicies >= 5 ? 'win' : ''}`;
+                        space.textContent = i + 1;
+                        liberalTrack.appendChild(space);
+                    }
+                }
+                
+                if (fascistTrack) {
+                    fascistTrack.innerHTML = '';
+                    for (let i = 0; i < 6; i++) {
+                        const space = document.createElement('div');
+                        space.className = `track-space ${i < this.fascistPolicies ? 'filled' : ''} ${i === 5 && this.fascistPolicies >= 6 ? 'win' : ''} ${i >= 2 && i <= 4 ? 'power' : ''}`;
+                        space.textContent = i + 1;
+                        fascistTrack.appendChild(space);
+                    }
+                }
+                
+                // Update track counts
+                const liberalCount = document.querySelector('.liberal-track .track-count');
+                const fascistCount = document.querySelector('.fascist-track .track-count');
+                
+                if (liberalCount) liberalCount.textContent = this.liberalPolicies + '/5';
+                if (fascistCount) fascistCount.textContent = this.fascistPolicies + '/6';
+            }
+            
+            updateElectionTracker() {
+                const tracker = document.getElementById('election-tracker');
+                if (!tracker) return;
+                
+                tracker.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const space = document.createElement('div');
+                    space.className = `tracker-space ${i < this.electionTracker ? 'filled' : ''}`;
+                    space.textContent = i + 1;
+                    tracker.appendChild(space);
+                }
+            }
+            
+            updateGameActions() {
+                const actionsContainer = document.getElementById('game-actions');
+                if (!actionsContainer) return;
+                
+                switch (this.currentPhase) {
+                    case 'election':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Choose Chancellor</h3>
+                                <p class="action-description">
+                                    ${this.players[this.currentPresident]} (President) must choose a Chancellor for this election.
+                                </p>
+                                <div class="chancellor-options">
+                                    ${this.players.map((player, index) => 
+                                        index !== this.currentPresident ?
+                                            `<button class="chancellor-btn btn btn-primary">${player}</button>` :
+                                            ''
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'legislation':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Choose Policy Stack</h3>
+                                <p class="action-description">
+                                    ${this.players[this.currentPresident]} (President) must choose one of the remaining policy stacks.
+                                </p>
+                                <div class="policy-stack-options">
+                                    ${this.policyStacks.map((stack, index) => 
+                                        `<button class="stack-btn btn btn-primary">Stack ${index + 1} (${stack.length} cards)</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'president-discard':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Discard Policy Card</h3>
+                                <p class="action-description">
+                                    ${this.players[this.currentPresident]} (President) must discard one policy card from the selected stack.
+                                    Remaining cards: ${this.currentPolicyStack.join(', ')}
+                                </p>
+                                <div class="discard-options">
+                                    ${this.currentPolicyStack.map((card, index) => 
+                                        `<button class="discard-btn btn btn-secondary">Discard ${card}</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'chancellor-choose':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Enact Policy</h3>
+                                <p class="action-description">
+                                    ${this.players[this.currentChancellor] || 'Chancellor'} must choose one policy to enact.
+                                    Available policies: ${this.currentPolicyStack.join(', ')}
+                                </p>
+                                <div class="enact-options">
+                                    ${this.currentPolicyStack.map((card, index) => 
+                                        `<button class="enact-btn btn btn-primary">Enact ${card}</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'executive':
+                        actionsContainer.innerHTML = `
+                            <div class="action-phase">
+                                <h3>Executive Powers</h3>
+                                <p class="action-description">
+                                    ${this.players[this.currentPresident]} (President) has special powers due to fascist policies.
+                                </p>
+                                <div class="power-options">
+                                    ${this.executivePowers.map(power => 
+                                        `<button class="power-btn btn btn-accent">Use ${power.replace('_', ' ')}</button>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    default:
+                        actionsContainer.innerHTML = '<p>Game phase not recognized</p>';
+                }
+            }
+            
+            updateGameLog() {
+                const logContainer = document.getElementById('game-log-entries');
+                if (!logContainer) return;
+                
+                logContainer.innerHTML = '';
+                this.gameLog.slice().reverse().forEach(entry => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry ${entry.type}`;
+                    logEntry.innerHTML = `
+                        <div class="log-timestamp">${entry.timestamp}</div>
+                        <div class="log-message">${entry.message}</div>
+                    `;
+                    logContainer.appendChild(logEntry);
+                });
+            }
+            
+            reset() {
+                this.currentTurn = 1;
+                this.currentPhase = 'election';
+                this.currentPresident = 0;
+                this.currentChancellor = null;
+                this.liberalPolicies = 0;
+                this.fascistPolicies = 0;
+                this.electionTracker = 0;
+                this.gameOver = false;
+                this.winner = null;
+                this.policyStacks = [];
+                this.currentPolicyStack = null;
+                this.presidentDiscarded = null;
+                this.executivePowers = [];
+                this.gameLog = [];
+                this.lastChancellor = null;
+                this.consecutiveFailedElections = 0;
+                
+                this.initializeGame();
+            }
+        }
+        
+        // Initialize demo game
+        let demoGame = new DemoGame();
+        
+        // Setup event listeners
+        document.getElementById('demo-next-btn').addEventListener('click', () => {
+            demoGame.nextPhase();
+        });
+        
+        document.getElementById('demo-reset-btn').addEventListener('click', () => {
+            demoGame.reset();
+        });
+    </script>
+</body>
+</html>

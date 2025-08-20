@@ -52,7 +52,7 @@
 - **Engaging Interactions**: Smooth animations and visual feedback throughout
 
 #### 📁 Files Modified
-- **`pages/multidevice.html`**: Enhanced join game page structure and styling
+- **`pages/play.html`**: Enhanced join game page structure and styling
 - **`changelog.md`**: Added documentation for join game page improvements
 
 #### 🎨 Design Consistency
@@ -232,7 +232,7 @@
 - **Enhanced Setup Flow** - More intuitive and enjoyable game creation process
 
 ### 📁 Files Modified
-- `pages/multidevice.html` - Complete design overhaul with modern styling, enhanced sections, and improved user interface
+- `pages/play.html` - Complete design overhaul with modern styling, enhanced sections, and improved user interface
 
 ### 🧪 Design Consistency
 - **Visual Harmony** - Create game page now matches home page design aesthetic
@@ -466,7 +466,7 @@
 - `backend/README.md` - Comprehensive backend setup and usage documentation
 - `backend/composer.json` - PHP dependency management configuration
 - `database/schema.sql` - Complete database schema with sample data
-- `pages/multidevice.html` - Multi-device game interface
+- `pages/play.html` - Multi-device game interface
 
 ### 📁 Files Modified
 - `index.html` - Button reordering, beta tag addition, and feature list updates

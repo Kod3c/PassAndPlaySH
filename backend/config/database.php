@@ -2,22 +2,18 @@
 /**
  * Database Configuration
  * Secret Hitler Multi-Device Game
+ * Using SQLite for simplicity
  */
 
 class DatabaseConfig {
-    // Database connection settings
-    const DB_HOST = 'localhost';
-    const DB_NAME = 'secret_hitler';
-    const DB_USER = 'root';
-    const DB_PASS = '';
-    const DB_CHARSET = 'utf8mb4';
+    // Database file path (relative to backend directory)
+    const DB_FILE = 'secret_hitler.db';
     
     // Connection options
     const DB_OPTIONS = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+        PDO::ATTR_EMULATE_PREPARES => false
     ];
     
     /**
@@ -27,8 +23,12 @@ class DatabaseConfig {
      */
     public static function getConnection() {
         try {
-            $dsn = "mysql:host=" . self::DB_HOST . ";dbname=" . self::DB_NAME . ";charset=" . self::DB_CHARSET;
-            $pdo = new PDO($dsn, self::DB_USER, self::DB_PASS, self::DB_OPTIONS);
+            $dbPath = __DIR__ . '/../' . self::DB_FILE;
+            $pdo = new PDO("sqlite:$dbPath", null, null, self::DB_OPTIONS);
+            
+            // Enable foreign keys
+            $pdo->exec('PRAGMA foreign_keys = ON');
+            
             return $pdo;
         } catch (PDOException $e) {
             throw new Exception("Database connection failed: " . $e->getMessage());
@@ -58,7 +58,7 @@ class DatabaseConfig {
             $pdo = self::getConnection();
             
             // Check if tables exist
-            $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+            $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(PDO::FETCH_COLUMN);
             
             // Get game count
             $gameCount = $pdo->query("SELECT COUNT(*) FROM games")->fetchColumn();
@@ -79,6 +79,28 @@ class DatabaseConfig {
                 'error' => $e->getMessage(),
                 'timestamp' => date('Y-m-d H:i:s')
             ];
+        }
+    }
+    
+    /**
+     * Initialize database with schema
+     * @return bool
+     */
+    public static function initializeDatabase() {
+        try {
+            $pdo = self::getConnection();
+            
+            // Read and execute schema
+            $schemaPath = __DIR__ . '/../../database/schema.sqlite.sql';
+            if (file_exists($schemaPath)) {
+                $schema = file_get_contents($schemaPath);
+                $pdo->exec($schema);
+                return true;
+            } else {
+                throw new Exception("Schema file not found: $schemaPath");
+            }
+        } catch (Exception $e) {
+            throw new Exception("Database initialization failed: " . $e->getMessage());
         }
     }
 }
