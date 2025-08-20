@@ -22,7 +22,7 @@ class DatabaseConfig {
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
     ];
     
-    /**
+    /** 
      * Get database connection
      * @return PDO
      * @throws Exception
