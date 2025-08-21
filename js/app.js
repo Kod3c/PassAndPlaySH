@@ -12,9 +12,6 @@ class App {
         this.setupEventListeners();
         this.setupBetaAccess();
         this.setupThemeSwitcher();
-        // Initialize SPA routing
-        this.basePath = this.getBasePath();
-        this.setupRouting();
         // Check if autoShowSection exists before calling
         if (typeof this.autoShowSection === 'function') {
             this.autoShowSection();
@@ -112,11 +109,6 @@ class App {
         
         // Update active navigation state
         this.updateNavigationState(pageName);
-
-        // If navigating to rules, ensure default section is visible
-        if (pageName === 'rules') {
-            this.showRulesSection('overview');
-        }
     }
 
     showRulesSection(sectionName) {
@@ -150,11 +142,6 @@ class App {
         if (activeItem) {
             activeItem.classList.add('active');
         }
-    }
-
-    // Backwards-compat alias to avoid breaking existing calls
-    updateNavigationState(pageName) {
-        this.updateActiveNavigation(pageName);
     }
 
     setupEventListeners() {
