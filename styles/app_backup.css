@@ -1,0 +1,1558 @@
+/* ============================================
+   SECRET HITLER - PROPAGANDA DESIGN SYSTEM
+   1930s European Propaganda Poster Aesthetic
+   ============================================ */
+
+/* ============================================
+   1. FONT DECLARATIONS
+   ============================================ */
+@font-face {
+  font-family: 'Eskade Fraktur';
+  src: url('../EskapadeFraktur-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Eskade Fraktur';
+  src: url('../EskapadeFraktur-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================
+   2. CSS VARIABLES - SECRET HITLER COLORS
+   ============================================ */
+:root {
+  /* Official Secret Hitler Colors */
+  --liberal-blue: #00AEEF;        /* Pantone 2995 C */
+  --fascist-red: #DA291C;         /* Pantone 485 C */
+  --neutral-beige: #D6C6A9;       /* Pantone 468 C */
+  --propaganda-black: #101820;    /* Pantone Black C */
+  --highlight-cream: #F1E6B2;     /* Pantone 7499 C */
+  
+  /* Additional Utility Colors */
+  --white: #FFFFFF;
+  --off-white: #F8F5EC;
+  --dark-cream: #CDB891;
+  --dark-beige: #B8A687;
+  --light-black: #2A2D34;
+  --shadow-black: rgba(16, 24, 32, 0.85);
+  
+  /* Game Colors */
+  --liberal-dark: #0084BB;
+  --liberal-light: #4AC4F3;
+  --fascist-dark: #A61F17;
+  --fascist-light: #E85449;
+  
+  /* Text Colors */
+  --text-primary: var(--propaganda-black);
+  --text-light: var(--highlight-cream);
+  --text-on-blue: var(--white);
+  --text-on-red: var(--highlight-cream);
+  
+  /* Borders & Dividers */
+  --border-thick: 4px;
+  --border-medium: 3px;
+  --border-thin: 2px;
+  --border-color: var(--propaganda-black);
+  
+  /* Shadows - Propaganda Style */
+  --shadow-brutal: 6px 6px 0px var(--propaganda-black);
+  --shadow-medium: 4px 4px 0px var(--propaganda-black);
+  --shadow-small: 2px 2px 0px var(--propaganda-black);
+  --shadow-inset: inset 0 2px 4px rgba(16, 24, 32, 0.3);
+  
+  /* Spacing Scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  
+  /* Typography Scale */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+  --font-2xl: 1.75rem;
+  --font-3xl: 2.5rem;
+  --font-4xl: 3.5rem;
+  --font-5xl: 4.5rem;
+  
+  /* Font Families */
+  --font-fraktur: 'Eskade Fraktur', Georgia, serif;
+  --font-propaganda: 'Futura', 'League Gothic', 'Oswald', 'Arial Black', sans-serif;
+  --font-body: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-base: 250ms ease-out;
+  --transition-slow: 350ms ease-out;
+}
+
+/* ============================================
+   3. RESET & BASE STYLES
+   ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--font-base);
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--neutral-beige);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Paper texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(216, 198, 169, 0.03) 10px,
+      rgba(216, 198, 169, 0.03) 20px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================
+   4. TYPOGRAPHY - PROPAGANDA STYLE
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-fraktur);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  font-size: var(--font-5xl);
+  text-shadow: 3px 3px 0px var(--fascist-red);
+}
+
+h2 {
+  font-size: var(--font-3xl);
+  font-weight: 400;
+  text-shadow: 2px 2px 0px rgba(218, 41, 28, 0.3);
+}
+
+h3 {
+  font-size: var(--font-2xl);
+  font-weight: 400;
+}
+
+h4 {
+  font-size: var(--font-xl);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+}
+
+h5 {
+  font-size: var(--font-lg);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+}
+
+h6 {
+  font-size: var(--font-base);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+}
+
+p {
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+a {
+  color: var(--fascist-red);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+a:hover {
+  color: var(--fascist-dark);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+strong {
+  font-weight: 700;
+  color: var(--propaganda-black);
+}
+
+/* ============================================
+   5. LAYOUT COMPONENTS
+   ============================================ */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  position: relative;
+  z-index: 2;
+}
+
+.page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--neutral-beige);
+}
+
+main {
+  flex: 1;
+  padding: var(--space-2xl) 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   6. HEADER - PROPAGANDA BANNER STYLE
+   ============================================ */
+.header {
+  background: var(--propaganda-black);
+  border-bottom: var(--border-thick) solid var(--fascist-red);
+  padding: var(--space-xl) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative diagonal stripes */
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  right: -50%;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 20px,
+    rgba(218, 41, 28, 0.1) 20px,
+    rgba(218, 41, 28, 0.1) 40px
+  );
+  pointer-events: none;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 33%,
+    var(--neutral-beige) 33%,
+    var(--neutral-beige) 66%,
+    var(--fascist-red) 66%,
+    var(--fascist-red) 100%
+  );
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 3;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  cursor: pointer;
+  transition: transform var(--transition-base);
+}
+
+.logo:hover {
+  transform: scale(1.05) rotate(-1deg);
+}
+
+.logo-icon {
+  font-size: 4rem;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.logo-text h1 {
+  font-family: var(--font-fraktur);
+  font-size: var(--font-4xl);
+  color: var(--highlight-cream);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-shadow: 
+    3px 3px 0px var(--fascist-red),
+    6px 6px 0px rgba(218, 41, 28, 0.5);
+}
+
+.logo-text .subtitle {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-lg);
+  color: var(--liberal-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin: 0;
+  margin-top: -0.5rem;
+}
+
+/* ============================================
+   7. CARDS - PROPAGANDA POSTER STYLE
+   ============================================ */
+.card {
+  background: var(--off-white);
+  border: var(--border-medium) solid var(--propaganda-black);
+  position: relative;
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-brutal);
+  transition: all var(--transition-base);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: var(--propaganda-black);
+  z-index: -1;
+}
+
+.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px var(--propaganda-black);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  border-bottom: var(--border-medium) solid var(--propaganda-black);
+  position: relative;
+}
+
+.card-header::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--fascist-red);
+}
+
+.card-icon {
+  font-size: var(--font-3xl);
+  filter: drop-shadow(2px 2px 0px var(--propaganda-black));
+}
+
+.card-title {
+  font-family: var(--font-fraktur);
+  font-size: var(--font-2xl);
+  font-weight: 400;
+  color: var(--propaganda-black);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.card-content {
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* ============================================
+   8. BUTTONS - PROPAGANDA STYLE
+   ============================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  font-family: var(--font-propaganda);
+  font-size: var(--font-base);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: var(--border-medium) solid var(--propaganda-black);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  position: relative;
+  background: var(--highlight-cream);
+  color: var(--propaganda-black);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px var(--propaganda-black);
+}
+
+.btn:active {
+  transform: translate(0, 0);
+  box-shadow: 2px 2px 0px var(--propaganda-black);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button Variants */
+.btn-primary {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--liberal-dark);
+}
+
+.btn-secondary {
+  background: var(--fascist-red);
+  color: var(--highlight-cream);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--fascist-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--propaganda-black);
+  border-width: var(--border-thick);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--propaganda-black);
+  color: var(--highlight-cream);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--propaganda-black);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(16, 24, 32, 0.1);
+  border-color: var(--propaganda-black);
+  box-shadow: var(--shadow-small);
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-sm);
+  border-width: var(--border-thin);
+}
+
+.btn-lg {
+  padding: var(--space-lg) var(--space-2xl);
+  font-size: var(--font-lg);
+  border-width: var(--border-thick);
+  box-shadow: var(--shadow-brutal);
+}
+
+.btn-lg:hover {
+  box-shadow: 8px 8px 0px var(--propaganda-black);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ============================================
+   9. FORMS - PROPAGANDA STYLE
+   ============================================ */
+.form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  color: var(--propaganda-black);
+  font-size: var(--font-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--font-base);
+  border: var(--border-medium) solid var(--propaganda-black);
+  background: var(--off-white);
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-inset);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--liberal-blue);
+  box-shadow: 
+    var(--shadow-inset),
+    0 0 0 3px rgba(0, 174, 239, 0.2);
+}
+
+.form-control::placeholder {
+  color: var(--dark-beige);
+  font-style: italic;
+}
+
+.form-help {
+  margin-top: var(--space-xs);
+  font-size: var(--font-sm);
+  color: var(--dark-beige);
+  font-style: italic;
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23101820' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-md) center;
+  padding-right: var(--space-2xl);
+  cursor: pointer;
+}
+
+/* ============================================
+   10. FEATURE CARDS - PROPAGANDA POSTERS
+   ============================================ */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-xl);
+  margin: var(--space-2xl) 0;
+}
+
+.feature-card {
+  background: var(--off-white);
+  border: var(--border-thick) solid var(--propaganda-black);
+  padding: var(--space-xl);
+  text-align: center;
+  position: relative;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-medium);
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--liberal-blue);
+}
+
+.feature-card:nth-child(even)::before {
+  background: var(--fascist-red);
+}
+
+.feature-card:hover {
+  transform: translate(-3px, -3px) rotate(-1deg);
+  box-shadow: var(--shadow-brutal);
+}
+
+.feature-icon {
+  font-size: var(--font-3xl);
+  margin-bottom: var(--space-md);
+  display: block;
+  filter: drop-shadow(2px 2px 0px var(--propaganda-black));
+}
+
+.feature-title {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-lg);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-sm);
+  color: var(--propaganda-black);
+}
+
+.feature-description {
+  font-size: var(--font-sm);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* ============================================
+   11. GAME SECTIONS - SECRET HITLER THEME
+   ============================================ */
+.welcome-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: var(--space-xl);
+  filter: drop-shadow(3px 3px 0px var(--propaganda-black));
+}
+
+.welcome-title {
+  font-family: var(--font-fraktur);
+  font-size: var(--font-3xl);
+  color: var(--propaganda-black);
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+  text-shadow: 2px 2px 0px var(--fascist-red);
+}
+
+.welcome-description {
+  font-size: var(--font-lg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: var(--space-2xl);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--font-body);
+}
+
+.welcome-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  align-items: center;
+  margin-top: var(--space-2xl);
+}
+
+.primary-buttons,
+.secondary-buttons {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Game Setup Sections */
+.setup-section {
+  background: var(--off-white);
+  border: var(--border-thick) solid var(--propaganda-black);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+  position: relative;
+  box-shadow: var(--shadow-brutal);
+}
+
+.setup-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 50%,
+    var(--fascist-red) 50%,
+    var(--fascist-red) 100%
+  );
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: var(--border-medium) solid var(--propaganda-black);
+}
+
+.section-icon {
+  font-size: var(--font-3xl);
+  filter: drop-shadow(2px 2px 0px var(--propaganda-black));
+}
+
+.section-title {
+  font-family: var(--font-fraktur);
+  font-size: var(--font-2xl);
+  font-weight: 400;
+  color: var(--propaganda-black);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.section-description {
+  font-size: var(--font-base);
+  color: var(--dark-beige);
+  margin: 0;
+  font-style: italic;
+}
+
+/* Player Count Controls */
+.player-count-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xl);
+  margin: var(--space-2xl) 0;
+}
+
+.count-btn {
+  width: 60px;
+  height: 60px;
+  border: var(--border-thick) solid var(--propaganda-black);
+  background: var(--highlight-cream);
+  color: var(--propaganda-black);
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-medium);
+}
+
+.count-btn:hover:not(:disabled) {
+  background: var(--liberal-blue);
+  color: var(--white);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.count-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: var(--dark-beige);
+}
+
+.player-count-display {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--propaganda-black);
+  min-width: 150px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.current-count {
+  color: var(--fascist-red);
+  font-size: var(--font-3xl);
+  font-weight: 900;
+  text-shadow: 2px 2px 0px var(--propaganda-black);
+}
+
+/* Role Distribution Display */
+.role-distribution {
+  background: var(--neutral-beige);
+  border: var(--border-medium) solid var(--propaganda-black);
+  padding: var(--space-lg);
+  margin: var(--space-lg) 0;
+}
+
+.role-distribution h4 {
+  font-family: var(--font-propaganda);
+  text-transform: uppercase;
+  margin-bottom: var(--space-md);
+}
+
+.roles {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.role {
+  padding: var(--space-sm) var(--space-lg);
+  border: var(--border-thin) solid var(--propaganda-black);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-small);
+}
+
+.role.liberal {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+.role.fascist {
+  background: var(--fascist-red);
+  color: var(--highlight-cream);
+}
+
+.role.hitler {
+  background: var(--propaganda-black);
+  color: var(--highlight-cream);
+  position: relative;
+}
+
+.role.hitler::after {
+  content: '👑';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: var(--font-lg);
+}
+
+/* Player Input Fields */
+.player-inputs {
+  display: grid;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.player-input-group {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--neutral-beige);
+  border: var(--border-thin) solid var(--propaganda-black);
+}
+
+.player-input-group label {
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--propaganda-black);
+}
+
+.player-input-group input {
+  width: 100%;
+  padding: var(--space-md);
+  border: var(--border-medium) solid var(--propaganda-black);
+  background: var(--off-white);
+  font-family: var(--font-body);
+  font-size: var(--font-base);
+}
+
+/* Recommendations Box */
+.player-recommendations {
+  background: var(--highlight-cream);
+  border: var(--border-medium) solid var(--propaganda-black);
+  padding: var(--space-xl);
+  margin: var(--space-xl) 0;
+  box-shadow: var(--shadow-medium);
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--off-white);
+  border-left: var(--border-thick) solid var(--liberal-blue);
+  transition: all var(--transition-base);
+}
+
+.recommendation-item:nth-child(2) {
+  border-left-color: var(--fascist-red);
+}
+
+.recommendation-item:nth-child(3) {
+  border-left-color: var(--propaganda-black);
+}
+
+.recommendation-item:hover {
+  transform: translateX(8px);
+  box-shadow: var(--shadow-small);
+}
+
+/* Name Suggestions */
+.name-suggestions {
+  background: var(--propaganda-black);
+  border: var(--border-thick) solid var(--fascist-red);
+  padding: var(--space-xl);
+  margin: var(--space-xl) 0;
+}
+
+.name-suggestions h5 {
+  color: var(--highlight-cream);
+  font-family: var(--font-propaganda);
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+}
+
+.suggestion-buttons {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.suggestion-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--liberal-blue);
+  color: var(--white);
+  border: var(--border-medium) solid var(--white);
+  cursor: pointer;
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-small);
+}
+
+.suggestion-btn:hover {
+  background: var(--liberal-dark);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Game Summary */
+.game-summary {
+  background: var(--neutral-beige);
+  border: var(--border-medium) solid var(--propaganda-black);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-inset);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--off-white);
+  border: var(--border-thin) solid var(--propaganda-black);
+}
+
+.summary-label {
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--propaganda-black);
+}
+
+.summary-value {
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  color: var(--fascist-red);
+  text-transform: uppercase;
+}
+
+/* ============================================
+   12. STATUS MESSAGES
+   ============================================ */
+.status-container {
+  position: fixed;
+  top: var(--space-xl);
+  right: var(--space-xl);
+  z-index: 1000;
+  max-width: 400px;
+}
+
+.status-message {
+  background: var(--off-white);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  border: var(--border-thick) solid var(--propaganda-black);
+  box-shadow: var(--shadow-brutal);
+  animation: slideIn 0.3s ease-out;
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.status-success {
+  border-left: 8px solid var(--liberal-blue);
+  background: var(--off-white);
+}
+
+.status-error {
+  border-left: 8px solid var(--fascist-red);
+  background: var(--off-white);
+}
+
+.status-info {
+  border-left: 8px solid var(--neutral-beige);
+  background: var(--off-white);
+}
+
+/* ============================================
+   13. FOOTER - PROPAGANDA STYLE
+   ============================================ */
+footer,
+.main-footer {
+  background: var(--propaganda-black);
+  border-top: var(--border-thick) solid var(--fascist-red);
+  padding: var(--space-2xl) 0;
+  margin-top: var(--space-3xl);
+  position: relative;
+}
+
+footer::before,
+.main-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 33%,
+    var(--neutral-beige) 33%,
+    var(--neutral-beige) 66%,
+    var(--fascist-red) 66%,
+    var(--fascist-red) 100%
+  );
+}
+
+.footer-content {
+  text-align: center;
+  color: var(--highlight-cream);
+}
+
+.footer-text {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-base);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-lg);
+  color: var(--highlight-cream);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: var(--liberal-blue);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-thin) solid transparent;
+}
+
+.footer-link:hover {
+  color: var(--highlight-cream);
+  border-color: var(--highlight-cream);
+  transform: translateY(-2px);
+}
+
+.footer-separator {
+  color: var(--dark-beige);
+}
+
+/* ============================================
+   14. GAME INFO CARDS
+   ============================================ */
+.game-info-section {
+  margin: var(--space-3xl) 0;
+}
+
+.game-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-xl);
+}
+
+.game-info-card {
+  background: var(--off-white);
+  border: var(--border-thick) solid var(--propaganda-black);
+  padding: var(--space-xl);
+  text-align: center;
+  position: relative;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-medium);
+}
+
+.game-info-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--liberal-blue);
+}
+
+.game-info-card:nth-child(2)::after {
+  background: var(--neutral-beige);
+}
+
+.game-info-card:nth-child(3)::after {
+  background: var(--fascist-red);
+}
+
+.game-info-card:hover {
+  transform: translate(-3px, -3px) rotate(1deg);
+  box-shadow: var(--shadow-brutal);
+}
+
+.info-title {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-xl);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--propaganda-black);
+  margin-bottom: var(--space-sm);
+}
+
+.info-description {
+  color: var(--text-primary);
+  font-size: var(--font-base);
+  line-height: 1.5;
+}
+
+/* ============================================
+   15. UTILITY CLASSES
+   ============================================ */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--space-sm); }
+.mt-2 { margin-top: var(--space-md); }
+.mt-3 { margin-top: var(--space-lg); }
+.mt-4 { margin-top: var(--space-xl); }
+.mt-5 { margin-top: var(--space-2xl); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
+.mb-4 { margin-bottom: var(--space-xl); }
+.mb-5 { margin-bottom: var(--space-2xl); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--space-sm); }
+.p-2 { padding: var(--space-md); }
+.p-3 { padding: var(--space-lg); }
+.p-4 { padding: var(--space-xl); }
+.p-5 { padding: var(--space-2xl); }
+
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-1 { gap: var(--space-sm); }
+.gap-2 { gap: var(--space-md); }
+.gap-3 { gap: var(--space-lg); }
+
+/* ============================================
+   16. GRID SYSTEM
+   ============================================ */
+.grid {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ============================================
+   17. RULES PAGE STYLES
+   ============================================ */
+.rules-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+}
+
+.rules-header {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+  padding: var(--space-2xl) 0;
+  position: relative;
+}
+
+.rules-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 45%,
+    var(--propaganda-black) 45%,
+    var(--propaganda-black) 55%,
+    var(--fascist-red) 55%,
+    var(--fascist-red) 100%
+  );
+}
+
+.rules-icon {
+  font-size: 5rem;
+  margin-bottom: var(--space-xl);
+  display: block;
+  filter: drop-shadow(3px 3px 0px var(--propaganda-black));
+}
+
+.rules-header h2 {
+  font-family: var(--font-fraktur);
+  font-size: var(--font-4xl);
+  color: var(--propaganda-black);
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+  text-shadow: 3px 3px 0px var(--fascist-red);
+}
+
+.rules-subtitle {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-xl);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Rules Navigation */
+.rules-navigation {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-3xl);
+  flex-wrap: wrap;
+  padding: var(--space-xl);
+  background: var(--propaganda-black);
+  border: var(--border-thick) solid var(--fascist-red);
+}
+
+.rule-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--highlight-cream);
+  border: var(--border-medium) solid var(--propaganda-black);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-width: 120px;
+  box-shadow: var(--shadow-small);
+}
+
+.rule-nav-btn:hover {
+  background: var(--liberal-blue);
+  color: var(--white);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+.rule-nav-btn.active {
+  background: var(--fascist-red);
+  color: var(--highlight-cream);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.nav-icon {
+  font-size: var(--font-2xl);
+}
+
+.nav-text {
+  font-family: var(--font-propaganda);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Rules Content Sections */
+.rule-section {
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.rule-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   18. RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+  :root {
+    --font-base: 0.875rem;
+    --font-lg: 1rem;
+    --font-xl: 1.125rem;
+    --font-2xl: 1.5rem;
+    --font-3xl: 2rem;
+    --font-4xl: 2.5rem;
+    --font-5xl: 3rem;
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
+  }
+  
+  .header {
+    padding: var(--space-lg) 0;
+  }
+  
+  .logo-text h1 {
+    font-size: var(--font-3xl);
+  }
+  
+  .logo-text .subtitle {
+    font-size: var(--font-base);
+    letter-spacing: 0.2em;
+  }
+  
+  .card {
+    padding: var(--space-lg);
+  }
+  
+  .feature-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+  }
+  
+  .welcome-buttons {
+    gap: var(--space-lg);
+  }
+  
+  .primary-buttons,
+  .secondary-buttons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .player-input-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .player-input-group label {
+    margin-bottom: var(--space-xs);
+  }
+  
+  .count-btn {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .player-count-display {
+    min-width: 120px;
+  }
+  
+  .rules-navigation {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-lg);
+  }
+  
+  .rule-nav-btn {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-md);
+    min-width: auto;
+  }
+  
+  .game-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-container {
+    left: var(--space-md);
+    right: var(--space-md);
+    top: var(--space-md);
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .logo-icon {
+    font-size: 3rem;
+  }
+  
+  .logo-text h1 {
+    font-size: var(--font-2xl);
+  }
+  
+  .welcome-icon {
+    font-size: 3rem;
+  }
+  
+  .welcome-title {
+    font-size: var(--font-2xl);
+  }
+  
+  .feature-card {
+    padding: var(--space-md);
+  }
+  
+  .setup-section {
+    padding: var(--space-lg);
+  }
+  
+  .suggestion-buttons {
+    flex-direction: column;
+  }
+  
+  .suggestion-btn {
+    width: 100%;
+  }
+  
+  .footer-links {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  
+  .footer-separator {
+    display: none;
+  }
+}
+
+/* Tablet specific adjustments */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .game-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Large screens */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+  
+  .feature-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Print styles */
+@media print {
+  .header,
+  footer,
+  .btn,
+  .status-container {
+    display: none;
+  }
+  
+  body {
+    font-size: 12pt;
+    color: black;
+    background: white;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid black;
+    page-break-inside: avoid;
+  }
+}
