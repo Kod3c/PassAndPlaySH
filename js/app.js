@@ -345,23 +345,28 @@ class App {
     }
     
     setupMultiDeviceNavigation() {
-        // Handle multi-device navigation for create game
-        const createGameBtn = document.querySelector('[data-navigate="multidevice"]');
-        if (createGameBtn) {
-            createGameBtn.addEventListener('click', () => {
-                // Navigate to the multi-device page with create mode
-                window.location.href = 'pages/play.html?mode=create';
+        // Remove the data-navigate attribute from multidevice buttons to prevent conflicts
+        // and add direct click handlers
+        const multideviceButtons = document.querySelectorAll('[data-navigate="multidevice"]');
+        
+        multideviceButtons.forEach((btn, index) => {
+            // Remove the data-navigate attribute to prevent the general handler from triggering
+            btn.removeAttribute('data-navigate');
+            
+            // Add specific click handler based on button index
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (index === 0) {
+                    // First button - Create Game
+                    window.location.href = 'pages/play.html?mode=create';
+                } else if (index === 1) {
+                    // Second button - Join Game  
+                    window.location.href = 'pages/play.html?mode=join';
+                }
             });
-        }
-
-        // Handle multi-device navigation for join game
-        const joinGameBtn = document.querySelectorAll('[data-navigate="multidevice"]')[1];
-        if (joinGameBtn) {
-            joinGameBtn.addEventListener('click', () => {
-                // Navigate to the multi-device page with join mode
-                window.location.href = 'pages/play.html?mode=join';
-            });
-        }
+        });
     }
 
     setupBetaAccess() {
