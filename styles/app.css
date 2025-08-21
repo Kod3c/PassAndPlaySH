@@ -3357,3 +3357,603 @@ footer,
     transform: none;
   }
 }
+
+/* ============================================
+   21. Player Selection Page Styles
+   ============================================ */
+
+/* Player Input Fields */
+.player-inputs {
+  display: grid;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+.player-input-group {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--off-white);
+  border: var(--border-medium) solid var(--propaganda-black);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.player-input-group:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--liberal-blue);
+}
+
+.player-input-group label {
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--propaganda-black);
+  font-size: var(--font-sm);
+  letter-spacing: 0.05em;
+}
+
+.player-input-group input {
+  width: 100%;
+  padding: var(--space-md);
+  border: var(--border-medium) solid var(--propaganda-black);
+  background: var(--white);
+  font-family: var(--font-body);
+  font-size: var(--font-base);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.player-input-group input:focus {
+  outline: none;
+  border-color: var(--liberal-blue);
+  box-shadow: 0 0 0 3px rgba(0, 174, 239, 0.2);
+  transform: translateY(-1px);
+}
+
+.player-input-group input::placeholder {
+  color: var(--dark-beige);
+  font-style: italic;
+  font-size: var(--font-sm);
+}
+
+/* Player Recommendations */
+.player-recommendations {
+  background: var(--highlight-cream);
+  border: var(--border-medium) solid var(--propaganda-black);
+  padding: var(--space-xl);
+  margin: var(--space-xl) 0;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.player-recommendations::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 33%,
+    var(--fascist-red) 33%,
+    var(--fascist-red) 66%,
+    var(--propaganda-black) 66%,
+    var(--propaganda-black) 100%
+  );
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--off-white);
+  border-left: var(--border-thick) solid var(--liberal-blue);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.recommendation-item:nth-child(2) {
+  border-left-color: var(--fascist-red);
+}
+
+.recommendation-item:nth-child(3) {
+  border-left-color: var(--propaganda-black);
+}
+
+.recommendation-item:hover {
+  transform: translateX(8px);
+  box-shadow: var(--shadow-md);
+  background: var(--white);
+}
+
+.rec-icon {
+  font-size: var(--font-xl);
+  filter: drop-shadow(1px 1px 0px var(--propaganda-black));
+}
+
+.recommendation-item span:last-child {
+  font-family: var(--font-body);
+  font-size: var(--font-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Name Suggestions */
+.name-suggestions {
+  background: var(--propaganda-black);
+  border: var(--border-thick) solid var(--fascist-red);
+  padding: var(--space-xl);
+  margin: var(--space-xl) 0;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.name-suggestions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 50%,
+    var(--fascist-red) 50%,
+    var(--fascist-red) 100%
+  );
+}
+
+.name-suggestions h5 {
+  color: var(--highlight-cream);
+  font-family: var(--font-propaganda);
+  text-transform: uppercase;
+  margin-bottom: var(--space-lg);
+  font-size: var(--font-lg);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.suggestion-buttons {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.suggestion-btn {
+  padding: var(--space-md) var(--space-xl);
+  background: var(--liberal-blue);
+  color: var(--white);
+  border: var(--border-medium) solid var(--white);
+  cursor: pointer;
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.suggestion-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.suggestion-btn:hover::before {
+  left: 100%;
+}
+
+.suggestion-btn:hover {
+  background: var(--secondary-dark);
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--highlight-cream);
+}
+
+.suggestion-btn:active {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Game Summary */
+.game-summary {
+  background: var(--neutral-beige);
+  border: var(--border-medium) solid var(--propaganda-black);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.game-summary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 25%,
+    var(--fascist-red) 25%,
+    var(--fascist-red) 50%,
+    var(--neutral-beige) 50%,
+    var(--neutral-beige) 75%,
+    var(--propaganda-black) 75%,
+    var(--propaganda-black) 100%
+  );
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+  background: var(--off-white);
+  border: var(--border-thin) solid var(--propaganda-black);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--liberal-blue);
+  background: var(--white);
+}
+
+.summary-label {
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  color: var(--propaganda-black);
+  text-transform: uppercase;
+  font-size: var(--font-sm);
+  letter-spacing: 0.05em;
+}
+
+.summary-value {
+  font-family: var(--font-body);
+  color: var(--fascist-red);
+  font-weight: 600;
+  font-size: var(--font-base);
+}
+
+/* Role Distribution Display */
+.role-distribution {
+  background: var(--neutral-beige);
+  border: var(--border-medium) solid var(--propaganda-black);
+  padding: var(--space-lg);
+  margin: var(--space-lg) 0;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.role-distribution::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--liberal-blue) 0%,
+    var(--liberal-blue) 50%,
+    var(--fascist-red) 50%,
+    var(--fascist-red) 100%
+  );
+}
+
+.role-distribution h4 {
+  font-family: var(--font-propaganda);
+  text-transform: uppercase;
+  margin-bottom: var(--space-md);
+  color: var(--propaganda-black);
+  font-size: var(--font-lg);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.roles {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.role {
+  padding: var(--space-sm) var(--space-lg);
+  border: var(--border-thin) solid var(--propaganda-black);
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  font-size: var(--font-sm);
+  letter-spacing: 0.05em;
+}
+
+.role:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.role.liberal {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+.role.fascist {
+  background: var(--fascist-red);
+  color: var(--highlight-cream);
+}
+
+.role.hitler {
+  background: var(--propaganda-black);
+  color: var(--highlight-cream);
+  position: relative;
+}
+
+.role.hitler::after {
+  content: '👑';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: var(--font-sm);
+  filter: drop-shadow(1px 1px 0px var(--propaganda-black));
+}
+
+/* Create Game Hint */
+.create-game-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--highlight-cream);
+  border: var(--border-thin) solid var(--propaganda-black);
+  font-size: var(--font-sm);
+}
+
+/* Button Group Enhancements */
+.btn-group {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-2xl);
+}
+
+.btn-group .btn {
+  min-width: 160px;
+}
+
+/* Status Container Enhancements */
+.status-container {
+  position: fixed;
+  top: var(--space-xl);
+  right: var(--space-xl);
+  z-index: var(--z-modal);
+  max-width: 400px;
+}
+
+.status-message {
+  background: var(--off-white);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  border: var(--border-thick) solid var(--propaganda-black);
+  box-shadow: var(--shadow-lg);
+  animation: slideIn 0.3s ease-out;
+  font-family: var(--font-propaganda);
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.status-message::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+}
+
+.status-success {
+  border-left-color: var(--liberal-blue);
+}
+
+.status-success::before {
+  background: var(--liberal-blue);
+}
+
+.status-error {
+  border-left-color: var(--fascist-red);
+}
+
+.status-error::before {
+  background: var(--fascist-red);
+}
+
+.status-info {
+  border-left-color: var(--neutral-beige);
+}
+
+.status-info::before {
+  background: var(--neutral-beige);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   22. Responsive Design for Player Selection
+   ============================================ */
+
+@media (max-width: 768px) {
+  .player-input-group {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    text-align: center;
+  }
+  
+  .player-input-group label {
+    text-align: center;
+    font-size: var(--font-base);
+  }
+  
+  .suggestion-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .suggestion-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .roles {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  
+  .role {
+    min-width: 200px;
+    text-align: center;
+  }
+  
+  .summary-item {
+    flex-direction: column;
+    gap: var(--space-sm);
+    text-align: center;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-group .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .status-container {
+    left: var(--space-md);
+    right: var(--space-md);
+    top: var(--space-md);
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-input-group {
+    padding: var(--space-md);
+  }
+  
+  .player-input-group input {
+    padding: var(--space-sm);
+    font-size: var(--font-sm);
+  }
+  
+  .name-suggestions {
+    padding: var(--space-lg);
+  }
+  
+  .suggestion-btn {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-sm);
+  }
+  
+  .game-summary {
+    padding: var(--space-lg);
+  }
+  
+  .summary-item {
+    padding: var(--space-sm);
+  }
+  
+  .role-distribution {
+    padding: var(--space-md);
+  }
+  
+  .role {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-xs);
+    min-width: 160px;
+  }
+}
+
+/* Touch-friendly improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .player-input-group:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .recommendation-item:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .suggestion-btn:hover {
+    transform: none;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .suggestion-btn:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .summary-item:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .role:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  /* Ensure minimum touch target size */
+  .suggestion-btn {
+    min-height: 44px;
+  }
+  
+  .player-input-group input {
+    min-height: 44px;
+  }
+}
