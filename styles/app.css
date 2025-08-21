@@ -533,15 +533,32 @@ main {
   margin-bottom: var(--space-lg);
 }
 
-.form-label {
-  display: block;
-  margin-bottom: var(--space-sm);
-  font-family: 'Oswald', 'Bebas Neue', 'Futura', 'League Gothic', 'Arial Black', sans-serif;
+.form-group .form-control {
+  transition: all var(--transition-fast);
+  border-radius: 0;
+}
+
+.form-group .form-control:focus {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.form-group .form-label {
   font-weight: 700;
   color: var(--propaganda-black);
-  font-size: var(--font-sm);
+  margin-bottom: var(--space-sm);
+  display: block;
+  font-family: var(--font-propaganda);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
+  font-size: var(--font-sm);
+}
+
+.form-group .form-help {
+  margin-top: var(--space-xs);
+  font-size: var(--font-sm);
+  color: var(--dark-beige);
+  font-style: italic;
 }
 
 .form-control {
@@ -561,13 +578,6 @@ main {
 }
 
 .form-control::placeholder {
-  color: var(--dark-beige);
-  font-style: italic;
-}
-
-.form-help {
-  margin-top: var(--space-xs);
-  font-size: var(--font-sm);
   color: var(--dark-beige);
   font-style: italic;
 }
@@ -3543,6 +3553,19 @@ footer,
   letter-spacing: 0.05em;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.suggestion-btn .btn-emoji {
+  font-size: var(--font-lg);
+  filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.3));
+}
+
+.suggestion-btn .btn-text {
+  font-size: var(--font-sm);
+  letter-spacing: 0.05em;
 }
 
 .suggestion-btn::before {

@@ -108,9 +108,18 @@
                     <div class="name-suggestions" id="name-suggestions" style="display: none;">
                         <h5>Quick Name Suggestions</h5>
                         <div class="suggestion-buttons">
-                            <button class="suggestion-btn" id="random-names-btn">Random Names</button>
-                            <button class="suggestion-btn" id="default-names-btn">Default Names</button>
-                            <button class="suggestion-btn" id="clear-names-btn">Clear All</button>
+                            <button class="suggestion-btn" id="random-names-btn">
+                                <span class="btn-emoji">🎲</span>
+                                <span class="btn-text">Random Names</span>
+                            </button>
+                            <button class="suggestion-btn" id="default-names-btn">
+                                <span class="btn-emoji">👥</span>
+                                <span class="btn-text">Default Names</span>
+                            </button>
+                            <button class="suggestion-btn" id="clear-names-btn">
+                                <span class="btn-emoji">🗑️</span>
+                                <span class="btn-text">Clear All</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -365,6 +374,18 @@
                     // Show additional UI elements when players are selected
                     nameSuggestions.style.display = 'block';
                     gameSummarySection.style.display = 'block';
+                    
+                    // Show the player input hint
+                    const playerInputHint = document.getElementById('player-input-hint');
+                    if (playerInputHint) {
+                        playerInputHint.style.display = 'block';
+                    }
+                    
+                    // Show player recommendations
+                    const playerRecommendations = document.getElementById('player-recommendations');
+                    if (playerRecommendations) {
+                        playerRecommendations.style.display = 'block';
+                    }
                 }
                 
                 // Update button states based on current count
