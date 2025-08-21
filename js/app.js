@@ -7,12 +7,19 @@ class App {
     }
 
     async init() {
-        this.setupEventListeners();
+        // Setup multidevice navigation FIRST to prevent conflicts
         this.setupMultiDeviceNavigation();
+        this.setupEventListeners();
         this.setupBetaAccess();
         this.setupThemeSwitcher();
-        this.autoShowSection();
-        this.initializePlayerCount();
+        // Check if autoShowSection exists before calling
+        if (typeof this.autoShowSection === 'function') {
+            this.autoShowSection();
+        }
+        // Check if initializePlayerCount exists before calling
+        if (typeof this.initializePlayerCount === 'function') {
+            this.initializePlayerCount();
+        }
     }
 
     getBasePath() {
@@ -55,11 +62,19 @@ class App {
     }
 
     navigateToPage(pageName, updateHistory = true) {
+        // Validate pageName
+        if (!pageName || typeof pageName !== 'string') {
+            console.error('Invalid page name:', pageName);
+            return;
+        }
+        
         this.currentPage = pageName;
         
         // Update browser history if requested
         if (updateHistory) {
-            const url = pageName === 'home' ? this.basePath + '/' : this.basePath + `/${pageName}`;
+            // Use getBasePath() method if basePath is not defined
+            const basePath = this.basePath || this.getBasePath() || '';
+            const url = pageName === 'home' ? basePath + '/' : basePath + `/${pageName}`;
             window.history.pushState({ page: pageName }, '', url);
         }
         
@@ -139,7 +154,7 @@ class App {
             if (!navigateElement) {
                 let currentElement = event.target;
                 while (currentElement && currentElement !== document.body) {
-                    if (currentElement.hasAttribute('data-navigate')) {
+                    if (currentElement.hasAttribute && currentElement.hasAttribute('data-navigate')) {
                         navigateElement = currentElement;
                         break;
                     }
@@ -149,7 +164,10 @@ class App {
             
             if (navigateElement) {
                 const page = navigateElement.dataset.navigate;
-                this.navigateToPage(page);
+                // Only navigate if page is defined and not 'multidevice'
+                if (page && page !== 'multidevice') {
+                    this.navigateToPage(page);
+                }
             }
         });
 
@@ -358,13 +376,14 @@ class App {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                if (index === 0) {
-                    // First button - Create Game
-                    window.location.href = 'pages/play.html?mode=create';
-                } else if (index === 1) {
-                    // Second button - Join Game  
-                    window.location.href = 'pages/play.html?mode=join';
-                }
+                // Simple relative path that should work from index.html
+                const mode = index === 0 ? 'create' : 'join';
+                
+                // Use a simple relative path - this works when index.html is at the root
+                const playPageUrl = 'pages/play.html?mode=' + mode;
+                
+                console.log('Navigating to:', playPageUrl);
+                window.location.href = playPageUrl;
             });
         });
     }
