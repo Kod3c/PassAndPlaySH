@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Hitler - Pass & Play</title>
-    <meta name="description" content="Play Secret Hitler on one device with pass-and-play mechanics">
-    <link rel="stylesheet" href="styles/app.css">
-    <link rel="manifest" href="manifest.json">
+    <title>Rules - Secret Hitler - Pass & Play</title>
+    <meta name="description" content="Learn how to play Secret Hitler - the ultimate social deduction game">
+    <link rel="stylesheet" href="../styles/app.css">
+    <link rel="manifest" href="../manifest.json">
 </head>
 <body>
     <div class="page-wrapper">
@@ -27,135 +27,6 @@
         
         <!-- Main Content -->
         <main>
-            <div class="container">
-                <!-- Welcome Section -->
-                <div class="card text-center mb-4">
-                    <div class="card-content">
-                        <span class="card-icon" style="font-size: 3rem;">🎮</span>
-                        <h2 class="mt-2">Welcome to Secret Hitler</h2>
-                        <p>Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
-                        
-                        <div class="flex justify-center gap-2 flex-wrap mt-3">
-                            <button data-navigate="multidevice" class="btn btn-primary btn-lg">
-                                <span>🚀</span>
-                                <span>Create Game</span>
-                            </button>
-                            <button data-navigate="multidevice" class="btn btn-secondary btn-lg">
-                                <span>🔗</span>
-                                <span>Join Game</span>
-                            </button>
-                        </div>
-                        
-                        <div class="flex justify-center gap-2 flex-wrap mt-2">
-                            <button data-navigate="setup" class="btn btn-outline" disabled>
-                                <span>📱</span>
-                                <span>Pass & Play Game</span>
-                            </button>
-                            <button onclick="window.location.href='pages/rules.html'" class="btn btn-outline">
-                                <span>📖</span>
-                                <span>View Rules</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            
-                <!-- Features Section -->
-                <div class="text-center mb-4">
-                    <h3>🎯 Game Features</h3>
-                    <p class="text-secondary">Everything you need for an immersive Secret Hitler experience</p>
-                </div>
-                
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <span class="feature-icon">🎭</span>
-                        <h4 class="feature-title">Hidden Role Management</h4>
-                        <p class="feature-description">Seamlessly manage secret identities with our intuitive interface</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">🗳️</span>
-                        <h4 class="feature-title">Election & Voting</h4>
-                        <p class="feature-description">Streamlined voting system with real-time results</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">📜</span>
-                        <h4 class="feature-title">Policy Legislation</h4>
-                        <p class="feature-description">Easy policy tracking and management</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">⚡</span>
-                        <h4 class="feature-title">Executive Powers</h4>
-                        <p class="feature-description">Special abilities unlock as the game progresses</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">🔒</span>
-                        <h4 class="feature-title">Privacy First</h4>
-                        <p class="feature-description">Pass-and-play mechanics ensure role secrecy</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">📱</span>
-                        <h4 class="feature-title">Multi-Device</h4>
-                        <p class="feature-description">Play across multiple devices or on one screen</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">🌐</span>
-                        <h4 class="feature-title">Real-time Multiplayer</h4>
-                        <p class="feature-description">Connect with friends anywhere in the world</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">💾</span>
-                        <h4 class="feature-title">Offline Capable</h4>
-                        <p class="feature-description">No internet required for local games</p>
-                    </div>
-                </div>
-            
-                <!-- Game Info Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                    <div class="card">
-                        <div class="card-content text-center">
-                            <span class="card-icon">👥</span>
-                            <h4>5-10 Players</h4>
-                            <p>Perfect for any group size</p>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-content text-center">
-                            <span class="card-icon">⏱️</span>
-                            <h4>30-45 Minutes</h4>
-                            <p>Quick and engaging gameplay</p>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-content text-center">
-                            <span class="card-icon">🎯</span>
-                            <h4>Social Deduction</h4>
-                            <p>Test your deception skills</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-
-
-        <!-- Footer -->
-        <footer>
-            <div class="container">
-                <p>Built for offline play - no accounts or servers required</p>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Rules Page Content (Hidden by default) -->
-        <main id="rules-page" class="page-content" style="display: none;">
             <div class="rules-page">
                 <div class="rules-header">
                     <div class="rules-icon">📖</div>
@@ -658,11 +529,11 @@
                 </div>
 
                 <div class="rules-actions">
-                    <button data-navigate="home" class="btn btn-primary btn-large">
+                    <button onclick="window.location.href='../index.html'" class="btn btn-primary btn-large">
                         <span class="btn-icon">🏠</span>
                         <span class="btn-text">Back to Home</span>
                     </button>
-                    <button data-navigate="setup" class="btn btn-secondary btn-medium">
+                    <button onclick="window.location.href='play.html'" class="btn btn-secondary btn-medium">
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">Start New Game</span>
                     </button>
@@ -670,15 +541,47 @@
             </div>
         </main>
 
-        <!-- Game Page Content (placeholder) -->
-        <main id="game-page" class="page-content" style="display: none;">
-            <div class="game-page">
-                <h2>Game in Progress</h2>
-                <p>Game functionality coming soon...</p>
-                <button data-navigate="home" class="btn btn-primary">Back to Home</button>
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <p>Built for offline play - no accounts or servers required</p>
             </div>
-        </main>
+        </footer>
+    </div>
 
-    <script src="js/app.js"></script>
+    <script>
+        // Rules page navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup rules page navigation
+            const ruleNavButtons = document.querySelectorAll('.rule-nav-btn');
+            const ruleSections = document.querySelectorAll('.rule-section');
+
+            ruleNavButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const sectionName = this.dataset.section;
+                    
+                    // Update active navigation button
+                    ruleNavButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the selected section
+                    ruleSections.forEach(section => section.classList.remove('active'));
+                    const targetSection = document.getElementById(sectionName + '-section');
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+                });
+            });
+
+            // Make header clickable to go home
+            const header = document.querySelector('header h1');
+            if (header) {
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', () => {
+                    window.location.href = '../index.html';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
