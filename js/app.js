@@ -245,6 +245,11 @@ class App {
         const themeOptions = document.querySelectorAll('.theme-option');
         const enableThemeBtn = document.getElementById('enable-theme-btn');
         
+        // Check if theme switcher exists before trying to use it
+        if (!themeSwitcher) {
+            return; // Exit early if no theme switcher found
+        }
+        
         if (enabled) {
             themeSwitcher.classList.remove('disabled');
             themeOptions.forEach(option => {
@@ -269,7 +274,10 @@ class App {
     }
 
     toggleThemeSwitcher() {
-        const isCurrentlyEnabled = !document.querySelector('.theme-switcher').classList.contains('disabled');
+        const themeSwitcher = document.querySelector('.theme-switcher');
+        if (!themeSwitcher) return; // Exit if no theme switcher
+        
+        const isCurrentlyEnabled = !themeSwitcher.classList.contains('disabled');
         const newState = !isCurrentlyEnabled;
         
         this.setThemeSwitcherState(newState);
