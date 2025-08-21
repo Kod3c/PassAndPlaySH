@@ -247,7 +247,7 @@
             cursor: not-allowed;
             opacity: 0.6;
         }
-
+        
         .current-count {
             font-size: 1.5rem;
             font-weight: bold;
@@ -266,8 +266,8 @@
 
         .recommendation-item {
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
+                align-items: center;
+                gap: 0.75rem;
             margin-bottom: 0.5rem;
             padding: 0.5rem;
             border-radius: var(--border-radius);
@@ -302,19 +302,19 @@
             display: grid;
             gap: 1rem;
         }
-
+        
         .player-input-group {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
-
+        
         .player-input-group label {
             min-width: 80px;
             font-weight: 600;
             color: var(--text-primary);
         }
-
+        
         .player-input-group input {
             flex: 1;
             padding: 0.75rem;
@@ -323,7 +323,7 @@
             font-size: 1rem;
             transition: var(--transition);
         }
-
+        
         .player-input-group input:focus {
             outline: none;
             border-color: var(--accent-color);
@@ -347,9 +347,9 @@
         .suggestion-buttons {
             display: flex;
             gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
+                flex-wrap: wrap;
+            }
+            
         .suggestion-btn {
             padding: 0.5rem 1rem;
             background: var(--info-color);
@@ -357,7 +357,7 @@
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
-            font-size: 0.9rem;
+                font-size: 0.9rem;
             transition: var(--transition);
         }
 
@@ -368,9 +368,9 @@
         }
 
         .game-summary-content {
-            padding: 1.5rem;
-        }
-
+                padding: 1.5rem;
+            }
+            
         .summary-item {
             display: flex;
             justify-content: space-between;
@@ -393,7 +393,7 @@
             font-weight: 600;
             color: var(--text-primary);
         }
-
+        
         .summary-value {
             color: var(--accent-color);
             font-weight: 500;
@@ -406,7 +406,7 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-
+        
         .btn {
             padding: 0.75rem 2rem;
             border: none;
@@ -507,7 +507,7 @@
                 gap: 1rem;
                 padding: 1rem;
             }
-
+            
             .player-recommendations,
             .name-suggestions {
                 margin: 1rem 0;
@@ -541,9 +541,9 @@
 
             .btn-group {
                 padding: 1rem;
-                gap: 0.75rem;
-            }
-
+            gap: 0.75rem;
+        }
+        
             .btn {
                 padding: 0.6rem 1.5rem;
                 font-size: 0.9rem;
@@ -604,10 +604,10 @@
     <header class="header">
         <h1>🎭 Secret Hitler</h1>
         <p id="page-subtitle">Game Setup</p>
-    </header>
-
+        </header>
+        
     <!-- Main content area for game setup -->
-    <main class="multi-device-setup">
+        <main class="multi-device-setup">
         <!-- Game Creation Section - Main setup interface -->
         <div id="create-section" class="setup-section enhanced-section active">
             <div class="section-header">
@@ -617,13 +617,13 @@
                     <p class="create-description">Set up a new Secret Hitler game for your group</p>
                 </div>
             </div>
-
+            
             <!-- Game Settings Section - Configure game parameters -->
-            <div class="setup-section enhanced-section">
-                <div class="section-header">
+                <div class="setup-section enhanced-section">
+                    <div class="section-header">
                     <div class="section-icon">⚙️</div>
                     <h2>Game Settings</h2>
-                </div>
+                    </div>
                 <!-- Grid layout for game configuration options -->
                 <div class="game-settings-grid">
                     <!-- Game name input field -->
@@ -631,7 +631,7 @@
                         <label for="game-name-input">Game Name</label>
                         <input type="text" id="game-name-input" class="setting-input" placeholder="Enter game name" value="Secret Hitler Game">
                         <small class="setting-help">Choose a memorable name for your game</small>
-                    </div>
+                            </div>
                     <!-- Game mode selection dropdown -->
                     <div class="setting-item">
                         <label for="game-mode-select">Game Mode</label>
@@ -641,7 +641,7 @@
                             <option value="extended">Extended Game</option>
                         </select>
                         <small class="setting-help">Standard: Full rules, Quick: Faster gameplay, Extended: More rounds</small>
-                    </div>
+                        </div>
                     <!-- Difficulty level selection -->
                     <div class="setting-item">
                         <label for="difficulty-select">Difficulty</label>
@@ -651,10 +651,10 @@
                             <option value="expert">Expert</option>
                         </select>
                         <small class="setting-help">Affects role distribution and special rules</small>
+                        </div>
                     </div>
                 </div>
-            </div>
-
+                    
             <!-- Player Count Section -->
             <div class="player-count-section">
                 <h3>Number of Players</h3>
@@ -664,23 +664,23 @@
                     <button class="count-btn" id="increase-btn">+</button>
                     <span>players</span>
                 </div>
-
+                    
                 <!-- Player Recommendations -->
                 <div class="player-recommendations" id="player-recommendations" style="display: none;">
                     <div class="recommendation-item">
                         <span class="rec-icon">👥</span>
                         <span class="rec-text"><strong>5-6 players:</strong> Great for beginners, simpler dynamics</span>
-                    </div>
+                </div>
                     <div class="recommendation-item">
                         <span class="rec-icon">🎯</span>
                         <span class="rec-text"><strong>7-8 players:</strong> Optimal experience, balanced gameplay</span>
-                    </div>
+            </div>
                     <div class="recommendation-item">
                         <span class="rec-icon">🔥</span>
                         <span class="rec-text"><strong>9-10 players:</strong> Maximum chaos, advanced players</span>
-                    </div>
                 </div>
-
+                    </div>
+                    
                 <div id="role-info"></div>
                 <div id="player-inputs" class="player-inputs"></div>
 
@@ -692,15 +692,15 @@
                         <button class="suggestion-btn" id="default-names-btn">Default Names</button>
                         <button class="suggestion-btn" id="clear-names-btn">Clear All</button>
                     </div>
-                </div>
             </div>
-
+                </div>
+                
             <!-- Game Summary Section -->
             <div class="setup-section enhanced-section" id="game-summary-section" style="display: none;">
-                <div class="section-header">
+                    <div class="section-header">
                     <div class="section-icon">📋</div>
                     <h2>Game Summary</h2>
-                </div>
+                    </div>
                 <div class="game-summary-content">
                     <div class="summary-item">
                         <span class="summary-label">Game Name:</span>
@@ -709,38 +709,38 @@
                     <div class="summary-item">
                         <span class="summary-label">Players:</span>
                         <span class="summary-value" id="summary-players">0</span>
-                    </div>
+                </div>
                     <div class="summary-item">
                         <span class="summary-label">Mode:</span>
                         <span class="summary-value" id="summary-mode">Standard Game</span>
-                    </div>
+                </div>
                     <div class="summary-item">
                         <span class="summary-label">Difficulty:</span>
                         <span class="summary-value" id="summary-difficulty">Normal</span>
-                    </div>
+            </div>
                     <div class="summary-item">
                         <span class="summary-label">Estimated Duration:</span>
                         <span class="summary-value" id="summary-duration">45-60 minutes</span>
+                </div>
                     </div>
                 </div>
-            </div>
-
+                
             <div class="btn-group">
                 <button id="create-game-btn" class="btn btn-primary">
                     <span class="btn-icon">🚀</span>
                     <span class="btn-text">Create Game</span>
-                </button>
+                            </button>
                 <button type="button" class="btn btn-outline" onclick="window.history.back()">
-                    <span class="btn-icon">⬅️</span>
+                        <span class="btn-icon">⬅️</span>
                     <span class="btn-text">Back</span>
-                </button>
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <!-- Status Messages -->
+            
+            <!-- Status Messages -->
         <div id="status-container" class="status-container"></div>
-    </main>
-
+        </main>
+    
     <!-- JavaScript for game setup functionality -->
     <script>
         /**
@@ -783,7 +783,7 @@
                 // Initialize the game setup interface
                 this.init();
             }
-
+            
             /**
              * Initialize the game setup interface
              * Sets up all event listeners, navigation, and initial state
@@ -802,7 +802,7 @@
             setupEventListeners() {
                 // Player count controls - increment button
                 document.getElementById('increase-btn').addEventListener('click', () => {
-                    const currentCount = this.getCurrentPlayerCount();
+                        const currentCount = this.getCurrentPlayerCount();
                     if (currentCount < 10) {  // Maximum 10 players allowed
                         this.updatePlayerCount(currentCount + 1);
                     }
@@ -810,7 +810,7 @@
 
                 // Player count controls - decrement button
                 document.getElementById('decrease-btn').addEventListener('click', () => {
-                    const currentCount = this.getCurrentPlayerCount();
+                        const currentCount = this.getCurrentPlayerCount();
                     if (currentCount > 0) {  // Minimum 0 players
                         this.updatePlayerCount(currentCount - 1);
                     }
@@ -873,7 +873,7 @@
                 const currentCountSpan = document.querySelector('.current-count');
                 return currentCountSpan ? parseInt(currentCountSpan.textContent) : 0;
             }
-
+            
             /**
              * Update the player count and regenerate the interface
              * This is the main method that handles all UI updates when player count changes
@@ -910,24 +910,24 @@
                     playerRecommendations.style.display = 'block';
                     
                     // Display role distribution based on player count
-                    const distribution = this.getRoleDistribution(newCount);
-                    roleInfo.innerHTML = `
+                const distribution = this.getRoleDistribution(newCount);
+                roleInfo.innerHTML = `
                         <div class="role-distribution">
                             <h4>Role Distribution:</h4>
                             <div class="roles">
                                 <span class="role liberal">${distribution.liberals} Liberals</span>
                                 <span class="role fascist">${distribution.fascists} Fascists</span>
                                 <span class="role hitler">1 Hitler</span>
-                            </div>
                         </div>
-                    `;
-                    
+                    </div>
+                `;
+
                     // Dynamically generate player name input fields
                     let inputsHTML = '';
-                    for (let i = 1; i <= newCount; i++) {
+                for (let i = 1; i <= newCount; i++) {
                         inputsHTML += `
                             <div class="player-input-group">
-                                <label for="player-${i}">Player ${i}:</label>
+                        <label for="player-${i}">Player ${i}:</label>
                                 <input type="text" id="player-${i}" placeholder="Enter player name" required>
                             </div>
                         `;
@@ -970,7 +970,7 @@
                 // Return distribution for valid player count, or empty object for invalid
                 return distributions[playerCount] || { liberals: 0, fascists: 0, hitler: 0 };
             }
-
+            
             /**
              * Initialize the player count to 0
              * This ensures the interface starts in a clean state
