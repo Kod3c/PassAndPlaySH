@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for proper HTML5 structure and responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Game Setup</title>
+    
+    <!-- External CSS file for shared styles -->
+    <link href="../styles/main.css" rel="stylesheet">
+    
+    <!-- Page-specific styles for the game setup interface -->
+    <style>
+        /* CSS Custom Properties (Variables) for consistent theming */
+        :root {
+            /* Primary color scheme - dark blues for professional look */
+            --primary-color: #2c3e50;      /* Main brand color */
+            --secondary-color: #34495e;    /* Secondary brand color */
+            
+            /* Accent colors for interactive elements */
+            --accent-color: #e74c3c;      /* Primary accent (red) */
+            --accent-secondary: #3498db;   /* Secondary accent (blue) */
+            --accent-tertiary: #f39c12;   /* Tertiary accent (orange) */
+            
+            /* Status colors for different message types */
+            --success-color: #27ae60;     /* Success messages */
+            --warning-color: #f39c12;     /* Warning messages */
+            --danger-color: #e74c3c;      /* Error messages */
+            --info-color: #3498db;        /* Information messages */
+            
+            /* Background colors for layering */
+            --bg-primary: #ecf0f1;        /* Main background */
+            --bg-secondary: #bdc3c7;      /* Secondary background */
+            
+            /* Text colors for readability */
+            --text-primary: #2c3e50;      /* Primary text */
+            --text-secondary: #7f8c8d;    /* Secondary text */
+            
+            /* Border and shadow properties */
+            --border-color: #d5dbdb;      /* Default border color */
+            --shadow-light: 0 2px 4px rgba(0,0,0,0.1);      /* Subtle shadows */
+            --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);    /* Medium shadows */
+            --shadow-heavy: 0 8px 16px rgba(0,0,0,0.2);     /* Heavy shadows */
+            
+            /* Common design values */
+            --border-radius: 8px;         /* Rounded corners */
+            --transition: all 0.3s ease;  /* Smooth transitions */
+        }
+
+        /* Global CSS reset for consistent styling across browsers */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;  /* Include padding and border in element sizing */
+        }
+
+        /* Main body styling with gradient background */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Modern, readable font stack */
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);  /* Subtle gradient background */
+            color: var(--text-primary);  /* Primary text color for readability */
+            line-height: 1.6;  /* Comfortable line spacing */
+            min-height: 100vh;  /* Ensure full viewport height coverage */
+        }
+
+        /* Header section with gradient background and shadow */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);  /* Brand gradient */
+            color: white;  /* White text for contrast */
+            text-align: center;  /* Center align all header content */
+            padding: 2rem 1rem;  /* Generous padding for visual impact */
+            box-shadow: var(--shadow-medium);  /* Drop shadow for depth */
+        }
+
+        /* Main title styling with large, bold text */
+        .header h1 {
+            font-size: 2.5rem;  /* Large, prominent title */
+            font-weight: 700;  /* Bold weight for emphasis */
+            margin-bottom: 0.5rem;  /* Space below title */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);  /* Subtle text shadow for depth */
+        }
+
+        /* Subtitle text styling */
+        .header p {
+            font-size: 1.1rem;  /* Slightly larger than body text */
+            opacity: 0.9;  /* Slightly transparent for hierarchy */
+        }
+
+        /* Main content container with responsive width */
+        .multi-device-setup {
+            max-width: 800px;  /* Maximum width for optimal readability */
+            margin: 2rem auto;  /* Center horizontally with top/bottom spacing */
+            padding: 0 1rem;  /* Horizontal padding for mobile margins */
+        }
+
+        /* Base styling for all setup sections */
+        .setup-section {
+            background: white;  /* Clean white background */
+            border-radius: var(--border-radius);  /* Rounded corners */
+            box-shadow: var(--shadow-medium);  /* Medium shadow for depth */
+            margin-bottom: 2rem;  /* Space between sections */
+            overflow: hidden;  /* Hide any content that overflows rounded corners */
+            transition: var(--transition);  /* Smooth transitions for all changes */
+        }
+
+        /* Hover effect for interactive sections */
+        .setup-section:hover {
+            box-shadow: var(--shadow-heavy);  /* Stronger shadow on hover */
+            transform: translateY(-2px);  /* Slight upward movement for depth */
+        }
+
+        /* Enhanced sections with special visual treatment */
+        .enhanced-section {
+            position: relative;  /* Enable absolute positioning for pseudo-elements */
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);  /* Subtle gradient background */
+        }
+
+        /* Top border accent for even-numbered enhanced sections */
+        .enhanced-section:nth-child(even)::before {
+            content: '';  /* Required for pseudo-element */
+            position: absolute;  /* Position relative to parent */
+            top: 0;  /* Align to top edge */
+            left: 0;  /* Align to left edge */
+            right: 0;  /* Extend to right edge */
+            height: 4px;  /* Thin accent line */
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));  /* Red to blue gradient */
+            z-index: 1;  /* Ensure accent appears above content */
+        }
+
+        /* Alternative accent color for sections divisible by 3 */
+        .enhanced-section:nth-child(3n)::before {
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-tertiary));  /* Blue to orange gradient */
+        }
+
+        /* Header styling for each section with icon and title */
+        .section-header {
+            display: flex;  /* Flexbox layout for icon and text alignment */
+            align-items: center;  /* Vertically center all elements */
+            gap: 0.75rem;  /* Consistent spacing between elements */
+            padding: 1.5rem;  /* Generous padding for visual breathing room */
+            border-bottom: 2px solid var(--border-color);  /* Bottom border for section separation */
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);  /* Subtle gradient background */
+        }
+
+        /* Icon styling within section headers */
+        .section-icon {
+            font-size: 1.5rem;  /* Large, prominent icon */
+            color: var(--accent-color);  /* Accent color for visual interest */
+        }
+
+        /* Section title styling */
+        .section-header h2 {
+            font-size: 1.5rem;  /* Large, readable title */
+            font-weight: 600;  /* Semi-bold weight for emphasis */
+            color: var(--primary-color);  /* Primary color for consistency */
+        }
+
+        /* Description text below section titles */
+        .create-description {
+            color: var(--text-secondary);  /* Secondary text color for hierarchy */
+            margin: 0;  /* Remove default margins */
+            font-size: 0.95rem;  /* Slightly smaller than body text */
+        }
+
+        /* Grid layout for game settings with responsive columns */
+        .game-settings-grid {
+            display: grid;  /* CSS Grid for flexible layout */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));  /* Auto-fit columns with minimum width */
+            gap: 1.5rem;  /* Consistent spacing between grid items */
+            padding: 1.5rem;  /* Padding around the entire grid */
+        }
+
+        /* Individual setting item container */
+        .setting-item {
+            display: flex;  /* Flexbox for vertical stacking */
+            flex-direction: column;  /* Stack label, input, and help text vertically */
+            gap: 0.5rem;  /* Consistent spacing between elements */
+        }
+
+        /* Label styling for form inputs */
+        .setting-item label {
+            font-weight: 600;  /* Semi-bold for emphasis */
+            color: var(--text-primary);  /* Primary text color */
+            font-size: 0.9rem;  /* Slightly smaller than body text */
+        }
+
+        /* Common styling for text inputs and select dropdowns */
+        .setting-input,
+        .setting-select {
+            padding: 0.75rem;  /* Comfortable padding for touch targets */
+            border: 2px solid var(--border-color);  /* Visible border */
+            border-radius: var(--border-radius);  /* Rounded corners */
+            font-size: 1rem;  /* Readable font size */
+            transition: var(--transition);  /* Smooth transitions for interactions */
+            background: white;  /* Clean white background */
+        }
+
+        /* Focus state styling for better accessibility */
+        .setting-input:focus,
+        .setting-select:focus {
+            outline: none;  /* Remove default browser outline */
+            border-color: var(--accent-color);  /* Accent color on focus */
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);  /* Subtle glow effect */
+        }
+
+        /* Help text below form inputs */
+        .setting-help {
+            font-size: 0.8rem;  /* Small text for secondary information */
+            color: var(--text-secondary);  /* Secondary color for hierarchy */
+            margin-top: 0.25rem;  /* Small space above help text */
+        }
+
+        .player-count-section {
+            padding: 1.5rem;
+        }
+
+        .player-count-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .count-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .count-btn:hover:not(:disabled) {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .count-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .current-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .player-recommendations {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .recommendation-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .recommendation-item:hover {
+            background: rgba(39, 174, 96, 0.1);
+            transform: translateX(5px);
+        }
+
+        .recommendation-item:hover .rec-icon {
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .rec-icon {
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .rec-text {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .player-inputs {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .player-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .player-input-group label {
+            min-width: 80px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .player-input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .player-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .name-suggestions {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--info-color);
+        }
+
+        .name-suggestions h5 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+
+        .suggestion-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-btn {
+            padding: 0.5rem 1rem;
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .suggestion-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .game-summary-content {
+            padding: 1.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .summary-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-light);
+            border-color: var(--accent-color);
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .summary-value {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .btn-group {
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-icon {
+            font-size: 1.1rem;
+        }
+
+        .status-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .status-message {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 0.5rem;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .status-success {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #d5f4e6 0%, #f0fdf4 100%);
+        }
+
+        .status-error {
+            border-color: var(--danger-color);
+            background: linear-gradient(135deg, #fee2e2 0%, #fef2f2 100%);
+        }
+
+        .status-info {
+            border-color: var(--info-color);
+            background: linear-gradient(135deg, #dbeafe 0%, #f0f9ff 100%);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .multi-device-setup {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .game-settings-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .player-recommendations,
+            .name-suggestions {
+                margin: 1rem 0;
+                padding: 0.75rem;
+            }
+
+            .suggestion-buttons {
+                gap: 0.5rem;
+            }
+
+            .suggestion-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .game-summary-content {
+                padding: 1rem;
+            }
+
+            .summary-item {
+                padding: 0.6rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .summary-label,
+            .summary-value {
+                font-size: 0.9rem;
+            }
+
+            .btn-group {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .game-settings-grid {
+                padding: 0.75rem;
+            }
+
+            .setting-item {
+                gap: 0.4rem;
+            }
+
+            .setting-input,
+            .setting-select {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .setting-help {
+                font-size: 0.75rem;
+            }
+
+            .player-recommendations {
+                padding: 0.6rem;
+            }
+
+            .recommendation-item {
+                padding: 0.4rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .name-suggestions h5 {
+                font-size: 0.9rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .suggestion-btn {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.8rem;
+            }
+
+            .summary-item {
+                padding: 0.5rem;
+            }
+
+            .summary-label,
+            .summary-value {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main page header with game title and subtitle -->
+    <header class="header">
+        <h1>🎭 Secret Hitler</h1>
+        <p id="page-subtitle">Game Setup</p>
+    </header>
+
+    <!-- Main content area for game setup -->
+    <main class="multi-device-setup">
+        <!-- Game Creation Section - Main setup interface -->
+        <div id="create-section" class="setup-section enhanced-section active">
+            <div class="section-header">
+                <div class="section-icon">🎮</div>
+                <div>
+                    <h2>Create New Game</h2>
+                    <p class="create-description">Set up a new Secret Hitler game for your group</p>
+                </div>
+            </div>
+
+            <!-- Game Settings Section - Configure game parameters -->
+            <div class="setup-section enhanced-section">
+                <div class="section-header">
+                    <div class="section-icon">⚙️</div>
+                    <h2>Game Settings</h2>
+                </div>
+                <!-- Grid layout for game configuration options -->
+                <div class="game-settings-grid">
+                    <!-- Game name input field -->
+                    <div class="setting-item">
+                        <label for="game-name-input">Game Name</label>
+                        <input type="text" id="game-name-input" class="setting-input" placeholder="Enter game name" value="Secret Hitler Game">
+                        <small class="setting-help">Choose a memorable name for your game</small>
+                    </div>
+                    <!-- Game mode selection dropdown -->
+                    <div class="setting-item">
+                        <label for="game-mode-select">Game Mode</label>
+                        <select id="game-mode-select" class="setting-select">
+                            <option value="standard">Standard Game</option>
+                            <option value="quick">Quick Game</option>
+                            <option value="extended">Extended Game</option>
+                        </select>
+                        <small class="setting-help">Standard: Full rules, Quick: Faster gameplay, Extended: More rounds</small>
+                    </div>
+                    <!-- Difficulty level selection -->
+                    <div class="setting-item">
+                        <label for="difficulty-select">Difficulty</label>
+                        <select id="difficulty-select" class="setting-select">
+                            <option value="normal">Normal</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                        <small class="setting-help">Affects role distribution and special rules</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Count Section -->
+            <div class="player-count-section">
+                <h3>Number of Players</h3>
+                <div class="player-count-controls">
+                    <button class="count-btn" id="decrease-btn">−</button>
+                    <span class="current-count">0</span>
+                    <button class="count-btn" id="increase-btn">+</button>
+                    <span>players</span>
+                </div>
+
+                <!-- Player Recommendations -->
+                <div class="player-recommendations" id="player-recommendations" style="display: none;">
+                    <div class="recommendation-item">
+                        <span class="rec-icon">👥</span>
+                        <span class="rec-text"><strong>5-6 players:</strong> Great for beginners, simpler dynamics</span>
+                    </div>
+                    <div class="recommendation-item">
+                        <span class="rec-icon">🎯</span>
+                        <span class="rec-text"><strong>7-8 players:</strong> Optimal experience, balanced gameplay</span>
+                    </div>
+                    <div class="recommendation-item">
+                        <span class="rec-icon">🔥</span>
+                        <span class="rec-text"><strong>9-10 players:</strong> Maximum chaos, advanced players</span>
+                    </div>
+                </div>
+
+                <div id="role-info"></div>
+                <div id="player-inputs" class="player-inputs"></div>
+
+                <!-- Quick Name Suggestions -->
+                <div class="name-suggestions" id="name-suggestions" style="display: none;">
+                    <h5>Quick Name Suggestions</h5>
+                    <div class="suggestion-buttons">
+                        <button class="suggestion-btn" id="random-names-btn">Random Names</button>
+                        <button class="suggestion-btn" id="default-names-btn">Default Names</button>
+                        <button class="suggestion-btn" id="clear-names-btn">Clear All</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Summary Section -->
+            <div class="setup-section enhanced-section" id="game-summary-section" style="display: none;">
+                <div class="section-header">
+                    <div class="section-icon">📋</div>
+                    <h2>Game Summary</h2>
+                </div>
+                <div class="game-summary-content">
+                    <div class="summary-item">
+                        <span class="summary-label">Game Name:</span>
+                        <span class="summary-value" id="summary-game-name">Secret Hitler Game</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Players:</span>
+                        <span class="summary-value" id="summary-players">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Mode:</span>
+                        <span class="summary-value" id="summary-mode">Standard Game</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Difficulty:</span>
+                        <span class="summary-value" id="summary-difficulty">Normal</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Estimated Duration:</span>
+                        <span class="summary-value" id="summary-duration">45-60 minutes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button id="create-game-btn" class="btn btn-primary">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">Create Game</span>
+                </button>
+                <button type="button" class="btn btn-outline" onclick="window.history.back()">
+                    <span class="btn-icon">⬅️</span>
+                    <span class="btn-text">Back</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="status-container" class="status-container"></div>
+    </main>
+
+    <!-- JavaScript for game setup functionality -->
+    <script>
+        /**
+         * GameSetup Class
+         * 
+         * This class handles all the game setup functionality including:
+         * - Player count management
+         * - Player name collection
+         * - Game settings configuration
+         * - Form validation and submission
+         * - UI updates and interactions
+         */
+        class GameSetup {
+            /**
+             * Constructor - Initialize the game setup
+             * Sets up the initial game state and calls init()
+             */
+            constructor() {
+                // Initialize game state object with default values
+                this.gameState = {
+                    players: [],                    // Array to store player names
+                    currentTurn: 1,                // Current game turn (starts at 1)
+                    currentPhase: 'setup',         // Current game phase
+                    currentPresident: 0,           // Index of current president
+                    currentChancellor: null,       // Index of current chancellor
+                    liberalPolicies: 0,            // Count of enacted liberal policies
+                    fascistPolicies: 0,            // Count of enacted fascist policies
+                    electionTracker: 0,            // Failed election counter
+                    gameOver: false,               // Game completion flag
+                    winner: null,                  // Winning team (liberal/fascist)
+                    policyStacks: [],              // Available policy card stacks
+                    currentPolicyStack: null,      // Currently selected policy stack
+                    presidentDiscarded: null,      // Policy card discarded by president
+                    executivePowers: [],           // Available executive powers
+                    gameLog: [],                   // Game event log
+                    lastChancellor: null,          // Previous chancellor index
+                    consecutiveFailedElections: 0  // Counter for failed elections
+                };
+                
+                // Initialize the game setup interface
+                this.init();
+            }
+
+            /**
+             * Initialize the game setup interface
+             * Sets up all event listeners, navigation, and initial state
+             */
+            init() {
+                this.setupEventListeners();        // Bind all interactive elements
+                this.setupHeaderNavigation();      // Setup header click handlers
+                this.initializePlayerCount();      // Set initial player count to 0
+                this.updateGameSummary();          // Initialize the game summary display
+            }
+
+            /**
+             * Setup all event listeners for interactive elements
+             * Binds click, input, and change events to their respective handlers
+             */
+            setupEventListeners() {
+                // Player count controls - increment button
+                document.getElementById('increase-btn').addEventListener('click', () => {
+                    const currentCount = this.getCurrentPlayerCount();
+                    if (currentCount < 10) {  // Maximum 10 players allowed
+                        this.updatePlayerCount(currentCount + 1);
+                    }
+                });
+
+                // Player count controls - decrement button
+                document.getElementById('decrease-btn').addEventListener('click', () => {
+                    const currentCount = this.getCurrentPlayerCount();
+                    if (currentCount > 0) {  // Minimum 0 players
+                        this.updatePlayerCount(currentCount - 1);
+                    }
+                });
+
+                // Main create game button - validates and processes game setup
+                document.getElementById('create-game-btn').addEventListener('click', () => {
+                    this.startGameSetup();
+                });
+
+                // Name suggestion buttons for quick player name population
+                document.getElementById('random-names-btn').addEventListener('click', () => {
+                    this.fillRandomNames();
+                });
+
+                document.getElementById('default-names-btn').addEventListener('click', () => {
+                    this.fillDefaultNames();
+                });
+
+                document.getElementById('clear-names-btn').addEventListener('click', () => {
+                    this.clearAllNames();
+                });
+
+                // Game settings event listeners - update summary in real-time
+                document.getElementById('game-name-input').addEventListener('input', () => {
+                    this.updateGameSummary();  // Update as user types
+                });
+
+                document.getElementById('game-mode-select').addEventListener('change', () => {
+                    this.updateGameSummary();  // Update when mode changes
+                });
+
+                document.getElementById('difficulty-select').addEventListener('change', () => {
+                    this.updateGameSummary();  // Update when difficulty changes
+                });
+            }
+
+            /**
+             * Setup header navigation functionality
+             * Makes the header title clickable to return to the home page
+             */
+            setupHeaderNavigation() {
+                // Get the header title element
+                const headerTitle = document.getElementById('header-title');
+                if (headerTitle) {
+                    // Add pointer cursor to indicate clickability
+                    headerTitle.style.cursor = 'pointer';
+                    // Add click event to navigate back to home page
+                    headerTitle.addEventListener('click', () => {
+                        window.location.href = '../index.html';
+                    });
+                }
+            }
+
+            /**
+             * Get the current player count from the DOM
+             * @returns {number} Current player count (0-10)
+             */
+            getCurrentPlayerCount() {
+                const currentCountSpan = document.querySelector('.current-count');
+                return currentCountSpan ? parseInt(currentCountSpan.textContent) : 0;
+            }
+
+            /**
+             * Update the player count and regenerate the interface
+             * This is the main method that handles all UI updates when player count changes
+             * @param {number} newCount - New player count (0-10)
+             */
+            updatePlayerCount(newCount) {
+                const currentCount = this.getCurrentPlayerCount();
+                
+                // Early return if count hasn't actually changed
+                if (newCount === currentCount) return;
+                
+                // Update the player count display
+                const countDisplay = document.querySelector('.current-count');
+                if (countDisplay) {
+                    countDisplay.textContent = newCount;
+                }
+                
+                // Get references to all UI elements that need updating
+                const roleInfo = document.getElementById('role-info');           // Role distribution display
+                const playerInputs = document.getElementById('player-inputs');   // Player name input fields
+                const nameSuggestions = document.getElementById('name-suggestions'); // Quick name buttons
+                const gameSummarySection = document.getElementById('game-summary-section'); // Game summary
+                const playerRecommendations = document.getElementById('player-recommendations'); // Player count tips
+                
+                if (newCount === 0) {
+                    // Hide all game-related UI when no players selected
+                    roleInfo.innerHTML = '';
+                    playerInputs.innerHTML = '';
+                    nameSuggestions.style.display = 'none';
+                    gameSummarySection.style.display = 'none';
+                    playerRecommendations.style.display = 'none';
+                } else {
+                    // Show player count recommendations for all valid counts
+                    playerRecommendations.style.display = 'block';
+                    
+                    // Display role distribution based on player count
+                    const distribution = this.getRoleDistribution(newCount);
+                    roleInfo.innerHTML = `
+                        <div class="role-distribution">
+                            <h4>Role Distribution:</h4>
+                            <div class="roles">
+                                <span class="role liberal">${distribution.liberals} Liberals</span>
+                                <span class="role fascist">${distribution.fascists} Fascists</span>
+                                <span class="role hitler">1 Hitler</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Dynamically generate player name input fields
+                    let inputsHTML = '';
+                    for (let i = 1; i <= newCount; i++) {
+                        inputsHTML += `
+                            <div class="player-input-group">
+                                <label for="player-${i}">Player ${i}:</label>
+                                <input type="text" id="player-${i}" placeholder="Enter player name" required>
+                            </div>
+                        `;
+                    }
+                    playerInputs.innerHTML = inputsHTML;
+                    
+                    // Show additional UI elements when players are selected
+                    nameSuggestions.style.display = 'block';
+                    gameSummarySection.style.display = 'block';
+                }
+                
+                // Update button states based on current count
+                const decreaseBtn = document.getElementById('decrease-btn');
+                const increaseBtn = document.getElementById('increase-btn');
+                
+                decreaseBtn.disabled = newCount <= 0;   // Disable decrease at minimum
+                increaseBtn.disabled = newCount >= 10;  // Disable increase at maximum
+                
+                // Update the game summary with new player count
+                this.updateGameSummary();
+            }
+
+            /**
+             * Get the role distribution for a given player count
+             * Based on official Secret Hitler rules for balanced gameplay
+             * @param {number} playerCount - Number of players (5-10)
+             * @returns {Object} Object with liberals, fascists, and hitler counts
+             */
+            getRoleDistribution(playerCount) {
+                // Official Secret Hitler role distribution rules
+                const distributions = {
+                    5: { liberals: 3, fascists: 1, hitler: 1 },   // 5 players: 3L, 1F, 1H
+                    6: { liberals: 4, fascists: 1, hitler: 1 },   // 6 players: 4L, 1F, 1H
+                    7: { liberals: 4, fascists: 2, hitler: 1 },   // 7 players: 4L, 2F, 1H
+                    8: { liberals: 5, fascists: 2, hitler: 1 },   // 8 players: 5L, 2F, 1H
+                    9: { liberals: 5, fascists: 3, hitler: 1 },   // 9 players: 5L, 3F, 1H
+                    10: { liberals: 6, fascists: 3, hitler: 1 }   // 10 players: 6L, 3F, 1H
+                };
+                
+                // Return distribution for valid player count, or empty object for invalid
+                return distributions[playerCount] || { liberals: 0, fascists: 0, hitler: 0 };
+            }
+
+            /**
+             * Initialize the player count to 0
+             * This ensures the interface starts in a clean state
+             */
+            initializePlayerCount() {
+                // Start with 0 players like pass-and-play mode
+                this.updatePlayerCount(0);
+            }
+
+            /**
+             * Main game setup method - validates and processes all game configuration
+             * This method is called when the user clicks "Create Game"
+             * It validates all inputs, collects game settings, and prepares for game start
+             */
+            startGameSetup() {
+                // Get the current player count from the interface
+                const maxPlayers = this.getCurrentPlayerCount();
+                
+                // Input validation - ensure player count is selected
+                if (maxPlayers === 0) {
+                    this.showStatus('Please select a player count', 'error');
+                    return;  // Exit early if validation fails
+                }
+                
+                // Collect and validate all player names
+                const playerNames = [];
+                for (let i = 1; i <= maxPlayers; i++) {
+                    const input = document.getElementById(`player-${i}`);
+                    const name = input.value.trim();  // Remove whitespace
+                    
+                    // Validate that each player has a name
+                    if (!name) {
+                        this.showStatus(`Please enter a name for Player ${i}`, 'error');
+                        input.focus();  // Focus the empty input for user convenience
+                        return;  // Exit early if validation fails
+                    }
+                    playerNames.push(name);
+                }
+                
+                // Collect all game settings from the form
+                const gameName = document.getElementById('game-name-input')?.value || 'Secret Hitler Game';
+                const gameMode = document.getElementById('game-mode-select')?.value || 'standard';
+                const difficulty = document.getElementById('difficulty-select')?.value || 'normal';
+                
+                // Show success message to user
+                this.showStatus('Game setup complete! Ready to start playing.', 'success');
+                
+                // Store the complete game configuration in the game state
+                this.gameState.players = playerNames;
+                this.gameState.gameName = gameName;
+                this.gameState.gameMode = gameMode;
+                this.gameState.difficulty = difficulty;
+                
+                // Log the complete game configuration for debugging
+                console.log('Game Configuration:', {
+                    name: gameName,
+                    mode: gameMode,
+                    difficulty: difficulty,
+                    players: playerNames
+                });
+                
+                // TODO: Connect to database backend when ready
+                // This is where you'll add the database integration code
+                // this.saveGameToDatabase();
+            }
+
+            /**
+             * Display status messages to the user
+             * Creates temporary notification messages that auto-disappear
+             * @param {string} message - The message text to display
+             * @param {string} type - Message type: 'info', 'success', 'error', 'warning'
+             */
+            showStatus(message, type = 'info') {
+                // Get the status container where messages will be displayed
+                const statusContainer = document.getElementById('status-container');
+                
+                // Create a new status message element
+                const statusDiv = document.createElement('div');
+                statusDiv.className = `status-message status-${type}`;  // Apply appropriate CSS classes
+                statusDiv.textContent = message;  // Set the message text
+                
+                // Add the message to the status container
+                statusContainer.appendChild(statusDiv);
+                
+                // Auto-remove the message after 5 seconds for clean UI
+                setTimeout(() => {
+                    statusDiv.remove();
+                }, 5000);
+            }
+
+            /**
+             * Update the game summary display with current settings
+             * This method is called whenever any game setting changes
+             * Provides real-time feedback to the user about their game configuration
+             */
+            updateGameSummary() {
+                // Get current values from all form inputs
+                const playerCount = this.getCurrentPlayerCount();
+                const gameName = document.getElementById('game-name-input')?.value || 'Secret Hitler Game';
+                const gameMode = document.getElementById('game-mode-select')?.value || 'standard';
+                const difficulty = document.getElementById('difficulty-select')?.value || 'normal';
+
+                // Update all summary display elements with current values
+                document.getElementById('summary-game-name').textContent = gameName;
+                document.getElementById('summary-players').textContent = playerCount;
+                document.getElementById('summary-mode').textContent = this.getGameModeDisplayName(gameMode);
+                document.getElementById('summary-difficulty').textContent = this.getDifficultyDisplayName(difficulty);
+                document.getElementById('summary-duration').textContent = this.getEstimatedDuration(gameMode, playerCount);
+            }
+
+            /**
+             * Convert game mode value to human-readable display name
+             * @param {string} mode - Game mode value from select element
+             * @returns {string} Human-readable mode name
+             */
+            getGameModeDisplayName(mode) {
+                const modes = {
+                    'standard': 'Standard Game',  // Full rules, normal gameplay
+                    'quick': 'Quick Game',        // Faster gameplay, simplified rules
+                    'extended': 'Extended Game'   // More rounds, longer gameplay
+                };
+                return modes[mode] || 'Standard Game';  // Default fallback
+            }
+
+            /**
+             * Convert difficulty value to human-readable display name
+             * @param {string} difficulty - Difficulty value from select element
+             * @returns {string} Human-readable difficulty name
+             */
+            getDifficultyDisplayName(difficulty) {
+                const difficulties = {
+                    'normal': 'Normal',   // Standard difficulty
+                    'hard': 'Hard',       // Increased difficulty
+                    'expert': 'Expert'    // Maximum difficulty
+                };
+                return difficulties[difficulty] || 'Normal';  // Default fallback
+            }
+
+            /**
+             * Calculate estimated game duration based on mode and player count
+             * Uses a formula that accounts for more players taking longer
+             * @param {string} mode - Game mode (affects base duration)
+             * @param {number} playerCount - Number of players (affects duration multiplier)
+             * @returns {string} Estimated duration range in minutes
+             */
+            getEstimatedDuration(mode, playerCount) {
+                // Base duration for each game mode in minutes
+                const baseDuration = {
+                    'quick': 30,      // Quick games are fastest
+                    'standard': 45,   // Standard games are medium length
+                    'extended': 60    // Extended games are longest
+                };
+                
+                // Get base duration for the selected mode
+                const base = baseDuration[mode] || 45;
+                
+                // Calculate player multiplier: more players = longer game
+                // Formula: 1 + (players - 5) * 0.1, minimum 1.0
+                const playerMultiplier = Math.max(1, (playerCount - 5) * 0.1 + 1);
+                
+                // Calculate final duration and round to nearest minute
+                const estimatedMinutes = Math.round(base * playerMultiplier);
+                
+                // Return range (e.g., "45-60 minutes")
+                return `${estimatedMinutes}-${estimatedMinutes + 15} minutes`;
+            }
+
+            /**
+             * Fill all player name inputs with random names from a predefined list
+             * Uses gender-neutral names for inclusivity and shuffles them randomly
+             * Provides a quick way to populate player names for testing or convenience
+             */
+            fillRandomNames() {
+                const playerCount = this.getCurrentPlayerCount();
+                
+                // Predefined list of gender-neutral names for inclusivity
+                const randomNames = [
+                    'Alex', 'Blake', 'Casey', 'Drew', 'Emery', 'Finley', 'Gray', 'Hayden',
+                    'Indigo', 'Jordan', 'Kendall', 'Lane', 'Morgan', 'Nova', 'Ocean', 'Parker',
+                    'Quinn', 'River', 'Sage', 'Taylor', 'Uma', 'Vale', 'Wren', 'Xander', 'Yuki', 'Zara'
+                ];
+                
+                // Shuffle the names array randomly using Fisher-Yates algorithm
+                const shuffled = [...randomNames].sort(() => Math.random() - 0.5);
+                
+                // Fill each player input with a random name
+                for (let i = 1; i <= playerCount; i++) {
+                    const input = document.getElementById(`player-${i}`);
+                    if (input) {
+                        // Use shuffled name or fallback to "Player X" if we run out
+                        input.value = shuffled[i - 1] || `Player ${i}`;
+                    }
+                }
+                
+                // Show success message to user
+                this.showStatus('Random names filled!', 'info');
+            }
+
+            /**
+             * Fill all player name inputs with default "Player X" names
+             * Useful for quick setup when you don't have specific names in mind
+             */
+            fillDefaultNames() {
+                const playerCount = this.getCurrentPlayerCount();
+                
+                // Fill each player input with a default name
+                for (let i = 1; i <= playerCount; i++) {
+                    const input = document.getElementById(`player-${i}`);
+                    if (input) {
+                        input.value = `Player ${i}`;
+                    }
+                }
+                
+                // Show success message to user
+                this.showStatus('Default names filled!', 'info');
+            }
+
+            /**
+             * Clear all player name inputs
+             * Resets all player name fields to empty for fresh input
+             */
+            clearAllNames() {
+                const playerCount = this.getCurrentPlayerCount();
+                
+                // Clear each player input field
+                for (let i = 1; i <= playerCount; i++) {
+                    const input = document.getElementById(`player-${i}`);
+                    if (input) {
+                        input.value = '';
+                    }
+                }
+                
+                // Show success message to user
+                this.showStatus('All names cleared!', 'info');
+            }
+        }  // End of GameSetup class
+        
+        // Initialize the game setup when the page loads
+        const gameSetup = new GameSetup();
+    </script>
+</body>
+</html>
