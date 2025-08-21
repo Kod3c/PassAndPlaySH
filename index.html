@@ -31,38 +31,40 @@
                 <!-- Welcome Section -->
                 <div class="card text-center mb-4">
                     <div class="card-content">
-                        <span class="card-icon" style="font-size: 3rem;">🎮</span>
-                        <h2 class="mt-2">Welcome to Secret Hitler</h2>
-                        <p>Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
+                        <span class="card-icon welcome-icon">🎮</span>
+                        <h2 class="welcome-title">Welcome to Secret Hitler</h2>
+                        <p class="welcome-description">Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
                         
-                        <div class="flex justify-center gap-2 flex-wrap mt-3">
-                            <button data-navigate="multidevice" class="btn btn-primary btn-lg">
-                                <span>🚀</span>
-                                <span>Create Game</span>
-                            </button>
-                            <button data-navigate="multidevice" class="btn btn-secondary btn-lg">
-                                <span>🔗</span>
-                                <span>Join Game</span>
-                            </button>
-                        </div>
-                        
-                        <div class="flex justify-center gap-2 flex-wrap mt-2">
-                            <button data-navigate="setup" class="btn btn-outline" disabled>
-                                <span>📱</span>
-                                <span>Pass & Play Game</span>
-                            </button>
-                            <button onclick="window.location.href='pages/rules.html'" class="btn btn-outline">
-                                <span>📖</span>
-                                <span>View Rules</span>
-                            </button>
+                        <div class="welcome-buttons">
+                            <div class="primary-buttons">
+                                <button data-navigate="multidevice" class="btn btn-primary btn-lg">
+                                    <span class="btn-emoji">🚀</span>
+                                    <span class="btn-text">Create Game</span>
+                                </button>
+                                <button data-navigate="multidevice" class="btn btn-secondary btn-lg">
+                                    <span class="btn-emoji">🔗</span>
+                                    <span class="btn-text">Join Game</span>
+                                </button>
+                            </div>
+                            
+                            <div class="secondary-buttons">
+                                <button data-navigate="setup" class="btn btn-outline" disabled>
+                                    <span class="btn-emoji">📱</span>
+                                    <span class="btn-text">Pass & Play Game</span>
+                                </button>
+                                <button onclick="window.location.href='pages/rules.html'" class="btn btn-outline">
+                                    <span class="btn-emoji">📖</span>
+                                    <span class="btn-text">View Rules</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             
                 <!-- Features Section -->
-                <div class="text-center mb-4">
-                    <h3>🎯 Game Features</h3>
-                    <p class="text-secondary">Everything you need for an immersive Secret Hitler experience</p>
+                <div class="features-header text-center mb-4">
+                    <h3 class="features-title">🎯 Game Features</h3>
+                    <p class="features-subtitle">Everything you need for an immersive Secret Hitler experience</p>
                 </div>
                 
                 <div class="feature-grid">
@@ -116,28 +118,30 @@
                 </div>
             
                 <!-- Game Info Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                    <div class="card">
-                        <div class="card-content text-center">
-                            <span class="card-icon">👥</span>
-                            <h4>5-10 Players</h4>
-                            <p>Perfect for any group size</p>
+                <div class="game-info-section mt-4">
+                    <div class="game-info-grid">
+                        <div class="game-info-card">
+                            <div class="card-content text-center">
+                                <span class="card-icon">👥</span>
+                                <h4 class="info-title">5-10 Players</h4>
+                                <p class="info-description">Perfect for any group size</p>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-content text-center">
-                            <span class="card-icon">⏱️</span>
-                            <h4>30-45 Minutes</h4>
-                            <p>Quick and engaging gameplay</p>
+                        
+                        <div class="game-info-card">
+                            <div class="card-content text-center">
+                                <span class="card-icon">⏱️</span>
+                                <h4 class="info-title">30-45 Minutes</h4>
+                                <p class="info-description">Quick and engaging gameplay</p>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-content text-center">
-                            <span class="card-icon">🎯</span>
-                            <h4>Social Deduction</h4>
-                            <p>Test your deception skills</p>
+                        
+                        <div class="game-info-card">
+                            <div class="card-content text-center">
+                                <span class="card-icon">🎯</span>
+                                <h4 class="info-title">Social Deduction</h4>
+                                <p class="info-description">Test your deception skills</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -147,9 +151,16 @@
 
 
         <!-- Footer -->
-        <footer>
+        <footer class="main-footer">
             <div class="container">
-                <p>Built for offline play - no accounts or servers required</p>
+                <div class="footer-content">
+                    <p class="footer-text">Built for offline play - no accounts or servers required</p>
+                    <div class="footer-links">
+                        <a href="pages/rules.html" class="footer-link">📖 Rules</a>
+                        <span class="footer-separator">•</span>
+                        <a href="#" class="footer-link">🎮 Play</a>
+                    </div>
+                </div>
             </div>
         </footer>
     </div>
