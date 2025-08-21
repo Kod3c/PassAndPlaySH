@@ -339,6 +339,7 @@
                     // Hide all game-related UI when no players selected
                     roleInfo.innerHTML = '';
                     playerInputs.innerHTML = '';
+                    playerInputs.style.display = 'none'; // Hide the container when no players
                     nameSuggestions.style.display = 'none';
                     gameSummarySection.style.display = 'none';
                     playerRecommendations.style.display = 'none';
@@ -370,6 +371,7 @@
                         `;
                     }
                     playerInputs.innerHTML = inputsHTML;
+                    playerInputs.style.display = 'block'; // Make the container visible
                     
                     // Show additional UI elements when players are selected
                     nameSuggestions.style.display = 'block';
