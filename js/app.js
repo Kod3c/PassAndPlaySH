@@ -329,10 +329,7 @@ class App {
         // Setup create game validation
         this.setupCreateGameValidation();
         
-        // Initialize with 5 players if starting at 0
-        if (this.getCurrentPlayerCount() === 0) {
-            this.updatePlayerCount(5);
-        }
+        // Start at 0 players; first increment will jump to 5
     }
 
     setupCreateGameValidation() {

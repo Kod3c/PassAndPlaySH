@@ -227,19 +227,23 @@
              * Binds click, input, and change events to their respective handlers
              */
             setupEventListeners() {
-                // Player count controls - increment button
+                // Player count controls - increment button (0 -> 5 on first add)
                 document.getElementById('increase-btn').addEventListener('click', () => {
                         const currentCount = this.getCurrentPlayerCount();
-                    if (currentCount < 10) {  // Maximum 10 players allowed
+                    if (currentCount === 0) {
+                        this.updatePlayerCount(5);
+                    } else if (currentCount < 10) {  // Maximum 10 players allowed
                         this.updatePlayerCount(currentCount + 1);
                     }
                 });
 
-                // Player count controls - decrement button
+                // Player count controls - decrement button (5 -> 0 on remove)
                 document.getElementById('decrease-btn').addEventListener('click', () => {
                         const currentCount = this.getCurrentPlayerCount();
-                    if (currentCount > 0) {  // Minimum 0 players
+                    if (currentCount > 5) {  // Above minimum playable count
                         this.updatePlayerCount(currentCount - 1);
+                    } else if (currentCount === 5) {
+                        this.updatePlayerCount(0);
                     }
                 });
 
