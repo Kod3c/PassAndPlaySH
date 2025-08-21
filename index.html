@@ -5,157 +5,137 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Hitler - Pass & Play</title>
     <meta name="description" content="Play Secret Hitler on one device with pass-and-play mechanics">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/themes.css">
-    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/app.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <!-- Theme Switcher -->
-    <div class="theme-switcher disabled">
-        <h4>Theme</h4>
-        <div class="theme-options">
-            <button class="theme-option active" data-theme="default" disabled>Default</button>
-            <button class="theme-option" data-theme="dark" disabled>Dark</button>
-            <button class="theme-option" data-theme="high-contrast" disabled>High Contrast</button>
-            <button class="theme-option" data-theme="warm" disabled>Warm</button>
-            <button class="theme-option" data-theme="cool" disabled>Cool</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <header>
-            <div class="header-content">
-                <div class="game-logo">
-                    <div class="logo-icon">🎭</div>
-                    <div class="logo-text">
-                        <h1>Secret Hitler</h1>
-                        <p class="subtitle">Pass & Play Edition</p>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <span class="logo-icon">🎭</span>
+                        <div class="logo-text">
+                            <h1>Secret Hitler</h1>
+                            <p class="subtitle">Pass & Play Edition</p>
+                        </div>
                     </div>
-                </div>
-                <div class="header-decoration">
-                    <div class="decoration-line"></div>
-                    <div class="decoration-dot"></div>
-                    <div class="decoration-line"></div>
                 </div>
             </div>
         </header>
         
-        <!-- Home Page Content -->
-        <main id="home-page" class="page-content">
-            <div class="welcome-section">
-                <div class="welcome-header">
-                    <div class="welcome-icon">🎮</div>
-                    <h2>Welcome to Secret Hitler</h2>
-                    <p class="welcome-description">Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
-                </div>
-                
-                <div class="game-options">
-                    <div class="option-group primary-options">
-                        <button data-navigate="multidevice" class="btn btn-primary btn-large">
-                            <span class="btn-icon">🚀</span>
-                            <span class="btn-text">Create Game</span>
-                        </button>
-                        <button data-navigate="multidevice" class="btn btn-secondary btn-large">
-                            <span class="btn-icon">🔗</span>
-                            <span class="btn-text">Join Game</span>
-                        </button>
+        <!-- Main Content -->
+        <main>
+            <div class="container">
+                <!-- Welcome Section -->
+                <div class="card text-center mb-4">
+                    <div class="card-content">
+                        <span class="card-icon" style="font-size: 3rem;">🎮</span>
+                        <h2 class="mt-2">Welcome to Secret Hitler</h2>
+                        <p>Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
+                        
+                        <div class="flex justify-center gap-2 flex-wrap mt-3">
+                            <button data-navigate="multidevice" class="btn btn-primary btn-lg">
+                                <span>🚀</span>
+                                <span>Create Game</span>
+                            </button>
+                            <button data-navigate="multidevice" class="btn btn-secondary btn-lg">
+                                <span>🔗</span>
+                                <span>Join Game</span>
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-center gap-2 flex-wrap mt-2">
+                            <button data-navigate="setup" class="btn btn-outline" disabled>
+                                <span>📱</span>
+                                <span>Pass & Play Game</span>
+                            </button>
+                            <button data-navigate="rules" class="btn btn-outline">
+                                <span>📖</span>
+                                <span>View Rules</span>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div class="option-group secondary-options">
-                        <button data-navigate="setup" class="btn btn-outline btn-medium" disabled>
-                            <span class="btn-icon">📱</span>
-                            <span class="btn-text">Pass & Play Game</span>
-                            <span class="beta-tag">BETA</span>
-                        </button>
-                        <button data-navigate="rules" class="btn btn-outline btn-medium">
-                            <span class="btn-icon">📖</span>
-                            <span class="btn-text">View Rules</span>
-                        </button>
-                    </div>
                 </div>
-            </div>
             
-            <div class="features-section">
-                <div class="section-header">
+                <!-- Features Section -->
+                <div class="text-center mb-4">
                     <h3>🎯 Game Features</h3>
-                    <p>Everything you need for an immersive Secret Hitler experience</p>
+                    <p class="text-secondary">Everything you need for an immersive Secret Hitler experience</p>
                 </div>
                 
-                <div class="features-grid">
+                <div class="feature-grid">
                     <div class="feature-card">
-                        <div class="feature-icon">🎭</div>
-                        <h4>Hidden Role Management</h4>
-                        <p>Seamlessly manage secret identities with our intuitive interface</p>
+                        <span class="feature-icon">🎭</span>
+                        <h4 class="feature-title">Hidden Role Management</h4>
+                        <p class="feature-description">Seamlessly manage secret identities with our intuitive interface</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">🗳️</div>
-                        <h4>Election & Voting</h4>
-                        <p>Streamlined voting system with real-time results</p>
+                        <span class="feature-icon">🗳️</span>
+                        <h4 class="feature-title">Election & Voting</h4>
+                        <p class="feature-description">Streamlined voting system with real-time results</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">📜</div>
-                        <h4>Policy Legislation</h4>
-                        <p>Easy policy tracking and management</p>
+                        <span class="feature-icon">📜</span>
+                        <h4 class="feature-title">Policy Legislation</h4>
+                        <p class="feature-description">Easy policy tracking and management</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">⚡</div>
-                        <h4>Executive Powers</h4>
-                        <p>Special abilities unlock as the game progresses</p>
+                        <span class="feature-icon">⚡</span>
+                        <h4 class="feature-title">Executive Powers</h4>
+                        <p class="feature-description">Special abilities unlock as the game progresses</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">🔒</div>
-                        <h4>Privacy First</h4>
-                        <p>Pass-and-play mechanics ensure role secrecy</p>
+                        <span class="feature-icon">🔒</span>
+                        <h4 class="feature-title">Privacy First</h4>
+                        <p class="feature-description">Pass-and-play mechanics ensure role secrecy</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">📱</div>
-                        <h4>Multi-Device</h4>
-                        <p>Play across multiple devices or on one screen</p>
+                        <span class="feature-icon">📱</span>
+                        <h4 class="feature-title">Multi-Device</h4>
+                        <p class="feature-description">Play across multiple devices or on one screen</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">🌐</div>
-                        <h4>Real-time Multiplayer</h4>
-                        <p>Connect with friends anywhere in the world</p>
+                        <span class="feature-icon">🌐</span>
+                        <h4 class="feature-title">Real-time Multiplayer</h4>
+                        <p class="feature-description">Connect with friends anywhere in the world</p>
                     </div>
                     
                     <div class="feature-card">
-                        <div class="feature-icon">💾</div>
-                        <h4>Offline Capable</h4>
-                        <p>No internet required for local games</p>
+                        <span class="feature-icon">💾</span>
+                        <h4 class="feature-title">Offline Capable</h4>
+                        <p class="feature-description">No internet required for local games</p>
                     </div>
                 </div>
-            </div>
             
-            <div class="game-info-section">
-                <div class="info-cards">
-                    <div class="info-card">
-                        <div class="info-icon">👥</div>
-                        <div class="info-content">
+                <!-- Game Info Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                    <div class="card">
+                        <div class="card-content text-center">
+                            <span class="card-icon">👥</span>
                             <h4>5-10 Players</h4>
                             <p>Perfect for any group size</p>
                         </div>
                     </div>
                     
-                    <div class="info-card">
-                        <div class="info-icon">⏱️</div>
-                        <div class="info-content">
+                    <div class="card">
+                        <div class="card-content text-center">
+                            <span class="card-icon">⏱️</span>
                             <h4>30-45 Minutes</h4>
                             <p>Quick and engaging gameplay</p>
                         </div>
                     </div>
                     
-                    <div class="info-card">
-                        <div class="info-icon">🎯</div>
-                        <div class="info-content">
+                    <div class="card">
+                        <div class="card-content text-center">
+                            <span class="card-icon">🎯</span>
                             <h4>Social Deduction</h4>
                             <p>Test your deception skills</p>
                         </div>
@@ -164,45 +144,17 @@
             </div>
         </main>
 
-        <!-- Setup Page Content -->
-        <main id="setup-page" class="page-content" style="display: none;">
-            <div class="setup-page">
-                <h2>Game Setup</h2>
 
-                <div class="setup-section">
-                    <h3>Player Count</h3>
-                    <div class="player-count-selector">
-                        <div class="player-count-controls">
-                            <button class="player-btn player-minus" id="player-minus" disabled>-</button>
-                            <div class="player-count-display">
-                                <span class="current-count">0</span> players
-                            </div>
-                            <button class="player-btn player-plus" id="player-plus">+</button>
-                        </div>
-                    </div>
 
-                    <div class="role-distribution">
-                        <h4>Role Distribution</h4>
-                        <div id="role-info" class="role-info">
-                            <p>Select player count to see role distribution</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="setup-section">
-                    <h3>Player Names</h3>
-                    <div id="player-inputs" class="player-inputs">
-                        <!-- Player input fields will be generated here -->
-                    </div>
-                </div>
-
-                <div class="setup-actions">
-                    <button id="back-to-home-btn" class="btn btn-outline">Back to Home</button>
-                </div>
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <p>Built for offline play - no accounts or servers required</p>
             </div>
-        </main>
+        </footer>
+    </div>
 
-        <!-- Rules Page Content -->
+    <!-- Rules Page Content (Hidden by default) -->
         <main id="rules-page" class="page-content" style="display: none;">
             <div class="rules-page">
                 <div class="rules-header">
@@ -727,12 +679,6 @@
             </div>
         </main>
 
-        <footer>
-            <p>Built for offline play - no accounts or servers required</p>
-            <button id="enable-theme-btn" class="btn btn-outline">Enable Theme Selector</button>
-        </footer>
-    </div>
-    
     <script src="js/app.js"></script>
 </body>
 </html>
