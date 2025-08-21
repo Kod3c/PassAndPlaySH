@@ -98,6 +98,11 @@
                     
                     <div id="role-info"></div>
                     <div id="player-inputs" class="player-inputs mt-3"></div>
+                    
+                    <!-- Player Input Hint -->
+                    <div class="create-game-hint" id="player-input-hint" style="display: none;">
+                        Fill in all player names to start the game
+                    </div>
 
                     <!-- Quick Name Suggestions -->
                     <div class="name-suggestions" id="name-suggestions" style="display: none;">
@@ -347,11 +352,11 @@
 
                     // Dynamically generate player name input fields
                     let inputsHTML = '';
-                for (let i = 1; i <= newCount; i++) {
+                    for (let i = 1; i <= newCount; i++) {
                         inputsHTML += `
                             <div class="player-input-group">
-                        <label for="player-${i}">Player ${i}:</label>
-                                <input type="text" id="player-${i}" placeholder="Enter player name" required>
+                                <label for="player-${i}">Player ${i}:</label>
+                                <input type="text" id="player-${i}" class="form-control" placeholder="Enter player name" required>
                             </div>
                         `;
                     }
