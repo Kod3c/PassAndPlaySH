@@ -732,15 +732,19 @@
                 // Player count controls
                 document.getElementById('increase-btn').addEventListener('click', () => {
                     const currentCount = this.getCurrentPlayerCount();
-                    if (currentCount < 10) {
+                    if (currentCount === 0) {
+                        this.updatePlayerCount(5);
+                    } else if (currentCount < 10) {
                         this.updatePlayerCount(currentCount + 1);
                     }
                 });
 
                 document.getElementById('decrease-btn').addEventListener('click', () => {
                     const currentCount = this.getCurrentPlayerCount();
-                    if (currentCount > 0) {
+                    if (currentCount > 5) {
                         this.updatePlayerCount(currentCount - 1);
+                    } else if (currentCount === 5) {
+                        this.updatePlayerCount(0);
                     }
                 });
 
