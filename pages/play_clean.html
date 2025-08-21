@@ -590,22 +590,14 @@
                     </div>
                     <div class="setting-item">
                         <label for="game-mode-select">Game Mode</label>
-                        <select id="game-mode-select" class="setting-select">
-                            <option value="standard">Standard Game</option>
-                            <option value="quick">Quick Game</option>
-                            <option value="extended">Extended Game</option>
+                        <select id="game-mode-select" class="setting-select" disabled>
+                            <option value="standard" selected>Standard Game</option>
+                            <option value="quick" disabled>Quick Game</option>
+                            <option value="extended" disabled>Extended Game</option>
                         </select>
-                        <small class="setting-help">Standard: Full rules, Quick: Faster gameplay, Extended: More rounds</small>
+                        <small class="setting-help">Standard: Full rules (other modes disabled)</small>
                     </div>
-                    <div class="setting-item">
-                        <label for="difficulty-select">Difficulty</label>
-                        <select id="difficulty-select" class="setting-select">
-                            <option value="normal">Normal</option>
-                            <option value="hard">Hard</option>
-                            <option value="expert">Expert</option>
-                        </select>
-                        <small class="setting-help">Affects role distribution and special rules</small>
-                    </div>
+
                 </div>
             </div>
 
@@ -667,10 +659,6 @@
                     <div class="summary-item">
                         <span class="summary-label">Mode:</span>
                         <span class="summary-value" id="summary-mode">Standard Game</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">Difficulty:</span>
-                        <span class="summary-value" id="summary-difficulty">Normal</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">Estimated Duration:</span>
@@ -774,10 +762,15 @@
                 document.getElementById('game-mode-select').addEventListener('change', () => {
                     this.updateGameSummary();
                 });
-
-                document.getElementById('difficulty-select').addEventListener('change', () => {
-                    this.updateGameSummary();
-                });
+                
+                // Disable all game mode options except "Standard"
+                const gameModeSelect = document.getElementById('game-mode-select');
+                if (gameModeSelect) {
+                    const options = gameModeSelect.options;
+                    for (let i = 0; i < options.length; i++) {
+                        options[i].disabled = (options[i].value !== 'standard');
+                    }
+                }
             }
 
             setupHeaderNavigation() {
@@ -907,7 +900,6 @@
                 // Collect game settings
                 const gameName = document.getElementById('game-name-input')?.value || 'Secret Hitler Game';
                 const gameMode = document.getElementById('game-mode-select')?.value || 'standard';
-                const difficulty = document.getElementById('difficulty-select')?.value || 'normal';
                 
                 this.showStatus('Game setup complete! Ready to start playing.', 'success');
                 
@@ -915,12 +907,10 @@
                 this.gameState.players = playerNames;
                 this.gameState.gameName = gameName;
                 this.gameState.gameMode = gameMode;
-                this.gameState.difficulty = difficulty;
                 
                 console.log('Game Configuration:', {
                     name: gameName,
                     mode: gameMode,
-                    difficulty: difficulty,
                     players: playerNames
                 });
                 
@@ -947,13 +937,11 @@
                 const playerCount = this.getCurrentPlayerCount();
                 const gameName = document.getElementById('game-name-input')?.value || 'Secret Hitler Game';
                 const gameMode = document.getElementById('game-mode-select')?.value || 'standard';
-                const difficulty = document.getElementById('difficulty-select')?.value || 'normal';
 
                 // Update summary display
                 document.getElementById('summary-game-name').textContent = gameName;
                 document.getElementById('summary-players').textContent = playerCount;
                 document.getElementById('summary-mode').textContent = this.getGameModeDisplayName(gameMode);
-                document.getElementById('summary-difficulty').textContent = this.getDifficultyDisplayName(difficulty);
                 document.getElementById('summary-duration').textContent = this.getEstimatedDuration(gameMode, playerCount);
             }
 
@@ -966,14 +954,7 @@
                 return modes[mode] || 'Standard Game';
             }
 
-            getDifficultyDisplayName(difficulty) {
-                const difficulties = {
-                    'normal': 'Normal',
-                    'hard': 'Hard',
-                    'expert': 'Expert'
-                };
-                return difficulties[difficulty] || 'Normal';
-            }
+
 
             getEstimatedDuration(mode, playerCount) {
                 const baseDuration = {
