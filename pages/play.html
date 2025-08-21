@@ -97,7 +97,11 @@
                     </div>
                     
                     <div id="role-info"></div>
-                    <div id="player-inputs" class="player-inputs mt-3"></div>
+                    <div id="player-inputs" class="player-inputs mt-3" style="display: block;">
+                        <div class="player-input-placeholder" style="text-align: center; color: var(--dark-beige); padding: var(--space-xl);">
+                            Select number of players to add player name inputs
+                        </div>
+                    </div>
                     
                     <!-- Player Input Hint -->
                     <div class="create-game-hint" id="player-input-hint" style="display: none;">
@@ -221,6 +225,12 @@
                 this.setupHeaderNavigation();      // Setup header click handlers
                 this.initializePlayerCount();      // Set initial player count to 0
                 this.updateGameSummary();          // Initialize the game summary display
+                
+                // Debug: Check initial state of player inputs container
+                const playerInputs = document.getElementById('player-inputs');
+                console.log('Initial player inputs container:', playerInputs);
+                console.log('Initial display style:', playerInputs?.style.display);
+                console.log('Initial innerHTML:', playerInputs?.innerHTML);
             }
 
             /**
@@ -338,8 +348,7 @@
                 if (newCount === 0) {
                     // Hide all game-related UI when no players selected
                     roleInfo.innerHTML = '';
-                    playerInputs.innerHTML = '';
-                    playerInputs.style.display = 'none'; // Hide the container when no players
+                    playerInputs.innerHTML = '<div class="player-input-placeholder" style="text-align: center; color: var(--dark-beige); padding: var(--space-xl);">Select number of players to add player name inputs</div>';
                     nameSuggestions.style.display = 'none';
                     gameSummarySection.style.display = 'none';
                     playerRecommendations.style.display = 'none';
@@ -370,8 +379,11 @@
                             </div>
                         `;
                     }
+                    console.log('Generated HTML:', inputsHTML); // Debug log
                     playerInputs.innerHTML = inputsHTML;
                     playerInputs.style.display = 'block'; // Make the container visible
+                    console.log('Player inputs container:', playerInputs); // Debug log
+                    console.log('Container display style:', playerInputs.style.display); // Debug log
                     
                     // Show additional UI elements when players are selected
                     nameSuggestions.style.display = 'block';

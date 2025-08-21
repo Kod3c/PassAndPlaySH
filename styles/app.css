@@ -3377,6 +3377,7 @@ footer,
   display: grid;
   gap: var(--space-lg);
   margin-top: var(--space-xl);
+  min-height: 50px; /* Ensure container has height even when empty */
 }
 
 .player-input-group {
