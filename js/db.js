@@ -21,6 +21,27 @@ import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/1
 
 const db = getFirestore(app);
 
+function sanitizeGameName(raw) {
+  const trimmed = String(raw || '').trim();
+  const collapsed = trimmed.replace(/\s+/g, ' ');
+  const cleaned = collapsed.replace(/[^A-Za-z0-9 _\-'.!?:()/]/g, '');
+  return cleaned.slice(0, 48) || 'Secret Hitler Game';
+}
+
+function sanitizePlayerName(raw) {
+  const trimmed = String(raw || '').trim();
+  const collapsed = trimmed.replace(/\s+/g, ' ');
+  const cleaned = collapsed.replace(/[^A-Za-z0-9 _\-'.]/g, '');
+  return cleaned.slice(0, 24);
+}
+
+function normalizeNameKey(name) {
+  return String(name || '')
+    .toLocaleLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function ensureAnonymousAuth() {
   try {
     const auth = getAuth(app);
@@ -56,23 +77,34 @@ export async function createGame(gameName, playerNames, hostPasswordHash = null)
   const gameRef = doc(db, 'games', gameId);
   const createdAt = serverTimestamp();
 
+  // Validate and sanitize player names
+  const sanitized = Array.isArray(playerNames) ? playerNames.map(sanitizePlayerName).filter(n => n) : [];
+  if (sanitized.length < 5) {
+    throw new Error('At least 5 valid player names are required.');
+  }
+  // Duplicate check (case-insensitive, whitespace-normalized)
+  const keys = sanitized.map(normalizeNameKey);
+  const uniqueCount = new Set(keys).size;
+  if (uniqueCount !== sanitized.length) {
+    throw new Error('Duplicate player names are not allowed.');
+  }
+
   await setDoc(gameRef, {
     id: gameId,
-    name: gameName || 'Secret Hitler Game',
+    name: sanitizeGameName(gameName),
     state: 'lobby',
-    playerCount: Array.isArray(playerNames) ? playerNames.length : 0,
+    playerCount: sanitized.length,
     createdAt,
     updatedAt: createdAt,
-    hostName: Array.isArray(playerNames) && playerNames.length > 0 ? String(playerNames[0] || '').trim() : null,
+    hostName: sanitized.length > 0 ? sanitized[0] : null,
     hostPasswordHash: hostPasswordHash || null,
     // Set initial expiry to 15 minutes from now; TTL will remove stale lobbies
     expireAt: new Date(Date.now() + 15 * 60 * 1000)
   }, { merge: true });
 
   const playersCol = collection(gameRef, 'players');
-  for (let i = 0; i < playerNames.length; i++) {
-    const name = String(playerNames[i] || '').trim();
-    if (!name) continue;
+  for (let i = 0; i < sanitized.length; i++) {
+    const name = sanitized[i];
     await addDoc(playersCol, {
       name,
       seat: i + 1,

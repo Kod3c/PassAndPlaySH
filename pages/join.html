@@ -91,7 +91,13 @@
         }
 
         function normalizeGameId(id) {
-            return (id || '').trim().toUpperCase();
+            // Allow only A-Z, 0-9, and one hyphen separator
+            const upper = (id || '').toUpperCase();
+            const cleaned = upper.replace(/[^A-Z0-9-]/g, '');
+            // Collapse multiple hyphens to a single and trim hyphen ends
+            const collapsed = cleaned.replace(/-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+            // Limit length to 16
+            return collapsed.slice(0, 16);
         }
 
         async function ensureAuth() {
@@ -289,6 +295,8 @@
             let debounceTimer = null;
             gameIdInput.addEventListener('input', function() {
                 const gid = normalizeGameId(gameIdInput.value);
+                // reflect sanitized value back to field for clarity
+                gameIdInput.value = gid;
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 250);
                 updateJoinEnabled();

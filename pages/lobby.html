@@ -142,19 +142,53 @@
                 const joinUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/join.html') + '?game=' + encodeURIComponent(game.id);
                 inviteInput.value = joinUrl;
 
-                lobbyInfo.innerHTML = `
-                    <div class="lobby-header">
-                        <div class="lobby-meta">
-                            <div><strong>Game:</strong> ${game.name || 'Secret Hitler Game'}</div>
-                            <div><strong>Game ID:</strong> ${game.id}</div>
-                            <div><strong>Players Expected:</strong> ${game.playerCount || (players ? players.length : 0)}</div>
-                        </div>
-                        <div class="lobby-status">
-                            <span class="status-dot"></span>
-                            <span>Waiting for players...</span>
-                        </div>
-                    </div>
-                `;
+                // Safely render lobby info without injecting user strings as HTML
+                lobbyInfo.innerHTML = '';
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'lobby-header';
+
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'lobby-meta';
+                const gameRow = document.createElement('div');
+                const gameStrong = document.createElement('strong');
+                gameStrong.textContent = 'Game:';
+                gameRow.appendChild(gameStrong);
+                gameRow.appendChild(document.createTextNode(' '));
+                const gameNameSpan = document.createElement('span');
+                gameNameSpan.textContent = game.name || 'Secret Hitler Game';
+                gameRow.appendChild(gameNameSpan);
+
+                const idRow = document.createElement('div');
+                const idStrong = document.createElement('strong');
+                idStrong.textContent = 'Game ID:';
+                idRow.appendChild(idStrong);
+                idRow.appendChild(document.createTextNode(' ' + (game.id || '')));
+
+                const countRow = document.createElement('div');
+                const countStrong = document.createElement('strong');
+                countStrong.textContent = 'Players Expected:';
+                countRow.appendChild(countStrong);
+                const expected = (typeof game.playerCount === 'number' && game.playerCount > 0)
+                    ? game.playerCount
+                    : (players ? players.length : 0);
+                countRow.appendChild(document.createTextNode(' ' + expected));
+
+                metaDiv.appendChild(gameRow);
+                metaDiv.appendChild(idRow);
+                metaDiv.appendChild(countRow);
+
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'lobby-status';
+                const statusDot = document.createElement('span');
+                statusDot.className = 'status-dot';
+                const statusText = document.createElement('span');
+                statusText.textContent = 'Waiting for players...';
+                statusDiv.appendChild(statusDot);
+                statusDiv.appendChild(statusText);
+
+                headerDiv.appendChild(metaDiv);
+                headerDiv.appendChild(statusDiv);
+                lobbyInfo.appendChild(headerDiv);
 
                 // Identify current player via saved playerId or current auth uid (use raw players list)
                 let savedPlayerId = null;
@@ -232,11 +266,18 @@
                         const li = document.createElement('li');
                         li.className = 'player-list-item';
                         const dotColor = status === 'present' ? '#22c55e' : '#9ca3af';
-                        const label = isYou(item.p) ? `${item.name} - You` : item.name;
-                        li.innerHTML = `
-                            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${dotColor};margin-right:8px;"></span>
-                            <span class="player-name">${label}</span>
-                        `;
+                        const dot = document.createElement('span');
+                        dot.style.display = 'inline-block';
+                        dot.style.width = '10px';
+                        dot.style.height = '10px';
+                        dot.style.borderRadius = '50%';
+                        dot.style.background = dotColor;
+                        dot.style.marginRight = '8px';
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'player-name';
+                        nameSpan.textContent = isYou(item.p) ? `${item.name} - You` : item.name;
+                        li.appendChild(dot);
+                        li.appendChild(nameSpan);
                         ul.appendChild(li);
                     });
                     return ul;
@@ -255,7 +296,16 @@
                     col.className = 'card subtle';
                     const header = document.createElement('div');
                     header.className = 'card-header';
-                    header.innerHTML = `<div><h3 class="card-title">${title} <span class="badge">${count}</span></h3></div>`;
+                    const titleWrap = document.createElement('div');
+                    const h3 = document.createElement('h3');
+                    h3.className = 'card-title';
+                    h3.textContent = `${title} `;
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = String(count);
+                    h3.appendChild(badge);
+                    titleWrap.appendChild(h3);
+                    header.appendChild(titleWrap);
                     const body = document.createElement('div');
                     body.className = 'card-content';
                     body.appendChild(ul);

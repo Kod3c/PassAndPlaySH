@@ -123,6 +123,7 @@
             const createGameBtn = document.getElementById('create-game-btn');
             const player1Hint = document.getElementById('player1-hint');
             const gameNameInput = document.getElementById('game-name-input');
+            const namesErrorId = 'names-error';
 
             const MIN_VALID_PLAYERS = 5;
             const MAX_PLAYERS = 10;
@@ -157,6 +158,17 @@
                     group.appendChild(input);
                     playerInputsContainer.appendChild(group);
                 }
+                // Ensure error container exists right after inputs
+                let err = document.getElementById(namesErrorId);
+                if (!err) {
+                    err = document.createElement('div');
+                    err.id = namesErrorId;
+                    err.className = 'form-error';
+                    err.style.color = '#b91c1c';
+                    err.style.fontWeight = '600';
+                    err.style.marginTop = '0.5rem';
+                    playerInputsContainer.parentElement.appendChild(err);
+                }
             }
 
             function getPlayerCount() {
@@ -172,6 +184,26 @@
                 validateForm();
             }
 
+            function normalizeForCompare(name) {
+                return (name || '')
+                    .toLocaleLowerCase()
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function sanitizeName(raw) {
+                const trimmed = (raw || '').trim();
+                // Collapse internal whitespace
+                const collapsed = trimmed.replace(/\s+/g, ' ');
+                // Allow letters, numbers, spaces, hyphen, underscore, apostrophe, period
+                const cleaned = collapsed.replace(/[^A-Za-z0-9 _\-'.]/g, '');
+                return cleaned.slice(0, 24);
+            }
+
+            function isValidName(name) {
+                return /^[A-Za-z0-9 _\-'.]{1,24}$/.test(name);
+            }
+
             function validateForm() {
                 const count = getPlayerCount();
                 if (!createGameBtn) return;
@@ -181,17 +213,34 @@
                 }
                 const inputs = playerInputsContainer.querySelectorAll('input');
                 let allFilled = true;
+                let invalidFound = false;
+                const seen = new Set();
+                let dupName = null;
                 inputs.forEach((inp) => {
-                    if (!inp.value || !inp.value.trim()) allFilled = false;
+                    const raw = inp.value || '';
+                    const val = raw.trim();
+                    if (!val) { allFilled = false; return; }
+                    const sanitized = sanitizeName(val);
+                    if (!isValidName(sanitized)) invalidFound = true;
+                    const key = normalizeForCompare(sanitized);
+                    if (seen.has(key) && !dupName) dupName = sanitized;
+                    seen.add(key);
                 });
-                createGameBtn.disabled = !allFilled;
+                const err = document.getElementById(namesErrorId);
+                if (err) {
+                    if (!allFilled) err.textContent = '';
+                    else if (invalidFound) err.textContent = 'Names may use letters, numbers, spaces, - _ \'. .';
+                    else if (dupName) err.textContent = 'Duplicate names are not allowed.';
+                    else err.textContent = '';
+                }
+                createGameBtn.disabled = !(allFilled && !invalidFound && !dupName);
             }
 
             function collectPlayerNames() {
                 const inputs = playerInputsContainer.querySelectorAll('input');
                 const names = [];
                 inputs.forEach((inp) => {
-                    const val = (inp.value || '').trim();
+                    const val = sanitizeName(inp.value || '');
                     if (val) names.push(val);
                 });
                 return names;
@@ -208,14 +257,29 @@
                 if (count < MIN_VALID_PLAYERS) return;
                 const players = collectPlayerNames();
                 if (players.length !== count) return;
+                // Validate again for duplicates and invalid
+                const norm = players.map(normalizeForCompare);
+                const hasDup = norm.length !== new Set(norm).size;
+                const hasInvalid = players.some(n => !isValidName(n));
+                if (hasDup || hasInvalid) {
+                    const err = document.getElementById(namesErrorId);
+                    if (err) err.textContent = hasInvalid ? 'Names may use letters, numbers, spaces, - _ \' .'
+                        : 'Duplicate names are not allowed.';
+                    return;
+                }
 
                 const gameName = (gameNameInput && gameNameInput.value || 'Secret Hitler Game').trim();
                 const hostPasswordInput = document.getElementById('host-password-input');
                 const hostPassword = hostPasswordInput ? (hostPasswordInput.value || '').trim() : '';
                 const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
-                const gameId = await createGame(gameName, players, hostPasswordHash);
-                try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
-                window.location.href = `lobby.html?game=${encodeURIComponent(gameId)}`;
+                try {
+                    const gameId = await createGame(gameName, players, hostPasswordHash);
+                    try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
+                    window.location.href = `lobby.html?game=${encodeURIComponent(gameId)}`;
+                } catch (e) {
+                    const err = document.getElementById(namesErrorId);
+                    if (err) err.textContent = (e && e.message) ? String(e.message) : 'Failed to create game. Please check player names.';
+                }
             }
 
             // Initialize starting state at 0 players
