@@ -385,7 +385,7 @@ class App {
                 const mode = index === 0 ? 'create' : 'join';
                 
                 // Use a simple relative path - this works when index.html is at the root
-                const playPageUrl = 'pages/play.html?mode=' + mode;
+                const playPageUrl = 'pages/create.html?mode=' + mode;
                 
                 console.log('Navigating to:', playPageUrl);
                 window.location.href = playPageUrl;

@@ -1,7 +1,7 @@
 {
-  "name": "Secret Hitler - Pass & Play",
+  "name": "Secret Hitler - Mobile Edition",
   "short_name": "Secret Hitler",
-  "description": "Play Secret Hitler on one device with pass-and-play mechanics",
+  "description": "Play Secret Hitler on one device with Mobile Edition mechanics",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#D6C6A9",

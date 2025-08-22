@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler - Create Game</title>
+    <link href="../styles/app.css" rel="stylesheet">
+    <meta name="theme-color" content="#101820">
+    
+    
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo" onclick="window.location.href='../index.html'">
+                        <span class="logo-icon">🎭</span>
+                        <div class="logo-text">
+                            <h1>Secret Hitler</h1>
+                            <p class="subtitle">Game Setup</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <div class="container">
+                <!-- Create Game Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <span class="card-icon">🎮</span>
+                        <div>
+                            <h2 class="card-title">Create New Game</h2>
+                            <p class="section-description">Set up a new Secret Hitler game for your group</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Settings -->
+                <div class="setup-section">
+                    <div class="section-header">
+                        <span class="section-icon">⚙️</span>
+                        <h2 class="section-title">Game Settings</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="form-group">
+                            <label for="game-name-input" class="form-label">Game Name</label>
+                            <input type="text" id="game-name-input" class="form-control" placeholder="Enter game name" value="Secret Hitler Game">
+                            <small class="form-help">Choose a memorable name for your game</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="game-mode-select" class="form-label">Game Mode</label>
+                            <select id="game-mode-select" class="form-control" disabled>
+                                <option value="standard" selected>Standard Game</option>
+                                <option value="quick" disabled>Quick Game</option>
+                                <option value="extended" disabled>Extended Game</option>
+                            </select>
+                            <small class="form-help">Standard: Full rules (other modes disabled)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player Count Section -->
+                <div class="setup-section">
+                    <div class="section-header">
+                        <span class="section-icon">👥</span>
+                        <h2 class="section-title">Players</h2>
+                    </div>
+                    
+                    <div class="player-count-controls">
+                        <button class="count-btn" id="decrease-btn">−</button>
+                        <div class="player-count-display">
+                            <span class="current-count">0</span>
+                            <span>players</span>
+                        </div>
+                        <button class="count-btn" id="increase-btn">+</button>
+                    </div>
+
+                    <div id="player1-hint" class="create-game-hint" style="display: none;">👤 Player 1 should be you (the person creating the game).</div>
+
+                    <!-- Dynamic Player Name Inputs -->
+                    <div id="player-inputs" class="player-inputs"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group flex justify-center gap-2 mt-4">
+                    <button id="create-game-btn" class="btn btn-primary btn-lg">
+                        <span>🚀</span>
+                        <span>Create Game</span>
+                    </button>
+                    <button type="button" class="btn btn-outline btn-lg" onclick="window.history.back()">
+                        <span>⬅️</span>
+                        <span>Back</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Messages Container -->
+        <div id="status-container" class="status-container"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Player setup logic (skip 1-4 players, dynamic name inputs)
+        document.addEventListener('DOMContentLoaded', function() {
+            const increaseBtn = document.getElementById('increase-btn');
+            const decreaseBtn = document.getElementById('decrease-btn');
+            const currentCountSpan = document.querySelector('.current-count');
+            const playerInputsContainer = document.getElementById('player-inputs');
+            const createGameBtn = document.getElementById('create-game-btn');
+            const player1Hint = document.getElementById('player1-hint');
+            const gameNameInput = document.getElementById('game-name-input');
+
+            const MIN_VALID_PLAYERS = 5;
+            const MAX_PLAYERS = 10;
+
+            function updateControls(count) {
+                if (decreaseBtn) decreaseBtn.disabled = count === 0;
+                if (increaseBtn) increaseBtn.disabled = count === MAX_PLAYERS;
+            }
+
+            function renderPlayerInputs(count) {
+                if (!playerInputsContainer) return;
+                playerInputsContainer.innerHTML = '';
+                for (let i = 1; i <= count; i++) {
+                    const group = document.createElement('div');
+                    group.className = 'player-input-group';
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `player-name-${i}`);
+                    label.textContent = `Player ${i}`;
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `player-name-${i}`;
+                    input.name = `player-name-${i}`;
+                    input.className = 'form-control';
+                    input.placeholder = 'Enter player name';
+                    input.maxLength = 24;
+                    input.autocomplete = 'name';
+                    input.addEventListener('input', validateForm);
+
+                    group.appendChild(label);
+                    group.appendChild(input);
+                    playerInputsContainer.appendChild(group);
+                }
+            }
+
+            function getPlayerCount() {
+                return parseInt(currentCountSpan.textContent || '0', 10);
+            }
+
+            function setPlayerCount(newCount) {
+                const bounded = Math.max(0, Math.min(MAX_PLAYERS, newCount));
+                currentCountSpan.textContent = String(bounded);
+                renderPlayerInputs(bounded >= MIN_VALID_PLAYERS ? bounded : 0);
+                updateControls(bounded);
+                if (player1Hint) player1Hint.style.display = bounded > 0 ? '' : 'none';
+                validateForm();
+            }
+
+            function validateForm() {
+                const count = getPlayerCount();
+                if (!createGameBtn) return;
+                if (count < MIN_VALID_PLAYERS) {
+                    createGameBtn.disabled = true;
+                    return;
+                }
+                const inputs = playerInputsContainer.querySelectorAll('input');
+                let allFilled = true;
+                inputs.forEach((inp) => {
+                    if (!inp.value || !inp.value.trim()) allFilled = false;
+                });
+                createGameBtn.disabled = !allFilled;
+            }
+
+            function collectPlayerNames() {
+                const inputs = playerInputsContainer.querySelectorAll('input');
+                const names = [];
+                inputs.forEach((inp) => {
+                    const val = (inp.value || '').trim();
+                    if (val) names.push(val);
+                });
+                return names;
+            }
+
+            function generateGameId() {
+                const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+                const ts = Date.now().toString(36).slice(-4).toUpperCase();
+                return `${rand}-${ts}`;
+            }
+
+            function handleCreateGame() {
+                const count = getPlayerCount();
+                if (count < MIN_VALID_PLAYERS) return;
+                const players = collectPlayerNames();
+                if (players.length !== count) return;
+
+                const gameName = (gameNameInput && gameNameInput.value || 'Secret Hitler Game').trim();
+                const gameId = generateGameId();
+
+                const gameData = {
+                    id: gameId,
+                    name: gameName,
+                    players: players,
+                    hostIndex: 0,
+                    createdAt: Date.now()
+                };
+
+                try {
+                    localStorage.setItem('sh_currentGame', JSON.stringify(gameData));
+                    // Also keep compatibility with existing key if used elsewhere
+                    localStorage.setItem('gamePlayers', JSON.stringify(players));
+                } catch (e) {
+                    console.error('Failed saving game to localStorage', e);
+                }
+
+                window.location.href = 'lobby.html';
+            }
+
+            // Initialize starting state at 0 players
+            setPlayerCount(0);
+
+            // Controls: skip 1-4 when increasing from 0, and drop to 0 from 5 when decreasing
+            if (increaseBtn) {
+                increaseBtn.addEventListener('click', function() {
+                    const current = getPlayerCount();
+                    if (current === 0) {
+                        setPlayerCount(MIN_VALID_PLAYERS);
+                    } else if (current < MAX_PLAYERS) {
+                        setPlayerCount(current + 1);
+                    }
+                });
+            }
+
+            if (decreaseBtn) {
+                decreaseBtn.addEventListener('click', function() {
+                    const current = getPlayerCount();
+                    if (current <= MIN_VALID_PLAYERS) {
+                        setPlayerCount(0);
+                    } else {
+                        setPlayerCount(current - 1);
+                    }
+                });
+            }
+
+            if (createGameBtn) {
+                createGameBtn.addEventListener('click', function() {
+                    handleCreateGame();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+

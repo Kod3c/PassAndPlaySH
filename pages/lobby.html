@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby - Secret Hitler</title>
+    <link rel="stylesheet" href="../styles/app.css">
+    <meta name="theme-color" content="#101820">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo" onclick="window.location.href='../index.html'">
+                        <span class="logo-icon">🎭</span>
+                        <div class="logo-text">
+                            <h1>Secret Hitler</h1>
+                            <p class="subtitle">Lobby</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="container">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <span class="card-icon">🕒</span>
+                        <div>
+                            <h2 class="card-title">Game Lobby</h2>
+                            <p class="section-description">Waiting for players to join...</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div id="lobby-info" class="lobby-info"></div>
+                        <div id="players-list" class="players-list mt-3"></div>
+
+                        <div class="invite-section mt-3">
+                            <div class="invite-row">
+                                <input id="invite-link" class="form-control" type="text" readonly>
+                                <button id="copy-invite-btn" class="btn btn-secondary">Copy Invite</button>
+                            </div>
+                            <small class="form-help">Share this link with other players to join the lobby.</small>
+                        </div>
+
+                        <div class="lobby-actions mt-4">
+                            <button id="start-game-btn" class="btn btn-primary btn-lg" disabled>Start Game</button>
+                            <button class="btn btn-outline btn-lg" onclick="window.location.href='../index.html'">Back to Home</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <div class="container">
+                <div class="footer-content">
+                    <p class="footer-text">Built for offline play - no accounts or servers required</p>
+                    <div class="footer-links">
+                        <a href="../pages/rules.html" class="footer-link">📖 Rules</a>
+                        <span class="footer-separator">•</span>
+                        <a href="../index.html" class="footer-link">🎮 Play</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            const lobbyInfo = document.getElementById('lobby-info');
+            const playersList = document.getElementById('players-list');
+            const inviteInput = document.getElementById('invite-link');
+            const copyInviteBtn = document.getElementById('copy-invite-btn');
+            const startBtn = document.getElementById('start-game-btn');
+
+            function loadGame() {
+                try {
+                    const raw = localStorage.getItem('sh_currentGame');
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                } catch (e) {
+                    console.error('Failed to read lobby data', e);
+                    return null;
+                }
+            }
+
+            function render(game) {
+                if (!game) {
+                    lobbyInfo.innerHTML = '<p class="text-danger">No game found. Please create a game first.</p>';
+                    startBtn.disabled = true;
+                    return;
+                }
+                const joinUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/join.html') + '?game=' + encodeURIComponent(game.id);
+                inviteInput.value = joinUrl;
+
+                lobbyInfo.innerHTML = `
+                    <div class="lobby-header">
+                        <div class="lobby-meta">
+                            <div><strong>Game:</strong> ${game.name || 'Secret Hitler Game'}</div>
+                            <div><strong>Game ID:</strong> ${game.id}</div>
+                            <div><strong>Players Expected:</strong> ${game.players.length}</div>
+                        </div>
+                        <div class="lobby-status">
+                            <span class="status-dot"></span>
+                            <span>Waiting for players...</span>
+                        </div>
+                    </div>
+                `;
+
+                const list = document.createElement('ul');
+                list.className = 'player-list-ul';
+                game.players.forEach((name, idx) => {
+                    const li = document.createElement('li');
+                    li.className = 'player-list-item';
+                    li.innerHTML = `<span class="player-index">${idx + 1}.</span> <span class="player-name">${name}</span>${idx === game.hostIndex ? ' <span class="host-badge">Host</span>' : ''}`;
+                    list.appendChild(li);
+                });
+                playersList.innerHTML = '';
+                playersList.appendChild(list);
+
+                // For now, enable start only for host and keep disabled pending full presence logic
+                const isHost = true; // This device created the game in create.html
+                startBtn.disabled = !isHost;
+            }
+
+            function copyInvite() {
+                inviteInput.select();
+                try {
+                    document.execCommand('copy');
+                    copyInviteBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyInviteBtn.textContent = 'Copy Invite'; }, 1500);
+                } catch (e) {
+                    console.warn('Copy failed, select manually');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const game = loadGame();
+                render(game);
+                copyInviteBtn.addEventListener('click', copyInvite);
+                startBtn.addEventListener('click', function() {
+                    // Placeholder: navigate to rules or game start page
+                    window.location.href = '../index.html';
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
