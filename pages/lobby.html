@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lobby - Secret Hitler</title>
-    <link rel="stylesheet" href="../styles/app.css">
+    <link rel="stylesheet" href="../styles/app.css?v=dev">
     <meta name="theme-color" content="#101820">
+    <style>
+        .badge { display:inline-block; padding: 0.125rem 0.5rem; border: var(--border-medium) solid var(--propaganda-black); background: var(--off-white); font-weight: 700; font-size: var(--font-sm); border-radius: 999px; margin-left: 0.5rem; }
+        .player-list-ul { list-style: none; padding-left: 0; margin: 0; display: grid; gap: var(--space-sm); }
+        .player-list-item { display: flex; align-items: center; gap: 8px; padding: 0.375rem 0.5rem; background: #fff; border: var(--border-thin) dashed var(--propaganda-black); }
+        .player-name { font-weight: 600; letter-spacing: 0.02em; }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -47,6 +53,7 @@
 
                         <div class="lobby-actions mt-4">
                             <button id="start-game-btn" class="btn btn-primary btn-lg" disabled>Start Game</button>
+                            <button id="cancel-game-btn" class="btn btn-outline btn-lg">🛑 Cancel Game</button>
                             <button class="btn btn-outline btn-lg" onclick="window.location.href='../index.html'">Back to Home</button>
                         </div>
                     </div>
@@ -70,12 +77,45 @@
 
     <script type="module">
         import { onGameSnapshot, getGame } from '../js/db.js';
+        import { app } from '../js/firebase.js';
+        import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         (function() {
             const lobbyInfo = document.getElementById('lobby-info');
             const playersList = document.getElementById('players-list');
             const inviteInput = document.getElementById('invite-link');
             const copyInviteBtn = document.getElementById('copy-invite-btn');
             const startBtn = document.getElementById('start-game-btn');
+
+            const db = getFirestore(app);
+            const PRESENT_WINDOW_MS = 60 * 1000; // 60s
+            const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
+            let heartbeatTimer = null;
+
+            async function ensureAuth() {
+                const auth = getAuth(app);
+                if (!auth.currentUser) await signInAnonymously(auth);
+                return auth.currentUser;
+            }
+
+            async function autoClaimHost(gameId) {
+                // Attempt to claim Player 1 (seat 1) if it has no uid yet
+                try {
+                    const authUser = await ensureAuth();
+                    if (!authUser) return null;
+                    const playersQ = query(collection(doc(db, 'games', gameId), 'players'), where('seat', '==', 1));
+                    const snap = await getDocs(playersQ);
+                    for (const d of snap.docs) {
+                        const data = d.data() || {};
+                        if (!data.uid) {
+                            await updateDoc(d.ref, { uid: authUser.uid, lastSeen: serverTimestamp() });
+                            try { localStorage.setItem(`sh_playerId_${gameId}`, d.id); } catch (_) {}
+                            return d.id;
+                        }
+                    }
+                } catch (_) {}
+                return null;
+            }
 
             function getGameIdFromUrl() {
                 const params = new URLSearchParams(window.location.search);
@@ -105,16 +145,78 @@
                     </div>
                 `;
 
-                const list = document.createElement('ul');
-                list.className = 'player-list-ul';
-                (players || []).forEach((p, idx) => {
-                    const li = document.createElement('li');
-                    li.className = 'player-list-item';
-                    li.innerHTML = `<span class="player-index">${idx + 1}.</span> <span class="player-name">${p.name}</span>`;
-                    list.appendChild(li);
+                // Deduplicate by name, prefer docs with uid
+                const nameToPlayer = new Map();
+                (players || []).forEach((p) => {
+                    const key = (p.name || '').toString().trim();
+                    if (!key) return;
+                    const existing = nameToPlayer.get(key);
+                    if (!existing) {
+                        nameToPlayer.set(key, p);
+                    } else {
+                        // Prefer the one with uid; if both have/no uid keep existing
+                        if (!existing.uid && p.uid) nameToPlayer.set(key, p);
+                    }
                 });
+
+                const now = Date.now();
+                const present = [];
+                const notPresent = [];
+                for (const [name, p] of nameToPlayer.entries()) {
+                    const lastSeen = p.lastSeen && p.lastSeen.toDate ? p.lastSeen.toDate().getTime() : 0;
+                    const isPresent = Boolean(p.uid) && (lastSeen > 0) && (now - lastSeen <= PRESENT_WINDOW_MS);
+                    (isPresent ? present : notPresent).push({ name, p });
+                }
+
+                // Sort alphabetically by name within groups
+                present.sort((a, b) => a.name.localeCompare(b.name));
+                notPresent.sort((a, b) => a.name.localeCompare(b.name));
+
+                function renderList(items, status) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'player-list-ul';
+                    items.forEach((item) => {
+                        const li = document.createElement('li');
+                        li.className = 'player-list-item';
+                        const dotColor = status === 'present' ? '#22c55e' : '#9ca3af';
+                        li.innerHTML = `
+                            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${dotColor};margin-right:8px;"></span>
+                            <span class="player-name">${item.name}</span>
+                        `;
+                        ul.appendChild(li);
+                    });
+                    return ul;
+                }
+
+                const container = document.createElement('div');
+                container.style.display = 'flex';
+                container.style.gap = '16px';
+                container.style.alignItems = 'flex-start';
+                container.style.flexWrap = 'wrap';
+
+                function column(title, count, ul) {
+                    const col = document.createElement('div');
+                    col.style.flex = '1 1 280px';
+                    col.style.minWidth = '260px';
+                    col.className = 'card subtle';
+                    const header = document.createElement('div');
+                    header.className = 'card-header';
+                    header.innerHTML = `<div><h3 class="card-title">${title} <span class="badge">${count}</span></h3></div>`;
+                    const body = document.createElement('div');
+                    body.className = 'card-content';
+                    body.appendChild(ul);
+                    col.appendChild(header);
+                    col.appendChild(body);
+                    return col;
+                }
+
+                const presentCol = column('Present', present.length, renderList(present, 'present'));
+                const awayCol = column('Not Present', notPresent.length, renderList(notPresent, 'away'));
+
                 playersList.innerHTML = '';
-                playersList.appendChild(list);
+                container.appendChild(presentCol);
+                container.appendChild(awayCol);
+                playersList.appendChild(container);
 
                 // For now, enable start only for host and keep disabled pending full presence logic
                 const isHost = true; // This device created the game in create.html
@@ -132,6 +234,54 @@
                 }
             }
 
+            async function cancelGame(gameId) {
+                if (!gameId) return;
+                const confirmed = window.confirm('Cancel this game? Players will be returned to home.');
+                if (!confirmed) return;
+                try {
+                    await ensureAuth();
+                    const gameRef = doc(db, 'games', gameId);
+                    await setDoc(gameRef, { state: 'cancelled', updatedAt: serverTimestamp(), expireAt: new Date() }, { merge: true });
+                } catch (e) {
+                    console.error('Failed to cancel game', e);
+                }
+                try { localStorage.removeItem('sh_currentGameId'); } catch (_) {}
+                try { localStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
+                window.location.href = '../index.html';
+            }
+
+            async function startHeartbeat(gameId) {
+                try { await ensureAuth(); } catch (_) {}
+                const playerIdKey = `sh_playerId_${gameId}`;
+                let playerId = null;
+                try { playerId = localStorage.getItem(playerIdKey); } catch (_) { playerId = null; }
+                if (!playerId) {
+                    // Try to auto-claim host (Player 1) if uid missing
+                    playerId = await autoClaimHost(gameId);
+                }
+                if (!playerId) return; // nothing to heartbeat yet
+
+                const playerRef = doc(db, 'games', gameId, 'players', playerId);
+
+                async function beat() {
+                    try { await updateDoc(playerRef, { lastSeen: serverTimestamp() }); } catch (_) {}
+                }
+
+                // initial beat on load/visibility
+                beat();
+
+                if (heartbeatTimer) clearInterval(heartbeatTimer);
+                heartbeatTimer = setInterval(beat, HEARTBEAT_INTERVAL_MS);
+
+                document.addEventListener('visibilitychange', function() {
+                    if (document.visibilityState === 'visible') beat();
+                });
+                window.addEventListener('beforeunload', function() {
+                    // best-effort; may not complete
+                    beat();
+                });
+            }
+
             document.addEventListener('DOMContentLoaded', async function() {
                 const gameId = getGameIdFromUrl();
                 if (!gameId) {
@@ -141,10 +291,13 @@
                 const initial = await getGame(gameId);
                 render(initial, []);
                 onGameSnapshot(gameId, ({ game, players }) => render(game, players));
+                startHeartbeat(gameId);
                 copyInviteBtn.addEventListener('click', copyInvite);
                 startBtn.addEventListener('click', function() {
                     window.location.href = '../index.html';
                 });
+                const cancelBtn = document.getElementById('cancel-game-btn');
+                if (cancelBtn) cancelBtn.addEventListener('click', function() { cancelGame(gameId); });
             });
         })();
     </script>

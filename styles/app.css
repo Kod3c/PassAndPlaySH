@@ -3981,3 +3981,37 @@ footer,
     min-height: 44px;
   }
 }
+
+/* ============================================
+   Lobby: Invite Row Layout
+   ============================================ */
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.invite-row .form-control {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0; /* allow shrinking so button fits on same line */
+}
+
+@supports not (gap: 1rem) {
+  .invite-row .btn { margin-left: var(--space-md); }
+}
+
+@media (max-width: 480px) {
+  .invite-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+  .invite-row .form-control,
+  .invite-row .btn {
+    width: 100%;
+  }
+  @supports not (gap: 1rem) {
+    .invite-row .btn { margin-left: 0; }
+  }
+}
