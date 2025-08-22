@@ -11,6 +11,12 @@
         .player-list-ul { list-style: none; padding-left: 0; margin: 0; display: grid; gap: var(--space-sm); }
         .player-list-item { display: flex; align-items: center; gap: 8px; padding: 0.375rem 0.5rem; background: #fff; border: var(--border-thin) dashed var(--propaganda-black); }
         .player-name { font-weight: 600; letter-spacing: 0.02em; }
+        .lobby-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+        .lobby-actions .btn { flex: 0 1 auto; }
+        @media (max-width: 640px) {
+            .lobby-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+            .lobby-actions .btn { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -160,28 +166,28 @@
                     }
                 });
 
+                // Identify current player via saved playerId or current auth uid (make sure it exists before grouping)
+                let savedPlayerId = null;
+                try { savedPlayerId = localStorage.getItem(`sh_playerId_${game.id}`); } catch (_) { savedPlayerId = null; }
+                const authUser = getAuth(app).currentUser;
+                const currentUid = authUser ? authUser.uid : null;
+                function isYou(playerDoc) {
+                    return (savedPlayerId && playerDoc.id === savedPlayerId) || (currentUid && playerDoc.uid === currentUid);
+                }
+
                 const now = Date.now();
                 const present = [];
                 const notPresent = [];
                 for (const [name, p] of nameToPlayer.entries()) {
                     const lastSeen = p.lastSeen && p.lastSeen.toDate ? p.lastSeen.toDate().getTime() : 0;
                     const isPresent = Boolean(p.uid) && (lastSeen > 0) && (now - lastSeen <= PRESENT_WINDOW_MS);
-                    (isPresent ? present : notPresent).push({ name, p });
+                    const effectivePresent = isYou(p) || isPresent;
+                    (effectivePresent ? present : notPresent).push({ name, p });
                 }
 
                 // Sort alphabetically by name within groups
                 present.sort((a, b) => a.name.localeCompare(b.name));
                 notPresent.sort((a, b) => a.name.localeCompare(b.name));
-
-                // Identify current player via saved playerId or current auth uid
-                let savedPlayerId = null;
-                try { savedPlayerId = localStorage.getItem(`sh_playerId_${game.id}`); } catch (_) { savedPlayerId = null; }
-                const authUser = getAuth(app).currentUser;
-                const currentUid = authUser ? authUser.uid : null;
-
-                function isYou(playerDoc) {
-                    return (savedPlayerId && playerDoc.id === savedPlayerId) || (currentUid && playerDoc.uid === currentUid);
-                }
 
                 // Move your player to the top of the present list
                 const youIndex = present.findIndex(item => isYou(item.p));
