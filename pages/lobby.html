@@ -53,6 +53,7 @@
 
                         <div class="lobby-actions mt-4">
                             <button id="start-game-btn" class="btn btn-primary btn-lg" disabled>Start Game</button>
+                            <button id="leave-lobby-btn" class="btn btn-outline btn-lg">🚪 Leave Lobby</button>
                             <button id="cancel-game-btn" class="btn btn-outline btn-lg">🛑 Cancel Game</button>
                             <button class="btn btn-outline btn-lg" onclick="window.location.href='../index.html'">Back to Home</button>
                         </div>
@@ -172,6 +173,23 @@
                 present.sort((a, b) => a.name.localeCompare(b.name));
                 notPresent.sort((a, b) => a.name.localeCompare(b.name));
 
+                // Identify current player via saved playerId or current auth uid
+                let savedPlayerId = null;
+                try { savedPlayerId = localStorage.getItem(`sh_playerId_${game.id}`); } catch (_) { savedPlayerId = null; }
+                const authUser = getAuth(app).currentUser;
+                const currentUid = authUser ? authUser.uid : null;
+
+                function isYou(playerDoc) {
+                    return (savedPlayerId && playerDoc.id === savedPlayerId) || (currentUid && playerDoc.uid === currentUid);
+                }
+
+                // Move your player to the top of the present list
+                const youIndex = present.findIndex(item => isYou(item.p));
+                if (youIndex > 0) {
+                    const [youItem] = present.splice(youIndex, 1);
+                    present.unshift(youItem);
+                }
+
                 function renderList(items, status) {
                     const ul = document.createElement('ul');
                     ul.className = 'player-list-ul';
@@ -179,9 +197,10 @@
                         const li = document.createElement('li');
                         li.className = 'player-list-item';
                         const dotColor = status === 'present' ? '#22c55e' : '#9ca3af';
+                        const label = isYou(item.p) ? `${item.name} - You` : item.name;
                         li.innerHTML = `
                             <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${dotColor};margin-right:8px;"></span>
-                            <span class="player-name">${item.name}</span>
+                            <span class="player-name">${label}</span>
                         `;
                         ul.appendChild(li);
                     });
@@ -213,9 +232,17 @@
                 const presentCol = column('Present', present.length, renderList(present, 'present'));
                 const awayCol = column('Not Present', notPresent.length, renderList(notPresent, 'away'));
 
+                const allPresent = notPresent.length === 0;
+
                 playersList.innerHTML = '';
-                container.appendChild(presentCol);
-                container.appendChild(awayCol);
+                if (allPresent) {
+                    presentCol.style.flex = '1 1 100%';
+                    presentCol.style.minWidth = '100%';
+                    container.appendChild(presentCol);
+                } else {
+                    container.appendChild(presentCol);
+                    container.appendChild(awayCol);
+                }
                 playersList.appendChild(container);
 
                 // For now, enable start only for host and keep disabled pending full presence logic
@@ -248,6 +275,36 @@
                 try { localStorage.removeItem('sh_currentGameId'); } catch (_) {}
                 try { localStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
                 window.location.href = '../index.html';
+            }
+
+            async function leaveLobby(gameId) {
+                if (!gameId) return;
+                const confirmed = window.confirm('Leave this lobby?');
+                if (!confirmed) return;
+                try {
+                    // Stop heartbeat updates
+                    if (heartbeatTimer) {
+                        clearInterval(heartbeatTimer);
+                        heartbeatTimer = null;
+                    }
+
+                    // Clear uid/lastSeen so this seat becomes available
+                    const playerIdKey = `sh_playerId_${gameId}`;
+                    let playerId = null;
+                    try { playerId = localStorage.getItem(playerIdKey); } catch (_) { playerId = null; }
+                    if (playerId) {
+                        try { await ensureAuth(); } catch (_) {}
+                        const playerRef = doc(db, 'games', gameId, 'players', playerId);
+                        try {
+                            await updateDoc(playerRef, { uid: null, lastSeen: null });
+                        } catch (e) {
+                            console.warn('Failed to clear player uid/lastSeen', e);
+                        }
+                    }
+                } finally {
+                    try { localStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
+                    window.location.href = '../index.html';
+                }
             }
 
             async function startHeartbeat(gameId) {
@@ -298,6 +355,8 @@
                 });
                 const cancelBtn = document.getElementById('cancel-game-btn');
                 if (cancelBtn) cancelBtn.addEventListener('click', function() { cancelGame(gameId); });
+                const leaveBtn = document.getElementById('leave-lobby-btn');
+                if (leaveBtn) leaveBtn.addEventListener('click', function() { leaveLobby(gameId); });
             });
         })();
     </script>

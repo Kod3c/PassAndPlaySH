@@ -15,7 +15,7 @@
         <header class="header">
             <div class="container">
                 <div class="header-content">
-                    <div class="logo" onclick="window.location.href='../index.html'>
+                    <div class="logo" onclick="window.location.href='../index.html'">
                         <span class="logo-icon">🎭</span>
                         <div class="logo-text">
                             <h1>Secret Hitler</h1>
@@ -79,7 +79,7 @@
 
     <script type="module">
         import { app } from '../js/firebase.js';
-        import { getFirestore, doc, collection, addDoc, serverTimestamp, getDoc, setDoc, query, getDocs, where, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getFirestore, doc, collection, serverTimestamp, getDoc, setDoc, query, getDocs, where, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
         const db = getFirestore(app);
@@ -105,12 +105,21 @@
             if (!gameSnap.exists()) throw new Error('Game not found');
             const playersCol = collection(gameRef, 'players');
 
-            // Try to claim an existing seeded player with the same name that has no uid yet
+            // Only allow joining with an existing player name; do not auto-create
             const q = query(playersCol, where('name', '==', name.trim()));
             const snap = await getDocs(q);
+            if (snap.empty) {
+                throw new Error('Player name not found in this game');
+            }
+
             let claimedPlayerId = null;
             for (const d of snap.docs) {
                 const data = d.data() || {};
+                if (data.uid === uid) {
+                    await updateDoc(d.ref, { lastSeen: serverTimestamp() });
+                    claimedPlayerId = d.id;
+                    break;
+                }
                 if (!data.uid) {
                     await updateDoc(d.ref, { uid, lastSeen: serverTimestamp() });
                     claimedPlayerId = d.id;
@@ -118,16 +127,8 @@
                 }
             }
 
-            // If none found to claim, create a new player doc with uid and lastSeen
             if (!claimedPlayerId) {
-                const created = await addDoc(playersCol, {
-                    name: name.trim(),
-                    alive: true,
-                    uid,
-                    lastSeen: serverTimestamp(),
-                    createdAt: serverTimestamp()
-                });
-                claimedPlayerId = created.id;
+                throw new Error('That name is already taken');
             }
 
             // Extend TTL by 15 minutes when a player joins/claims
@@ -208,7 +209,7 @@
                     setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
                 } catch (e) {
                     console.error(e);
-                    status.textContent = 'Failed to join. Check the Game ID and try again.';
+                    status.textContent = (e && e.message) ? e.message : 'Failed to join. Check the Game ID and try again.';
                     joinBtn.disabled = false;
                 }
             });
