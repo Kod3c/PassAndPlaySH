@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join Game - Secret Hitler</title>
     <meta name="description" content="Join an existing Secret Hitler game">
-    <link rel="stylesheet" href="../styles/app.css">
-    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="../styles/app.css?v=dev">
+    <link rel="manifest" href="../manifest.json?v=dev">
     <meta name="theme-color" content="#101820">
 </head>
 <body>
@@ -39,8 +39,18 @@
                     </div>
                     <div class="card-content">
                         <div class="form-group">
+                            <label class="form-label" for="game-id">Game ID</label>
+                            <input id="game-id" class="form-control" type="text" placeholder="e.g. SH325-IK5L" maxlength="16" autocomplete="off">
+                            <small class="form-help">Paste or type the game code</small>
+                        </div>
+
+                        <div id="game-status" class="mt-2" style="margin-bottom: 1rem;"></div>
+
+                        <div class="form-group">
                             <label class="form-label" for="player-name">Player Name</label>
-                            <input id="player-name" class="form-control" type="text" placeholder="Your name" maxlength="24" autocomplete="name">
+                            <input id="player-name" class="form-control" type="text" placeholder="Your name" maxlength="24" autocomplete="name" list="existing-names">
+                            <datalist id="existing-names"></datalist>
+                            <small class="form-help">Current players will show as suggestions</small>
                         </div>
                         <div class="btn-group">
                             <button id="join-btn" class="btn btn-primary">Join Lobby</button>
@@ -69,14 +79,18 @@
 
     <script type="module">
         import { app } from '../js/firebase.js';
-        import { getFirestore, doc, collection, addDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getFirestore, doc, collection, addDoc, serverTimestamp, getDoc, setDoc, query, getDocs, where, updateDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
         const db = getFirestore(app);
 
-        function getGameId() {
+        function getGameIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
             return params.get('game') || '';
+        }
+
+        function normalizeGameId(id) {
+            return (id || '').trim().toUpperCase();
         }
 
         async function ensureAuth() {
@@ -85,41 +99,116 @@
             return auth.currentUser;
         }
 
-        async function addPlayer(gameId, name) {
+        async function claimOrAddPlayer(gameId, name, uid) {
             const gameRef = doc(db, 'games', gameId);
             const gameSnap = await getDoc(gameRef);
             if (!gameSnap.exists()) throw new Error('Game not found');
-            const col = collection(gameRef, 'players');
-            await addDoc(col, { name: name.trim(), alive: true, createdAt: serverTimestamp() });
+            const playersCol = collection(gameRef, 'players');
+
+            // Try to claim an existing seeded player with the same name that has no uid yet
+            const q = query(playersCol, where('name', '==', name.trim()));
+            const snap = await getDocs(q);
+            let claimedPlayerId = null;
+            for (const d of snap.docs) {
+                const data = d.data() || {};
+                if (!data.uid) {
+                    await updateDoc(d.ref, { uid, lastSeen: serverTimestamp() });
+                    claimedPlayerId = d.id;
+                    break;
+                }
+            }
+
+            // If none found to claim, create a new player doc with uid and lastSeen
+            if (!claimedPlayerId) {
+                const created = await addDoc(playersCol, {
+                    name: name.trim(),
+                    alive: true,
+                    uid,
+                    lastSeen: serverTimestamp(),
+                    createdAt: serverTimestamp()
+                });
+                claimedPlayerId = created.id;
+            }
+
+            // Extend TTL by 15 minutes when a player joins/claims
+            await setDoc(gameRef, { updatedAt: serverTimestamp(), expireAt: new Date(Date.now() + 15 * 60 * 1000) }, { merge: true });
+
+            // Persist for lobby heartbeat
+            try { localStorage.setItem(`sh_playerId_${gameId}`, claimedPlayerId); } catch (_) {}
+            return claimedPlayerId;
+        }
+
+        async function loadGameMeta(gameId) {
+            const statusEl = document.getElementById('game-status');
+            const datalist = document.getElementById('existing-names');
+            datalist.innerHTML = '';
+            if (!gameId) {
+                statusEl.textContent = '';
+                return null;
+            }
+            const gameRef = doc(db, 'games', gameId);
+            const snap = await getDoc(gameRef);
+            if (!snap.exists()) {
+                statusEl.textContent = 'Game not found.';
+                return null;
+            }
+            const game = snap.data();
+            statusEl.textContent = `Found game: ${game.name || gameId} (${gameId})`;
+            const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('createdAt', 'asc')));
+            const names = playersSnap.docs.map(d => (d.data().name || '').toString());
+            names.forEach(n => {
+                if (!n) return;
+                const opt = document.createElement('option');
+                opt.value = n;
+                datalist.appendChild(opt);
+            });
+            try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
+            return game;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const joinBtn = document.getElementById('join-btn');
             const nameInput = document.getElementById('player-name');
             const status = document.getElementById('join-status');
-            const gameId = getGameId();
-            if (!gameId) {
-                status.textContent = 'Missing game ID in URL.';
-                joinBtn.disabled = true;
-                return;
+            const gameIdInput = document.getElementById('game-id');
+
+            let currentGameId = normalizeGameId(getGameIdFromUrl());
+            if (currentGameId) {
+                gameIdInput.value = currentGameId;
+                loadGameMeta(currentGameId);
             }
+
+            function updateJoinEnabled() {
+                const name = (nameInput.value || '').trim();
+                const gid = normalizeGameId(gameIdInput.value);
+                joinBtn.disabled = !(name && gid);
+            }
+
+            let debounceTimer = null;
+            gameIdInput.addEventListener('input', function() {
+                const gid = normalizeGameId(gameIdInput.value);
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 250);
+                updateJoinEnabled();
+            });
+
+            nameInput.addEventListener('input', updateJoinEnabled);
+            updateJoinEnabled();
 
             joinBtn.addEventListener('click', async function() {
                 const name = (nameInput.value || '').trim();
-                if (!name) {
-                    status.textContent = 'Please enter your name.';
-                    return;
-                }
+                const gid = normalizeGameId(gameIdInput.value);
+                if (!name || !gid) return;
                 joinBtn.disabled = true;
                 status.textContent = 'Joining...';
                 try {
-                    await ensureAuth();
-                    await addPlayer(gameId, name);
+                    const user = await ensureAuth();
+                    await claimOrAddPlayer(gid, name, user.uid);
                     status.textContent = 'Joined! Redirecting to lobby...';
-                    setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gameId)}`; }, 600);
+                    setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
                 } catch (e) {
                     console.error(e);
-                    status.textContent = 'Failed to join. Check the link and try again.';
+                    status.textContent = 'Failed to join. Check the Game ID and try again.';
                     joinBtn.disabled = false;
                 }
             });

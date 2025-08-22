@@ -34,11 +34,19 @@ async function ensureAnonymousAuth() {
 }
 
 function generateGameId() {
+  // Format: SH + hour(12h) + minute + '-' + 4-char random (no 0/O/1/I)
+  const now = new Date();
+  let hour = now.getHours() % 12;
+  if (hour === 0) hour = 12; // 12-hour clock
+  const minute = now.getMinutes();
+  const timePart = `SH${hour}${minute.toString().padStart(2, '0')}`;
+
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 4; i++) code += alphabet[Math.floor(Math.random() * alphabet.length)];
-  const tail = Math.random().toString(36).slice(2, 5).toUpperCase();
-  return `${code}-${tail}`;
+  let rand = '';
+  for (let i = 0; i < 4; i++) {
+    rand += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return `${timePart}-${rand}`;
 }
 
 export async function createGame(gameName, playerNames) {
@@ -54,7 +62,9 @@ export async function createGame(gameName, playerNames) {
     state: 'lobby',
     playerCount: Array.isArray(playerNames) ? playerNames.length : 0,
     createdAt,
-    updatedAt: createdAt
+    updatedAt: createdAt,
+    // Set initial expiry to 15 minutes from now; TTL will remove stale lobbies
+    expireAt: new Date(Date.now() + 15 * 60 * 1000)
   }, { merge: true });
 
   const playersCol = collection(gameRef, 'players');
