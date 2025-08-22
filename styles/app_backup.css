@@ -8,7 +8,7 @@
    ============================================ */
 @font-face {
   font-family: 'Eskade Fraktur';
-  src: url('../EskapadeFraktur-Black.ttf') format('truetype');
+  src: url('../fonts/EskapadeFraktur-Black.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: 'Eskade Fraktur';
-  src: url('../EskapadeFraktur-Regular.ttf') format('truetype');
+  src: url('../fonts/EskapadeFraktur-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;

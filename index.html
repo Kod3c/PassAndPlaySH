@@ -692,5 +692,10 @@
         </main>
 
     <script src="js/app.js"></script>
+    <script type="module">
+        import { app, analyticsPromise } from "./js/firebase.js";
+        console.log("Firebase app initialized:", !!app);
+        analyticsPromise.then(a => console.log("Analytics supported:", !!a));
+    </script>
 </body>
 </html>
