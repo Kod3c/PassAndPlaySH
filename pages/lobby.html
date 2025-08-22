@@ -152,38 +152,55 @@
                     </div>
                 `;
 
-                // Deduplicate by name, prefer docs with uid
-                const nameToPlayer = new Map();
-                (players || []).forEach((p) => {
-                    const key = (p.name || '').toString().trim();
-                    if (!key) return;
-                    const existing = nameToPlayer.get(key);
-                    if (!existing) {
-                        nameToPlayer.set(key, p);
-                    } else {
-                        // Prefer the one with uid; if both have/no uid keep existing
-                        if (!existing.uid && p.uid) nameToPlayer.set(key, p);
-                    }
-                });
-
-                // Identify current player via saved playerId or current auth uid (make sure it exists before grouping)
+                // Identify current player via saved playerId or current auth uid (use raw players list)
                 let savedPlayerId = null;
                 try { savedPlayerId = sessionStorage.getItem(`sh_playerId_${game.id}`); } catch (_) { savedPlayerId = null; }
                 const authUser = getAuth(app).currentUser;
                 const currentUid = authUser ? authUser.uid : null;
-                const allPlayers = Array.from(nameToPlayer.values());
                 let youPlayerId = null;
-                if (savedPlayerId && allPlayers.some(p => p && p.id === savedPlayerId)) {
+                if (savedPlayerId && (players || []).some(pl => pl && pl.id === savedPlayerId)) {
                     youPlayerId = savedPlayerId;
                 } else if (currentUid) {
-                    const match = allPlayers.find(p => p && p.uid === currentUid);
+                    const match = (players || []).find(pl => pl && pl.uid === currentUid);
                     if (match) youPlayerId = match.id;
                 }
                 function isYou(playerDoc) {
                     return Boolean(playerDoc && youPlayerId && playerDoc.id === youPlayerId);
                 }
 
+                // Deduplicate by name with smarter preference: you > present > has uid > newest lastSeen
                 const now = Date.now();
+                function getLastSeenMs(doc) {
+                    try { return doc && doc.lastSeen && doc.lastSeen.toDate ? doc.lastSeen.toDate().getTime() : 0; } catch (_) { return 0; }
+                }
+                function isDocPresent(doc) {
+                    const ms = getLastSeenMs(doc);
+                    return Boolean(doc && doc.uid) && ms > 0 && (now - ms <= PRESENT_WINDOW_MS);
+                }
+                function pickPreferred(existing, candidate) {
+                    if (!existing) return candidate;
+                    if (!candidate) return existing;
+                    if (isYou(candidate)) return candidate;
+                    if (isYou(existing)) return existing;
+                    const ePresent = isDocPresent(existing);
+                    const cPresent = isDocPresent(candidate);
+                    if (cPresent && !ePresent) return candidate;
+                    if (!cPresent && ePresent) return existing;
+                    if (candidate.uid && !existing.uid) return candidate;
+                    if (!candidate.uid && existing.uid) return existing;
+                    const eLast = getLastSeenMs(existing);
+                    const cLast = getLastSeenMs(candidate);
+                    if (cLast > eLast) return candidate;
+                    return existing;
+                }
+                const nameToPlayer = new Map();
+                (players || []).forEach((p) => {
+                    const key = (p.name || '').toString().trim();
+                    if (!key) return;
+                    const existing = nameToPlayer.get(key);
+                    nameToPlayer.set(key, pickPreferred(existing, p));
+                });
+
                 const present = [];
                 const notPresent = [];
                 for (const [name, p] of nameToPlayer.entries()) {
