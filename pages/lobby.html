@@ -131,8 +131,7 @@
 
             function render(game, players) {
                 if (!game) {
-                    lobbyInfo.innerHTML = '<p class="text-danger">No game found. Please create a game first.</p>';
-                    startBtn.disabled = true;
+                    window.location.href = '../index.html';
                     return;
                 }
                 const joinUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/join.html') + '?game=' + encodeURIComponent(game.id);
@@ -355,6 +354,22 @@
                     // Try to auto-claim host (Player 1) if uid missing
                     playerId = await autoClaimHost(gameId);
                 }
+                if (!playerId) {
+                    // Fallback: find existing claimed player by current uid
+                    try {
+                        const authUser = getAuth(app).currentUser;
+                        const uid = authUser ? authUser.uid : null;
+                        if (uid) {
+                            const playersQ = query(collection(doc(db, 'games', gameId), 'players'), where('uid', '==', uid));
+                            const snap = await getDocs(playersQ);
+                            if (!snap.empty) {
+                                const d = snap.docs[0];
+                                playerId = d.id;
+                                try { sessionStorage.setItem(playerIdKey, playerId); } catch (_) {}
+                            }
+                        }
+                    } catch (_) {}
+                }
                 if (!playerId) return; // nothing to heartbeat yet
 
                 const playerRef = doc(db, 'games', gameId, 'players', playerId);
@@ -381,12 +396,22 @@
             document.addEventListener('DOMContentLoaded', async function() {
                 const gameId = getGameIdFromUrl();
                 if (!gameId) {
-                    render(null);
+                    window.location.href = '../index.html';
                     return;
                 }
                 const initial = await getGame(gameId);
+                if (!initial) {
+                    window.location.href = '../index.html';
+                    return;
+                }
                 render(initial, []);
-                onGameSnapshot(gameId, ({ game, players }) => render(game, players));
+                onGameSnapshot(gameId, ({ game, players }) => {
+                    if (!game) {
+                        window.location.href = '../index.html';
+                        return;
+                    }
+                    render(game, players);
+                });
                 startHeartbeat(gameId);
                 copyInviteBtn.addEventListener('click', copyInvite);
                 startBtn.addEventListener('click', function() {

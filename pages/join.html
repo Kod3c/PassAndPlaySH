@@ -50,7 +50,8 @@
                             <label class="form-label" for="player-name">Player Name</label>
                             <input id="player-name" class="form-control" type="text" placeholder="Your name" maxlength="24" autocomplete="name" list="existing-names">
                             <datalist id="existing-names"></datalist>
-                            <small class="form-help">Current players will show as suggestions</small>
+                            <select id="player-name-select" class="form-control" style="display:none"></select>
+                            <small class="form-help">Choose your name from the roster when a valid Game ID is entered</small>
                         </div>
                         <div class="btn-group">
                             <button id="join-btn" class="btn btn-primary">Join Lobby</button>
@@ -142,27 +143,105 @@
         async function loadGameMeta(gameId) {
             const statusEl = document.getElementById('game-status');
             const datalist = document.getElementById('existing-names');
+            const nameInput = document.getElementById('player-name');
+            const nameSelect = document.getElementById('player-name-select');
             datalist.innerHTML = '';
             if (!gameId) {
                 statusEl.textContent = '';
+                // Revert to free text when no game
+                if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.innerHTML = ''; }
+                if (nameInput) { nameInput.style.display = ''; nameInput.value = ''; }
                 return null;
             }
             const gameRef = doc(db, 'games', gameId);
             const snap = await getDoc(gameRef);
             if (!snap.exists()) {
                 statusEl.textContent = 'Game not found.';
+                if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.innerHTML = ''; }
+                if (nameInput) { nameInput.style.display = ''; }
                 return null;
             }
             const game = snap.data();
             statusEl.textContent = `Found game: ${game.name || gameId} (${gameId})`;
             const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('createdAt', 'asc')));
-            const names = playersSnap.docs.map(d => (d.data().name || '').toString());
-            names.forEach(n => {
+            // Determine availability per name (uid present => unavailable)
+            let currentUser = null;
+            try { currentUser = await ensureAuth(); } catch (_) { currentUser = null; }
+            const nameInfo = new Map();
+            playersSnap.docs.forEach(d => {
+                const data = d.data() || {};
+                const n = (data.name || '').toString().trim();
                 if (!n) return;
+                const uid = data.uid || null;
+                let info = nameInfo.get(n);
+                if (!info) {
+                    info = { name: n, unclaimed: 0, claimed: false };
+                    nameInfo.set(n, info);
+                }
+                if (!uid) info.unclaimed += 1;
+                else info.claimed = true;
+            });
+
+            // Populate dropdown and datalist with optgroups
+            if (nameSelect) { nameSelect.innerHTML = ''; }
+            datalist.innerHTML = '';
+
+            const allNames = Array.from(nameInfo.values()).map(i => i.name).sort((a,b) => a.localeCompare(b));
+            allNames.forEach(n => {
                 const opt = document.createElement('option');
                 opt.value = n;
                 datalist.appendChild(opt);
             });
+
+            if (nameSelect) {
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Select your name';
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                nameSelect.appendChild(placeholder);
+
+                const availableGroup = document.createElement('optgroup');
+                availableGroup.label = 'Available';
+                const unavailableGroup = document.createElement('optgroup');
+                unavailableGroup.label = 'Unavailable';
+
+                const availableNames = [];
+                const unavailableNames = [];
+                nameInfo.forEach(info => {
+                    const available = info.unclaimed > 0;
+                    (available ? availableNames : unavailableNames).push(info);
+                });
+                availableNames.sort((a,b) => a.name.localeCompare(b.name));
+                unavailableNames.sort((a,b) => a.name.localeCompare(b.name));
+
+                availableNames.forEach(info => {
+                    const o = document.createElement('option');
+                    o.value = info.name;
+                    o.textContent = info.name;
+                    availableGroup.appendChild(o);
+                });
+                unavailableNames.forEach(info => {
+                    const o = document.createElement('option');
+                    o.value = info.name;
+                    o.textContent = info.name + ' - Unavailable';
+                    o.disabled = true;
+                    unavailableGroup.appendChild(o);
+                });
+
+                if (availableNames.length) nameSelect.appendChild(availableGroup);
+                if (unavailableNames.length) nameSelect.appendChild(unavailableGroup);
+
+                // If exactly one name is available, auto-select it
+                if (availableNames.length === 1) {
+                    nameSelect.value = availableNames[0].name;
+                    try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
+                }
+            }
+
+            // Switch to dropdown mode
+            if (nameInput) nameInput.style.display = 'none';
+            if (nameSelect) nameSelect.style.display = '';
             try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
             return game;
         }
@@ -170,6 +249,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const joinBtn = document.getElementById('join-btn');
             const nameInput = document.getElementById('player-name');
+            const nameSelect = document.getElementById('player-name-select');
             const status = document.getElementById('join-status');
             const gameIdInput = document.getElementById('game-id');
 
@@ -179,8 +259,17 @@
                 loadGameMeta(currentGameId);
             }
 
+            function getSelectedName() {
+                if (nameSelect && nameSelect.style.display !== 'none') {
+                    const val = (nameSelect.value || '').trim();
+                    if (val === '' || nameSelect.selectedOptions.length === 0 || nameSelect.selectedOptions[0].disabled) return '';
+                    return val;
+                }
+                return (nameInput.value || '').trim();
+            }
+
             function updateJoinEnabled() {
-                const name = (nameInput.value || '').trim();
+                const name = getSelectedName();
                 const gid = normalizeGameId(gameIdInput.value);
                 joinBtn.disabled = !(name && gid);
             }
@@ -194,10 +283,11 @@
             });
 
             nameInput.addEventListener('input', updateJoinEnabled);
+            if (nameSelect) nameSelect.addEventListener('change', updateJoinEnabled);
             updateJoinEnabled();
 
             joinBtn.addEventListener('click', async function() {
-                const name = (nameInput.value || '').trim();
+                const name = getSelectedName();
                 const gid = normalizeGameId(gameIdInput.value);
                 if (!name || !gid) return;
                 joinBtn.disabled = true;
