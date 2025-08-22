@@ -116,7 +116,7 @@
                         const data = d.data() || {};
                         if (!data.uid) {
                             await updateDoc(d.ref, { uid: authUser.uid, lastSeen: serverTimestamp() });
-                            try { localStorage.setItem(`sh_playerId_${gameId}`, d.id); } catch (_) {}
+                            try { sessionStorage.setItem(`sh_playerId_${gameId}`, d.id); } catch (_) {}
                             return d.id;
                         }
                     }
@@ -168,11 +168,19 @@
 
                 // Identify current player via saved playerId or current auth uid (make sure it exists before grouping)
                 let savedPlayerId = null;
-                try { savedPlayerId = localStorage.getItem(`sh_playerId_${game.id}`); } catch (_) { savedPlayerId = null; }
+                try { savedPlayerId = sessionStorage.getItem(`sh_playerId_${game.id}`); } catch (_) { savedPlayerId = null; }
                 const authUser = getAuth(app).currentUser;
                 const currentUid = authUser ? authUser.uid : null;
+                const allPlayers = Array.from(nameToPlayer.values());
+                let youPlayerId = null;
+                if (savedPlayerId && allPlayers.some(p => p && p.id === savedPlayerId)) {
+                    youPlayerId = savedPlayerId;
+                } else if (currentUid) {
+                    const match = allPlayers.find(p => p && p.uid === currentUid);
+                    if (match) youPlayerId = match.id;
+                }
                 function isYou(playerDoc) {
-                    return (savedPlayerId && playerDoc.id === savedPlayerId) || (currentUid && playerDoc.uid === currentUid);
+                    return Boolean(playerDoc && youPlayerId && playerDoc.id === youPlayerId);
                 }
 
                 const now = Date.now();
@@ -181,7 +189,7 @@
                 for (const [name, p] of nameToPlayer.entries()) {
                     const lastSeen = p.lastSeen && p.lastSeen.toDate ? p.lastSeen.toDate().getTime() : 0;
                     const isPresent = Boolean(p.uid) && (lastSeen > 0) && (now - lastSeen <= PRESENT_WINDOW_MS);
-                    const effectivePresent = isYou(p) || isPresent;
+                    const effectivePresent = (youPlayerId && p.id === youPlayerId) || isPresent;
                     (effectivePresent ? present : notPresent).push({ name, p });
                 }
 
@@ -238,7 +246,11 @@
                 const presentCol = column('Present', present.length, renderList(present, 'present'));
                 const awayCol = column('Not Present', notPresent.length, renderList(notPresent, 'away'));
 
-                const allPresent = notPresent.length === 0;
+                // Determine if all expected players are present
+                const expectedCount = (typeof game.playerCount === 'number' && game.playerCount > 0)
+                    ? game.playerCount
+                    : nameToPlayer.size;
+                const allPresent = present.length >= expectedCount && notPresent.length === 0;
 
                 playersList.innerHTML = '';
                 if (allPresent) {
@@ -251,9 +263,13 @@
                 }
                 playersList.appendChild(container);
 
-                // For now, enable start only for host and keep disabled pending full presence logic
-                const isHost = true; // This device created the game in create.html
-                startBtn.disabled = !isHost;
+                // Enable start only if current user is host (seat 1) AND all players are present
+                let youPlayer = null;
+                if (youPlayerId) {
+                    youPlayer = (players || []).find(pl => pl && pl.id === youPlayerId) || null;
+                }
+                const isHost = Boolean(youPlayer && youPlayer.seat === 1);
+                startBtn.disabled = !(isHost && allPresent);
             }
 
             function copyInvite() {
@@ -279,7 +295,7 @@
                     console.error('Failed to cancel game', e);
                 }
                 try { localStorage.removeItem('sh_currentGameId'); } catch (_) {}
-                try { localStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
+                try { sessionStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
                 window.location.href = '../index.html';
             }
 
@@ -297,7 +313,7 @@
                     // Clear uid/lastSeen so this seat becomes available
                     const playerIdKey = `sh_playerId_${gameId}`;
                     let playerId = null;
-                    try { playerId = localStorage.getItem(playerIdKey); } catch (_) { playerId = null; }
+                    try { playerId = sessionStorage.getItem(playerIdKey); } catch (_) { playerId = null; }
                     if (playerId) {
                         try { await ensureAuth(); } catch (_) {}
                         const playerRef = doc(db, 'games', gameId, 'players', playerId);
@@ -308,7 +324,7 @@
                         }
                     }
                 } finally {
-                    try { localStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
+                    try { sessionStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
                     window.location.href = '../index.html';
                 }
             }
@@ -317,7 +333,7 @@
                 try { await ensureAuth(); } catch (_) {}
                 const playerIdKey = `sh_playerId_${gameId}`;
                 let playerId = null;
-                try { playerId = localStorage.getItem(playerIdKey); } catch (_) { playerId = null; }
+                try { playerId = sessionStorage.getItem(playerIdKey); } catch (_) { playerId = null; }
                 if (!playerId) {
                     // Try to auto-claim host (Player 1) if uid missing
                     playerId = await autoClaimHost(gameId);

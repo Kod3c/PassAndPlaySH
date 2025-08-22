@@ -134,8 +134,8 @@
             // Extend TTL by 15 minutes when a player joins/claims
             await setDoc(gameRef, { updatedAt: serverTimestamp(), expireAt: new Date(Date.now() + 15 * 60 * 1000) }, { merge: true });
 
-            // Persist for lobby heartbeat
-            try { localStorage.setItem(`sh_playerId_${gameId}`, claimedPlayerId); } catch (_) {}
+            // Persist for lobby heartbeat (per-tab)
+            try { sessionStorage.setItem(`sh_playerId_${gameId}`, claimedPlayerId); } catch (_) {}
             return claimedPlayerId;
         }
 
