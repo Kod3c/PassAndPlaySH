@@ -49,7 +49,7 @@ function generateGameId() {
   return `${timePart}-${rand}`;
 }
 
-export async function createGame(gameName, playerNames) {
+export async function createGame(gameName, playerNames, hostPasswordHash = null) {
   await ensureAnonymousAuth();
 
   const gameId = generateGameId();
@@ -63,6 +63,8 @@ export async function createGame(gameName, playerNames) {
     playerCount: Array.isArray(playerNames) ? playerNames.length : 0,
     createdAt,
     updatedAt: createdAt,
+    hostName: Array.isArray(playerNames) && playerNames.length > 0 ? String(playerNames[0] || '').trim() : null,
+    hostPasswordHash: hostPasswordHash || null,
     // Set initial expiry to 15 minutes from now; TTL will remove stale lobbies
     expireAt: new Date(Date.now() + 15 * 60 * 1000)
   }, { merge: true });

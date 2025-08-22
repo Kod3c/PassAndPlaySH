@@ -98,6 +98,14 @@
             const PRESENT_WINDOW_MS = 60 * 1000; // 60s
             const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
             let heartbeatTimer = null;
+            let removalHandled = false;
+
+            function handleGameRemoved() {
+                if (removalHandled) return;
+                removalHandled = true;
+                try { alert('This game is no longer available. Returning to home.'); } catch (_) {}
+                window.location.href = '../index.html';
+            }
 
             async function ensureAuth() {
                 const auth = getAuth(app);
@@ -130,10 +138,7 @@
             }
 
             function render(game, players) {
-                if (!game) {
-                    window.location.href = '../index.html';
-                    return;
-                }
+                if (!game) { handleGameRemoved(); return; }
                 const joinUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/join.html') + '?game=' + encodeURIComponent(game.id);
                 inviteInput.value = joinUrl;
 
@@ -286,6 +291,8 @@
                 }
                 const isHost = Boolean(youPlayer && youPlayer.seat === 1);
                 startBtn.disabled = !(isHost && allPresent);
+                const cancelBtnEl = document.getElementById('cancel-game-btn');
+                if (cancelBtnEl) cancelBtnEl.style.display = isHost ? '' : 'none';
             }
 
             function copyInvite() {
@@ -395,21 +402,12 @@
 
             document.addEventListener('DOMContentLoaded', async function() {
                 const gameId = getGameIdFromUrl();
-                if (!gameId) {
-                    window.location.href = '../index.html';
-                    return;
-                }
+                if (!gameId) { window.location.href = '../index.html'; return; }
                 const initial = await getGame(gameId);
-                if (!initial) {
-                    window.location.href = '../index.html';
-                    return;
-                }
+                if (!initial) { handleGameRemoved(); return; }
                 render(initial, []);
                 onGameSnapshot(gameId, ({ game, players }) => {
-                    if (!game) {
-                        window.location.href = '../index.html';
-                        return;
-                    }
+                    if (!game || (game && game.state === 'cancelled')) { handleGameRemoved(); return; }
                     render(game, players);
                 });
                 startHeartbeat(gameId);

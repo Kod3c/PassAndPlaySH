@@ -53,6 +53,11 @@
                             <input type="text" id="game-name-input" class="form-control" placeholder="Enter game name" value="Secret Hitler">
                             <small class="form-help">Choose a memorable name for your game</small>
                         </div>
+                        <div class="form-group">
+                            <label for="host-password-input" class="form-label">Host Rejoin Password (optional)</label>
+                            <input type="password" id="host-password-input" class="form-control" placeholder="Set a password to reclaim host if disconnected" maxlength="64" autocomplete="new-password">
+                            <small class="form-help">If set, anyone joining as the host must enter this password.</small>
+                        </div>
                         
                         <div class="form-group">
                             <label for="game-mode-select" class="form-label">Game Mode</label>
@@ -205,7 +210,10 @@
                 if (players.length !== count) return;
 
                 const gameName = (gameNameInput && gameNameInput.value || 'Secret Hitler Game').trim();
-                const gameId = await createGame(gameName, players);
+                const hostPasswordInput = document.getElementById('host-password-input');
+                const hostPassword = hostPasswordInput ? (hostPasswordInput.value || '').trim() : '';
+                const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
+                const gameId = await createGame(gameName, players, hostPasswordHash);
                 try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
                 window.location.href = `lobby.html?game=${encodeURIComponent(gameId)}`;
             }
