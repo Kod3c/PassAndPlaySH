@@ -68,7 +68,8 @@
         </footer>
     </div>
 
-    <script>
+    <script type="module">
+        import { onGameSnapshot, getGame } from '../js/db.js';
         (function() {
             const lobbyInfo = document.getElementById('lobby-info');
             const playersList = document.getElementById('players-list');
@@ -76,18 +77,12 @@
             const copyInviteBtn = document.getElementById('copy-invite-btn');
             const startBtn = document.getElementById('start-game-btn');
 
-            function loadGame() {
-                try {
-                    const raw = localStorage.getItem('sh_currentGame');
-                    if (!raw) return null;
-                    return JSON.parse(raw);
-                } catch (e) {
-                    console.error('Failed to read lobby data', e);
-                    return null;
-                }
+            function getGameIdFromUrl() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('game') || localStorage.getItem('sh_currentGameId') || '';
             }
 
-            function render(game) {
+            function render(game, players) {
                 if (!game) {
                     lobbyInfo.innerHTML = '<p class="text-danger">No game found. Please create a game first.</p>';
                     startBtn.disabled = true;
@@ -101,7 +96,7 @@
                         <div class="lobby-meta">
                             <div><strong>Game:</strong> ${game.name || 'Secret Hitler Game'}</div>
                             <div><strong>Game ID:</strong> ${game.id}</div>
-                            <div><strong>Players Expected:</strong> ${game.players.length}</div>
+                            <div><strong>Players Expected:</strong> ${game.playerCount || (players ? players.length : 0)}</div>
                         </div>
                         <div class="lobby-status">
                             <span class="status-dot"></span>
@@ -112,10 +107,10 @@
 
                 const list = document.createElement('ul');
                 list.className = 'player-list-ul';
-                game.players.forEach((name, idx) => {
+                (players || []).forEach((p, idx) => {
                     const li = document.createElement('li');
                     li.className = 'player-list-item';
-                    li.innerHTML = `<span class="player-index">${idx + 1}.</span> <span class="player-name">${name}</span>${idx === game.hostIndex ? ' <span class="host-badge">Host</span>' : ''}`;
+                    li.innerHTML = `<span class="player-index">${idx + 1}.</span> <span class="player-name">${p.name}</span>`;
                     list.appendChild(li);
                 });
                 playersList.innerHTML = '';
@@ -137,12 +132,17 @@
                 }
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const game = loadGame();
-                render(game);
+            document.addEventListener('DOMContentLoaded', async function() {
+                const gameId = getGameIdFromUrl();
+                if (!gameId) {
+                    render(null);
+                    return;
+                }
+                const initial = await getGame(gameId);
+                render(initial, []);
+                onGameSnapshot(gameId, ({ game, players }) => render(game, players));
                 copyInviteBtn.addEventListener('click', copyInvite);
                 startBtn.addEventListener('click', function() {
-                    // Placeholder: navigate to rules or game start page
                     window.location.href = '../index.html';
                 });
             });

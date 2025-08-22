@@ -3,7 +3,7 @@
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+// import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -20,8 +20,7 @@ export const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 // Guard analytics for environments where it isn't supported (non-HTTPS, missing gtag, etc.)
-export const analyticsPromise = isSupported()
-  .then((supported) => (supported ? getAnalytics(app) : null))
-  .catch(() => null);
+// Disabled analytics in dev to avoid adblock noise; re-enable later if needed
+export const analyticsPromise = Promise.resolve(null);
 
 
