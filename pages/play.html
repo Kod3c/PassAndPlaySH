@@ -57,8 +57,8 @@
         /* Compact layout for narrow phones */
         @media (max-width: 480px) {
             .play-main { padding: 0 8px calc(88px + env(safe-area-inset-bottom)); }
-            /* Make role banner full-bleed on very small screens to match gutters */
-            .role-bar { width: calc(100% + 16px); margin: 0 -8px; border-radius: 0; }
+            /* Role banner: keep standard width on small screens */
+            .role-bar { width: 100%; margin: 0; border-radius: 12px; }
             .board-frame { padding: 12px; }
             .track { flex-direction: column; align-items: center; gap: 8px; }
             .track-title { font-size: 0.95rem; text-align: center; }
@@ -71,11 +71,11 @@
             .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
             /* Floating action bar adjustments for narrow screens */
             .floating-footer { padding: 0 8px; bottom: calc(8px + env(safe-area-inset-bottom)); }
-            .actions-bar { padding: 8px; gap: 6px; flex-wrap: wrap; justify-content: center; }
-            .actions-left, .actions-center, .actions-right { flex: 1 1 100%; justify-content: space-between; }
-            .actions-left { order: 1; }
-            .actions-center { order: 2; display: flex; justify-content: center; }
-            .actions-right { order: 3; }
+            .actions-bar { padding: 8px; gap: 6px; flex-wrap: wrap; justify-content: space-between; }
+            /* First row: center; Second row: left + right */
+            .actions-center { order: 1; flex: 1 1 100%; display: flex; justify-content: center; }
+            .actions-left { order: 2; flex: 1 1 0; display: flex; justify-content: flex-start; }
+            .actions-right { order: 2; flex: 1 1 0; display: flex; justify-content: flex-end; }
             .actions-bar .btn { min-width: 0; padding: 8px 10px; font-size: 0.95rem; }
         }
         @media (max-width: 360px) {
