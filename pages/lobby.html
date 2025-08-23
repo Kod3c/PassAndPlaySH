@@ -95,7 +95,7 @@
             const startBtn = document.getElementById('start-game-btn');
 
             const db = getFirestore(app);
-            const PRESENT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+            const PRESENT_WINDOW_MS = 90 * 1000; // 90s to match faster reclaim on join page
             const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
             let heartbeatTimer = null;
             let removalHandled = false;

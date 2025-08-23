@@ -509,6 +509,8 @@
         let historyItems = [];
         let localPaused = false;
         let lastStatusMessage = null;
+        const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
+        let heartbeatTimer = null;
 
         function getGameId() {
             const p = new URLSearchParams(window.location.search);
@@ -535,6 +537,15 @@
             if (!uid) return null;
             const m = (latestPlayers || []).find(p => p && p.uid === uid);
             return m ? m.id : null;
+        }
+
+        function heartbeatOnce(gameId) {
+            try {
+                const youId = computeYouId(gameId);
+                if (!youId) return;
+                const playerRef = doc(db, 'games', gameId, 'players', youId);
+                updateDoc(playerRef, { lastSeen: serverTimestamp() }).catch(() => {});
+            } catch (_) { /* no-op */ }
         }
 
         function renderSlots(el, count) {
@@ -637,58 +648,41 @@
                 .map(p => p.id);
         }
 
-        function renderActions(gameId) {
-            const actionsCenter = document.querySelector('.actions-center');
-            if (!actionsCenter) return;
-            actionsCenter.innerHTML = '';
-
-            const statusEl = document.getElementById('status');
-
-            const youId = computeYouId(gameId);
-            const game = latestGame;
-            const players = latestPlayers || [];
-            if (!game || !players.length) return;
-
-            // Respect local pause (AFK)
-            if (localPaused) {
-                const pausedMsg = document.createElement('div');
-                pausedMsg.className = 'status-text';
-                pausedMsg.textContent = 'Paused (AFK). Open Menu to resume.';
-                actionsCenter.appendChild(pausedMsg);
-                return;
-            }
-
-            // Only proceed once the game is in playing state
-            if (game.state !== 'playing') return;
-
-            // If no nominee yet, handle nomination UI
+        function computePhase(game) {
+            if (!game || game.state !== 'playing') return 'idle';
             const nomineeId = game.nominatedChancellorPlayerId || null;
-            if (!nomineeId) {
-                const presId = game.currentPresidentPlayerId || null;
-                const pres = players.find(p => p && p.id === presId) || null;
-                if (youId && youId === presId) {
-                    if (pres) {
-                        setStatus(gameId, `${pres.name || 'President'}: Nominate a Chancellor`);
-                    }
-                    const chooseBtn = document.createElement('button');
-                    chooseBtn.id = 'open-nominate-btn';
-                    chooseBtn.className = 'btn btn-primary';
-                    chooseBtn.textContent = 'Choose Chancellor';
-                    actionsCenter.appendChild(chooseBtn);
-                } else {
-                    setStatus(gameId, 'Waiting for the President to nominate a Chancellor…');
-                    // No additional message in actions area; waiting text is shown in the banner
-                }
-                return;
+            if (!nomineeId) return 'nomination';
+            const voteResolution = (game.voteResolution || null);
+            if (!voteResolution) return 'voting';
+            if (voteResolution === 'ja') {
+                // Placeholder upcoming phases once implemented
+                const policyPhase = (game.policyPhase || null);
+                return policyPhase || 'president_draw';
             }
+            // voteResolution === 'nein' → fails, next round would reset nomination
+            return 'post_vote';
+        }
 
-            // Chancellor nominee already chosen
+        function renderPhaseNomination(gameId, youId, game, players, actionsCenter) {
+            const presId = game.currentPresidentPlayerId || null;
+            const pres = players.find(p => p && p.id === presId) || null;
+            if (youId && youId === presId) {
+                if (pres) { setStatus(gameId, `${pres.name || 'President'}: Nominate a Chancellor`); }
+                const chooseBtn = document.createElement('button');
+                chooseBtn.id = 'open-nominate-btn';
+                chooseBtn.className = 'btn btn-primary';
+                chooseBtn.textContent = 'Choose Chancellor';
+                actionsCenter.appendChild(chooseBtn);
+            } else {
+                setStatus(gameId, 'Waiting for the President to nominate a Chancellor…');
+            }
+        }
+
+        function renderPhaseVoting(gameId, youId, game, players, actionsCenter) {
+            const nomineeId = game.nominatedChancellorPlayerId || null;
             const chanc = players.find(p => p && p.id === nomineeId) || null;
-            if (chanc) {
-                setStatus(gameId, `Chancellor nominated: ${chanc.name || 'Player'}`);
-            }
+            if (chanc) setStatus(gameId, `Chancellor nominated: ${chanc.name || 'Player'}`);
 
-            // Voting UI: centered black Vote button with popover
             const votes = (game.electionVotes && typeof game.electionVotes === 'object') ? game.electionVotes : {};
             const aliveIds = (players || []).filter(p => p && p.alive !== false).map(p => p.id);
             const totalVoters = aliveIds.length || players.length;
@@ -704,10 +698,8 @@
             voteBtn.style.minWidth = '160px';
             voteBtn.style.minHeight = '44px';
             voteBtn.style.fontSize = '1.05rem';
-
             const votedValue = youVoted ? String(votes[youId]).toUpperCase() : 'Vote';
             voteBtn.innerHTML = `<span class="vote-label">${votedValue}</span><span class="vote-count">(${numVotes}/${totalVoters})</span>`;
-
             const canVote = youId && aliveIds.includes(youId) && !youVoted;
             if (canVote) {
                 voteBtn.className = 'btn btn-black btn-attention btn-flashy';
@@ -716,10 +708,7 @@
                 voteBtn.disabled = true;
                 voteBtn.setAttribute('aria-disabled', 'true');
             }
-
             wrap.appendChild(voteBtn);
-
-            // Only render popover if the player can still vote
             if (canVote) {
                 const pop = document.createElement('div');
                 pop.id = 'vote-popover';
@@ -740,8 +729,49 @@
                 pop.appendChild(row);
                 wrap.appendChild(pop);
             }
-
             actionsCenter.appendChild(wrap);
+        }
+
+        function renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter) {
+            const presId = game.currentPresidentPlayerId || null;
+            const pres = players.find(p => p && p.id === presId) || null;
+            if (youId && youId === presId) {
+                setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
+                const msg = document.createElement('div');
+                msg.className = 'status-text';
+                msg.textContent = 'Card drawing coming soon…';
+                actionsCenter.appendChild(msg);
+            } else {
+                setStatus(gameId, 'Waiting for the President to draw policy cards…');
+            }
+        }
+
+        function renderActions(gameId) {
+            const actionsCenter = document.querySelector('.actions-center');
+            if (!actionsCenter) return;
+            actionsCenter.innerHTML = '';
+
+            const youId = computeYouId(gameId);
+            const game = latestGame;
+            const players = latestPlayers || [];
+            if (!game || !players.length) return;
+
+            if (localPaused) {
+                const pausedMsg = document.createElement('div');
+                pausedMsg.className = 'status-text';
+                pausedMsg.textContent = 'Paused (AFK). Open Menu to resume.';
+                actionsCenter.appendChild(pausedMsg);
+                return;
+            }
+
+            if (game.state !== 'playing') return;
+
+            const phase = computePhase(game);
+            if (phase === 'nomination') return renderPhaseNomination(gameId, youId, game, players, actionsCenter);
+            if (phase === 'voting') return renderPhaseVoting(gameId, youId, game, players, actionsCenter);
+            if (phase === 'president_draw') return renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter);
+            // For other phases not yet implemented, show a neutral status
+            setStatus(gameId, 'Proceeding to next phase…');
         }
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1313,6 +1343,15 @@
             });
 
             // Removed redirect for help-btn; now opens in-game modal
+
+            // Presence heartbeat to keep this player's session marked active while playing
+            heartbeatOnce(gid);
+            if (heartbeatTimer) clearInterval(heartbeatTimer);
+            heartbeatTimer = setInterval(function() { heartbeatOnce(gid); }, HEARTBEAT_INTERVAL_MS);
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') heartbeatOnce(gid);
+            });
+            window.addEventListener('beforeunload', function() { heartbeatOnce(gid); });
 
             // Nomination click handler (event delegation on document)
             document.addEventListener('click', async function(e) {

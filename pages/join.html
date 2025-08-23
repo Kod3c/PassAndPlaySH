@@ -172,34 +172,52 @@
             const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('createdAt', 'asc')));
             // Read host pass requirement from game
             const hostPasswordHash = (snap.data() && snap.data().hostPasswordHash) || null;
-            // Determine availability per name; treat entries claimed by this device's UID as available for rejoin
+            // Determine availability per name based on presence window
+            const PRESENT_WINDOW_MS = 90 * 1000; // 90s: faster reclaim from a new device
             let currentUser = null;
             try { currentUser = await ensureAuth(); } catch (_) { currentUser = null; }
             const currentUid = currentUser ? currentUser.uid : null;
+            const now = Date.now();
+            const idToName = new Map();
             const nameInfo = new Map();
             playersSnap.docs.forEach(d => {
                 const data = d.data() || {};
                 const n = (data.name || '').toString().trim();
                 if (!n) return;
+                idToName.set(d.id, n);
                 const uid = data.uid || null;
                 let info = nameInfo.get(n);
                 if (!info) {
-                    info = { name: n, unclaimed: 0, claimed: false, claimedByYou: false, staleClaimed: false };
+                    info = { name: n, unclaimed: 0, hasActive: false, staleClaimed: false, youMatches: 0 };
                     nameInfo.set(n, info);
                 }
-                if (!uid) info.unclaimed += 1;
-                else {
-                    info.claimed = true;
-                    if (currentUid && uid === currentUid) info.claimedByYou = true;
-                    // Mark as stale if lastSeen is older than presence window
+                if (!uid) {
+                    info.unclaimed += 1;
+                } else {
+                    // Count if this name currently belongs to your UID
+                    if (currentUid && uid === currentUid) info.youMatches += 1;
+                    // Presence check for active session
                     try {
                         const ms = data.lastSeen && data.lastSeen.toDate ? data.lastSeen.toDate().getTime() : 0;
-                        if (ms > 0 && (Date.now() - ms) > (5 * 60 * 1000)) {
+                        if (uid && ms > 0 && (now - ms) <= PRESENT_WINDOW_MS) {
+                            info.hasActive = true;
+                        } else if (uid && ms > 0 && (now - ms) > PRESENT_WINDOW_MS) {
                             info.staleClaimed = true;
                         }
                     } catch (_) {}
                 }
             });
+
+            // Decide a single seat to label as "Your seat": prefer saved playerId; else unique uid match
+            let savedPlayerId = null;
+            try { savedPlayerId = sessionStorage.getItem(`sh_playerId_${gameId}`) || null; } catch (_) { savedPlayerId = null; }
+            let youSeatName = null;
+            if (savedPlayerId && idToName.has(savedPlayerId)) {
+                youSeatName = idToName.get(savedPlayerId);
+            } else {
+                const youNames = Array.from(nameInfo.values()).filter(i => i.youMatches > 0).map(i => i.name);
+                if (youNames.length === 1) youSeatName = youNames[0];
+            }
 
             // Populate dropdown and datalist with optgroups
             if (nameSelect) { nameSelect.innerHTML = ''; }
@@ -223,12 +241,14 @@
                 const availableGroup = document.createElement('optgroup');
                 availableGroup.label = 'Available';
                 const unavailableGroup = document.createElement('optgroup');
-                unavailableGroup.label = 'Unavailable';
+                unavailableGroup.label = 'Taken';
 
                 const availableNames = [];
                 const unavailableNames = [];
                 nameInfo.forEach(info => {
-                    const available = (info.unclaimed > 0) || Boolean(info.claimedByYou) || Boolean(info.staleClaimed);
+                    const isYourSeat = Boolean(youSeatName && info.name === youSeatName);
+                    // Your seat always selectable; others selectable if there is no active session (stale or unclaimed)
+                    const available = isYourSeat || (!info.hasActive);
                     (available ? availableNames : unavailableNames).push(info);
                 });
                 availableNames.sort((a,b) => a.name.localeCompare(b.name));
@@ -237,13 +257,13 @@
                 availableNames.forEach(info => {
                     const o = document.createElement('option');
                     o.value = info.name;
-                    o.textContent = info.name + (info.claimedByYou ? ' – Your seat' : (info.staleClaimed && info.unclaimed === 0 ? ' – Disconnected' : ''));
+                    o.textContent = info.name + (youSeatName && info.name === youSeatName ? ' – Your seat' : (info.staleClaimed && info.unclaimed === 0 ? ' – Available' : ''));
                     availableGroup.appendChild(o);
                 });
                 unavailableNames.forEach(info => {
                     const o = document.createElement('option');
                     o.value = info.name;
-                    o.textContent = info.name + ' - Unavailable';
+                    o.textContent = info.name + ' - Taken';
                     o.disabled = true;
                     unavailableGroup.appendChild(o);
                 });
@@ -252,7 +272,7 @@
                 if (unavailableNames.length) nameSelect.appendChild(unavailableGroup);
 
                 // If your seat is present, auto-select it; otherwise if exactly one available, select it
-                const yours = availableNames.find(i => i.claimedByYou);
+                const yours = youSeatName ? availableNames.find(i => i.name === youSeatName) : null;
                 if (yours) {
                     nameSelect.value = yours.name;
                     try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
