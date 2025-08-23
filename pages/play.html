@@ -69,11 +69,20 @@
             body.role-banner-visible .players-strip { margin-top: 10px; }
             .players-strip::-webkit-scrollbar { display: none; }
             .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
+            /* Floating action bar adjustments for narrow screens */
+            .floating-footer { padding: 0 8px; bottom: calc(8px + env(safe-area-inset-bottom)); }
+            .actions-bar { padding: 8px; gap: 6px; flex-wrap: wrap; justify-content: center; }
+            .actions-left, .actions-center, .actions-right { flex: 1 1 100%; justify-content: space-between; }
+            .actions-left { order: 1; }
+            .actions-center { order: 2; display: flex; justify-content: center; }
+            .actions-right { order: 3; }
+            .actions-bar .btn { min-width: 0; padding: 8px 10px; font-size: 0.95rem; }
         }
         @media (max-width: 360px) {
             .slot { width: 40px; height: 54px; }
             .status-banner { font-size: 1rem; padding: 10px 12px; }
             .player-chip { font-size: 1.05rem; }
+            .actions-bar .btn { padding: 6px 8px; font-size: 0.9rem; }
         }
         .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
         .actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
