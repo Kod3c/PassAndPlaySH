@@ -15,7 +15,7 @@
             --highlight-cream: #F1E6B2;
         }
         .play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
-        .play-main { flex:1; display:flex; align-items:center; justify-content:center; padding: 12px 12px 96px; }
+        .play-main { flex:1; display:flex; align-items:center; justify-content:center; padding: 6px 12px 96px; }
         .board-shell { width: 100%; max-width: 1040px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
         .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
         .player-chip { padding: 4px 10px; border: 2px solid var(--propaganda-black); background:#fff; font-weight:700; }
@@ -44,12 +44,15 @@
         .policy-chip.fascist { background: var(--fascist-red); color:#fff; }
         .policy-chip .count { margin-left: 6px; font-weight: 900; }
         @media (max-width: 640px) {
-            .policy-summary { flex-direction: column; align-items: center; gap: 12px; }
-            .policy-card-title { display:block; }
+            /* Show policy counters side-by-side on mobile */
+            .policy-summary { flex-direction: row; align-items: center; justify-content: center; gap: 8px; flex-wrap: nowrap; }
+            .policy-card-title { display:none; }
+            .policy-chip { padding: 6px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+            .policy-chip .policy-label { display: none; }
         }
         /* Compact layout for narrow phones */
         @media (max-width: 480px) {
-            .play-main { padding: 8px 8px calc(88px + env(safe-area-inset-bottom)); }
+            .play-main { padding: 4px 8px calc(88px + env(safe-area-inset-bottom)); }
             .board-frame { padding: 12px; }
             .track { flex-direction: column; align-items: center; gap: 8px; }
             .track-title { font-size: 0.95rem; text-align: center; }
@@ -181,11 +184,11 @@
                         <div class="policy-summary">
                             <div class="policy-card-wrap">
                                 <div class="policy-card-title">Liberal Policies</div>
-                                <div class="policy-chip liberal">Liberal <span class="count" id="liberal-count">0/5</span></div>
+                                <div class="policy-chip liberal"><span class="policy-label">Liberal</span> <span class="count" id="liberal-count">0/5</span></div>
                             </div>
                             <div class="policy-card-wrap">
                                 <div class="policy-card-title">Fascist Policies</div>
-                                <div class="policy-chip fascist">Fascist <span class="count" id="fascist-count">0/6</span></div>
+                                <div class="policy-chip fascist"><span class="policy-label">Fascist</span> <span class="count" id="fascist-count">0/6</span></div>
                             </div>
                         </div>
                         <div class="tracker-row">

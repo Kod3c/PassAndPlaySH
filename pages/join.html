@@ -180,6 +180,8 @@
                 // Revert to free text when no game
                 if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.classList.add('hidden'); nameSelect.innerHTML = ''; }
                 if (nameInput) { nameInput.style.display = ''; nameInput.value = ''; }
+                const btn = document.getElementById('join-btn');
+                if (btn) btn.textContent = 'Join Lobby';
                 return null;
             }
             const gameRef = doc(db, 'games', gameId);
@@ -188,10 +190,18 @@
                 statusEl.textContent = 'Game not found.';
                 if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.classList.add('hidden'); nameSelect.innerHTML = ''; }
                 if (nameInput) { nameInput.style.display = ''; }
+                const btn = document.getElementById('join-btn');
+                if (btn) btn.textContent = 'Join Lobby';
                 return null;
             }
             const game = snap.data();
             statusEl.textContent = `Found game: ${game.name || gameId} (${gameId})`;
+            // Update join button label depending on game state
+            try {
+                const state = (game && game.state) ? String(game.state) : 'lobby';
+                const btn = document.getElementById('join-btn');
+                if (btn) btn.textContent = (state === 'reveal' || state === 'playing') ? 'Join Game' : 'Join Lobby';
+            } catch (_) {}
             const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('createdAt', 'asc')));
             // Read host pass requirement from game
             const hostPasswordHash = (snap.data() && snap.data().hostPasswordHash) || null;
