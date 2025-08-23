@@ -149,12 +149,20 @@ export function onGameSnapshot(gameId, callback) {
 // Subscribe to history timeline ordered by time, then clientOrder
 export function onHistory(gameId, callback, limit = 200) {
   const col = collection(doc(db, 'games', gameId), 'history');
-  // Order by server ts asc, then by clientOrder asc for stable ordering
-  const q = query(col, orderBy('ts', 'asc'), orderBy('clientOrder', 'asc'));
-  return onSnapshot(q, (snap) => {
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (typeof callback === 'function') callback(items);
-  });
+  // Order by clientOrder only to avoid requiring a composite Firestore index
+  const q = query(col, orderBy('clientOrder', 'asc'));
+  return onSnapshot(
+    q,
+    (snap) => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (typeof callback === 'function') callback(items);
+    },
+    (err) => {
+      // Best-effort: surface an empty list on error so UI shows a friendly state
+      console.warn('History subscription error', err);
+      if (typeof callback === 'function') callback([]);
+    }
+  );
 }
 
 

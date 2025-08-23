@@ -19,7 +19,7 @@
         .board-shell { width: 100%; max-width: 1040px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
         .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
         /* When role banner is visible, push players down a bit more */
-        body.role-banner-visible .players-strip { margin-top: 16px; }
+        body.role-banner-visible .players-strip { margin-top: 8px; }
         .player-chip { padding: 4px 10px; border: 2px solid var(--propaganda-black); background:#fff; font-weight:700; }
         .player-chip.is-president { background: #fef3c7; }
         .player-chip.is-chancellor { background: #e0f2fe; }
@@ -66,7 +66,7 @@
             .slot { width: 44px; height: 60px; }
             /* Player strip: larger chips and horizontal scroll */
             .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
-            body.role-banner-visible .players-strip { margin-top: 10px; }
+            body.role-banner-visible .players-strip { margin-top: 8px; }
             .players-strip::-webkit-scrollbar { display: none; }
             .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
             /* Floating action bar adjustments for narrow screens */
@@ -101,8 +101,8 @@
         .status-banner.status-updated { animation: dropIn 180ms ease-out; }
         /* Floating role banner */
         /* Role banner now inline (not fixed) */
-        .floating-role { position: static; padding: 0; margin: 0; z-index: auto; pointer-events: auto; display:none; width: 100%; align-self: stretch; }
-        .role-bar { width: calc(100% + 24px); margin: 0 -12px; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 12px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 0; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.25rem; line-height: 1; }
+        .floating-role { position: static; padding: 0; margin: 8px 0; z-index: auto; pointer-events: auto; display:none; width: 100%; align-self: stretch; }
+        .role-bar { width: 100%; margin: 0; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 12px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.25rem; line-height: 1; }
         .role-tag { padding: 0; border: 0; background: transparent; box-shadow: none; }
         .role-tag.pres { background: #fef3c7; }
         .role-tag.chanc { background: #e0f2fe; }
