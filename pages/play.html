@@ -99,6 +99,18 @@
                 font-size: 1.1rem;
                 flex: 1 1 0;
             }
+            /* Ensure only Menu and Order are big on mobile */
+            #menu-btn,
+            #order-btn {
+                min-height: 52px;
+                padding: 12px 16px;
+                font-size: 1.1rem;
+            }
+            /* Make Menu and Order wide; Rules and History compact */
+            .actions-left > #menu-btn { flex: 1 1 auto; min-width: 48%; }
+            .actions-left > #help-btn { flex: 0 0 auto; white-space: nowrap; }
+            .actions-right > #history-btn { flex: 0 0 auto; white-space: nowrap; }
+            .actions-right > #order-btn { flex: 1 1 auto; min-width: 48%; }
         }
         @media (max-width: 360px) {
             .slot { width: 40px; height: 54px; }
