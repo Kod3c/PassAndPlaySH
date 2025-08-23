@@ -113,7 +113,7 @@
 
     <!-- JavaScript -->
     <script type="module">
-        import { createGame } from '../js/db.js';
+        import { createGame } from '../js/db.js?v=2';
         // Player setup logic (skip 1-4 players, dynamic name inputs)
         document.addEventListener('DOMContentLoaded', function() {
             const increaseBtn = document.getElementById('increase-btn');
@@ -246,11 +246,7 @@
                 return names;
             }
 
-            function generateGameId() {
-                const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
-                const ts = Date.now().toString(36).slice(-4).toUpperCase();
-                return `${rand}-${ts}`;
-            }
+            // Game ID generation is handled server-side in js/db.js (5-char code)
 
             async function handleCreateGame() {
                 const count = getPlayerCount();

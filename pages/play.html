@@ -16,7 +16,7 @@
         }
         .play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
         .play-main { flex:1; display:flex; flex-direction: column; align-items: stretch; justify-content:flex-start; padding: 0 12px 96px; }
-        .board-shell { width: 100%; max-width: 1040px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
+        .board-shell { width: 100%; max-width: 1040px; margin: 0 auto; display:flex; flex-direction:column; align-items:center; gap: 12px; }
         .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
         /* When role banner is visible, push players down a bit more */
         body.role-banner-visible .players-strip { margin-top: 8px; }
@@ -161,6 +161,55 @@
         .vote-popover .btn { min-width: 120px; min-height: 48px; padding: 12px 18px; font-size: 1.125rem; }
         .vote-popover::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--propaganda-black); }
         .btn-black { background: #101820; color: #fff; }
+        /* Table-spread policy cards (design only) */
+        .table-spread { width: 100%; display:flex; flex-direction: row-reverse; align-items:flex-end; justify-content:center; gap: 0; padding: 12px 0 0; margin: 16px 0 0; }
+        .table-spread .table-card { width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-image: url('../images/policy-back.png'); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); margin: 0 -18px; transform-origin: 50% 100%; }
+        /* Subtle varied angles to simulate a real table spread */
+        .table-spread .table-card:nth-child(1) { transform: rotate(18deg); }
+        .table-spread .table-card:nth-child(2) { transform: rotate(14deg); }
+        .table-spread .table-card:nth-child(3) { transform: rotate(10deg); }
+        .table-spread .table-card:nth-child(4) { transform: rotate(6deg); }
+        .table-spread .table-card:nth-child(5) { transform: rotate(3deg); }
+        .table-spread .table-card:nth-child(6) { transform: rotate(1deg); }
+        .table-spread .table-card:nth-child(7) { transform: rotate(-1deg); }
+        .table-spread .table-card:nth-child(8) { transform: rotate(-3deg); }
+        .table-spread .table-card:nth-child(9) { transform: rotate(-6deg); }
+        .table-spread .table-card:nth-child(10) { transform: rotate(-10deg); }
+        .table-spread .table-card:nth-child(11) { transform: rotate(-14deg); }
+        .table-spread .table-card:nth-child(12) { transform: rotate(-18deg); }
+        /* Deck + Discard stacks flanking the spread */
+        .cards-row { width: 100%; display:flex; align-items:center; justify-content:center; gap: 20px; margin: 12px 0 0; }
+        .card-stack { position: relative; width: calc(var(--play-card-w, 64px) + 8px); height: calc(var(--play-card-h, 92px) + 8px); flex: 0 0 auto; }
+        .stack-card { position: absolute; left: 0; bottom: 0; width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); }
+        .stack-card.is-back { background-image: url('../images/policy-back.png'); }
+        .stack-card.is-discard { background-image: url('../images/discard.png'); }
+        .card-stack.deck .stack-card:nth-child(1) { transform: translate(0, 0) rotate(-2deg); }
+        .card-stack.deck .stack-card:nth-child(2) { transform: translate(4px, -4px) rotate(1deg); }
+        .card-stack.deck .stack-card:nth-child(3) { transform: translate(8px, -8px) rotate(-0.5deg); }
+        .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 0) rotate(2deg) scale(1.3); }
+        /* Single, larger discard card */
+        .card-stack.discard .stack-card { transform: scale(1.3); transform-origin: 50% 100%; }
+        /* Responsive sizing for small screens */
+        @media (max-width: 640px) {
+            .table-spread { padding-top: 10px; margin-top: 14px; }
+            .cards-row { gap: 14px; margin-top: 10px; }
+            .table-spread .table-card { width: var(--play-card-w, 56px); height: var(--play-card-h, 82px); margin: 0 -18px; }
+            .card-stack { width: calc(var(--play-card-w, 56px) + 8px); height: calc(var(--play-card-h, 82px) + 8px); }
+            .stack-card { width: var(--play-card-w, 56px); height: var(--play-card-h, 82px); }
+        }
+        @media (max-width: 360px) {
+            .table-spread { padding-top: 8px; margin-top: 12px; }
+            .cards-row { gap: 12px; margin-top: 8px; }
+            .table-spread .table-card { width: var(--play-card-w, 50px); height: var(--play-card-h, 74px); margin: 0 -20px; }
+            .card-stack { width: calc(var(--play-card-w, 50px) + 8px); height: calc(var(--play-card-h, 74px) + 8px); }
+            .stack-card { width: var(--play-card-w, 50px); height: var(--play-card-h, 74px); }
+        }
+        /* Preloader overlay */
+        .preloader-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
+        .preloader-overlay .loader { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .preloader-overlay .spinner { width: 56px; height: 56px; border: 6px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+        .preloader-overlay .loader-text { color: #fff; font-weight: 800; letter-spacing: 0.03em; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#101820">
@@ -215,9 +264,31 @@
                             <div class="tracker" id="election-tracker"></div>
                         </div>
                     </div>
+                    <!-- Deck + Spread + Discard (visual only) -->
+                    <div class="cards-row" aria-hidden="false">
+                        <div class="table-spread">
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                            <div class="table-card"></div>
+                        </div>
+                        <div class="card-stack discard" aria-label="Discard Pile">
+                            <div class="stack-card is-discard"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
+
+        
 
         <footer class="floating-footer">
             <div class="actions-bar">
@@ -537,10 +608,16 @@
                 </div>
         </div>
     </div>
+    <div id="preloader-overlay" class="preloader-overlay" aria-hidden="false">
+        <div class="loader">
+            <div class="spinner"></div>
+            <div id="preloader-text" class="loader-text">Loading board…</div>
+        </div>
+    </div>
 
     <script type="module">
         import { app } from '../js/firebase.js';
-        import { onHistory, logPublic } from '../js/db.js';
+        import { onHistory, logPublic } from '../js/db.js?v=2';
         import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy, updateDoc, serverTimestamp, runTransaction, increment } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
@@ -558,6 +635,14 @@
         function getGameId() {
             const p = new URLSearchParams(window.location.search);
             return p.get('game') || localStorage.getItem('sh_currentGameId') || '';
+        }
+        function hidePreloader() {
+            const o = document.getElementById('preloader-overlay');
+            if (o) o.style.display = 'none';
+        }
+        function setPreloader(text) {
+            const t = document.getElementById('preloader-text');
+            if (t && text) t.textContent = text;
         }
 
         function getYouPlayerId(gameId) {
@@ -1338,6 +1423,11 @@
             if (!gid) { setStatus('', 'Missing game id'); return; }
 
             const gameRef = doc(db, 'games', gid);
+            let gameReady = false;
+            let playersReady = false;
+            function maybeHide() {
+                if (gameReady && playersReady) hidePreloader();
+            }
             const snap = await getDoc(gameRef);
             if (!snap.exists()) { setStatus(gid, 'Game not found'); return; }
             setStatus(gid, 'Game in progress');
@@ -1360,6 +1450,8 @@
                 renderActions(gid);
                 // Attempt resolve vote if complete
                 maybeResolveElectionVote(gid);
+                gameReady = true;
+                maybeHide();
             });
 
             // Subscribe to players ordered by orderIndex
@@ -1376,6 +1468,8 @@
                 renderHistory();
                 // Update actions when players change (eligibility)
                 renderActions(gid);
+                playersReady = true;
+                maybeHide();
             });
 
             // Removed redirect for help-btn; now opens in-game modal

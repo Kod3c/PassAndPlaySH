@@ -39,8 +39,8 @@
                     </div>
                     <div class="card-content">
                         <div class="form-group">
-                            <label class="form-label" for="game-id">Game ID</label>
-                            <input id="game-id" class="form-control code-input" type="text" placeholder="e.g. SH325-IK5L" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
+                            <label class="form-label" for="game-id">Game Code</label>
+                            <input id="game-id" class="form-control code-input" type="text" placeholder="e.g. 7K3MZ" maxlength="10" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
                             <small class="form-help">Paste or type the game code</small>
                         </div>
 
@@ -91,36 +91,18 @@
         }
 
         function normalizeGameId(id) {
-            // Normalize various Unicode dash/minus characters to ASCII hyphen before filtering
-            const raw = (id || '');
-            const withAsciiHyphens = raw.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043\uFE58\uFE63\uFF0D]/g, '-');
-            // Allow only A-Z, 0-9, and hyphen
-            const upper = withAsciiHyphens.toUpperCase();
-            const cleaned = upper.replace(/[^A-Z0-9-]/g, '');
-            // Collapse multiple hyphens to a single and trim hyphen ends
-            const collapsed = cleaned.replace(/-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-            // Limit length to 16
-            return collapsed.slice(0, 16);
+            // Accept only A-Z and 2-9, excluding I/O/1/0; limit to 5 chars
+            const raw = (id || '').toString();
+            const upper = raw.toUpperCase();
+            const cleaned = upper
+                .replace(/[IO10]/g, '') // remove ambiguous chars entirely
+                .replace(/[^A-Z2-9]/g, '');
+            return cleaned.slice(0, 5);
         }
 
         function formatGameIdForDisplay(normalized) {
-            // Input: already normalized to [A-Z0-9-], uppercased, single hyphens
-            const str = String(normalized || '');
-            const compact = str.replace(/-/g, '');
-            if (compact.length === 0) return '';
-            // If SH-time-based pattern, place dash after SH + 3-4 digits when available
-            if (/^SH\d/.test(compact)) {
-                const match = compact.match(/^SH(\d{0,4})/);
-                const digits = match ? (match[1] || '') : '';
-                const leftLen = 2 + Math.min(digits.length, 4); // 5 or 6 when enough digits
-                if (compact.length > leftLen) {
-                    return compact.slice(0, leftLen) + '-' + compact.slice(leftLen);
-                }
-                return compact; // not enough to add dash yet
-            }
-            // Otherwise, prefer 4-4 grouping when length allows
-            if (compact.length <= 4) return compact;
-            return compact.slice(0, 4) + '-' + compact.slice(4, 8);
+            // Keep as-is; no dashes
+            return String(normalized || '');
         }
 
         async function ensureAuth() {
@@ -341,8 +323,8 @@
 
             let currentGameId = normalizeGameId(getGameIdFromUrl());
             if (currentGameId) {
-                gameIdInput.value = formatGameIdForDisplay(currentGameId);
-                loadGameMeta(currentGameId);
+                // Do not mutate the field; only use normalized copy for lookups
+                if (currentGameId.length === 5) loadGameMeta(currentGameId);
             }
 
             function getSelectedName() {
@@ -357,28 +339,33 @@
             function updateJoinEnabled() {
                 const name = getSelectedName();
                 const gid = normalizeGameId(gameIdInput.value);
-                joinBtn.disabled = !(name && gid);
+                joinBtn.disabled = !(name && gid && gid.length === 5);
             }
 
             let debounceTimer = null;
             gameIdInput.addEventListener('input', function() {
                 const gid = normalizeGameId(gameIdInput.value);
-                gameIdInput.value = formatGameIdForDisplay(gid);
                 clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 250);
+                if (gid.length === 5) {
+                    debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 150);
+                } else {
+                    debounceTimer = setTimeout(() => { loadGameMeta(''); }, 150);
+                }
                 updateJoinEnabled();
             });
 
-            gameIdInput.addEventListener('paste', function(e) {
-                try {
-                    const text = (e.clipboardData || window.clipboardData).getData('text') || '';
-                    const gid = normalizeGameId(text);
-                    gameIdInput.value = formatGameIdForDisplay(gid);
+            gameIdInput.addEventListener('paste', function() {
+                // Allow paste unmodified; lookup happens via normalized copy on input
+                setTimeout(() => {
+                    const gid = normalizeGameId(gameIdInput.value);
                     clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 100);
+                    if (gid.length === 5) {
+                        debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 100);
+                    } else {
+                        debounceTimer = setTimeout(() => { loadGameMeta(''); }, 100);
+                    }
                     updateJoinEnabled();
-                    e.preventDefault();
-                } catch (_) {}
+                }, 0);
             });
 
             nameInput.addEventListener('input', updateJoinEnabled);
@@ -389,7 +376,7 @@
             joinBtn.addEventListener('click', async function() {
                 const name = getSelectedName();
                 const gid = normalizeGameId(gameIdInput.value);
-                if (!name || !gid) return;
+                if (!name || !gid || gid.length !== 5) return;
                 joinBtn.disabled = true;
                 status.textContent = 'Joining...';
                 try {

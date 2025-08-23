@@ -17,6 +17,12 @@
             .lobby-actions { flex-direction: column; align-items: stretch; gap: 10px; }
             .lobby-actions .btn { width: 100%; }
         }
+        /* Preloader overlay */
+        .preloader-overlay { position: fixed; inset: 0; z-index: 10000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
+        .preloader-overlay .loader { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .preloader-overlay .spinner { width: 56px; height: 56px; border: 6px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+        .preloader-overlay .loader-text { color: #fff; font-weight: 800; letter-spacing: 0.03em; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -81,13 +87,29 @@
             </div>
         </footer>
     </div>
-
+    <div id="preloader-overlay" class="preloader-overlay" aria-hidden="true">
+        <div class="loader">
+            <div class="spinner"></div>
+            <div class="loader-text">Loading…</div>
+        </div>
+    </div>
     <script type="module">
-        import { onGameSnapshot, getGame, logPublic, logPrivate, logPartied, logSilent } from '../js/db.js';
+        import { onGameSnapshot, getGame, logPublic, logPrivate, logPartied, logSilent } from '../js/db.js?v=2';
         import { app } from '../js/firebase.js';
         import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         (function() {
+            function showPreloader(text) {
+                const o = document.getElementById('preloader-overlay');
+                if (!o) return;
+                o.style.display = 'flex';
+                const t = o.querySelector('.loader-text');
+                if (t && text) t.textContent = text;
+            }
+            function hidePreloader() {
+                const o = document.getElementById('preloader-overlay');
+                if (o) o.style.display = 'none';
+            }
             const lobbyInfo = document.getElementById('lobby-info');
             const playersList = document.getElementById('players-list');
             const inviteInput = document.getElementById('invite-link');
@@ -164,7 +186,7 @@
 
                 const idRow = document.createElement('div');
                 const idStrong = document.createElement('strong');
-                idStrong.textContent = 'Game ID:';
+                idStrong.textContent = 'Game Code:';
                 idRow.appendChild(idStrong);
                 idRow.appendChild(document.createTextNode(' ' + (game.id || '')));
 
@@ -434,10 +456,11 @@
                     }
 
                     function updateProgress() {
-                        const seen = (players || []).filter(p => p && p.roleSeen).length;
-                        const totalExpected = (typeof game.playerCount === 'number' && game.playerCount > 0)
-                            ? game.playerCount
-                            : ((players || []).length);
+                        const dedupedPlayers = Array.from(nameToPlayer.values());
+                        const seen = dedupedPlayers.filter(p => p && p.roleSeen).length;
+                        const totalExpected = (typeof expectedCount === 'number' && expectedCount > 0)
+                            ? expectedCount
+                            : dedupedPlayers.length;
                         const pct = totalExpected > 0 ? Math.min(100, Math.max(0, Math.round((seen / totalExpected) * 100))) : 0;
                         progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
                         progressBarInner.style.width = `${pct}%`;
@@ -510,6 +533,21 @@
                         doneBtn.textContent = '✅ Continue';
 
                         let shown = false;
+                        let markedSeen = false;
+                        async function markSeenOnce() {
+                            if (markedSeen) return;
+                            const you = getYouPlayer();
+                            if (!you || you.roleSeen) { markedSeen = true; return; }
+                            try {
+                                await ensureAuth();
+                                await updateDoc(doc(db, 'games', game.id, 'players', you.id), { roleSeen: true, lastSeen: serverTimestamp() });
+                                markedSeen = true;
+                                // Optimistically update local state and progress right away
+                                try { you.roleSeen = true; } catch (_) {}
+                                try { updateProgress(); } catch (_) {}
+                                try { await logPrivate(game.id, 'You acknowledged viewing your secret role', you.id, { type: 'ack', actorId: you.id }); } catch (_) {}
+                            } catch (_) {}
+                        }
                         function computeRoleText() {
                             const role = ((yp && yp.role) || '').toString().toUpperCase();
                             const party = ((yp && yp.party) || '').toString().toUpperCase();
@@ -529,6 +567,8 @@
                                 else if (info.party === 'FASCIST' || info.role === 'FASCIST') roleLabel.style.color = '#DA291C';
                                 else roleLabel.style.color = '#00AEEF';
                                 toggleBtn.textContent = '🙈 Hide my secret role';
+                                // First reveal counts as seen
+                                markSeenOnce();
                             }
                         }
 
@@ -537,13 +577,7 @@
                         });
 
                         doneBtn.addEventListener('click', async function() {
-                            const you = getYouPlayer();
-                            if (!you) { overlay.remove(); return; }
-                            try {
-                                await ensureAuth();
-                                await updateDoc(doc(db, 'games', game.id, 'players', you.id), { roleSeen: true, lastSeen: serverTimestamp() });
-                                try { await logPrivate(game.id, 'You acknowledged viewing your secret role', you.id, { type: 'ack', actorId: you.id }); } catch (_) {}
-                            } catch (_) {}
+                            await markSeenOnce();
                             overlay.remove();
                         });
 
@@ -564,15 +598,17 @@
                         e.preventDefault();
                         e.stopPropagation();
                         if (!isHost) return;
-                        const seen = (players || []).filter(p => p && p.roleSeen).length;
-                        const totalExpected = (typeof game.playerCount === 'number' && game.playerCount > 0)
-                            ? game.playerCount
-                            : ((players || []).length);
+                        const dedupedPlayers = Array.from(nameToPlayer.values());
+                        const seen = dedupedPlayers.filter(p => p && p.roleSeen).length;
+                        const totalExpected = (typeof expectedCount === 'number' && expectedCount > 0)
+                            ? expectedCount
+                            : dedupedPlayers.length;
                         if (seen !== totalExpected || totalExpected === 0) return;
                         // Prevent double clicks / rapid re-renders from causing multiple writes
                         hostBtn.disabled = true;
                         const originalText = hostBtn.textContent;
                         hostBtn.textContent = 'Starting…';
+                        showPreloader('Preparing board…');
                         try {
                             await ensureAuth();
                             await updateDoc(doc(db, 'games', game.id), { state: 'playing', updatedAt: serverTimestamp() });
@@ -717,6 +753,7 @@
                     if (!game || (game && game.state === 'cancelled')) { handleGameRemoved(); return; }
                     // If host has started the game, route everyone to play screen
                     if (game && game.state === 'playing') {
+                        showPreloader('Loading board…');
                         const playUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/play.html') + '?game=' + encodeURIComponent(game.id);
                         window.location.href = playUrl;
                         return;

@@ -55,26 +55,30 @@ async function ensureAnonymousAuth() {
 }
 
 function generateGameId() {
-  // Format: SH + hour(12h) + minute + '-' + 4-char random (no 0/O/1/I)
-  const now = new Date();
-  let hour = now.getHours() % 12;
-  if (hour === 0) hour = 12; // 12-hour clock
-  const minute = now.getMinutes();
-  const timePart = `SH${hour}${minute.toString().padStart(2, '0')}`;
-
+  // 5-character unambiguous code (exclude 0/O and 1/I)
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let rand = '';
-  for (let i = 0; i < 4; i++) {
-    rand += alphabet[Math.floor(Math.random() * alphabet.length)];
+  let id = '';
+  for (let i = 0; i < 5; i++) {
+    id += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
-  return `${timePart}-${rand}`;
+  return id;
 }
 
 export async function createGame(gameName, playerNames, hostPasswordHash = null) {
   await ensureAnonymousAuth();
-
-  const gameId = generateGameId();
-  const gameRef = doc(db, 'games', gameId);
+  // Generate a unique 5-char ID (retry a few times just in case of collision)
+  let gameId = '';
+  let gameRef = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    gameId = generateGameId();
+    gameRef = doc(db, 'games', gameId);
+    // eslint-disable-next-line no-await-in-loop
+    const existing = await getDoc(gameRef);
+    if (!existing.exists()) break;
+    if (attempt === 4) {
+      throw new Error('Failed to create a unique game ID. Please try again.');
+    }
+  }
   const createdAt = serverTimestamp();
 
   // Validate and sanitize player names
