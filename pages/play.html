@@ -97,8 +97,9 @@
             border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; 
             font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; 
             text-align:center; animation: dropIn 180ms ease-out; font-size: 1.125rem; line-height: 1;
-            color: var(--propaganda-black);
+            color: #000;
         }
+        .status-text { color: #000; }
         .status-banner.status-updated { animation: dropIn 180ms ease-out; }
         /* Floating role banner */
         /* Role banner now inline (not fixed) */
@@ -1457,8 +1458,9 @@
             // Voting click handler
             document.addEventListener('click', async function(e) {
                 const t = e.target;
-                // Toggle vote popover
-                if (t && t.matches && t.matches('#vote-toggle-btn')) {
+                // Toggle vote popover (support clicks on inner elements)
+                const toggleBtn = (t && t.closest) ? t.closest('#vote-toggle-btn') : null;
+                if (toggleBtn) {
                     e.preventDefault();
                     const pop = document.getElementById('vote-popover');
                     if (pop) {
@@ -1466,8 +1468,10 @@
                     }
                     return;
                 }
-                if (!(t && t.matches && t.matches('button[data-vote]'))) return;
-                const vote = t.getAttribute('data-vote');
+                // Submit vote (support clicks on inner elements)
+                const voteBtn = (t && t.closest) ? t.closest('button[data-vote]') : null;
+                if (!voteBtn) return;
+                const vote = voteBtn.getAttribute('data-vote');
                 if (!vote || (vote !== 'ja' && vote !== 'nein')) return;
                 const youId = computeYouId(gid);
                 if (!youId) return;
