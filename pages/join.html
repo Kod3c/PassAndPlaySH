@@ -40,7 +40,7 @@
                     <div class="card-content">
                         <div class="form-group">
                             <label class="form-label" for="game-id">Game ID</label>
-                            <input id="game-id" class="form-control" type="text" placeholder="e.g. SH325-IK5L" maxlength="16" autocomplete="off">
+                            <input id="game-id" class="form-control" type="text" placeholder="e.g. SH325-IK5L" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
                             <small class="form-help">Paste or type the game code</small>
                         </div>
 
@@ -91,8 +91,11 @@
         }
 
         function normalizeGameId(id) {
-            // Allow only A-Z, 0-9, and one hyphen separator
-            const upper = (id || '').toUpperCase();
+            // Normalize various Unicode dash/minus characters to ASCII hyphen before filtering
+            const raw = (id || '');
+            const withAsciiHyphens = raw.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043\uFE58\uFE63\uFF0D]/g, '-');
+            // Allow only A-Z, 0-9, and hyphen
+            const upper = withAsciiHyphens.toUpperCase();
             const cleaned = upper.replace(/[^A-Z0-9-]/g, '');
             // Collapse multiple hyphens to a single and trim hyphen ends
             const collapsed = cleaned.replace(/-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
