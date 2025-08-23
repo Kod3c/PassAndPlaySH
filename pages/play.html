@@ -20,6 +20,8 @@
         body.role-banner-visible .play-main { padding-top: 56px; }
         .board-shell { width: 100%; max-width: 1040px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
         .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
+        /* When role banner is visible, push players down a bit more */
+        body.role-banner-visible .players-strip { margin-top: 16px; }
         .player-chip { padding: 4px 10px; border: 2px solid var(--propaganda-black); background:#fff; font-weight:700; }
         .player-chip.is-president { background: #fef3c7; }
         .player-chip.is-chancellor { background: #e0f2fe; }
@@ -65,6 +67,7 @@
             .slot { width: 44px; height: 60px; }
             /* Player strip: larger chips and horizontal scroll */
             .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+            body.role-banner-visible .players-strip { margin-top: 20px; }
             .players-strip::-webkit-scrollbar { display: none; }
             .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
             /* Bottom actions bar becomes two rows with centered primary action */
@@ -72,6 +75,30 @@
             .actions-center { order: -1; width: 100%; justify-content: center; }
             .actions-left, .actions-right { flex: 1 1 0; justify-content: space-between; }
             .actions-bar .btn { min-height: 40px; padding: 8px 10px; font-size: 0.95rem; }
+            /* Center actions button sizing: Big, small, small, big */
+            .actions-center > .btn:nth-child(1),
+            .actions-center > *:nth-child(1) > .btn {
+                min-height: 48px;
+                padding: 12px 16px;
+                font-size: 1.1rem;
+                flex: 1 1 0;
+            }
+            .actions-center > .btn:nth-child(2),
+            .actions-center > *:nth-child(2) > .btn,
+            .actions-center > .btn:nth-child(3),
+            .actions-center > *:nth-child(3) > .btn {
+                min-height: 40px;
+                padding: 8px 10px;
+                font-size: 0.95rem;
+                flex: 0 0 auto;
+            }
+            .actions-center > .btn:nth-child(4),
+            .actions-center > *:nth-child(4) > .btn {
+                min-height: 48px;
+                padding: 12px 16px;
+                font-size: 1.1rem;
+                flex: 1 1 0;
+            }
         }
         @media (max-width: 360px) {
             .slot { width: 40px; height: 54px; }
