@@ -614,6 +614,11 @@ class App {
         if (gamePage) {
             gamePage.innerHTML = this.game.getGameHTML();
             this.setupGameEventListeners();
+            // Show one-time alert when moving into legislation after a successful election
+            if (this.game.pendingLegislationAlert) {
+                alert(`${this.game.players[this.game.currentPresident]} (President) is picking policy cards...`);
+                this.game.pendingLegislationAlert = false;
+            }
         }
     }
 
@@ -761,6 +766,7 @@ class Game {
         this.gameLog = [];
         this.lastChancellor = null;
         this.consecutiveFailedElections = 0;
+        this.pendingLegislationAlert = false;
         
         this.assignRoles();
         this.shufflePolicyDeck();
@@ -877,6 +883,7 @@ class Game {
             this.electionTracker = 0;
             this.lastElection = 'success';
             this.consecutiveFailedElections = 0;
+            this.pendingLegislationAlert = true;
             this.logGameEvent('action', 'Election successful! ' + jaVotes + ' Ja vs ' + neinVotes + ' Nein');
             this.logGameEvent('phase', 'Legislation phase begins');
         } else {
