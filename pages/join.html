@@ -40,7 +40,7 @@
                     <div class="card-content">
                         <div class="form-group">
                             <label class="form-label" for="game-id">Game ID</label>
-                            <input id="game-id" class="form-control" type="text" placeholder="e.g. SH325-IK5L" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
+                            <input id="game-id" class="form-control code-input" type="text" placeholder="e.g. SH325-IK5L" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
                             <small class="form-help">Paste or type the game code</small>
                         </div>
 
@@ -101,6 +101,26 @@
             const collapsed = cleaned.replace(/-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
             // Limit length to 16
             return collapsed.slice(0, 16);
+        }
+
+        function formatGameIdForDisplay(normalized) {
+            // Input: already normalized to [A-Z0-9-], uppercased, single hyphens
+            const str = String(normalized || '');
+            const compact = str.replace(/-/g, '');
+            if (compact.length === 0) return '';
+            // If SH-time-based pattern, place dash after SH + 3-4 digits when available
+            if (/^SH\d/.test(compact)) {
+                const match = compact.match(/^SH(\d{0,4})/);
+                const digits = match ? (match[1] || '') : '';
+                const leftLen = 2 + Math.min(digits.length, 4); // 5 or 6 when enough digits
+                if (compact.length > leftLen) {
+                    return compact.slice(0, leftLen) + '-' + compact.slice(leftLen);
+                }
+                return compact; // not enough to add dash yet
+            }
+            // Otherwise, prefer 4-4 grouping when length allows
+            if (compact.length <= 4) return compact;
+            return compact.slice(0, 4) + '-' + compact.slice(4, 8);
         }
 
         async function ensureAuth() {
@@ -311,7 +331,7 @@
 
             let currentGameId = normalizeGameId(getGameIdFromUrl());
             if (currentGameId) {
-                gameIdInput.value = currentGameId;
+                gameIdInput.value = formatGameIdForDisplay(currentGameId);
                 loadGameMeta(currentGameId);
             }
 
@@ -333,11 +353,22 @@
             let debounceTimer = null;
             gameIdInput.addEventListener('input', function() {
                 const gid = normalizeGameId(gameIdInput.value);
-                // reflect sanitized value back to field for clarity
-                gameIdInput.value = gid;
+                gameIdInput.value = formatGameIdForDisplay(gid);
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 250);
                 updateJoinEnabled();
+            });
+
+            gameIdInput.addEventListener('paste', function(e) {
+                try {
+                    const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    const gid = normalizeGameId(text);
+                    gameIdInput.value = formatGameIdForDisplay(gid);
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => { loadGameMeta(gid); }, 100);
+                    updateJoinEnabled();
+                    e.preventDefault();
+                } catch (_) {}
             });
 
             nameInput.addEventListener('input', updateJoinEnabled);

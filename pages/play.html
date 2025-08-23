@@ -55,12 +55,20 @@
             .track-title { font-size: 0.95rem; text-align: center; }
             .slots { gap: 6px; }
             .slot { width: 44px; height: 60px; }
-            .players-strip { gap: 6px; }
-            .player-chip { padding: 3px 8px; }
+            /* Player strip: larger chips and horizontal scroll */
+            .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+            .players-strip::-webkit-scrollbar { display: none; }
+            .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
+            /* Bottom actions bar becomes two rows with centered primary action */
+            .actions-bar { padding: 8px; gap: 6px; flex-wrap: wrap; }
+            .actions-center { order: -1; width: 100%; justify-content: center; }
+            .actions-left, .actions-right { flex: 1 1 0; justify-content: space-between; }
+            .actions-bar .btn { min-height: 40px; padding: 8px 10px; font-size: 0.95rem; }
         }
         @media (max-width: 360px) {
             .slot { width: 40px; height: 54px; }
             .status-banner { font-size: 1rem; padding: 10px 12px; }
+            .player-chip { font-size: 1.05rem; }
         }
         .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
         .actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }

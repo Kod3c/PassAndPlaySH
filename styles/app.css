@@ -571,6 +571,13 @@ main {
   transition: all var(--transition-fast);
 }
 
+/* Modern code-like input styling for short IDs */
+.code-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .form-control:focus {
   outline: none;
   border-color: var(--liberal-blue);
