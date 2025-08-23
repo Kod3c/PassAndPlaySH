@@ -97,6 +97,7 @@
             border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; 
             font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; 
             text-align:center; animation: dropIn 180ms ease-out; font-size: 1.125rem; line-height: 1;
+            color: var(--propaganda-black);
         }
         .status-banner.status-updated { animation: dropIn 180ms ease-out; }
         /* Floating role banner */
@@ -551,6 +552,7 @@
         let lastStatusMessage = null;
         const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
         let heartbeatTimer = null;
+        let afkUnsub = null; let lastAfkSeenOrder = 0;
 
         function getGameId() {
             const p = new URLSearchParams(window.location.search);
@@ -1385,6 +1387,34 @@
                 if (document.visibilityState === 'visible') heartbeatOnce(gid);
             });
             window.addEventListener('beforeunload', function() { heartbeatOnce(gid); });
+
+            // Background: surface AFK/return notifications from history as a brief status banner
+            if (!afkUnsub) {
+                try {
+                    afkUnsub = onHistory(gid, (items) => {
+                        try {
+                            const youId = computeYouId(gid);
+                            const visible = (items || []).filter(canSeeEvent);
+                            const matches = visible.filter((evt) => {
+                                const msg = String(evt && evt.message || '');
+                                const isAfk = msg.includes(' is AFK');
+                                const isReturn = msg.includes(' returned');
+                                if (!(evt && evt.type === 'status' && (isAfk || isReturn))) return false;
+                                if (youId && evt.actorId && evt.actorId === youId) return false; // don't notify yourself
+                                return true;
+                            });
+                            if (!matches.length) return;
+                            const newest = matches[matches.length - 1];
+                            const order = Number(newest && newest.clientOrder || 0);
+                            if (!(order > lastAfkSeenOrder)) return;
+                            lastAfkSeenOrder = order;
+                            // Update banner without re-logging to history
+                            setStatus('', newest.message || '');
+                        } catch (_) { /* no-op */ }
+                    });
+                } catch (_) { /* no-op */ }
+            }
+            window.addEventListener('beforeunload', function() { if (afkUnsub) { try { afkUnsub(); } catch (_) {} afkUnsub = null; } });
 
             // Nomination click handler (event delegation on document)
             document.addEventListener('click', async function(e) {
