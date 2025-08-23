@@ -31,13 +31,35 @@
         .slots { display:flex; gap:8px; align-items:center; }
         .slot { width: 50px; height: 68px; border: 3px solid #000; background: rgba(255,255,255,0.18); box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9); border-radius: 4px; }
         .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
+        .tracker-row { display:flex; align-items:center; justify-content:center; gap:10px; padding-top: 4px; }
+        .tracker-label { font-weight:900; letter-spacing: 0.02em; }
         .tracker .bubble { width:26px; height:26px; border-radius:50%; background:#fff; border:3px solid var(--propaganda-black); }
+        .tracker .square { width:26px; height:26px; border-radius:4px; background:#fff; border:3px solid var(--propaganda-black); display:inline-flex; align-items:center; justify-content:center; font-weight:900; }
+        .tracker .square.active { background: var(--highlight-cream); }
+        .policy-summary { display:flex; align-items:stretch; justify-content:center; gap:10px; margin-top: 8px; }
+        .policy-card-wrap { display:flex; flex-direction:column; align-items:center; }
+        .policy-card-title { display:none; font-weight:900; margin-bottom: 4px; letter-spacing:0.02em; }
+        .policy-chip { padding: 6px 10px; border: 3px solid var(--propaganda-black); background:#fff; font-weight:800; box-shadow: inset 0 0 0 3px rgba(241,230,178,0.6); }
+        .policy-chip.liberal { background: var(--liberal-blue); color:#fff; }
+        .policy-chip.fascist { background: var(--fascist-red); color:#fff; }
+        .policy-chip .count { margin-left: 6px; font-weight: 900; }
+        @media (max-width: 640px) {
+            .policy-summary { flex-direction: column; align-items: center; gap: 12px; }
+            .policy-card-title { display:block; }
+        }
         .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
         .actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
         .actions-left, .actions-center, .actions-right { display:flex; gap:8px; align-items:center; }
         .btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
         .btn-primary { background: var(--highlight-cream); }
         .status-banner { text-align:center; font-weight:800; }
+        /* Floating role banner */
+        .floating-role { position: fixed; left: 0; right: 0; top: 0; padding: 0 12px; z-index: 2000; pointer-events: none; display:none; }
+        .role-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 14px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; }
+        .role-tag { padding: 4px 10px; border: 3px solid var(--propaganda-black); background: var(--highlight-cream); box-shadow: inset 0 0 0 3px rgba(0,0,0,0.05); }
+        .role-tag.pres { background: #fef3c7; }
+        .role-tag.chanc { background: #e0f2fe; }
+        @keyframes dropIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content:center; z-index: 60; }
         .modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
@@ -89,7 +111,20 @@
                                 <div class="slots" id="fascist-slots"></div>
                             </section>
                         </div>
-                        <div class="tracker" id="election-tracker"></div>
+                        <div class="policy-summary">
+                            <div class="policy-card-wrap">
+                                <div class="policy-card-title">Liberal Policies</div>
+                                <div class="policy-chip liberal">Liberal <span class="count" id="liberal-count">0/5</span></div>
+                            </div>
+                            <div class="policy-card-wrap">
+                                <div class="policy-card-title">Fascist Policies</div>
+                                <div class="policy-chip fascist">Fascist <span class="count" id="fascist-count">0/6</span></div>
+                            </div>
+                        </div>
+                        <div class="tracker-row">
+                            <div class="tracker-label">Failed Elections</div>
+                            <div class="tracker" id="election-tracker"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,7 +137,6 @@
                     <button id="help-btn" class="btn">📖 Rules</button>
                 </div>
                 <div class="actions-center">
-                    <button id="primary-action" class="btn btn-primary">Continue</button>
                 </div>
                 <div class="actions-right">
                     <button id="history-btn" class="btn">🕒 History</button>
@@ -110,6 +144,9 @@
                 </div>
             </div>
         </footer>
+        <div id="role-banner" class="floating-role" style="top: calc(80px + env(safe-area-inset-top));">
+            <div class="role-bar"><span id="role-badge" class="role-tag"></span></div>
+        </div>
         <div id="order-modal" class="modal-overlay">
             <div class="modal-card">
                 <div class="modal-header">
@@ -124,6 +161,7 @@
     <script type="module">
         import { app } from '../js/firebase.js';
         import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
         const db = getFirestore(app);
         let latestGame = null;
@@ -132,6 +170,28 @@
         function getGameId() {
             const p = new URLSearchParams(window.location.search);
             return p.get('game') || localStorage.getItem('sh_currentGameId') || '';
+        }
+
+        function getYouPlayerId(gameId) {
+            try { return sessionStorage.getItem(`sh_playerId_${gameId}`) || null; } catch (_) { return null; }
+        }
+
+        async function ensureAuth() {
+            const auth = getAuth(app);
+            if (!auth.currentUser) {
+                try { await signInAnonymously(auth); } catch (_) {}
+            }
+            return auth.currentUser;
+        }
+
+        function computeYouId(gameId) {
+            const fromSession = getYouPlayerId(gameId);
+            if (fromSession) return fromSession;
+            const auth = getAuth(app);
+            const uid = auth && auth.currentUser ? auth.currentUser.uid : null;
+            if (!uid) return null;
+            const m = (latestPlayers || []).find(p => p && p.uid === uid);
+            return m ? m.id : null;
         }
 
         function renderSlots(el, count) {
@@ -147,9 +207,47 @@
             el.innerHTML = '';
             for (let i = 0; i < 3; i++) {
                 const b = document.createElement('div');
-                b.className = 'bubble';
+                b.className = 'square';
+                b.textContent = String(i + 1);
+                b.dataset.index = String(i);
                 el.appendChild(b);
             }
+        }
+
+        function updateFromGame(game) {
+            if (!game) return;
+            const lib = Number(game.liberalPolicies || 0);
+            const fas = Number(game.fascistPolicies || 0);
+            const et = Number(game.electionTracker || 0);
+
+            const libEl = document.getElementById('liberal-count');
+            const fasEl = document.getElementById('fascist-count');
+            if (libEl) libEl.textContent = `${lib}/5`;
+            if (fasEl) fasEl.textContent = `${fas}/6`;
+
+            const squares = document.querySelectorAll('#election-tracker .square');
+            squares.forEach((sq, idx) => {
+                if (et > idx) sq.classList.add('active');
+                else sq.classList.remove('active');
+            });
+        }
+
+        function updateRoleBanner(game, gameId) {
+            const banner = document.getElementById('role-banner');
+            const badge = document.getElementById('role-badge');
+            const youId = computeYouId(gameId);
+            if (!banner || !badge || !game || !youId) { if (banner) banner.style.display = 'none'; return; }
+            const isPres = game.currentPresidentPlayerId && (game.currentPresidentPlayerId === youId);
+            const isChanc = game.currentChancellorPlayerId && (game.currentChancellorPlayerId === youId);
+            if (!isPres && !isChanc) { banner.style.display = 'none'; return; }
+            let text = '';
+            let cls = 'role-tag';
+            if (isPres && isChanc) { text = '👑🔨 President & Chancellor'; }
+            else if (isPres) { text = '👑 President'; cls += ' pres'; }
+            else if (isChanc) { text = '🔨 Chancellor'; cls += ' chanc'; }
+            badge.className = cls;
+            badge.textContent = text;
+            banner.style.display = 'block';
         }
 
         function renderPlayers(el, players) {
@@ -157,7 +255,11 @@
             (players || []).forEach(p => {
                 const chip = document.createElement('div');
                 chip.className = 'player-chip';
-                chip.textContent = p.name || 'Player';
+                const icons = [];
+                if (p.isPresident) icons.push('👑');
+                if (p.isChancellor) icons.push('🔨');
+                const prefix = icons.length ? icons.join('') + ' ' : '';
+                chip.textContent = prefix + (p.name || 'Player');
                 if (p.isPresident) chip.classList.add('is-president');
                 if (p.isChancellor) chip.classList.add('is-chancellor');
                 el.appendChild(chip);
@@ -166,6 +268,8 @@
 
         document.addEventListener('DOMContentLoaded', async function() {
             const gid = getGameId();
+            // Ensure we have an auth user so we can match uid if session id missing
+            await ensureAuth();
             const status = document.getElementById('status');
             const liberalSlots = document.getElementById('liberal-slots');
             const fascistSlots = document.getElementById('fascist-slots');
@@ -210,13 +314,13 @@
                         if (latestGame && latestGame.currentPresidentPlayerId === p.id) {
                             const pres = document.createElement('span');
                             pres.className = 'badge-pres';
-                            pres.textContent = 'President';
+                            pres.textContent = '👑 President';
                             right.appendChild(pres);
                         }
                         if (latestGame && latestGame.currentChancellorPlayerId === p.id) {
                             const chanc = document.createElement('span');
                             chanc.className = 'badge-chanc';
-                            chanc.textContent = 'Chancellor';
+                            chanc.textContent = '🔨 Chancellor';
                             right.appendChild(chanc);
                         }
                         row.appendChild(right);
@@ -249,6 +353,10 @@
                     isPresident: latestGame && (latestGame.currentPresidentPlayerId === p.id),
                     isChancellor: latestGame && (latestGame.currentChancellorPlayerId === p.id)
                 })));
+                // Update policy counters and election tracker if present
+                updateFromGame(latestGame);
+                // Update floating role banner for this device
+                updateRoleBanner(latestGame, gid);
             });
 
             // Subscribe to players ordered by orderIndex
@@ -259,6 +367,8 @@
                     isPresident: latestGame && (latestGame.currentPresidentPlayerId === p.id),
                     isChancellor: latestGame && (latestGame.currentChancellorPlayerId === p.id)
                 })));
+                // Also refresh the banner after players load (needed for uid->id map)
+                updateRoleBanner(latestGame, gid);
             });
 
             document.getElementById('help-btn')?.addEventListener('click', function() {
