@@ -146,4 +146,69 @@ export function onGameSnapshot(gameId, callback) {
   return () => unsubscribers.forEach(u => { try { u(); } catch (_) {} });
 }
 
+// Subscribe to history timeline ordered by time, then clientOrder
+export function onHistory(gameId, callback, limit = 200) {
+  const col = collection(doc(db, 'games', gameId), 'history');
+  // Order by server ts asc, then by clientOrder asc for stable ordering
+  const q = query(col, orderBy('ts', 'asc'), orderBy('clientOrder', 'asc'));
+  return onSnapshot(q, (snap) => {
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (typeof callback === 'function') callback(items);
+  });
+}
+
+
+// History logging helpers
+// Visibility levels: 'public' (everyone), 'private' (specific players),
+// 'partied' (party members), 'silent' (admins/diagnostics only)
+export async function addHistoryEvent(gameId, event) {
+  try {
+    // Ensure auth to allow serverTimestamp
+    await ensureAnonymousAuth();
+  } catch (_) {}
+
+  const historyCol = collection(doc(db, 'games', gameId), 'history');
+  // Provide a stable secondary sort key to break ties for same server ts
+  const nowMs = Date.now();
+  const perfMs = (typeof performance !== 'undefined' && performance.now) ? Math.floor(performance.now() % 1000) : Math.floor(Math.random() * 1000);
+  const clientOrder = nowMs * 1000 + perfMs;
+
+  const payload = {
+    ts: serverTimestamp(),
+    clientOrder,
+    type: String(event && event.type || 'system'),
+    visibility: String(event && event.visibility || 'public'),
+    message: String(event && event.message || ''),
+    actorId: event && event.actorId ? String(event.actorId) : null,
+    audience: Array.isArray(event && event.audience) ? event.audience.slice(0, 16).map(String) : null,
+    party: event && event.party ? String(event.party) : null,
+    meta: event && event.meta ? event.meta : null
+  };
+
+  try {
+    await addDoc(historyCol, payload);
+  } catch (e) {
+    // Best-effort only
+    console.warn('Failed to add history event', e);
+  }
+}
+
+export async function logPublic(gameId, message, extra = {}) {
+  return addHistoryEvent(gameId, { visibility: 'public', type: extra.type || 'system', message, actorId: extra.actorId || null, meta: extra.meta || null });
+}
+
+export async function logPrivate(gameId, message, audiencePlayerIds, extra = {}) {
+  const audience = Array.isArray(audiencePlayerIds) ? audiencePlayerIds : (audiencePlayerIds ? [audiencePlayerIds] : []);
+  return addHistoryEvent(gameId, { visibility: 'private', type: extra.type || 'system', message, audience, actorId: extra.actorId || null, meta: extra.meta || null });
+}
+
+export async function logPartied(gameId, message, party, extra = {}) {
+  const normalizedParty = (party || '').toString().toLowerCase();
+  return addHistoryEvent(gameId, { visibility: 'partied', type: extra.type || 'system', message, party: normalizedParty, actorId: extra.actorId || null, meta: extra.meta || null });
+}
+
+export async function logSilent(gameId, message, extra = {}) {
+  return addHistoryEvent(gameId, { visibility: 'silent', type: extra.type || 'system', message, actorId: extra.actorId || null, meta: extra.meta || null });
+}
+
 

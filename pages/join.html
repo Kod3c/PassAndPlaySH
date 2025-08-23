@@ -172,9 +172,10 @@
             const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('createdAt', 'asc')));
             // Read host pass requirement from game
             const hostPasswordHash = (snap.data() && snap.data().hostPasswordHash) || null;
-            // Determine availability per name (uid present => unavailable)
+            // Determine availability per name; treat entries claimed by this device's UID as available for rejoin
             let currentUser = null;
             try { currentUser = await ensureAuth(); } catch (_) { currentUser = null; }
+            const currentUid = currentUser ? currentUser.uid : null;
             const nameInfo = new Map();
             playersSnap.docs.forEach(d => {
                 const data = d.data() || {};
@@ -183,11 +184,21 @@
                 const uid = data.uid || null;
                 let info = nameInfo.get(n);
                 if (!info) {
-                    info = { name: n, unclaimed: 0, claimed: false };
+                    info = { name: n, unclaimed: 0, claimed: false, claimedByYou: false, staleClaimed: false };
                     nameInfo.set(n, info);
                 }
                 if (!uid) info.unclaimed += 1;
-                else info.claimed = true;
+                else {
+                    info.claimed = true;
+                    if (currentUid && uid === currentUid) info.claimedByYou = true;
+                    // Mark as stale if lastSeen is older than presence window
+                    try {
+                        const ms = data.lastSeen && data.lastSeen.toDate ? data.lastSeen.toDate().getTime() : 0;
+                        if (ms > 0 && (Date.now() - ms) > (5 * 60 * 1000)) {
+                            info.staleClaimed = true;
+                        }
+                    } catch (_) {}
+                }
             });
 
             // Populate dropdown and datalist with optgroups
@@ -217,7 +228,7 @@
                 const availableNames = [];
                 const unavailableNames = [];
                 nameInfo.forEach(info => {
-                    const available = info.unclaimed > 0;
+                    const available = (info.unclaimed > 0) || Boolean(info.claimedByYou) || Boolean(info.staleClaimed);
                     (available ? availableNames : unavailableNames).push(info);
                 });
                 availableNames.sort((a,b) => a.name.localeCompare(b.name));
@@ -226,7 +237,7 @@
                 availableNames.forEach(info => {
                     const o = document.createElement('option');
                     o.value = info.name;
-                    o.textContent = info.name;
+                    o.textContent = info.name + (info.claimedByYou ? ' – Your seat' : (info.staleClaimed && info.unclaimed === 0 ? ' – Disconnected' : ''));
                     availableGroup.appendChild(o);
                 });
                 unavailableNames.forEach(info => {
@@ -240,8 +251,12 @@
                 if (availableNames.length) nameSelect.appendChild(availableGroup);
                 if (unavailableNames.length) nameSelect.appendChild(unavailableGroup);
 
-                // If exactly one name is available, auto-select it
-                if (availableNames.length === 1) {
+                // If your seat is present, auto-select it; otherwise if exactly one available, select it
+                const yours = availableNames.find(i => i.claimedByYou);
+                if (yours) {
+                    nameSelect.value = yours.name;
+                    try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
+                } else if (availableNames.length === 1) {
                     nameSelect.value = availableNames[0].name;
                     try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
                 }

@@ -4027,3 +4027,86 @@ footer,
 
 .hidden { display: none; }
 .invisible { visibility: hidden; }
+
+/* Vote popover and black button */
+.vote-pop-wrap { position: relative; display: inline-block; }
+.vote-popover { position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); background: var(--off-white); border: var(--border-medium) solid var(--propaganda-black); border-radius: 8px; box-shadow: var(--shadow-lg); padding: 8px; display: none; z-index: var(--z-popover); }
+.vote-popover::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--propaganda-black); }
+.btn-black { background: var(--propaganda-black); color: var(--white); }
+
+/* Flashy attention for critical CTA (Vote) */
+.btn-attention { position: relative; overflow: visible; }
+.btn-attention::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 12px;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(218, 41, 28, 0.35);
+  animation: ringPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+  0% { box-shadow: 0 0 0 0 rgba(218, 41, 28, 0.35); }
+  70% { box-shadow: 0 0 0 10px rgba(218, 41, 28, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(218, 41, 28, 0); }
+}
+
+/* Extra flashy treatment */
+.btn-flashy { position: relative; overflow: hidden; }
+.btn-flashy::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transform: skewX(-20deg);
+  animation: sheenSweep 2.6s ease-in-out infinite;
+}
+
+/* Vote button label spacing */
+.vote-label { margin-right: 8px; }
+.vote-count { opacity: 0.9; }
+
+@keyframes sheenSweep {
+  0% { left: -120%; }
+  60% { left: -120%; }
+  100% { left: 120%; }
+}
+
+.vote-nudge { 
+  position: absolute; 
+  bottom: 56px; 
+  left: 50%; 
+  transform: translateX(-50%);
+  background: var(--off-white);
+  border: var(--border-medium) solid var(--propaganda-black);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 800;
+  font-family: var(--font-propaganda);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-lg);
+  animation: attentionBounce 1.4s ease-in-out infinite;
+  z-index: var(--z-popover);
+}
+
+.vote-nudge::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 10px solid transparent; 
+  border-right: 10px solid transparent; 
+  border-top: 10px solid var(--propaganda-black);
+}
+
+@keyframes attentionBounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -6px); }
+}

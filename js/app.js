@@ -1164,15 +1164,29 @@ class Game {
             case 'election':
                 return `
                     <div class="action-phase">
-                        <h3>Choose Chancellor</h3>
-                        <p>${this.players[this.currentPresident]} (President) must choose a Chancellor</p>
-                        <div class="chancellor-options">
-                            ${this.players.map((player, index) => 
-                                index !== this.currentPresident && index !== this.lastChancellor ?
-                                    `<button class="chancellor-btn btn btn-primary" data-chancellor="${index}">${player}</button>` :
-                                    ''
-                            ).join('')}
-                        </div>
+                        ${this.currentChancellor === null
+                            ? `
+                                <h3>Choose Chancellor</h3>
+                                <p>${this.players[this.currentPresident]} (President) must choose a Chancellor</p>
+                                <div class="chancellor-options">
+                                    ${this.players.map((player, index) => 
+                                        index !== this.currentPresident && index !== this.lastChancellor ?
+                                            `<button class="chancellor-btn btn btn-primary" data-chancellor="${index}">${player}</button>` :
+                                            ''
+                                    ).join('')}
+                                </div>
+                              `
+                            : `
+                                <h3>Government Vote</h3>
+                                <p>${this.players[this.currentPresident]} nominates ${this.players[this.currentChancellor]} for Chancellor.</p>
+                                <p>${this.players[this.currentChancellor]} for Chancellor?</p>
+                                <div class="vote-options">
+                                    <button class="vote-btn btn btn-primary" data-vote="ja">Ja</button>
+                                    <button class="vote-btn btn btn-secondary" data-vote="nein">Nein</button>
+                                </div>
+                                <p class="vote-progress">Votes submitted: ${this.votes.length}/${this.playerCount}</p>
+                              `
+                        }
                     </div>
                 `;
             case 'legislation':

@@ -51,30 +51,74 @@
         .actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
         .actions-left, .actions-center, .actions-right { display:flex; gap:8px; align-items:center; }
         .btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
-        .btn-primary { background: var(--highlight-cream); }
-        .status-banner { text-align:center; font-weight:800; }
+        .btn-primary { background: var(--highlight-cream); color: var(--propaganda-black); }
+        .status-banner { 
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            padding: 12px 16px; background: var(--off-white); border: 4px solid var(--propaganda-black);
+            border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; 
+            font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; 
+            text-align:center; animation: dropIn 180ms ease-out; font-size: 1.125rem; line-height: 1;
+        }
+        .status-banner.status-updated { animation: dropIn 180ms ease-out; }
         /* Floating role banner */
         .floating-role { position: fixed; left: 0; right: 0; top: 0; padding: 0 12px; z-index: 2000; pointer-events: none; display:none; }
-        .role-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 14px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; }
-        .role-tag { padding: 4px 10px; border: 3px solid var(--propaganda-black); background: var(--highlight-cream); box-shadow: inset 0 0 0 3px rgba(0,0,0,0.05); }
+        .role-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:center; gap:10px; padding: 12px 16px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.375rem; line-height: 1; }
+        .role-tag { padding: 0; border: 0; background: transparent; box-shadow: none; }
         .role-tag.pres { background: #fef3c7; }
         .role-tag.chanc { background: #e0f2fe; }
         @keyframes dropIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content:center; z-index: 60; }
-        .modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content:center; z-index: 5000; }
+        .modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); position: relative; }
         .modal-header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); }
         .modal-title { font-weight: 900; }
         .modal-body { padding: 12px; }
+        .modal-close { position:absolute; top:8px; right:8px; width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; border:3px solid var(--propaganda-black); background: var(--off-white); font-weight:900; box-shadow: var(--shadow-sm); cursor:pointer; }
+        .modal-close:hover { box-shadow: var(--shadow-md); }
+        /* Rules modal specific */
+        .rules-modal .modal-card { max-height: 86vh; display:flex; flex-direction:column; }
+        .rules-modal .modal-body { overflow:auto; }
+        .rules-modal .modal-header { background: var(--off-white); }
+        .rules-modal .modal-title { font-family: var(--font-fraktur); letter-spacing: 0.02em; font-size: var(--font-2xl); }
+        .rules-modal .modal-subtitle { font-family: var(--font-propaganda); font-size: var(--font-lg); color: var(--dark-beige); }
+        .rules-quicknav { display:flex; gap:8px; flex-wrap:nowrap; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); background: var(--bg-card); position: sticky; top: 0; z-index: 1; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
+        .rules-quicknav .rule-nav-btn { padding: 6px 10px; flex: 0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; }
+        /* Bottom nav for rules (mobile) */
+        .rules-bottomnav { display:none; position: sticky; bottom: 0; left: 0; right: 0; padding: 8px; background: var(--bg-card); border-top: 3px solid var(--propaganda-black); z-index: 1; }
+        .rules-bottomnav-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .rules-bottomnav .indicator { font-weight: 900; letter-spacing: 0.03em; }
+        @media (max-width: 640px) {
+            .rules-modal .modal-card { width: 96vw; max-height: 92vh; }
+            .rules-modal .modal-body { padding: 8px; padding-bottom: 64px; }
+            .rules-quicknav { gap:6px; padding: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow-x: hidden; overflow-y: visible; }
+            .rules-quicknav .rule-nav-btn { padding: 10px; min-width: 0; width: 100%; }
+            .rules-quicknav .nav-text { display:none; }
+            .rules-quicknav .nav-icon { font-size: 1.125rem; }
+            .rules-bottomnav { display:block; }
+            .rules-bottomnav .btn { min-height: 44px; flex: 1; }
+            .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
+        }
+        @media (max-width: 360px) {
+            .rules-quicknav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
         .order-list { display:flex; flex-direction:column; gap:8px; }
         .order-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; border: 2px dashed var(--propaganda-black); background:#fff; }
         .order-left { display:flex; align-items:center; gap:10px; }
+        /* Space between badges/tags on the right side of player order rows */
+        .order-right { display:flex; align-items:center; gap:6px; }
+        .order-right > * + * { margin-left: 6px; }
         .order-num { width: 28px; height: 28px; border-radius: 50%; display:inline-flex; align-items:center; justify-content:center; border: 3px solid var(--propaganda-black); font-weight:900; background: var(--highlight-cream); }
         .badge-pres { padding: 2px 8px; background:#fef3c7; border:2px solid var(--propaganda-black); font-weight:800; }
         .badge-chanc { padding: 2px 8px; background:#e0f2fe; border:2px solid var(--propaganda-black); font-weight:800; }
         @media (min-width: 720px) {
             .tracks { grid-template-columns: 1fr; }
         }
+        /* Voting popover */
+        .vote-pop-wrap { position: relative; display: inline-block; }
+        .vote-popover { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); background: #fff; border: 3px solid var(--propaganda-black); border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.28); padding: 14px 16px; display: none; z-index: 10; }
+        .vote-popover .btn { min-width: 120px; min-height: 48px; padding: 12px 18px; font-size: 1.125rem; }
+        .vote-popover::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--propaganda-black); }
+        .btn-black { background: #101820; color: #fff; }
     </style>
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#101820">
@@ -97,7 +141,6 @@
 
         <main class="play-main">
             <div class="board-shell">
-                <div id="status" class="status-banner">Setting up game…</div>
                 <div id="players-strip" class="players-strip"></div>
                 <div class="board-area">
                     <div class="board-frame">
@@ -106,6 +149,7 @@
                                 <div class="track-title">Liberal Policies</div>
                                 <div class="slots" id="liberal-slots"></div>
                             </section>
+                            <div id="status" class="status-banner">Setting up game…</div>
                             <section class="track fascist">
                                 <div class="track-title">Fascist Policies</div>
                                 <div class="slots" id="fascist-slots"></div>
@@ -144,28 +188,327 @@
                 </div>
             </div>
         </footer>
-        <div id="role-banner" class="floating-role" style="top: calc(80px + env(safe-area-inset-top));">
+        <div id="role-banner" class="floating-role">
             <div class="role-bar"><span id="role-badge" class="role-tag"></span></div>
         </div>
         <div id="order-modal" class="modal-overlay">
             <div class="modal-card">
                 <div class="modal-header">
                     <div class="modal-title">Player Order</div>
-                    <button id="order-close" class="btn">✖</button>
+                    <button id="order-close" class="modal-close" aria-label="Close">×</button>
                 </div>
                 <div id="order-body" class="modal-body"></div>
             </div>
+        </div>
+        <div id="history-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">History</div>
+                    <button id="history-close" class="modal-close" aria-label="Close">×</button>
+                </div>
+                <div id="history-body" class="modal-body"></div>
+            </div>
+        </div>
+        <div id="nomination-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">Choose Chancellor</div>
+                    <button id="nomination-close" class="modal-close" aria-label="Close">×</button>
+                </div>
+                <div id="nomination-body" class="modal-body"></div>
+            </div>
+        </div>
+        <div id="rules-modal" class="modal-overlay rules-modal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div>
+                        <div class="modal-title">Game Rules</div>
+                        <div class="modal-subtitle">Quick reference for in-game use</div>
+                    </div>
+                    <button id="rules-close" class="modal-close" aria-label="Close">×</button>
+                </div>
+                <div id="rules-body" class="modal-body">
+                    <div class="rules-quicknav">
+                        <button class="rule-nav-btn active" data-section="ov" aria-label="Overview">
+                            <span class="nav-icon" aria-hidden="true">🎯</span>
+                            <span class="nav-text">Overview</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="setup" aria-label="Setup">
+                            <span class="nav-icon" aria-hidden="true">⚙️</span>
+                            <span class="nav-text">Setup</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="roles" aria-label="Roles">
+                            <span class="nav-icon" aria-hidden="true">🎭</span>
+                            <span class="nav-text">Roles</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="flow" aria-label="Turn Order">
+                            <span class="nav-icon" aria-hidden="true">🔄</span>
+                            <span class="nav-text">Turn Order</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="powers" aria-label="Powers">
+                            <span class="nav-icon" aria-hidden="true">⚡</span>
+                            <span class="nav-text">Powers</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="legislative" aria-label="Legislative">
+                            <span class="nav-icon" aria-hidden="true">📜</span>
+                            <span class="nav-text">Legislative</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="win" aria-label="Victory">
+                            <span class="nav-icon" aria-hidden="true">🏆</span>
+                            <span class="nav-text">Victory</span>
+                        </button>
+                        <button class="rule-nav-btn" data-section="ref" aria-label="Reference">
+                            <span class="nav-icon" aria-hidden="true">📑</span>
+                            <span class="nav-text">Reference</span>
+                        </button>
+                    </div>
+                    <div class="rules-content">
+                        <section id="ov-section" class="rule-section active">
+                            <div class="section-header">
+                                <div class="section-icon">🎯</div>
+                                <h3>Game Overview</h3>
+                            </div>
+                            <div class="overview-grid">
+                                <div class="overview-card">
+                                    <div class="card-icon">👥</div>
+                                    <h4>Teams</h4>
+                                    <p>Liberals vs Fascists</p>
+                                    <span class="card-detail">Hidden roles</span>
+                                </div>
+                                <div class="overview-card">
+                                    <div class="card-icon">🎴</div>
+                                    <h4>Policies</h4>
+                                    <p>6 Fascist / 5 Liberal to win</p>
+                                    <span class="card-detail">See Victory</span>
+                                </div>
+                                <div class="overview-card">
+                                    <div class="card-icon">🔨</div>
+                                    <h4>Offices</h4>
+                                    <p>President & Chancellor</p>
+                                    <span class="card-detail">Rotate order</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="setup-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">⚙️</div>
+                                <h3>Setup</h3>
+                            </div>
+                            <div class="setup-steps">
+                                <div class="setup-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h4>Choose Roles by Player Count</h4>
+                                        <div class="role-distribution-visual">
+                                            <div class="role-example"><div class="role-badge liberal"><span class="role-icon">🟦</span>Liberals</div><span class="role-count">5 players: 3L, 1F, 1H</span></div>
+                                            <div class="role-example"><div class="role-badge liberal"><span class="role-icon">🟦</span>Liberals</div><span class="role-count">6 players: 4L, 1F, 1H</span></div>
+                                            <div class="role-example"><div class="role-badge liberal"><span class="role-icon">🟦</span>Liberals</div><span class="role-count">7 players: 4L, 2F, 1H</span></div>
+                                            <div class="role-example"><div class="role-badge liberal"><span class="role-icon">🟦</span>Liberals</div><span class="role-count">8 players: 5L, 2F, 1H</span></div>
+                                            <div class="role-example"><div class="role-badge liberal"><span class="role-icon">🟦</span>Liberals</div><span class="role-count">9 players: 5L, 3F, 1H</span></div>
+                                            <div class="role-example"><div class="role-badge liberal"><span class="role-icon">🟦</span>Liberals</div><span class="role-count">10 players: 6L, 3F, 1H</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="setup-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h4>Prepare Decks</h4>
+                                        <p>Policy deck: 11 Fascist, 6 Liberal. Shuffle and place face down; discards face down. When fewer than 3 remain, reshuffle discards into a new deck.</p>
+                                    </div>
+                                </div>
+                                <div class="setup-step">
+                                    <div class="step-number">3</div>
+                                    <div class="step-content">
+                                        <h4>Seat & Select First President</h4>
+                                        <p>Sit randomly around the table; assign player order clockwise. Randomly choose the first Presidential candidate.</p>
+                                    </div>
+                                </div>
+                                <div class="setup-step">
+                                    <div class="step-number">4</div>
+                                    <div class="step-content">
+                                        <h4>Secret Information (Night Phase)</h4>
+                                        <ul>
+                                            <li>5–6 players: Hitler learns the identity of the single Fascist. The Fascist does not learn Hitler.</li>
+                                            <li>7–10 players: Fascists learn one another. Hitler does not know the Fascists and the Fascists do not know Hitler.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="roles-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">🎭</div>
+                                <h3>Roles & Knowledge</h3>
+                            </div>
+                            <div class="roles-grid">
+                                <div class="role-card liberal"><div class="role-header"><div class="role-icon">🟦</div><h4>Liberal</h4></div><div class="role-info"><p class="role-description">Work together to enact 5 Liberal policies or execute Hitler.</p><div class="role-abilities"><h5>You know:</h5><ul><li>Only that you are Liberal.</li></ul></div></div></div>
+                                <div class="role-card fascist"><div class="role-header"><div class="role-icon">🟥</div><h4>Fascist</h4></div><div class="role-info"><p class="role-description">Coordinate covertly to enact 6 Fascist policies or elect Hitler after 3 Fascist policies.</p><div class="role-abilities"><h5>You know:</h5><ul><li>Other Fascists (7–10 players).</li><li>Hitler’s identity is unknown to you.</li></ul></div></div></div>
+                                <div class="role-card hitler"><div class="role-header"><div class="role-icon">👑</div><h4>Hitler</h4></div><div class="role-info"><p class="role-description">Deceive the Liberals and avoid detection.</p><div class="role-abilities"><h5>You know:</h5><ul><li>At 5–6 players: the single Fascist.</li><li>At 7–10 players: no one.</li></ul></div></div></div>
+                            </div>
+                        </section>
+
+                        <section id="flow-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">🔄</div>
+                                <h3>Turn Order</h3>
+                            </div>
+                            <div class="gameplay-flow">
+                                <div class="flow-step">
+                                    <div class="flow-icon">👑</div>
+                                    <h4>Nominate</h4>
+                                    <p>President nominates a Chancellor.</p>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step">
+                                    <div class="flow-icon">🗳️</div>
+                                    <h4>Vote</h4>
+                                    <p>All players vote Ja/Nein. Majority passes.</p>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step">
+                                    <div class="flow-icon">🎴</div>
+                                    <h4>Legislate</h4>
+                                    <p>Pres draws 3, discards 1; Chanc enacts 1 of 2.</p>
+                                </div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step">
+                                    <div class="flow-icon">⚡</div>
+                                    <h4>Powers</h4>
+                                    <p>Some Fascist policies trigger powers.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="powers-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">⚡</div>
+                                <h3>Executive Powers</h3>
+                            </div>
+                            <div class="powers-grid">
+                                <div class="power-card">
+                                    <div class="power-header">
+                                        <span class="power-number">3</span>
+                                        <h4>Policy Peek</h4>
+                                    </div>
+                                    <p>President looks at top 3 policy cards.</p>
+                                </div>
+                                <div class="power-card">
+                                    <div class="power-header">
+                                        <span class="power-number">4</span>
+                                        <h4>Investigation</h4>
+                                    </div>
+                                    <p>President checks a player's loyalty.</p>
+                                </div>
+                                <div class="power-card">
+                                    <div class="power-header">
+                                        <span class="power-number">5</span>
+                                        <h4>Special Election</h4>
+                                    </div>
+                                    <p>President picks the next Presidential candidate.</p>
+                                </div>
+                            </div>
+                            <div class="power-notes">
+                                <div class="notes-header"><div class="notes-icon">📏</div><h4>Power Timing by Player Count</h4></div>
+                                <ul>
+                                    <li><strong>5–6 players</strong>: 3 Policy Peek, 4 Execution, 5 Execution.</li>
+                                    <li><strong>7–8 players</strong>: 2 Investigation, 3 Special Election, 4 Execution, 5 Execution.</li>
+                                    <li><strong>9–10 players</strong>: 1 Investigation, 2 Investigation, 3 Special Election, 4 Execution, 5 Execution.</li>
+                                </ul>
+                            </div>
+                        </section>
+
+                        <section id="legislative-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">📜</div>
+                                <h3>Legislative Session & Veto</h3>
+                            </div>
+                            <div class="powers-intro"><div class="powers-header"><div class="powers-icon">🎴</div><p>President draws 3 policies, discards 1 face down, passes 2 to Chancellor. Chancellor discards 1 and enacts 1 face down.</p></div></div>
+                            <ul>
+                                <li>All discards and enacted cards are secret (face down).</li>
+                                <li>If fewer than 3 remain in deck, reshuffle the discard pile to form a new deck.</li>
+                                <li><strong>Veto Power</strong> unlocks after 5 Fascist policies are enacted. Chancellor may propose a veto; if the President agrees, discard both cards and advance the Election Tracker by 1 (no policy is enacted).</li>
+                                <li>Top-deck policies (after 3 failed elections) do not trigger Executive Powers.</li>
+                            </ul>
+                            <div class="powers-intro"><div class="powers-header"><div class="powers-icon">🚫</div><p><strong>Eligibility & Term Limits:</strong> The last elected President and last elected Chancellor are ineligible to be nominated as Chancellor in the next government. No player can be Chancellor in two consecutive governments.</p></div></div>
+                        </section>
+
+                        <section id="win-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">🏆</div>
+                                <h3>Victory Conditions</h3>
+                            </div>
+                            <div class="winning-conditions">
+                                <div class="win-condition liberal-win">
+                                    <div class="win-header">
+                                        <div class="win-icon">🟦</div>
+                                        <h4>Liberals</h4>
+                                    </div>
+                                    <div class="win-ways">
+                                        <div class="win-way"><span class="way-icon">✅</span><span class="way-text">Pass 5 Liberal policies</span></div>
+                                        <div class="win-way"><span class="way-icon">🎯</span><span class="way-text">Execute Hitler</span></div>
+                                    </div>
+                                </div>
+                                <div class="win-condition fascist-win">
+                                    <div class="win-header">
+                                        <div class="win-icon">🟥</div>
+                                        <h4>Fascists</h4>
+                                    </div>
+                                    <div class="win-ways">
+                                        <div class="win-way"><span class="way-icon">✅</span><span class="way-text">Pass 6 Fascist policies</span></div>
+                                        <div class="win-way"><span class="way-icon">👑</span><span class="way-text">Elect Hitler Chancellor after 3 Fascist policies</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="ref-section" class="rule-section">
+                            <div class="section-header">
+                                <div class="section-icon">📑</div>
+                                <h3>Reference</h3>
+                            </div>
+                            <div class="pdf-actions">
+                                <a class="btn btn-outline" href="../Secret_Hitler_Rules.pdf" target="_blank" rel="noopener">Open Official Rules (PDF)</a>
+                                <a class="btn" href="../Secret_Hitler_Rules.pdf" download>Download PDF</a>
+                            </div>
+                            <p class="mt-3" style="text-align:center;color:var(--dark-beige);">This in-game summary covers all core rules. Use the PDF for full artwork and extended clarifications.</p>
+                        </section>
+                    </div>
+                    <div class="rules-bottomnav" aria-hidden="false">
+                        <div class="rules-bottomnav-inner">
+                            <button id="rules-prev" class="btn" aria-label="Previous section">← Prev</button>
+                            <div id="rules-indicator" class="indicator">1/7</div>
+                            <button id="rules-next" class="btn btn-primary" aria-label="Next section">Next →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="menu-modal" class="modal-overlay">
+                <div class="modal-card">
+                    <div class="modal-header">
+                        <div class="modal-title">Menu</div>
+                        <button id="menu-close" class="modal-close" aria-label="Close">×</button>
+                    </div>
+                    <div id="menu-body" class="modal-body"></div>
+                </div>
         </div>
     </div>
 
     <script type="module">
         import { app } from '../js/firebase.js';
-        import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { onHistory, logPublic } from '../js/db.js';
+        import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy, updateDoc, serverTimestamp, runTransaction, increment } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
         const db = getFirestore(app);
         let latestGame = null;
         let latestPlayers = [];
+        let historyUnsub = null;
+        let historyItems = [];
+        let localPaused = false;
+        let lastStatusMessage = null;
 
         function getGameId() {
             const p = new URLSearchParams(window.location.search);
@@ -243,11 +586,27 @@
             let text = '';
             let cls = 'role-tag';
             if (isPres && isChanc) { text = '👑🔨 President & Chancellor'; }
-            else if (isPres) { text = '👑 President'; cls += ' pres'; }
-            else if (isChanc) { text = '🔨 Chancellor'; cls += ' chanc'; }
+            else if (isPres) { text = '👑 President'; }
+            else if (isChanc) { text = '🔨 Chancellor'; }
             badge.className = cls;
             badge.textContent = text;
             banner.style.display = 'block';
+        }
+
+        function setStatus(gameId, message) {
+            try {
+                const el = document.getElementById('status');
+                if (!el) return;
+                el.textContent = message || '';
+                // retrigger small animation
+                el.classList.remove('status-updated');
+                void el.offsetWidth;
+                el.classList.add('status-updated');
+                if (gameId && message && message !== lastStatusMessage) {
+                    lastStatusMessage = message;
+                    try { logPublic(gameId, message, { type: 'status' }); } catch (_) {}
+                }
+            } catch (_) { /* no-op */ }
         }
 
         function renderPlayers(el, players) {
@@ -266,10 +625,130 @@
             });
         }
 
+        function eligibleChancellorIds(game, players) {
+            if (!game || !players) return [];
+            const presId = game.currentPresidentPlayerId || null;
+            const lastPres = game.termLimitLastPresidentId || null;
+            const lastChanc = game.termLimitLastChancellorId || null;
+            return players
+                .filter(p => p && p.id && p.alive !== false)
+                .filter(p => p.id !== presId)
+                .filter(p => p.id !== lastPres && p.id !== lastChanc)
+                .map(p => p.id);
+        }
+
+        function renderActions(gameId) {
+            const actionsCenter = document.querySelector('.actions-center');
+            if (!actionsCenter) return;
+            actionsCenter.innerHTML = '';
+
+            const statusEl = document.getElementById('status');
+
+            const youId = computeYouId(gameId);
+            const game = latestGame;
+            const players = latestPlayers || [];
+            if (!game || !players.length) return;
+
+            // Respect local pause (AFK)
+            if (localPaused) {
+                const pausedMsg = document.createElement('div');
+                pausedMsg.className = 'status-text';
+                pausedMsg.textContent = 'Paused (AFK). Open Menu to resume.';
+                actionsCenter.appendChild(pausedMsg);
+                return;
+            }
+
+            // Only proceed once the game is in playing state
+            if (game.state !== 'playing') return;
+
+            // If no nominee yet, handle nomination UI
+            const nomineeId = game.nominatedChancellorPlayerId || null;
+            if (!nomineeId) {
+                const presId = game.currentPresidentPlayerId || null;
+                const pres = players.find(p => p && p.id === presId) || null;
+                if (youId && youId === presId) {
+                    if (pres) {
+                        setStatus(gameId, `${pres.name || 'President'}: Nominate a Chancellor`);
+                    }
+                    const chooseBtn = document.createElement('button');
+                    chooseBtn.id = 'open-nominate-btn';
+                    chooseBtn.className = 'btn btn-primary';
+                    chooseBtn.textContent = 'Choose Chancellor';
+                    actionsCenter.appendChild(chooseBtn);
+                } else {
+                    setStatus(gameId, 'Waiting for the President to nominate a Chancellor…');
+                    // No additional message in actions area; waiting text is shown in the banner
+                }
+                return;
+            }
+
+            // Chancellor nominee already chosen
+            const chanc = players.find(p => p && p.id === nomineeId) || null;
+            if (chanc) {
+                setStatus(gameId, `Chancellor nominated: ${chanc.name || 'Player'}`);
+            }
+
+            // Voting UI: centered black Vote button with popover
+            const votes = (game.electionVotes && typeof game.electionVotes === 'object') ? game.electionVotes : {};
+            const aliveIds = (players || []).filter(p => p && p.alive !== false).map(p => p.id);
+            const totalVoters = aliveIds.length || players.length;
+            const numVotes = Object.keys(votes).filter(k => aliveIds.includes(k)).length;
+            const youVoted = youId ? !!votes[youId] : false;
+
+            const wrap = document.createElement('div');
+            wrap.className = 'vote-pop-wrap';
+            wrap.style.margin = '0 auto';
+
+            const voteBtn = document.createElement('button');
+            voteBtn.id = 'vote-toggle-btn';
+            voteBtn.style.minWidth = '160px';
+            voteBtn.style.minHeight = '44px';
+            voteBtn.style.fontSize = '1.05rem';
+
+            const votedValue = youVoted ? String(votes[youId]).toUpperCase() : 'Vote';
+            voteBtn.innerHTML = `<span class="vote-label">${votedValue}</span><span class="vote-count">(${numVotes}/${totalVoters})</span>`;
+
+            const canVote = youId && aliveIds.includes(youId) && !youVoted;
+            if (canVote) {
+                voteBtn.className = 'btn btn-black btn-attention btn-flashy';
+            } else {
+                voteBtn.className = 'btn btn-black';
+                voteBtn.disabled = true;
+                voteBtn.setAttribute('aria-disabled', 'true');
+            }
+
+            wrap.appendChild(voteBtn);
+
+            // Only render popover if the player can still vote
+            if (canVote) {
+                const pop = document.createElement('div');
+                pop.id = 'vote-popover';
+                pop.className = 'vote-popover';
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.gap = '8px';
+                const yesBtn = document.createElement('button');
+                yesBtn.className = 'btn btn-primary';
+                yesBtn.setAttribute('data-vote', 'ja');
+                yesBtn.textContent = 'Ja';
+                const noBtn = document.createElement('button');
+                noBtn.className = 'btn';
+                noBtn.setAttribute('data-vote', 'nein');
+                noBtn.textContent = 'Nein';
+                row.appendChild(yesBtn);
+                row.appendChild(noBtn);
+                pop.appendChild(row);
+                wrap.appendChild(pop);
+            }
+
+            actionsCenter.appendChild(wrap);
+        }
+
         document.addEventListener('DOMContentLoaded', async function() {
             const gid = getGameId();
             // Ensure we have an auth user so we can match uid if session id missing
             await ensureAuth();
+            try { localPaused = localStorage.getItem(`sh_paused_${gid}`) === 'true'; } catch (_) {}
             const status = document.getElementById('status');
             const liberalSlots = document.getElementById('liberal-slots');
             const fascistSlots = document.getElementById('fascist-slots');
@@ -280,11 +759,119 @@
             renderSlots(fascistSlots, 6);
             renderTracker(tracker);
 
+            // Position role banner directly under the header dynamically
+            const roleBanner = document.getElementById('role-banner');
+            const headerEl = document.querySelector('.header');
+            function positionRoleBanner() {
+                if (!roleBanner || !headerEl) return;
+                const rect = headerEl.getBoundingClientRect();
+                const scrollY = window.scrollY || window.pageYOffset || 0;
+                const topPx = rect.top + scrollY + rect.height + 8; // 8px spacing
+                roleBanner.style.top = `${topPx}px`;
+            }
+            positionRoleBanner();
+            window.addEventListener('resize', positionRoleBanner);
+            window.addEventListener('scroll', positionRoleBanner, { passive: true });
+
             // Order modal handlers (set up early so button works even if game load fails)
             const orderBtn = document.getElementById('order-btn');
             const orderModal = document.getElementById('order-modal');
             const orderClose = document.getElementById('order-close');
             const orderBody = document.getElementById('order-body');
+
+            // History modal handlers
+            const historyBtn = document.getElementById('history-btn');
+            const historyModal = document.getElementById('history-modal');
+            const historyClose = document.getElementById('history-close');
+            const historyBody = document.getElementById('history-body');
+
+            // Nomination modal handlers
+            const nominationModal = document.getElementById('nomination-modal');
+            const nominationClose = document.getElementById('nomination-close');
+            const nominationBody = document.getElementById('nomination-body');
+
+            function setRoleBannerVisibility(visible) {
+                const banner = document.getElementById('role-banner');
+                if (!banner) return;
+                banner.style.visibility = visible ? 'visible' : 'hidden';
+            }
+
+            function formatTime(ts) {
+                try {
+                    if (!ts) return '';
+                    const d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
+                    if (!d) return '';
+                    return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+                } catch (_) { return ''; }
+            }
+
+            function youPlayerDoc() {
+                const id = computeYouId(gid);
+                return (latestPlayers || []).find(p => p && p.id === id) || null;
+            }
+
+            function canSeeEvent(evt) {
+                const vis = (evt && evt.visibility) || 'public';
+                if (vis === 'silent') return false;
+                if (vis === 'public') return true;
+                const you = youPlayerDoc();
+                if (!you) return false;
+                if (vis === 'private') {
+                    const audience = Array.isArray(evt && evt.audience) ? evt.audience : [];
+                    return audience.includes(you.id);
+                }
+                if (vis === 'partied') {
+                    const party = ((evt && evt.party) || '').toString().toLowerCase();
+                    const yourParty = ((you && you.party) || '').toString().toLowerCase();
+                    return party && yourParty && party === yourParty;
+                }
+                return false;
+            }
+
+            function renderHistory() {
+                if (!historyBody) return;
+                historyBody.innerHTML = '';
+                const wrap = document.createElement('div');
+                wrap.style.display = 'flex';
+                wrap.style.flexDirection = 'column';
+                wrap.style.gap = '8px';
+
+                const visibleItems = (historyItems || []).filter(canSeeEvent);
+
+                if (visibleItems.length === 0) {
+                    const p = document.createElement('p');
+                    p.textContent = 'No history yet.';
+                    historyBody.appendChild(p);
+                    return;
+                }
+
+                visibleItems.forEach((evt) => {
+                    const row = document.createElement('div');
+                    row.className = 'order-item';
+                    const left = document.createElement('div');
+                    left.className = 'order-left';
+                    const time = document.createElement('div');
+                    time.className = 'order-num';
+                    time.textContent = formatTime(evt.ts);
+                    const msg = document.createElement('div');
+                    msg.style.fontWeight = '800';
+                    msg.textContent = evt.message || '';
+                    left.appendChild(time);
+                    left.appendChild(msg);
+                    row.appendChild(left);
+
+                    const right = document.createElement('div');
+                    right.className = 'order-right';
+                    const tag = document.createElement('span');
+                    tag.className = 'badge-pres';
+                    tag.textContent = (evt.visibility || 'public').toUpperCase();
+                    right.appendChild(tag);
+                    row.appendChild(right);
+
+                    wrap.appendChild(row);
+                });
+                historyBody.appendChild(wrap);
+            }
 
             function openOrderModal() {
                 orderBody.innerHTML = '';
@@ -311,6 +898,7 @@
                         row.appendChild(left);
 
                         const right = document.createElement('div');
+                        right.className = 'order-right';
                         if (latestGame && latestGame.currentPresidentPlayerId === p.id) {
                             const pres = document.createElement('span');
                             pres.className = 'badge-pres';
@@ -323,30 +911,375 @@
                             chanc.textContent = '🔨 Chancellor';
                             right.appendChild(chanc);
                         }
+                        // During an active vote, indicate who has voted
+                        if (latestGame && latestGame.nominatedChancellorPlayerId) {
+                            const evotes = (latestGame.electionVotes && typeof latestGame.electionVotes === 'object') ? latestGame.electionVotes : {};
+                            if (evotes && Object.prototype.hasOwnProperty.call(evotes, p.id)) {
+                                const voted = document.createElement('span');
+                                voted.className = 'badge-pres';
+                                voted.textContent = 'VOTED';
+                                right.appendChild(voted);
+                            }
+                        }
                         row.appendChild(right);
                         list.appendChild(row);
                     });
                     orderBody.appendChild(list);
                 }
                 orderModal.style.display = 'flex';
+                setRoleBannerVisibility(false);
             }
 
-            function closeOrderModal() { orderModal.style.display = 'none'; }
+            function closeOrderModal() { orderModal.style.display = 'none'; setRoleBannerVisibility(true); }
             orderBtn?.addEventListener('click', openOrderModal);
             orderClose?.addEventListener('click', closeOrderModal);
             orderModal?.addEventListener('click', function(e) { if (e.target === orderModal) closeOrderModal(); });
 
-            if (!gid) { status.textContent = 'Missing game id'; return; }
+            function openHistoryModal() {
+                if (!historyModal) return;
+                historyModal.style.display = 'flex';
+                setRoleBannerVisibility(false);
+                // Subscribe on open
+                if (!historyUnsub) {
+                    try {
+                        historyUnsub = onHistory(gid, (items) => {
+                            historyItems = items || [];
+                            renderHistory();
+                        });
+                    } catch (_) {}
+                }
+                renderHistory();
+            }
+
+            function closeHistoryModal() {
+                if (historyModal) historyModal.style.display = 'none';
+                setRoleBannerVisibility(true);
+                if (historyUnsub) { try { historyUnsub(); } catch (_) {} historyUnsub = null; }
+            }
+            historyBtn?.addEventListener('click', openHistoryModal);
+            historyClose?.addEventListener('click', closeHistoryModal);
+            historyModal?.addEventListener('click', function(e) { if (e.target === historyModal) closeHistoryModal(); });
+
+            function openNominationModal() {
+                if (!nominationModal) return;
+                const youId = computeYouId(gid);
+                const presId = latestGame && latestGame.currentPresidentPlayerId;
+                if (!youId || !presId || youId !== presId) return;
+                if (latestGame && latestGame.nominatedChancellorPlayerId) return;
+                nominationBody.innerHTML = '';
+                const ids = eligibleChancellorIds(latestGame, latestPlayers || []);
+                if (!ids.length) {
+                    const p = document.createElement('p');
+                    p.textContent = 'No eligible candidates right now.';
+                    nominationBody.appendChild(p);
+                } else {
+                    const list = document.createElement('div');
+                    list.style.display = 'grid';
+                    list.style.gridTemplateColumns = '1fr 1fr';
+                    list.style.gap = '10px';
+                    ids.forEach(id => {
+                        const pl = (latestPlayers || []).find(pp => pp && pp.id === id);
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-primary';
+                        btn.style.width = '100%';
+                        btn.style.minHeight = '56px';
+                        btn.style.fontSize = '1rem';
+                        btn.setAttribute('data-nominate', id);
+                        btn.textContent = pl ? (pl.name || 'Player') : 'Player';
+                        list.appendChild(btn);
+                    });
+                    // If odd count, center the last button across both columns
+                    if (ids.length % 2 === 1) {
+                        const lastBtn = list.lastElementChild;
+                        if (lastBtn) {
+                            lastBtn.style.gridColumn = '1 / -1';
+                            lastBtn.style.justifySelf = 'center';
+                            lastBtn.style.width = '60%';
+                        }
+                    }
+                    nominationBody.appendChild(list);
+                }
+                nominationModal.style.display = 'flex';
+                setRoleBannerVisibility(false);
+            }
+            function closeNominationModal() { if (nominationModal) { nominationModal.style.display = 'none'; setRoleBannerVisibility(true); } }
+            nominationClose?.addEventListener('click', closeNominationModal);
+            nominationModal?.addEventListener('click', function(e) { if (e.target === nominationModal) closeNominationModal(); });
+
+            // Rules modal handlers
+            const rulesBtn = document.getElementById('help-btn');
+            const rulesModal = document.getElementById('rules-modal');
+            const rulesClose = document.getElementById('rules-close');
+            const ruleNavButtons = rulesModal?.querySelectorAll('.rule-nav-btn');
+            const ruleSections = rulesModal?.querySelectorAll('.rule-section');
+            const rulesPrevBtn = document.getElementById('rules-prev');
+            const rulesNextBtn = document.getElementById('rules-next');
+            const rulesIndicator = document.getElementById('rules-indicator');
+
+            const ruleKeys = ['ov','setup','roles','flow','powers','legislative','win','ref'];
+            function getActiveIndex() {
+                let idx = 0;
+                ruleSections?.forEach((sec, i) => { if (sec.classList.contains('active')) idx = i; });
+                return idx;
+            }
+            function setActiveByIndex(idx) {
+                const clamped = Math.max(0, Math.min((ruleSections?.length || 1) - 1, idx));
+                const targetId = `${ruleKeys[clamped]}-section`;
+                // switch sections
+                ruleSections?.forEach(sec => sec.classList.toggle('active', sec.id === targetId));
+                // switch top nav active state
+                ruleNavButtons?.forEach((b) => {
+                    const k = b.getAttribute('data-section');
+                    b.classList.toggle('active', `${k}-section` === targetId);
+                });
+                // update indicator
+                if (rulesIndicator) rulesIndicator.textContent = `${clamped + 1}/${ruleSections?.length || 1}`;
+                // scroll top of modal body for new section
+                const body = document.getElementById('rules-body');
+                if (body) body.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            function openRulesModal() { if (rulesModal) { rulesModal.style.display = 'flex'; setRoleBannerVisibility(false); } }
+            function closeRulesModal() { if (rulesModal) { rulesModal.style.display = 'none'; setRoleBannerVisibility(true); } }
+            if (rulesBtn) {
+                rulesBtn.addEventListener('click', function(e) {
+                    try { e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation(); } catch (_) {}
+                    openRulesModal();
+                }, { capture: true });
+            }
+            rulesClose?.addEventListener('click', closeRulesModal);
+            rulesModal?.addEventListener('click', function(e) { if (e.target === rulesModal) closeRulesModal(); });
+            // Tab switching inside rules modal
+            ruleNavButtons?.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const target = this.getAttribute('data-section');
+                    ruleNavButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    ruleSections?.forEach(sec => {
+                        if (sec.id === `${target}-section`) sec.classList.add('active');
+                        else sec.classList.remove('active');
+                    });
+                    // update indicator after manual switch
+                    setActiveByIndex(getActiveIndex());
+                });
+            });
+            // Prev/Next controls
+            rulesPrevBtn?.addEventListener('click', function() {
+                setActiveByIndex(getActiveIndex() - 1);
+            });
+            rulesNextBtn?.addEventListener('click', function() {
+                setActiveByIndex(getActiveIndex() + 1);
+            });
+            // Initialize indicator when modal opens
+            if (rulesIndicator) rulesIndicator.textContent = `${getActiveIndex() + 1}/${ruleSections?.length || 1}`;
+
+            // Swipe gestures for mobile
+            (function enableSwipe() {
+                const body = document.getElementById('rules-body');
+                if (!body) return;
+                let touchStartX = 0, touchStartY = 0, touching = false, moved = false;
+                body.addEventListener('touchstart', function(e) {
+                    if (!e.touches || e.touches.length !== 1) return;
+                    const t = e.touches[0];
+                    touchStartX = t.clientX; touchStartY = t.clientY; touching = true; moved = false;
+                }, { passive: true });
+                body.addEventListener('touchmove', function(e) {
+                    if (!touching || !e.touches || e.touches.length !== 1) return;
+                    const t = e.touches[0];
+                    const dx = t.clientX - touchStartX; const dy = t.clientY - touchStartY;
+                    if (Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy)) moved = true;
+                }, { passive: true });
+                body.addEventListener('touchend', function(e) {
+                    if (!touching) return; touching = false;
+                    const changed = e.changedTouches && e.changedTouches[0];
+                    if (!changed) return;
+                    const dx = changed.clientX - touchStartX; const dy = changed.clientY - touchStartY;
+                    if (!moved || Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+                    if (dx < 0) setActiveByIndex(getActiveIndex() + 1); else setActiveByIndex(getActiveIndex() - 1);
+                });
+            })();
+
+            // Make section headers tappable to jump to next section on mobile
+            (function enableHeaderTap() {
+                const mq = window.matchMedia('(max-width: 640px)');
+                const headers = rulesModal?.querySelectorAll('.rule-section .section-header');
+                headers?.forEach(h => {
+                    h.style.cursor = mq.matches ? 'pointer' : '';
+                    h.addEventListener('click', function() {
+                        if (!mq.matches) return;
+                        setActiveByIndex(getActiveIndex() + 1);
+                    });
+                });
+            })();
+            // Esc to close
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && rulesModal && rulesModal.style.display === 'flex') {
+                    closeRulesModal();
+                }
+            });
+
+            // Menu modal handlers
+            const menuBtn = document.getElementById('menu-btn');
+            const menuModal = document.getElementById('menu-modal');
+            const menuClose = document.getElementById('menu-close');
+            const menuBody = document.getElementById('menu-body');
+
+            function isSoundEnabled() {
+                try { return localStorage.getItem('sh_sound_enabled') !== 'false'; } catch (_) { return true; }
+            }
+            function setSoundEnabled(enabled) {
+                try { localStorage.setItem('sh_sound_enabled', enabled ? 'true' : 'false'); } catch (_) {}
+            }
+            function sanitizePlayerNameLocal(raw) {
+                const trimmed = String(raw || '').trim();
+                const collapsed = trimmed.replace(/\s+/g, ' ');
+                const cleaned = collapsed.replace(/[^A-Za-z0-9 _\-'.]/g, '');
+                return cleaned.slice(0, 24);
+            }
+
+            function renderMenu() {
+                if (!menuBody) return;
+                menuBody.innerHTML = '';
+                const list = document.createElement('div');
+                list.style.display = 'flex';
+                list.style.flexDirection = 'column';
+                list.style.gap = '8px';
+
+                const leaveBtn = document.createElement('button');
+                leaveBtn.id = 'leave-game-btn';
+                leaveBtn.className = 'btn';
+                leaveBtn.textContent = '↩️ Leave Game (rejoin later)';
+                list.appendChild(leaveBtn);
+
+                const pauseBtn = document.createElement('button');
+                pauseBtn.id = 'pause-toggle-btn';
+                pauseBtn.className = 'btn';
+                pauseBtn.textContent = localPaused ? '▶️ Resume Game' : '⏸️ Pause Game (AFK)';
+                list.appendChild(pauseBtn);
+
+                const soundBtn = document.createElement('button');
+                soundBtn.id = 'sound-toggle-btn';
+                soundBtn.className = 'btn';
+                soundBtn.textContent = isSoundEnabled() ? '🔇 Disable Sound Effects' : '🔊 Enable Sound Effects';
+                list.appendChild(soundBtn);
+
+                const nameBtn = document.createElement('button');
+                nameBtn.id = 'change-name-btn';
+                nameBtn.className = 'btn';
+                nameBtn.textContent = '✏️ Change Name';
+                list.appendChild(nameBtn);
+
+                const quitBtn = document.createElement('button');
+                quitBtn.id = 'quit-game-btn';
+                quitBtn.className = 'btn';
+                quitBtn.textContent = '⚠️ Quit Game for Everyone';
+                list.appendChild(quitBtn);
+
+                menuBody.appendChild(list);
+            }
+
+            function openMenuModal() {
+                renderMenu();
+                if (menuModal) menuModal.style.display = 'flex';
+                setRoleBannerVisibility(false);
+            }
+            function closeMenuModal() { if (menuModal) { menuModal.style.display = 'none'; setRoleBannerVisibility(true); } }
+            if (menuBtn) {
+                // Use capture and stop propagation to avoid other handlers firing
+                menuBtn.addEventListener('click', function(e) {
+                    try { e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation(); } catch (_) {}
+                    openMenuModal();
+                }, { capture: true });
+            }
+            menuClose?.addEventListener('click', closeMenuModal);
+            menuModal?.addEventListener('click', function(e) { if (e.target === menuModal) closeMenuModal(); });
+
+            // (Removed global delegation that could cause unintended opens)
+
+            // Menu actions (delegated)
+            menuBody?.addEventListener('click', async function(e) {
+                const t = e.target;
+                if (!(t && t.matches && t.matches('button'))) return;
+                const youId = computeYouId(gid);
+                const youDoc = (latestPlayers || []).find(p => p && p.id === youId) || null;
+                const yourName = youDoc ? (youDoc.name || 'Player') : 'Player';
+
+                if (t.id === 'leave-game-btn') {
+                    try {
+                        if (youId) {
+                            try { await updateDoc(doc(db, 'games', gid, 'players', youId), { uid: null, leftAt: serverTimestamp(), updatedAt: serverTimestamp() }); } catch (_) {}
+                            try { await logPublic(gid, `${yourName} left the game`, { type: 'leave', actorId: youId }); } catch (_) {}
+                        }
+                        try { sessionStorage.removeItem(`sh_playerId_${gid}`); } catch (_) {}
+                    } finally {
+                        closeMenuModal();
+                        window.location.href = `./join.html?game=${encodeURIComponent(gid)}`;
+                    }
+                    return;
+                }
+
+                if (t.id === 'quit-game-btn') {
+                    const ok = confirm('This will end the game for everyone. Are you sure?');
+                    if (!ok) return;
+                    try {
+                        await updateDoc(doc(db, 'games', gid), { state: 'cancelled', updatedAt: serverTimestamp() });
+                        try { await logPublic(gid, `Game ended by ${yourName}`, { type: 'end', actorId: youId || null }); } catch (_) {}
+                    } catch (err) {
+                        console.error('Failed to end game', err);
+                    } finally {
+                        closeMenuModal();
+                        window.location.href = '../index.html';
+                    }
+                    return;
+                }
+
+                if (t.id === 'pause-toggle-btn') {
+                    localPaused = !localPaused;
+                    try { localStorage.setItem(`sh_paused_${gid}`, localPaused ? 'true' : 'false'); } catch (_) {}
+                    try {
+                        if (localPaused) await logPublic(gid, `${yourName} is AFK`, { type: 'status', actorId: youId || null });
+                        else await logPublic(gid, `${yourName} returned`, { type: 'status', actorId: youId || null });
+                    } catch (_) {}
+                    renderMenu();
+                    renderActions(gid);
+                    return;
+                }
+
+                if (t.id === 'sound-toggle-btn') {
+                    const newState = !isSoundEnabled();
+                    setSoundEnabled(newState);
+                    renderMenu();
+                    return;
+                }
+
+                if (t.id === 'change-name-btn') {
+                    const currentName = youDoc ? (youDoc.name || '') : '';
+                    const input = prompt('Enter your new name (max 24 chars):', currentName);
+                    if (input === null) return;
+                    const cleaned = sanitizePlayerNameLocal(input);
+                    if (!cleaned) return;
+                    if (!youId) return;
+                    try {
+                        await updateDoc(doc(db, 'games', gid, 'players', youId), { name: cleaned, updatedAt: serverTimestamp() });
+                        try { await logPublic(gid, `${currentName || 'Player'} is now ${cleaned}`, { type: 'rename', actorId: youId }); } catch (_) {}
+                    } catch (err) {
+                        console.error('Failed to change name', err);
+                    }
+                    closeMenuModal();
+                    return;
+                }
+            });
+
+            if (!gid) { setStatus('', 'Missing game id'); return; }
 
             const gameRef = doc(db, 'games', gid);
             const snap = await getDoc(gameRef);
-            if (!snap.exists()) { status.textContent = 'Game not found'; return; }
-            status.textContent = 'Game in progress';
+            if (!snap.exists()) { setStatus(gid, 'Game not found'); return; }
+            setStatus(gid, 'Game in progress');
 
             onSnapshot(gameRef, (s) => {
                 latestGame = s.exists() ? s.data() : null;
-                if (!latestGame) { status.textContent = 'Game unavailable'; return; }
-                if (latestGame.state === 'cancelled') { status.textContent = 'Game cancelled'; }
+                if (!latestGame) { setStatus(gid, 'Game unavailable'); return; }
+                if (latestGame.state === 'cancelled') { setStatus(gid, 'Game cancelled'); }
                 // Update player strip highlights if ids available
                 renderPlayers(playersStrip, latestPlayers.map(p => ({
                     ...p,
@@ -357,6 +1290,10 @@
                 updateFromGame(latestGame);
                 // Update floating role banner for this device
                 updateRoleBanner(latestGame, gid);
+                // Update actions (nomination UI etc.)
+                renderActions(gid);
+                // Attempt resolve vote if complete
+                maybeResolveElectionVote(gid);
             });
 
             // Subscribe to players ordered by orderIndex
@@ -369,11 +1306,152 @@
                 })));
                 // Also refresh the banner after players load (needed for uid->id map)
                 updateRoleBanner(latestGame, gid);
+                // Re-render history when players (and thus your party) resolves
+                renderHistory();
+                // Update actions when players change (eligibility)
+                renderActions(gid);
             });
 
-            document.getElementById('help-btn')?.addEventListener('click', function() {
-                window.location.href = '../pages/rules.html';
+            // Removed redirect for help-btn; now opens in-game modal
+
+            // Nomination click handler (event delegation on document)
+            document.addEventListener('click', async function(e) {
+                const t = e.target;
+                if (t && t.matches && t.matches('#open-nominate-btn')) {
+                    e.preventDefault();
+                    openNominationModal();
+                    return;
+                }
+                if (!(t && t.matches && t.matches('button[data-nominate]'))) return;
+                const candidateId = t.getAttribute('data-nominate');
+                if (!candidateId) return;
+                const youId = computeYouId(gid);
+                const presId = latestGame && latestGame.currentPresidentPlayerId;
+                if (!youId || !presId || youId !== presId) return; // Only president can nominate
+                try {
+                    await ensureAuth();
+                    // Write nomination
+                    await updateDoc(doc(db, 'games', gid), {
+                        nominatedChancellorPlayerId: candidateId,
+                        electionVotes: {},
+                        voteResolution: null,
+                        updatedAt: serverTimestamp()
+                    });
+                    // Log publicly
+                    try {
+                        const p = (latestPlayers || []).find(pp => pp && pp.id === candidateId);
+                        await logPublic(gid, `President nominated ${p ? (p.name || 'a player') : 'a player'} as Chancellor`, { type: 'nomination', actorId: presId });
+                        await logPublic(gid, 'Chancellor vote began', { type: 'vote' });
+                    } catch (_) {}
+                    // Close modal after successful nomination
+                    const nominationModal = document.getElementById('nomination-modal');
+                    if (nominationModal) nominationModal.style.display = 'none';
+                    setRoleBannerVisibility(true);
+                } catch (err) {
+                    console.error('Failed to nominate chancellor', err);
+                }
             });
+
+            // Voting click handler
+            document.addEventListener('click', async function(e) {
+                const t = e.target;
+                // Toggle vote popover
+                if (t && t.matches && t.matches('#vote-toggle-btn')) {
+                    e.preventDefault();
+                    const pop = document.getElementById('vote-popover');
+                    if (pop) {
+                        pop.style.display = (pop.style.display === 'block') ? 'none' : 'block';
+                    }
+                    return;
+                }
+                if (!(t && t.matches && t.matches('button[data-vote]'))) return;
+                const vote = t.getAttribute('data-vote');
+                if (!vote || (vote !== 'ja' && vote !== 'nein')) return;
+                const youId = computeYouId(gid);
+                if (!youId) return;
+                const game = latestGame;
+                if (!game || !game.nominatedChancellorPlayerId) return;
+                try {
+                    await ensureAuth();
+                    await updateDoc(doc(db, 'games', gid), {
+                        ["electionVotes." + youId]: vote,
+                        updatedAt: serverTimestamp()
+                    });
+                    const pop = document.getElementById('vote-popover');
+                    if (pop) pop.style.display = 'none';
+                } catch (err) {
+                    console.error('Failed to submit vote', err);
+                }
+            });
+
+            // Helper: resolve election when all votes are in
+            let lastResolvedNomineeId = null;
+            async function maybeResolveElectionVote(gameId) {
+                try {
+                    const game = latestGame;
+                    if (!game) return;
+                    const nomineeId = game.nominatedChancellorPlayerId || null;
+                    if (!nomineeId) return;
+                    const votes = (game.electionVotes && typeof game.electionVotes === 'object') ? game.electionVotes : {};
+                    const aliveIds = (latestPlayers || []).filter(p => p && p.alive !== false).map(p => p.id);
+                    const totalVoters = aliveIds.length || (latestPlayers || []).length;
+                    const numVotes = Object.keys(votes).filter(k => aliveIds.includes(k)).length;
+                    if (!totalVoters || numVotes < totalVoters) return;
+                    if (lastResolvedNomineeId === nomineeId) return;
+
+                    const gameRef = doc(db, 'games', gameId);
+                    const outcome = await runTransaction(getFirestore(app), async (tx) => {
+                        const snap = await tx.get(gameRef);
+                        if (!snap.exists()) return null;
+                        const g = snap.data();
+                        const currentNominee = g.nominatedChancellorPlayerId || null;
+                        if (!currentNominee || currentNominee !== nomineeId) return null;
+                        const already = g.voteResolution && g.voteResolution.nomineeId === currentNominee && g.voteResolution.at;
+                        if (already) return null;
+                        const gvotes = (g.electionVotes && typeof g.electionVotes === 'object') ? g.electionVotes : {};
+                        const aliveNow = (latestPlayers || []).filter(p => p && p.alive !== false).map(p => p.id);
+                        const totalNow = aliveNow.length || (latestPlayers || []).length;
+                        const validVotes = Object.entries(gvotes).filter(([pid]) => aliveNow.includes(pid)).map(([,v]) => String(v));
+                        if (validVotes.length < totalNow || totalNow === 0) return null;
+                        const ja = validVotes.filter(v => v === 'ja').length;
+                        const nein = validVotes.filter(v => v === 'nein').length;
+                        const passed = ja > (totalNow / 2);
+                        const payload = {
+                            voteResolution: { nomineeId: currentNominee, ja, nein, passed, at: serverTimestamp() },
+                            electionVotes: {},
+                            updatedAt: serverTimestamp()
+                        };
+                        if (passed) {
+                            payload.electionTracker = 0;
+                            payload.currentChancellorPlayerId = currentNominee;
+                            payload.nominatedChancellorPlayerId = null;
+                            // Optional: set term limits for next nomination phase
+                            payload.termLimitLastPresidentId = g.currentPresidentPlayerId || null;
+                            payload.termLimitLastChancellorId = currentNominee;
+                        } else {
+                            payload.electionTracker = (typeof g.electionTracker === 'number' ? g.electionTracker : 0) + 1;
+                            // Clear failed nominee
+                            payload.nominatedChancellorPlayerId = null;
+                        }
+                        tx.update(gameRef, payload);
+                        return { ja, nein, passed };
+                    });
+
+                    if (outcome) {
+                        lastResolvedNomineeId = nomineeId;
+                        try {
+                            if (outcome.passed) {
+                                await logPublic(gameId, `Election passed: ${outcome.ja} Ja / ${outcome.nein} Nein`, { type: 'vote' });
+                            } else {
+                                await logPublic(gameId, `Election failed: ${outcome.nein} Nein / ${outcome.ja} Ja`, { type: 'vote' });
+                                await logPublic(gameId, 'Election tracker advanced by 1', { type: 'system' });
+                            }
+                        } catch (_) {}
+                    }
+                } catch (err) {
+                    console.error('Failed to resolve election vote', err);
+                }
+            }
 
         });
     </script>

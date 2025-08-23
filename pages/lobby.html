@@ -83,7 +83,7 @@
     </div>
 
     <script type="module">
-        import { onGameSnapshot, getGame } from '../js/db.js';
+        import { onGameSnapshot, getGame, logPublic, logPrivate, logPartied, logSilent } from '../js/db.js';
         import { app } from '../js/firebase.js';
         import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -125,6 +125,7 @@
                         if (!data.uid) {
                             await updateDoc(d.ref, { uid: authUser.uid, lastSeen: serverTimestamp() });
                             try { sessionStorage.setItem(`sh_playerId_${gameId}`, d.id); } catch (_) {}
+                            try { await logSilent(gameId, 'Auto-claimed host seat', { type: 'host', actorId: d.id, meta: { seat: 1 } }); } catch (_) {}
                             return d.id;
                         }
                     }
@@ -538,10 +539,11 @@
                         doneBtn.addEventListener('click', async function() {
                             const you = getYouPlayer();
                             if (!you) { overlay.remove(); return; }
-                        try {
-                            await ensureAuth();
+                            try {
+                                await ensureAuth();
                                 await updateDoc(doc(db, 'games', game.id, 'players', you.id), { roleSeen: true, lastSeen: serverTimestamp() });
-                        } catch (_) {}
+                                try { await logPrivate(game.id, 'You acknowledged viewing your secret role', you.id, { type: 'ack', actorId: you.id }); } catch (_) {}
+                            } catch (_) {}
                             overlay.remove();
                         });
 
@@ -574,6 +576,7 @@
                         try {
                             await ensureAuth();
                             await updateDoc(doc(db, 'games', game.id), { state: 'playing', updatedAt: serverTimestamp() });
+                            try { await logPublic(game.id, 'All players viewed roles — game is starting', { type: 'start' }); } catch (_) {}
                         } catch (_) {}
                         finally {
                             // If navigation hasn't occurred yet for some reason, re-enable button gracefully
@@ -616,6 +619,7 @@
                     await ensureAuth();
                     const gameRef = doc(db, 'games', gameId);
                     await setDoc(gameRef, { state: 'cancelled', updatedAt: serverTimestamp(), expireAt: new Date() }, { merge: true });
+                    try { await logPublic(gameId, 'Game cancelled by host', { type: 'admin' }); } catch (_) {}
                 } catch (e) {
                     console.error('Failed to cancel game', e);
                 }
@@ -647,6 +651,7 @@
                         } catch (e) {
                             console.warn('Failed to clear player uid/lastSeen', e);
                         }
+                        try { await logPublic(gameId, 'A player left the lobby', { type: 'presence', actorId: playerId }); } catch (_) {}
                     }
                 } finally {
                     try { sessionStorage.removeItem(`sh_playerId_${gameId}`); } catch (_) {}
@@ -787,6 +792,36 @@
                             termLimitLastPresidentId: null,
                             termLimitLastChancellorId: null
                         });
+                        // Log role assignment and knowledge
+                        try {
+                            // Public timeline basics
+                            await logPublic(gameId, 'Game started', { type: 'start' });
+                            await logPublic(gameId, 'Players randomized into order: ' + arr.map(p => p.name || 'Player').join(', '), { type: 'setup' });
+                            await logPublic(gameId, 'Order created', { type: 'setup' });
+                            await logPublic(gameId, 'Roles assigned', { type: 'setup' });
+                            const initialPresident = arr.find(p => p.id === initialPresidentId);
+                            await logPublic(gameId, `Game started: roles assigned. Initial President: ${initialPresident ? (initialPresident.name || 'Player') : 'Unknown'}`, { type: 'setup', actorId: initialPresidentId });
+                            await logPublic(gameId, 'Hitler role assigned', { type: 'setup' });
+                            await logPublic(gameId, 'Fascist team assigned', { type: 'setup' });
+                            for (let i = 0; i < arr.length; i++) {
+                                const p = arr[i];
+                                const roleName = (i === hitlerIndex) ? 'Hitler' : (assignedIds.has(p.id) && p.id !== arr[hitlerIndex].id) ? 'Fascist' : 'Liberal';
+                                const partyName = (roleName === 'Liberal') ? 'Liberal' : 'Fascist';
+                                await logPrivate(gameId, `Your role: ${roleName}${partyName && roleName !== partyName ? ' – ' + partyName : ''}`, p.id, { type: 'role', actorId: p.id, meta: { role: roleName.toLowerCase(), party: partyName.toLowerCase() } });
+                            }
+                            const fascists = arr.filter((p, i) => i !== hitlerIndex && assignedIds.has(p.id));
+                            const fascistNames = fascists.map(p => p.name || 'Player');
+                            if (count <= 6) {
+                                const hitler = arr[hitlerIndex];
+                                if (hitler && fascistNames.length > 0) {
+                                    await logPrivate(gameId, `You know the Fascist: ${fascistNames.join(', ')}`, hitler.id, { type: 'knowledge', actorId: hitler.id });
+                                }
+                            } else {
+                                if (fascistNames.length > 0) {
+                                    await logPartied(gameId, `Fascists: ${fascistNames.join(', ')}`, 'fascist', { type: 'knowledge' });
+                                }
+                            }
+                        } catch (_) {}
                     } catch (e) {
                         console.error('Failed to start game', e);
                     }
