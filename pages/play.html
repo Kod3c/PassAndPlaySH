@@ -15,7 +15,7 @@
             --highlight-cream: #F1E6B2;
         }
         .play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
-        .play-main { flex:1; display:flex; flex-direction: column; align-items: stretch; justify-content:center; padding: 0 12px 96px; }
+        .play-main { flex:1; display:flex; flex-direction: column; align-items: stretch; justify-content:flex-start; padding: 0 12px 96px; }
         .board-shell { width: 100%; max-width: 1040px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
         .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
         /* When role banner is visible, push players down a bit more */
@@ -51,12 +51,14 @@
             .policy-card-title { display:none; }
             .policy-chip { padding: 6px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
             .policy-chip .policy-label { display: inline; }
-            /* Reduce large empty space below header by top-aligning content */
-            .play-main { align-items: flex-start; justify-content: center; }
+            /* Reduce empty space below header by top-aligning content */
+            .play-main { align-items: stretch; justify-content: flex-start; }
         }
         /* Compact layout for narrow phones */
         @media (max-width: 480px) {
             .play-main { padding: 0 8px calc(88px + env(safe-area-inset-bottom)); }
+            /* Make role banner full-bleed on very small screens to match gutters */
+            .role-bar { width: calc(100% + 16px); margin: 0 -8px; border-radius: 0; }
             .board-frame { padding: 12px; }
             .track { flex-direction: column; align-items: center; gap: 8px; }
             .track-title { font-size: 0.95rem; text-align: center; }
@@ -90,8 +92,8 @@
         .status-banner.status-updated { animation: dropIn 180ms ease-out; }
         /* Floating role banner */
         /* Role banner now inline (not fixed) */
-        .floating-role { position: static; padding: 0; margin: 8px 0 0; z-index: auto; pointer-events: auto; display:none; }
-        .role-bar { width: 100%; margin: 0; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 12px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.25rem; line-height: 1; }
+        .floating-role { position: static; padding: 0; margin: 0; z-index: auto; pointer-events: auto; display:none; width: 100%; align-self: stretch; }
+        .role-bar { width: calc(100% + 24px); margin: 0 -12px; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 12px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 0; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.25rem; line-height: 1; }
         .role-tag { padding: 0; border: 0; background: transparent; box-shadow: none; }
         .role-tag.pres { background: #fef3c7; }
         .role-tag.chanc { background: #e0f2fe; }
