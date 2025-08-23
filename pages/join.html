@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join Game - Secret Hitler</title>
     <meta name="description" content="Join an existing Secret Hitler game">
-    <link rel="stylesheet" href="../styles/app.css?v=dev">
-    <link rel="manifest" href="../manifest.json?v=dev">
+    <link rel="stylesheet" href="../styles/app.css">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#101820">
 </head>
 <body>
@@ -44,13 +44,13 @@
                             <small class="form-help">Paste or type the game code</small>
                         </div>
 
-                        <div id="game-status" class="mt-2" style="margin-bottom: 1rem;"></div>
+                        <div id="game-status" class="mt-2 mb-4"></div>
 
                         <div class="form-group">
                             <label class="form-label" for="player-name">Player Name</label>
                             <input id="player-name" class="form-control" type="text" placeholder="Your name" maxlength="24" autocomplete="name" list="existing-names">
                             <datalist id="existing-names"></datalist>
-                            <select id="player-name-select" class="form-control" style="display:none"></select>
+                            <select id="player-name-select" class="form-control hidden"></select>
                             <small class="form-help">Choose your name from the roster when a valid Game ID is entered</small>
                         </div>
                         <div class="btn-group">
@@ -155,7 +155,7 @@
             if (!gameId) {
                 statusEl.textContent = '';
                 // Revert to free text when no game
-                if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.innerHTML = ''; }
+                if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.classList.add('hidden'); nameSelect.innerHTML = ''; }
                 if (nameInput) { nameInput.style.display = ''; nameInput.value = ''; }
                 return null;
             }
@@ -163,7 +163,7 @@
             const snap = await getDoc(gameRef);
             if (!snap.exists()) {
                 statusEl.textContent = 'Game not found.';
-                if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.innerHTML = ''; }
+                if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.classList.add('hidden'); nameSelect.innerHTML = ''; }
                 if (nameInput) { nameInput.style.display = ''; }
                 return null;
             }
@@ -249,7 +249,7 @@
 
             // Switch to dropdown mode
             if (nameInput) nameInput.style.display = 'none';
-            if (nameSelect) nameSelect.style.display = '';
+            if (nameSelect) { nameSelect.classList.remove('hidden'); nameSelect.style.display = 'block'; }
 
             // Ensure Join button state reflects current selection
             const joinBtnEl = document.getElementById('join-btn');

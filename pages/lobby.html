@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lobby - Secret Hitler</title>
-    <link rel="stylesheet" href="../styles/app.css?v=dev">
+    <link rel="stylesheet" href="../styles/app.css">
     <meta name="theme-color" content="#101820">
     <style>
         .badge { display:inline-block; padding: 0.125rem 0.5rem; border: var(--border-medium) solid var(--propaganda-black); background: var(--off-white); font-weight: 700; font-size: var(--font-sm); border-radius: 999px; margin-left: 0.5rem; }
@@ -58,7 +58,7 @@
                         </div>
 
                         <div class="lobby-actions mt-4">
-                            <button id="start-game-btn" class="btn btn-primary btn-lg" disabled>Start Game</button>
+                            <button id="start-game-btn" class="btn btn-primary btn-lg" disabled>Continue</button>
                             <button id="leave-lobby-btn" class="btn btn-outline btn-lg">🚪 Leave Lobby</button>
                             <button id="cancel-game-btn" class="btn btn-outline btn-lg">🛑 Cancel Game</button>
                             <button class="btn btn-outline btn-lg" onclick="window.location.href='../index.html'">Back to Home</button>
@@ -85,7 +85,7 @@
     <script type="module">
         import { onGameSnapshot, getGame } from '../js/db.js';
         import { app } from '../js/firebase.js';
-        import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         (function() {
             const lobbyInfo = document.getElementById('lobby-info');
@@ -95,7 +95,7 @@
             const startBtn = document.getElementById('start-game-btn');
 
             const db = getFirestore(app);
-            const PRESENT_WINDOW_MS = 60 * 1000; // 60s
+            const PRESENT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
             const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
             let heartbeatTimer = null;
             let removalHandled = false;
@@ -144,6 +144,9 @@
 
                 // Safely render lobby info without injecting user strings as HTML
                 lobbyInfo.innerHTML = '';
+                const contentRoot = document.querySelector('.card-content');
+                const existingReveal = document.getElementById('reveal-container');
+                if (existingReveal) existingReveal.remove();
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'lobby-header';
 
@@ -265,7 +268,11 @@
                     items.forEach((item) => {
                         const li = document.createElement('li');
                         li.className = 'player-list-item';
-                        const dotColor = status === 'present' ? '#22c55e' : '#9ca3af';
+                        let dotColor = status === 'present' ? '#22c55e' : '#9ca3af';
+                        if (game && game.state === 'reveal' && status === 'present') {
+                            const hasSeen = Boolean(item && item.p && item.p.roleSeen);
+                            dotColor = hasSeen ? '#22c55e' : '#DA291C';
+                        }
                         const dot = document.createElement('span');
                         dot.style.display = 'inline-block';
                         dot.style.width = '10px';
@@ -343,12 +350,257 @@
                 startBtn.disabled = !(isHost && allPresent);
                 const cancelBtnEl = document.getElementById('cancel-game-btn');
                 if (cancelBtnEl) cancelBtnEl.style.display = isHost ? '' : 'none';
+
+                // Hide the Continue (start) button during reveal phase
+                if (game && game.state === 'reveal') {
+                    startBtn.style.display = 'none';
+                } else {
+                    startBtn.style.display = '';
+                }
+
+                // If game is in reveal state, render role reveal UI
+                if (game && game.state === 'reveal') {
+                    const reveal = document.createElement('div');
+                    reveal.id = 'reveal-container';
+                    reveal.className = 'mt-3';
+                    // Single centered button to open full-screen reveal overlay
+                    const reopenWrap = document.createElement('div');
+                    reopenWrap.style.display = 'flex';
+                    reopenWrap.style.justifyContent = 'center';
+                    reopenWrap.style.alignItems = 'center';
+                    reopenWrap.style.gap = '12px';
+                    reopenWrap.style.marginTop = '12px';
+                    const reopenBtn = document.createElement('button');
+                    reopenBtn.className = 'btn btn-secondary btn-lg';
+                    reopenBtn.textContent = 'My Secret Role';
+                    reopenWrap.appendChild(reopenBtn);
+
+                    // Progress UI (label + bar) placed in Present list
+                    const presentBody = presentCol.querySelector('.card-content');
+                    const progressWrap = document.createElement('div');
+                    progressWrap.id = 'reveal-progress';
+                    progressWrap.style.display = 'flex';
+                    progressWrap.style.flexDirection = 'column';
+                    progressWrap.style.alignItems = 'center';
+                    progressWrap.style.gap = '8px';
+                    progressWrap.style.marginBottom = '12px';
+                    const progressLabel = document.createElement('div');
+                    progressLabel.style.fontWeight = '800';
+                    progressLabel.style.letterSpacing = '0.02em';
+                    const progressBarOuter = document.createElement('div');
+                    progressBarOuter.style.width = '100%';
+                    progressBarOuter.style.maxWidth = '520px';
+                    progressBarOuter.style.height = '10px';
+                    progressBarOuter.style.border = '3px solid var(--propaganda-black)';
+                    progressBarOuter.style.background = 'rgba(0,0,0,0.08)';
+                    progressBarOuter.style.borderRadius = '999px';
+                    progressBarOuter.style.overflow = 'hidden';
+                    const progressBarInner = document.createElement('div');
+                    progressBarInner.style.height = '100%';
+                    progressBarInner.style.width = '0%';
+                    progressBarInner.style.background = 'var(--liberal-blue)';
+                    progressBarInner.style.transition = 'width 200ms ease';
+                    progressBarOuter.appendChild(progressBarInner);
+                    progressWrap.appendChild(progressLabel);
+                    progressWrap.appendChild(progressBarOuter);
+                    if (presentBody) presentBody.insertBefore(progressWrap, presentBody.firstChild);
+
+                    const hostControls = document.createElement('div');
+                    hostControls.id = 'host-continue';
+                    hostControls.className = 'mt-2';
+                    hostControls.style.display = 'none';
+                    hostControls.style.textAlign = 'center';
+                    hostControls.style.marginTop = '0';
+                    const hostBtn = document.createElement('button');
+                    hostBtn.className = 'btn btn-primary btn-lg';
+                    hostBtn.textContent = 'Start Game';
+                    hostControls.appendChild(hostBtn);
+                    // Place Start Game next to My Secret Role button
+                    reopenWrap.appendChild(hostControls);
+
+                    reveal.appendChild(reopenWrap);
+                    if (contentRoot) contentRoot.appendChild(reveal);
+
+                    function getYouPlayer() {
+                        const authUser = getAuth(app).currentUser;
+                        const uid = authUser ? authUser.uid : null;
+                        let savedId = null;
+                        try { savedId = sessionStorage.getItem(`sh_playerId_${game.id}`); } catch (_) {}
+                        let yp = null;
+                        if (savedId) yp = (players || []).find(pl => pl && pl.id === savedId) || null;
+                        if (!yp && uid) yp = (players || []).find(pl => pl && pl.uid === uid) || null;
+                        return yp;
+                    }
+
+                    function updateProgress() {
+                        const seen = (players || []).filter(p => p && p.roleSeen).length;
+                        const totalExpected = (typeof game.playerCount === 'number' && game.playerCount > 0)
+                            ? game.playerCount
+                            : ((players || []).length);
+                        const pct = totalExpected > 0 ? Math.min(100, Math.max(0, Math.round((seen / totalExpected) * 100))) : 0;
+                        progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
+                        progressBarInner.style.width = `${pct}%`;
+                        if (isHost && seen === totalExpected && totalExpected > 0) {
+                            hostControls.style.display = '';
+                        } else {
+                            hostControls.style.display = 'none';
+                        }
+                    }
+
+                    // Full-screen role reveal overlay (centered, toggle, no timer)
+                    function openRoleOverlay() {
+                        // Remove any existing overlay
+                        const existing = document.getElementById('role-overlay');
+                        if (existing) existing.remove();
+
+                        const yp = getYouPlayer();
+                        const overlay = document.createElement('div');
+                        overlay.id = 'role-overlay';
+                        overlay.style.position = 'fixed';
+                        overlay.style.inset = '0';
+                        overlay.style.zIndex = '9999';
+                        overlay.style.background = 'rgba(0,0,0,0.9)';
+                        overlay.style.display = 'flex';
+                        overlay.style.alignItems = 'center';
+                        overlay.style.justifyContent = 'center';
+                        overlay.style.padding = '20px';
+
+                        const wrap = document.createElement('div');
+                        wrap.style.display = 'flex';
+                        wrap.style.flexDirection = 'column';
+                        wrap.style.alignItems = 'center';
+                        wrap.style.justifyContent = 'center';
+                        wrap.style.gap = '16px';
+                        wrap.style.width = '100%';
+                        wrap.style.maxWidth = '720px';
+                        wrap.style.textAlign = 'center';
+
+                        const prompt = document.createElement('div');
+                        prompt.style.color = '#fff';
+                        prompt.style.fontWeight = '800';
+                        prompt.style.fontSize = '1.125rem';
+                        prompt.textContent = 'Reveal your secret role (tap to toggle)';
+
+                        const roleBox = document.createElement('div');
+                        roleBox.style.minHeight = '120px';
+                        roleBox.style.display = 'flex';
+                        roleBox.style.alignItems = 'center';
+                        roleBox.style.justifyContent = 'center';
+                        roleBox.style.width = '100%';
+                        roleBox.style.border = '4px solid #fff';
+                        roleBox.style.borderRadius = '12px';
+                        roleBox.style.background = 'rgba(255,255,255,0.1)';
+                        roleBox.style.padding = '16px';
+
+                        const roleLabel = document.createElement('div');
+                        roleLabel.style.fontWeight = '900';
+                        roleLabel.style.letterSpacing = '0.03em';
+                        roleLabel.style.fontSize = '2rem';
+                        roleLabel.style.color = '#fff';
+                        roleLabel.textContent = 'Hidden';
+                        roleBox.appendChild(roleLabel);
+
+                        const toggleBtn = document.createElement('button');
+                        toggleBtn.className = 'btn btn-primary btn-lg';
+                        toggleBtn.textContent = '👁️ Reveal my secret role';
+
+                        const doneBtn = document.createElement('button');
+                        doneBtn.className = 'btn';
+                        doneBtn.textContent = '✅ Continue';
+
+                        let shown = false;
+                        function computeRoleText() {
+                            const role = ((yp && yp.role) || '').toString().toUpperCase();
+                            const party = ((yp && yp.party) || '').toString().toUpperCase();
+                        const label = role ? `${role}${party && role !== party ? ' – ' + party : ''}` : 'Not assigned yet';
+                            return { role, party, label };
+                        }
+                        function setRoleLabelVisible(visible) {
+                            shown = visible;
+                            if (!visible) {
+                                roleLabel.textContent = 'Hidden';
+                                roleLabel.style.color = '#fff';
+                                toggleBtn.textContent = '👁️ Reveal my secret role';
+                            } else {
+                                const info = computeRoleText();
+                                roleLabel.textContent = info.label;
+                                if (info.role === 'HITLER') roleLabel.style.color = '#DA291C';
+                                else if (info.party === 'FASCIST' || info.role === 'FASCIST') roleLabel.style.color = '#DA291C';
+                                else roleLabel.style.color = '#00AEEF';
+                                toggleBtn.textContent = '🙈 Hide my secret role';
+                            }
+                        }
+
+                        toggleBtn.addEventListener('click', function() {
+                            setRoleLabelVisible(!shown);
+                        });
+
+                        doneBtn.addEventListener('click', async function() {
+                            const you = getYouPlayer();
+                            if (!you) { overlay.remove(); return; }
+                        try {
+                            await ensureAuth();
+                                await updateDoc(doc(db, 'games', game.id, 'players', you.id), { roleSeen: true, lastSeen: serverTimestamp() });
+                        } catch (_) {}
+                            overlay.remove();
+                        });
+
+                        wrap.appendChild(prompt);
+                        wrap.appendChild(roleBox);
+                        wrap.appendChild(toggleBtn);
+                        wrap.appendChild(doneBtn);
+                        overlay.appendChild(wrap);
+                        document.body.appendChild(overlay);
+
+                        // Start hidden; user toggles to reveal
+                        setRoleLabelVisible(false);
+                    }
+
+                    reopenBtn.addEventListener('click', function() { openRoleOverlay(); });
+
+                    hostBtn.addEventListener('click', async function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!isHost) return;
+                        const seen = (players || []).filter(p => p && p.roleSeen).length;
+                        const totalExpected = (typeof game.playerCount === 'number' && game.playerCount > 0)
+                            ? game.playerCount
+                            : ((players || []).length);
+                        if (seen !== totalExpected || totalExpected === 0) return;
+                        // Prevent double clicks / rapid re-renders from causing multiple writes
+                        hostBtn.disabled = true;
+                        const originalText = hostBtn.textContent;
+                        hostBtn.textContent = 'Starting…';
+                        try {
+                            await ensureAuth();
+                            await updateDoc(doc(db, 'games', game.id), { state: 'playing', updatedAt: serverTimestamp() });
+                        } catch (_) {}
+                        finally {
+                            // If navigation hasn't occurred yet for some reason, re-enable button gracefully
+                            hostBtn.disabled = false;
+                            hostBtn.textContent = originalText;
+                        }
+                    });
+
+                    updateProgress();
+
+                    // Auto open the full-screen reveal for players who haven't seen their role yet
+                    const you = getYouPlayer();
+                    if (you && !you.roleSeen) {
+                        openRoleOverlay();
+                    }
+                }
             }
 
-            function copyInvite() {
-                inviteInput.select();
+            async function copyInvite() {
+                const text = inviteInput.value || '';
                 try {
-                    document.execCommand('copy');
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(text);
+                    } else {
+                        inviteInput.select();
+                        document.execCommand('copy');
+                    }
                     copyInviteBtn.textContent = 'Copied!';
                     setTimeout(() => { copyInviteBtn.textContent = 'Copy Invite'; }, 1500);
                 } catch (e) {
@@ -458,12 +710,86 @@
                 render(initial, []);
                 onGameSnapshot(gameId, ({ game, players }) => {
                     if (!game || (game && game.state === 'cancelled')) { handleGameRemoved(); return; }
+                    // If host has started the game, route everyone to play screen
+                    if (game && game.state === 'playing') {
+                        const playUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/play.html') + '?game=' + encodeURIComponent(game.id);
+                        window.location.href = playUrl;
+                        return;
+                    }
                     render(game, players);
                 });
                 startHeartbeat(gameId);
                 copyInviteBtn.addEventListener('click', copyInvite);
-                startBtn.addEventListener('click', function() {
-                    window.location.href = '../index.html';
+                startBtn.addEventListener('click', async function() {
+                    try {
+                        await ensureAuth();
+                        // Assign roles then switch to reveal state
+                        const gameRef = doc(db, 'games', gameId);
+                        // Load current players
+                        const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('seat', 'asc')));
+                        const players = playersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        const count = players.length;
+                        if (count < 5) { alert('Need at least 5 players to start.'); return; }
+
+                        function rolesForCount(n) {
+                            // returns {liberals, fascists, hasHitler: true}
+                            const map = { 5:[3,1], 6:[4,1], 7:[4,2], 8:[5,2], 9:[5,3], 10:[6,3] };
+                            const ent = map[n] || null;
+                            if (!ent) return null;
+                            return { liberals: ent[0], fascists: ent[1], hasHitler: true };
+                        }
+                        const cfg = rolesForCount(count);
+                        if (!cfg) { alert('Unsupported player count.'); return; }
+
+                        // Shuffle players
+                        const arr = players.slice();
+                        for (let i = arr.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+                        }
+
+                        // Pick Hitler
+                        const hitlerIndex = Math.floor(Math.random() * arr.length);
+                        const assignedIds = new Set();
+                        assignedIds.add(arr[hitlerIndex].id);
+
+                        // Pick Fascists (excluding Hitler)
+                        let fascistsToPick = cfg.fascists;
+                        for (let i = 0; i < arr.length && fascistsToPick > 0; i++) {
+                            if (i === hitlerIndex) continue;
+                            assignedIds.add(arr[i].id);
+                            fascistsToPick--;
+                        }
+
+                        // Write roles and randomized order
+                        for (let i = 0; i < arr.length; i++) {
+                            const p = arr[i];
+                            let role = 'liberal';
+                            let party = 'liberal';
+                            if (i === hitlerIndex) { role = 'hitler'; party = 'fascist'; }
+                            else if (assignedIds.has(p.id) && p.id !== arr[hitlerIndex].id) { role = 'fascist'; party = 'fascist'; }
+                            await updateDoc(doc(db, 'games', gameId, 'players', p.id), {
+                                role,
+                                party,
+                                roleSeen: false,
+                                orderIndex: i
+                            });
+                        }
+
+                        const initialPresidentId = arr[0] && arr[0].id ? arr[0].id : null;
+                        await updateDoc(gameRef, {
+                            state: 'reveal',
+                            updatedAt: serverTimestamp(),
+                            startedAt: serverTimestamp(),
+                            presidentIndex: 0,
+                            currentPresidentPlayerId: initialPresidentId,
+                            currentChancellorPlayerId: null,
+                            termLimitLastPresidentId: null,
+                            termLimitLastChancellorId: null
+                        });
+                    } catch (e) {
+                        console.error('Failed to start game', e);
+                    }
                 });
                 const cancelBtn = document.getElementById('cancel-game-btn');
                 if (cancelBtn) cancelBtn.addEventListener('click', function() { cancelGame(gameId); });

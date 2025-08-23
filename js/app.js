@@ -12,6 +12,7 @@ class App {
         this.setupEventListeners();
         this.setupBetaAccess();
         this.setupThemeSwitcher();
+        this.setupNavigationButtons();
         // Check if autoShowSection exists before calling
         if (typeof this.autoShowSection === 'function') {
             this.autoShowSection();
@@ -236,6 +237,23 @@ class App {
         if (enableThemeBtn) {
             enableThemeBtn.addEventListener('click', () => {
                 this.toggleThemeSwitcher();
+            });
+        }
+    }
+
+    setupNavigationButtons() {
+        // Setup navigation button event listeners
+        const joinGameBtn = document.getElementById('join-game-btn');
+        if (joinGameBtn) {
+            joinGameBtn.addEventListener('click', () => {
+                window.location.href = 'pages/join.html';
+            });
+        }
+
+        const viewRulesBtn = document.getElementById('view-rules-btn');
+        if (viewRulesBtn) {
+            viewRulesBtn.addEventListener('click', () => {
+                window.location.href = 'pages/rules.html';
             });
         }
     }

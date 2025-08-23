@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play - Secret Hitler</title>
+    <link rel="stylesheet" href="../styles/app.css">
+    <meta name="theme-color" content="#101820">
+    <style>
+        :root {
+            --liberal-blue: #00AEEF;
+            --fascist-red: #DA291C;
+            --propaganda-black: #101820;
+            --neutral-beige: #D6C6A9;
+            --highlight-cream: #F1E6B2;
+        }
+        .play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
+        .play-main { flex:1; display:flex; align-items:center; justify-content:center; padding: 12px 12px 96px; }
+        .board-shell { width: 100%; max-width: 1040px; display:flex; flex-direction:column; align-items:center; gap: 12px; }
+        .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+        .player-chip { padding: 4px 10px; border: 2px solid var(--propaganda-black); background:#fff; font-weight:700; }
+        .player-chip.is-president { background: #fef3c7; }
+        .player-chip.is-chancellor { background: #e0f2fe; }
+        .board-area { width:100%; display:flex; flex-direction:column; gap:12px; }
+        .board-frame { width:100%; border: 6px solid var(--propaganda-black); border-radius: 12px; background: #f6f0df; box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 0 0 4px var(--highlight-cream); padding: 16px; }
+        .tracks { display:grid; grid-template-columns: 1fr; gap: 16px; }
+        .track { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border: 3px solid var(--propaganda-black); background: var(--neutral-beige); box-shadow: inset 0 0 0 3px rgba(0,0,0,0.15); border-radius: 8px; }
+        .track.liberal { background: var(--liberal-blue); color: #fff; }
+        .track.fascist { background: var(--fascist-red); color: #fff; }
+        .track-title { font-weight:900; letter-spacing:0.04em; }
+        .slots { display:flex; gap:8px; align-items:center; }
+        .slot { width: 50px; height: 68px; border: 3px solid #000; background: rgba(255,255,255,0.18); box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9); border-radius: 4px; }
+        .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
+        .tracker .bubble { width:26px; height:26px; border-radius:50%; background:#fff; border:3px solid var(--propaganda-black); }
+        .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
+        .actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+        .actions-left, .actions-center, .actions-right { display:flex; gap:8px; align-items:center; }
+        .btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
+        .btn-primary { background: var(--highlight-cream); }
+        .status-banner { text-align:center; font-weight:800; }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content:center; z-index: 60; }
+        .modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+        .modal-header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); }
+        .modal-title { font-weight: 900; }
+        .modal-body { padding: 12px; }
+        .order-list { display:flex; flex-direction:column; gap:8px; }
+        .order-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; border: 2px dashed var(--propaganda-black); background:#fff; }
+        .order-left { display:flex; align-items:center; gap:10px; }
+        .order-num { width: 28px; height: 28px; border-radius: 50%; display:inline-flex; align-items:center; justify-content:center; border: 3px solid var(--propaganda-black); font-weight:900; background: var(--highlight-cream); }
+        .badge-pres { padding: 2px 8px; background:#fef3c7; border:2px solid var(--propaganda-black); font-weight:800; }
+        .badge-chanc { padding: 2px 8px; background:#e0f2fe; border:2px solid var(--propaganda-black); font-weight:800; }
+        @media (min-width: 720px) {
+            .tracks { grid-template-columns: 1fr; }
+        }
+    </style>
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#101820">
+</head>
+<body>
+    <div class="play-wrapper">
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo" onclick="window.location.href='../index.html'">
+                        <span class="logo-icon">🎭</span>
+                        <div class="logo-text">
+                            <h1>Secret Hitler</h1>
+                            <p class="subtitle">Game</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="play-main">
+            <div class="board-shell">
+                <div id="status" class="status-banner">Setting up game…</div>
+                <div id="players-strip" class="players-strip"></div>
+                <div class="board-area">
+                    <div class="board-frame">
+                        <div class="tracks">
+                            <section class="track liberal">
+                                <div class="track-title">Liberal Policies</div>
+                                <div class="slots" id="liberal-slots"></div>
+                            </section>
+                            <section class="track fascist">
+                                <div class="track-title">Fascist Policies</div>
+                                <div class="slots" id="fascist-slots"></div>
+                            </section>
+                        </div>
+                        <div class="tracker" id="election-tracker"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="floating-footer">
+            <div class="actions-bar">
+                <div class="actions-left">
+                    <button id="menu-btn" class="btn">☰ Menu</button>
+                    <button id="help-btn" class="btn">📖 Rules</button>
+                </div>
+                <div class="actions-center">
+                    <button id="primary-action" class="btn btn-primary">Continue</button>
+                </div>
+                <div class="actions-right">
+                    <button id="history-btn" class="btn">🕒 History</button>
+                    <button id="order-btn" class="btn">👥 Order</button>
+                </div>
+            </div>
+        </footer>
+        <div id="order-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">Player Order</div>
+                    <button id="order-close" class="btn">✖</button>
+                </div>
+                <div id="order-body" class="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { app } from '../js/firebase.js';
+        import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+        const db = getFirestore(app);
+        let latestGame = null;
+        let latestPlayers = [];
+
+        function getGameId() {
+            const p = new URLSearchParams(window.location.search);
+            return p.get('game') || localStorage.getItem('sh_currentGameId') || '';
+        }
+
+        function renderSlots(el, count) {
+            el.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement('div');
+                s.className = 'slot';
+                el.appendChild(s);
+            }
+        }
+
+        function renderTracker(el) {
+            el.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                el.appendChild(b);
+            }
+        }
+
+        function renderPlayers(el, players) {
+            el.innerHTML = '';
+            (players || []).forEach(p => {
+                const chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.textContent = p.name || 'Player';
+                if (p.isPresident) chip.classList.add('is-president');
+                if (p.isChancellor) chip.classList.add('is-chancellor');
+                el.appendChild(chip);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const gid = getGameId();
+            const status = document.getElementById('status');
+            const liberalSlots = document.getElementById('liberal-slots');
+            const fascistSlots = document.getElementById('fascist-slots');
+            const tracker = document.getElementById('election-tracker');
+            const playersStrip = document.getElementById('players-strip');
+
+            renderSlots(liberalSlots, 5);
+            renderSlots(fascistSlots, 6);
+            renderTracker(tracker);
+
+            // Order modal handlers (set up early so button works even if game load fails)
+            const orderBtn = document.getElementById('order-btn');
+            const orderModal = document.getElementById('order-modal');
+            const orderClose = document.getElementById('order-close');
+            const orderBody = document.getElementById('order-body');
+
+            function openOrderModal() {
+                orderBody.innerHTML = '';
+                const list = document.createElement('div');
+                list.className = 'order-list';
+                if (!latestPlayers || latestPlayers.length === 0) {
+                    const p = document.createElement('p');
+                    p.textContent = 'Player order not available yet.';
+                    orderBody.appendChild(p);
+                } else {
+                    latestPlayers.forEach((p, idx) => {
+                        const row = document.createElement('div');
+                        row.className = 'order-item';
+                        const left = document.createElement('div');
+                        left.className = 'order-left';
+                        const num = document.createElement('div');
+                        num.className = 'order-num';
+                        num.textContent = String(idx + 1);
+                        const name = document.createElement('div');
+                        name.style.fontWeight = '800';
+                        name.textContent = p.name || 'Player';
+                        left.appendChild(num);
+                        left.appendChild(name);
+                        row.appendChild(left);
+
+                        const right = document.createElement('div');
+                        if (latestGame && latestGame.currentPresidentPlayerId === p.id) {
+                            const pres = document.createElement('span');
+                            pres.className = 'badge-pres';
+                            pres.textContent = 'President';
+                            right.appendChild(pres);
+                        }
+                        if (latestGame && latestGame.currentChancellorPlayerId === p.id) {
+                            const chanc = document.createElement('span');
+                            chanc.className = 'badge-chanc';
+                            chanc.textContent = 'Chancellor';
+                            right.appendChild(chanc);
+                        }
+                        row.appendChild(right);
+                        list.appendChild(row);
+                    });
+                    orderBody.appendChild(list);
+                }
+                orderModal.style.display = 'flex';
+            }
+
+            function closeOrderModal() { orderModal.style.display = 'none'; }
+            orderBtn?.addEventListener('click', openOrderModal);
+            orderClose?.addEventListener('click', closeOrderModal);
+            orderModal?.addEventListener('click', function(e) { if (e.target === orderModal) closeOrderModal(); });
+
+            if (!gid) { status.textContent = 'Missing game id'; return; }
+
+            const gameRef = doc(db, 'games', gid);
+            const snap = await getDoc(gameRef);
+            if (!snap.exists()) { status.textContent = 'Game not found'; return; }
+            status.textContent = 'Game in progress';
+
+            onSnapshot(gameRef, (s) => {
+                latestGame = s.exists() ? s.data() : null;
+                if (!latestGame) { status.textContent = 'Game unavailable'; return; }
+                if (latestGame.state === 'cancelled') { status.textContent = 'Game cancelled'; }
+                // Update player strip highlights if ids available
+                renderPlayers(playersStrip, latestPlayers.map(p => ({
+                    ...p,
+                    isPresident: latestGame && (latestGame.currentPresidentPlayerId === p.id),
+                    isChancellor: latestGame && (latestGame.currentChancellorPlayerId === p.id)
+                })));
+            });
+
+            // Subscribe to players ordered by orderIndex
+            onSnapshot(query(collection(db, 'games', gid, 'players'), orderBy('orderIndex', 'asc')), (snapColl) => {
+                latestPlayers = snapColl.docs.map(d => ({ id: d.id, ...d.data() })) || [];
+                renderPlayers(playersStrip, latestPlayers.map(p => ({
+                    ...p,
+                    isPresident: latestGame && (latestGame.currentPresidentPlayerId === p.id),
+                    isChancellor: latestGame && (latestGame.currentChancellorPlayerId === p.id)
+                })));
+            });
+
+            document.getElementById('help-btn')?.addEventListener('click', function() {
+                window.location.href = '../pages/rules.html';
+            });
+
+        });
+    </script>
+</body>
+</html>
+
+
