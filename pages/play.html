@@ -31,7 +31,9 @@
         .track.fascist { background: var(--fascist-red); color: #fff; }
         .track-title { font-weight:900; letter-spacing:0.04em; }
         .slots { display:flex; gap:8px; align-items:center; }
-        .slot { width: 50px; height: 68px; border: 3px solid #000; background: rgba(255,255,255,0.18); box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9); border-radius: 4px; }
+        .slot { width: 50px; height: 68px; border: 3px solid #000; background: rgba(255,255,255,0.18); box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9); border-radius: 4px; position: relative; overflow: hidden; }
+        .track.liberal .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/bird.png'); background-repeat: no-repeat; background-position: center; background-size: 80% auto; opacity: 0.28; pointer-events: none; }
+        .track.fascist .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/skull.png'); background-repeat: no-repeat; background-position: center; background-size: 80% auto; opacity: 0.28; pointer-events: none; }
         .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
         .tracker-row { display:flex; align-items:center; justify-content:center; gap:10px; padding-top: 4px; }
         .tracker-label { font-weight:900; letter-spacing: 0.02em; }
@@ -179,6 +181,7 @@
         .table-spread .table-card:nth-child(12) { transform: rotate(-18deg); }
         /* Deck + Discard stacks flanking the spread */
         .cards-row { width: 100%; display:flex; align-items:center; justify-content:center; gap: 20px; margin: 12px 0 0; }
+        .card-stack.discard { align-self: flex-end; }
         .card-stack { position: relative; width: calc(var(--play-card-w, 64px) + 8px); height: calc(var(--play-card-h, 92px) + 8px); flex: 0 0 auto; }
         .stack-card { position: absolute; left: 0; bottom: 0; width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); }
         .stack-card.is-back { background-image: url('../images/policy-back.png'); }
@@ -186,9 +189,9 @@
         .card-stack.deck .stack-card:nth-child(1) { transform: translate(0, 0) rotate(-2deg); }
         .card-stack.deck .stack-card:nth-child(2) { transform: translate(4px, -4px) rotate(1deg); }
         .card-stack.deck .stack-card:nth-child(3) { transform: translate(8px, -8px) rotate(-0.5deg); }
-        .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 0) rotate(2deg) scale(1.3); }
+        .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 8px) rotate(2deg) scale(1.3); }
         /* Single, larger discard card */
-        .card-stack.discard .stack-card { transform: scale(1.3); transform-origin: 50% 100%; }
+        .card-stack.discard .stack-card { transform: translateY(8px) scale(1.3); transform-origin: 50% 100%; }
         /* Responsive sizing for small screens */
         @media (max-width: 640px) {
             .table-spread { padding-top: 10px; margin-top: 14px; }
@@ -1420,7 +1423,7 @@
                 }
             });
 
-            if (!gid) { setStatus('', 'Missing game id'); return; }
+            if (!gid) { setStatus('', 'Missing game id'); hidePreloader(); return; }
 
             const gameRef = doc(db, 'games', gid);
             let gameReady = false;
@@ -1429,13 +1432,13 @@
                 if (gameReady && playersReady) hidePreloader();
             }
             const snap = await getDoc(gameRef);
-            if (!snap.exists()) { setStatus(gid, 'Game not found'); return; }
+            if (!snap.exists()) { setStatus(gid, 'Game not found'); hidePreloader(); return; }
             setStatus(gid, 'Game in progress');
 
             onSnapshot(gameRef, (s) => {
                 latestGame = s.exists() ? s.data() : null;
-                if (!latestGame) { setStatus(gid, 'Game unavailable'); return; }
-                if (latestGame.state === 'cancelled') { setStatus(gid, 'Game cancelled'); }
+                if (!latestGame) { setStatus(gid, 'Game unavailable'); hidePreloader(); return; }
+                if (latestGame.state === 'cancelled') { setStatus(gid, 'Game cancelled'); hidePreloader(); }
                 // Update player strip highlights if ids available
                 renderPlayers(playersStrip, latestPlayers.map(p => ({
                     ...p,
