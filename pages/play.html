@@ -47,6 +47,21 @@
             .policy-summary { flex-direction: column; align-items: center; gap: 12px; }
             .policy-card-title { display:block; }
         }
+        /* Compact layout for narrow phones */
+        @media (max-width: 480px) {
+            .play-main { padding: 8px 8px calc(88px + env(safe-area-inset-bottom)); }
+            .board-frame { padding: 12px; }
+            .track { flex-direction: column; align-items: center; gap: 8px; }
+            .track-title { font-size: 0.95rem; text-align: center; }
+            .slots { gap: 6px; }
+            .slot { width: 44px; height: 60px; }
+            .players-strip { gap: 6px; }
+            .player-chip { padding: 3px 8px; }
+        }
+        @media (max-width: 360px) {
+            .slot { width: 40px; height: 54px; }
+            .status-banner { font-size: 1rem; padding: 10px 12px; }
+        }
         .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
         .actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
         .actions-left, .actions-center, .actions-right { display:flex; gap:8px; align-items:center; }
