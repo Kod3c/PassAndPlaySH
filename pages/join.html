@@ -323,11 +323,16 @@
                         // Find if selected name is host (seat 1)
                         const hostPlayersSnap = await getDocs(query(collection(gameRef, 'players'), where('seat', '==', 1)));
                         let hostName = null;
-                        hostPlayersSnap.forEach(d => { const data = d.data() || {}; hostName = hostName || (data.name || null); });
+                        let hostDocRef = null;
+                        hostPlayersSnap.forEach(d => { const data = d.data() || {}; hostName = hostName || (data.name || null); if (!hostDocRef) hostDocRef = d.ref; });
                         if (hostName && name === hostName) {
                             const input = window.prompt('Enter host password to reclaim host:');
                             const hash = input ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
                             if (!hash || hash !== hostPass) throw new Error('Incorrect host password');
+                            // Password verified: transfer host seat to this device's UID
+                            if (hostDocRef) {
+                                await updateDoc(hostDocRef, { uid: user.uid, lastSeen: serverTimestamp() });
+                            }
                         }
                     }
                     await claimOrAddPlayer(gid, name, user.uid);
