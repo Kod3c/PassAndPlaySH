@@ -56,7 +56,7 @@ export const BoardModule = {
                 <div class="cards-area" aria-hidden="false">
                     <div class="cards-row">
                         <div class="role-envelope" id="role-envelope" title="Click to view your secret role">
-                            <img src="../images/my-role.png" alt="My Secret Role" class="envelope-image">
+                            <img src="../images/envelope.png" alt="My Secret Role" class="envelope-image">
                         </div>
                         <div class="table-spread">
                             <!-- Table cards will be dynamically generated here -->
