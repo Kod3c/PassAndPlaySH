@@ -39,23 +39,19 @@
         /* Enacted policy card placed into track slots */
         .slot .policy-card {
             position: absolute;
-            /* Use percentage insets so the inner card scales nicely across sizes */
-            left: 6%; right: 6%; top: 6%; bottom: 6%;
-            background-size: contain; /* fallback if any background-image is used */
+            /* Fill the slot with slight bleed to avoid inner gap; allow rotation */
+            left: -4%; right: -4%; top: -4%; bottom: -4%;
+            background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            /* Rely on the slot border; avoid double borders that look heavy */
-            border: 0;
-            border-radius: 3px;
-            box-shadow: none;
+            border: 3px solid var(--propaganda-black);
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            pointer-events: none;
+            z-index: 2;
         }
-        /* Liberal/Fascist policy tiles: solid color with centered icon for consistent fit */
-        .slot .policy-card.liberal { background-color: var(--liberal-blue); }
-        .slot .policy-card.fascist { background-color: var(--fascist-red); }
-        .slot .policy-card.liberal::after,
-        .slot .policy-card.fascist::after { content: ""; position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; }
-        .slot .policy-card.liberal::after { background-image: url('../images/bird.png'); filter: brightness(0) invert(1); background-size: 56% auto; }
-        .slot .policy-card.fascist::after { background-image: url('../images/skull.png'); filter: brightness(0) invert(1); background-size: 56% auto; }
+        /* When a policy is placed, let it overflow slightly for rotation */
+        .slot.filled { overflow: visible; border-color: transparent; box-shadow: none; background: transparent; }
         .track.liberal .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/bird.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.6; filter: brightness(0) invert(1); pointer-events: none; }
         .track.fascist .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/skull.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.55; filter: brightness(0) invert(1); pointer-events: none; }
         /* Increase opacity for the last three fascist slots */
@@ -943,13 +939,22 @@
                     if (!existing) {
                         const card = document.createElement('div');
                         card.className = 'policy-card ' + (type === 'liberal' ? 'liberal' : 'fascist');
+                        // Use image backgrounds for authenticity
+                        card.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
+                        // Rotate left a bit more and scale up 5%
+                        card.style.transform = 'rotate(-5deg) scale(1.05)';
+                        card.style.zIndex = '3';
                         slot.appendChild(card);
+                        slot.classList.add('filled');
                     } else {
-                        existing.classList.toggle('liberal', type === 'liberal');
-                        existing.classList.toggle('fascist', type === 'fascist');
+                        existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
+                        existing.style.transform = 'rotate(-5deg) scale(1.05)';
+                        existing.style.zIndex = '3';
+                        slot.classList.add('filled');
                     }
                 } else {
                     if (existing) existing.remove();
+                    slot.classList.remove('filled');
                 }
             }
         }
@@ -1196,24 +1201,6 @@
             const enactedPolicy = game.enactedPolicy;
             if (enactedPolicy) {
                 setStatus(gameId, `${enactedPolicy === 'liberal' ? 'Liberal' : 'Fascist'} policy enacted! Policy phase completed.`);
-                
-                // Show a summary of what happened
-                const summary = document.createElement('div');
-                summary.className = 'status-text';
-                summary.style.textAlign = 'center';
-                summary.style.marginTop = '16px';
-                summary.innerHTML = `
-                    <div style="margin-bottom: 8px;">
-                        <strong>Policy Enacted:</strong> 
-                        <span style="color: ${enactedPolicy === 'liberal' ? 'var(--liberal-blue)' : 'var(--fascist-red)'}; font-weight: 900;">
-                            ${enactedPolicy === 'liberal' ? '🟦 Liberal' : '🟥 Fascist'}
-                        </span>
-                    </div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">
-                        Waiting for next turn to begin...
-                    </div>
-                `;
-                actionsCenter.appendChild(summary);
             } else {
                 setStatus(gameId, 'Policy phase completed. Waiting for next turn...');
             }
@@ -2833,9 +2820,7 @@
                 count += game.discardedCards.length;
             }
             
-            // Count cards from policy phases
-            if (game.policyPhase === 'completed' && game.presidentDiscardedCard) count++;
-            if (game.policyPhase === 'completed' && game.chancellorDiscardedCard) count++;
+            // Do not double-count based on policy phase; flags above already include discards
             
             console.log(`Calculated discard count from game state: ${count}`);
             return count;
