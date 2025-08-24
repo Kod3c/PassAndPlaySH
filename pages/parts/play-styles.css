@@ -391,7 +391,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     /* Remove margin since cards-area handles spacing */
 }
 
-/* Role envelope styling - mirrored discard pile */
+/* Role envelope styling - centered like discard pile */
 .role-envelope {
     cursor: pointer;
     transition: transform 0.2s ease, filter 0.2s ease;
@@ -399,15 +399,15 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     z-index: 5;
     width: calc(var(--play-card-w, 64px) + 8px);
     height: calc(var(--play-card-h, 92px) + 8px);
-    transform-origin: 50% 100%;
-    transform: translate(8px, 8px) scale(1.3) rotate(-2deg); /* Size similar to discard, moved right */
+    transform-origin: 50% 50%;
+    transform: scale(1.3) rotate(-2deg); /* Size similar to discard, centered */
 }
 .role-envelope:hover {
-    transform: translate(8px, 8px) scale(1.365) rotate(-2deg);
+    transform: scale(1.365) rotate(-2deg);
     filter: brightness(1.1);
 }
 .role-envelope:active {
-    transform: translate(8px, 8px) scale(1.274) rotate(-2deg);
+    transform: scale(1.274) rotate(-2deg);
 }
 .envelope-image {
     width: 100%;
@@ -564,9 +564,9 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 16px) rotate(2deg) scale(1.6); }
     .card-stack.discard .stack-card:nth-child(2) { transform: translate(3px, 20px) rotate(-1deg) scale(1.6); }
     .card-stack.discard .stack-card:nth-child(3) { transform: translate(-2px, 24px) rotate(3deg) scale(1.6); }
-    .role-envelope { transform: translate(16px, 16px) scale(1.6) rotate(-2deg); }
-    .role-envelope:hover { transform: translate(16px, 16px) scale(1.68) rotate(-2deg); }
-    .role-envelope:active { transform: translate(16px, 16px) scale(1.568) rotate(-2deg); }
+    .role-envelope { transform: scale(1.6) rotate(-2deg); }
+    .role-envelope:hover { transform: scale(1.68) rotate(-2deg); }
+    .role-envelope:active { transform: scale(1.568) rotate(-2deg); }
     .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-16px) rotate(-15deg) scale(1.0) !important; }
     .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-24px) rotate(12deg) scale(1.0) !important; }
     .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-32px) rotate(-8deg) scale(1.0) !important; }
