@@ -166,6 +166,30 @@
         /* Table-spread policy cards (design only) */
         .table-spread { width: 100%; display:flex; flex-direction: row-reverse; align-items:flex-end; justify-content:center; gap: 0; padding: 12px 0 0; margin: 16px 0 0; }
         .table-spread .table-card { width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-image: url('../images/policy-back.png'); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); margin: 0 -18px; transform-origin: 50% 100%; }
+        /* Ensure cards can host positioned tooltips */
+        .table-spread .table-card { position: relative; }
+        /* Glow/highlight for actionable table cards (no transform to preserve layout alignment) */
+        .table-spread .table-card.glow { box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6); animation: pulseGlowSpread 1.2s ease-in-out infinite alternate; will-change: filter, box-shadow; }
+        @keyframes pulseGlowSpread { from { filter: brightness(1) saturate(1); } to { filter: brightness(1.06) saturate(1.12); } }
+        /* Single tooltip above the spread */
+        .table-spread { position: relative; }
+        .spread-tooltip { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.98); color: #000; padding: 8px 12px; border: 3px solid var(--propaganda-black); border-radius: 10px; box-shadow: 0 6px 14px rgba(0,0,0,0.25); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.9rem; white-space: nowrap; pointer-events: none; z-index: 2; }
+        /* Revealed fronts for table cards */
+        .table-spread .table-card.is-front.liberal { background-image: url('../images/liberal.png'); }
+        .table-spread .table-card.is-front.facist { background-image: url('../images/facist.png'); }
+        .table-spread .table-card.lifting { transition: transform 140ms ease-out; }
+        .table-spread .table-card.is-front { transform-origin: 50% 50%; z-index: 10; }
+        .table-spread .table-card.revealed { transition: transform 220ms ease-out; }
+        /* Overlay for centered reveal */
+        .reveal-overlay { position: fixed; inset: 0; z-index: 6000; pointer-events: auto; }
+        .reveal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+        .reveal-card { position: absolute; width: var(--play-card-w, 92px); height: var(--play-card-h, 132px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6); transform-origin: 50% 50%; }
+        .reveal-instruction { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); pointer-events: none; background: rgba(255,255,255,0.97); color: #000; padding: 14px 18px; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,0.4); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.15rem; text-align: center; min-width: min(560px, 86vw); }
+        .reveal-actions { position: absolute; bottom: calc(10% + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .reveal-btn { cursor: pointer; border: 4px solid var(--propaganda-black); background: var(--highlight-cream); color: var(--propaganda-black); padding: 12px 18px; font-weight: 900; letter-spacing: 0.03em; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); text-transform: uppercase; font-family: var(--font-propaganda); font-size: 1.05rem; }
+        .reveal-btn[disabled] { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.3); }
+        .reveal-card.selected { box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 10px 24px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6); }
+        .reveal-card.selected::after { content: "✓"; position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border-radius: 50%; background: var(--highlight-cream); color: #000; display: inline-flex; align-items: center; justify-content: center; border: 3px solid var(--propaganda-black); font-weight: 900; box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
         /* Subtle varied angles to simulate a real table spread */
         .table-spread .table-card:nth-child(1) { transform: rotate(18deg); }
         .table-spread .table-card:nth-child(2) { transform: rotate(14deg); }
@@ -209,8 +233,8 @@
         }
         /* Larger screens: increase discard pile size */
         @media (min-width: 768px) {
-            .card-stack.discard .stack-card { transform: scale(1.6); transform-origin: 50% 100%; }
-            .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 0) rotate(2deg) scale(1.6); }
+            .card-stack.discard .stack-card { transform: translateY(16px) scale(1.6); transform-origin: 50% 100%; }
+            .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 16px) rotate(2deg) scale(1.6); }
         }
         /* Preloader overlay */
         .preloader-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
@@ -791,16 +815,21 @@
 
         function computePhase(game) {
             if (!game || game.state !== 'playing') return 'idle';
-            const nomineeId = game.nominatedChancellorPlayerId || null;
-            if (!nomineeId) return 'nomination';
             const voteResolution = (game.voteResolution || null);
-            if (!voteResolution) return 'voting';
-            if (voteResolution === 'ja') {
-                // Placeholder upcoming phases once implemented
+            if (!voteResolution) {
+                const nomineeId = game.nominatedChancellorPlayerId || null;
+                return nomineeId ? 'voting' : 'nomination';
+            }
+            let passed = false;
+            if (typeof voteResolution === 'string') {
+                passed = (voteResolution === 'ja');
+            } else if (typeof voteResolution === 'object') {
+                passed = !!voteResolution.passed;
+            }
+            if (passed) {
                 const policyPhase = (game.policyPhase || null);
                 return policyPhase || 'president_draw';
             }
-            // voteResolution === 'nein' → fails, next round would reset nomination
             return 'post_vote';
         }
 
@@ -880,11 +909,187 @@
                 setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
                 const msg = document.createElement('div');
                 msg.className = 'status-text';
-                msg.textContent = 'Card drawing coming soon…';
+                msg.textContent = 'Swipe the three glowing cards up to reveal them (only you can see).';
                 actionsCenter.appendChild(msg);
+                try { initSpreadPresidentDrawUI(); } catch (_) {}
             } else {
                 setStatus(gameId, 'Waiting for the President to draw policy cards…');
+                try { teardownSpreadPresidentDrawUI(); } catch (_) {}
             }
+        }
+
+        // President draw interactions on table-spread (local-only visuals)
+        let spreadPDListeners = false;
+        let spreadPDRevealed = 0;
+        let spreadPDAssigned = null;
+        let spreadFanShown = false;
+        function spreadRandomPolicy() { return Math.random() < (6/17) ? 'liberal' : 'facist'; }
+        function spreadAssignTopThree() {
+            if (Array.isArray(spreadPDAssigned) && spreadPDAssigned.length === 3) return spreadPDAssigned;
+            spreadPDAssigned = [spreadRandomPolicy(), spreadRandomPolicy(), spreadRandomPolicy()];
+            return spreadPDAssigned;
+        }
+        function teardownSpreadPresidentDrawUI() {
+            const spread = document.querySelector('.table-spread');
+            if (!spread) return;
+            const cards = Array.from(spread.querySelectorAll('.table-card'));
+            const topThree = cards.slice(-3);
+            topThree.forEach(c => { c.classList.remove('glow', 'lifting', 'is-front', 'liberal', 'facist'); c.style.transform = ''; c.style.opacity = ''; c.style.pointerEvents = ''; });
+            // remove listeners by cloning nodes
+            topThree.forEach((card) => { const clone = card.cloneNode(true); card.parentNode.replaceChild(clone, card); });
+            spreadPDListeners = false;
+            spreadPDRevealed = 0;
+            spreadPDAssigned = null;
+            spreadFanShown = false;
+            // Remove overlay if present
+            const overlay = document.getElementById('reveal-overlay');
+            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            // Remove single spread tooltip if present
+            const tip = document.getElementById('spread-tooltip');
+            if (tip && tip.parentNode) tip.parentNode.removeChild(tip);
+        }
+        function initSpreadPresidentDrawUI() {
+            const spread = document.querySelector('.table-spread');
+            if (!spread) return;
+            const cards = Array.from(spread.querySelectorAll('.table-card'));
+            if (cards.length < 3) return;
+            // row-reverse means leftmost are last in DOM order
+            const topThree = cards.slice(-3);
+            // highlight and add one tooltip centered above spread
+            topThree.forEach(c => c.classList.add('glow'));
+            if (!document.getElementById('spread-tooltip')) {
+                const tip = document.createElement('div');
+                tip.id = 'spread-tooltip';
+                tip.className = 'spread-tooltip';
+                tip.textContent = 'Tap or swipe up';
+                spread.appendChild(tip);
+            }
+            const vals = spreadAssignTopThree();
+            if (spreadPDListeners) return;
+            spreadPDListeners = true;
+            function revealAllToCenterFan() {
+                if (spreadFanShown) return;
+                spreadFanShown = true;
+                // Build overlay and move three clones to exact center positions to avoid layout drift
+                const overlayId = 'reveal-overlay';
+                let overlay = document.getElementById(overlayId);
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = overlayId;
+                    overlay.className = 'reveal-overlay';
+                    document.body.appendChild(overlay);
+                }
+                // Add instruction banner and actions
+                const instr = document.createElement('div');
+                instr.className = 'reveal-instruction';
+                instr.textContent = 'Select Two to give to your Chancellor';
+                overlay.appendChild(instr);
+                const actions = document.createElement('div');
+                actions.className = 'reveal-actions';
+                const sendBtn = document.createElement('button');
+                sendBtn.className = 'reveal-btn';
+                sendBtn.textContent = 'Send to Chancellor';
+                sendBtn.disabled = true;
+                actions.appendChild(sendBtn);
+                overlay.appendChild(actions);
+                const centerX = Math.round(window.innerWidth / 2);
+                const centerY = Math.round(window.innerHeight / 2);
+                const sampleRect = topThree[0].getBoundingClientRect();
+                const scale = 1.4;
+                const spacing = Math.max(96, Math.round(sampleRect.width * 1.25 * scale));
+                const orderMap = [2, 1, 0]; // map to left, center, right visually
+                const overlayCards = [];
+                orderMap.forEach((srcIdx, posIdx) => {
+                    const src = topThree[srcIdx];
+                    const policy = vals[srcIdx];
+                    // Style source to appear flipped and hide glow
+                    src.classList.add('is-front');
+                    src.classList.add(policy);
+                    src.classList.remove('glow');
+                    // Hide originals so only overlay cards are visible
+                    src.style.opacity = '0';
+                    src.style.pointerEvents = 'none';
+                    // Create overlay clone at center
+                    const clone = document.createElement('div');
+                    clone.className = 'reveal-card ' + policy;
+                    clone.style.backgroundImage = getComputedStyle(src).backgroundImage;
+                    const targetX = centerX + (posIdx - 1) * spacing;
+                    const targetY = centerY;
+                    const left = Math.round(targetX - (sampleRect.width * scale) / 2);
+                    const top = Math.round(targetY - (sampleRect.height * scale) / 2);
+                    const rot = posIdx === 0 ? -8 : (posIdx === 2 ? 8 : 0);
+                    clone.style.left = left + 'px';
+                    clone.style.top = top + 'px';
+                    clone.style.transform = `scale(${scale}) rotate(${rot}deg)`;
+                    overlay.appendChild(clone);
+                    overlayCards.push(clone);
+                });
+                spreadPDRevealed = 3;
+
+                // Selection logic: click to toggle; enable send when exactly 2 selected
+                function updateSendState() {
+                    const selected = overlayCards.filter(c => c.classList.contains('selected'));
+                    sendBtn.disabled = (selected.length !== 2);
+                }
+                overlayCards.forEach((c) => {
+                    c.style.cursor = 'pointer';
+                    c.addEventListener('click', function() {
+                        if (c.classList.contains('selected')) {
+                            c.classList.remove('selected');
+                        } else {
+                            // Limit to 2 selected
+                            const selected = overlayCards.filter(cc => cc.classList.contains('selected'));
+                            if (selected.length >= 2) return;
+                            c.classList.add('selected');
+                        }
+                        updateSendState();
+                    });
+                });
+                updateSendState();
+            }
+            topThree.forEach((card, idx) => {
+                const policy = vals[idx];
+                let startX = 0, startY = 0, dragging = false, moved = false, tapStart = 0;
+                function onDown(e) {
+                    if (card.classList.contains('is-front')) return;
+                    dragging = true; moved = false; tapStart = Date.now(); card.classList.add('lifting');
+                    const pt = e.touches ? e.touches[0] : e;
+                    startX = pt.clientX; startY = pt.clientY;
+                }
+                function onMove(e) {
+                    if (!dragging) return;
+                    const pt = e.touches ? e.touches[0] : e;
+                    const dx = pt.clientX - startX; const dy = pt.clientY - startY;
+                    if (Math.abs(dx) + Math.abs(dy) > 10) moved = true;
+                    const ty = Math.min(0, dy);
+                    const tx = Math.max(-20, Math.min(20, dx));
+                    card.style.transform = `translate(${tx}px, ${ty}px)`;
+                }
+                function onUp(e) {
+                    if (!dragging) return;
+                    dragging = false; card.classList.remove('lifting');
+                    const pt = e.changedTouches ? e.changedTouches[0] : e;
+                    const deltaY = pt.clientY - startY;
+                    const tapDuration = Date.now() - tapStart;
+                    // Trigger on upward swipe OR simple tap (short + little movement)
+                    if (deltaY < -60 || (!moved && tapDuration < 300)) {
+                        // First reveal triggers all three to fan to center
+                        revealAllToCenterFan();
+                    } else {
+                        card.style.transform = '';
+                    }
+                }
+                card.addEventListener('mousedown', onDown);
+                card.addEventListener('mousemove', onMove);
+                card.addEventListener('mouseup', onUp);
+                card.addEventListener('mouseleave', onUp);
+                card.addEventListener('touchstart', onDown, { passive: true });
+                card.addEventListener('touchmove', onMove, { passive: true });
+                card.addEventListener('touchend', onUp);
+                card.addEventListener('touchcancel', onUp);
+                // Also handle simple click to reveal
+                card.addEventListener('click', function() { revealAllToCenterFan(); });
+            });
         }
 
         function renderActions(gameId) {
