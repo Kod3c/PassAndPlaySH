@@ -39,9 +39,13 @@
         /* Enacted policy card placed into track slots */
         .slot .policy-card {
             position: absolute;
-            /* Fill the slot with slight bleed to avoid inner gap; allow rotation */
-            left: -4%; right: -4%; top: -4%; bottom: -4%;
-            background-size: cover;
+            /* Centered, with width-first sizing to avoid looking too wide */
+            top: 50%; left: 50%; right: auto; bottom: auto;
+            width: var(--policy-card-w, 68%);
+            height: auto;
+            aspect-ratio: 92 / 132;
+            transform-origin: center center;
+            background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             border: 3px solid var(--propaganda-black);
@@ -94,7 +98,8 @@
             /* Fascist track: 6 slots, less spacing between cards on mobile to match liberal track width */
             .track.fascist .slots { gap: 4px; }
             .slot { width: 44px; height: 60px; }
-            .slot .policy-card { left: 7%; right: 7%; top: 7%; bottom: 7%; }
+            /* Use aspect ratio sizing; center horizontally */
+            .slot .policy-card { left: 50%; top: 50%; width: 22px !important; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(0.82) !important; }
             /* Player strip: larger chips and horizontal scroll */
             .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
             body.role-banner-visible .players-strip { margin-top: 8px; }
@@ -111,7 +116,7 @@
         }
         @media (max-width: 360px) {
             .slot { width: 40px; height: 54px; }
-            .slot .policy-card { left: 8%; right: 8%; top: 8%; bottom: 8%; }
+            .slot .policy-card { left: 50%; top: 50%; width: 18px !important; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(0.78) !important; }
             /* Liberal track: 5 slots, more spacing between cards on very small screens */
             .track.liberal .slots { gap: 10px; }
             /* Fascist track: 6 slots, less spacing between cards on very small screens to match liberal track width */
@@ -942,13 +947,13 @@
                         // Use image backgrounds for authenticity
                         card.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
                         // Rotate left a bit more and scale up 5%
-                        card.style.transform = 'rotate(-5deg) scale(1.05)';
+                        card.style.transform = 'translate(-50%, -50%) rotate(-5deg) scale(1.05)';
                         card.style.zIndex = '3';
                         slot.appendChild(card);
                         slot.classList.add('filled');
                     } else {
                         existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
-                        existing.style.transform = 'rotate(-5deg) scale(1.05)';
+                        existing.style.transform = 'translate(-50%, -50%) rotate(-5deg) scale(1.05)';
                         existing.style.zIndex = '3';
                         slot.classList.add('filled');
                     }
@@ -1268,7 +1273,14 @@
             
             const centerX = Math.round(window.innerWidth / 2);
             const centerY = Math.round(window.innerHeight / 2);
-            const scale = 1.4;
+            // Responsive scale: reduce card size on narrow screens so overlays don't overwhelm UI
+            const _vw = window.innerWidth || (document && document.documentElement && document.documentElement.clientWidth) || 0;
+            let scale = 1.4;
+            if (_vw <= 360) {
+                scale = 0.95;
+            } else if (_vw <= 640) {
+                scale = 1.1;
+            }
             
             const overlayCards = [];
             
@@ -1552,7 +1564,14 @@
                 const centerX = Math.round(window.innerWidth / 2);
                 const centerY = Math.round(window.innerHeight / 2);
                 const sampleRect = topThree[0].getBoundingClientRect();
-                const scale = 1.4;
+                // Responsive scale: smaller overlays on phones
+                const _vw2 = window.innerWidth || (document && document.documentElement && document.documentElement.clientWidth) || 0;
+                let scale = 1.4;
+                if (_vw2 <= 360) {
+                    scale = 1.0;
+                } else if (_vw2 <= 640) {
+                    scale = 1.15;
+                }
                 const spacing = Math.max(96, Math.round(sampleRect.width * 1.25 * scale));
                 const orderMap = [2, 1, 0]; // map to left, center, right visually
                 const overlayCards = [];
@@ -1866,6 +1885,53 @@
                     });
                 }
                 
+                // Advance to next government: clear chancellor, set term limits, and rotate president
+                try {
+                    const prevChancellorId = latestGame.currentChancellorPlayerId || null;
+                    const prevPresidentId = latestGame.currentPresidentPlayerId || null;
+                    const currentIndex = Number(latestGame.presidentIndex || 0);
+                    const orderedAlive = (latestPlayers || [])
+                        .filter(p => p && p.alive !== false)
+                        .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+                    const nextIndex = orderedAlive.length ? ((currentIndex + 1) % orderedAlive.length) : 0;
+                    const nextPresident = orderedAlive[nextIndex] || null;
+
+                    const advanceUpdates = {
+                        // Clear out policy phase artifacts so UI returns to nomination
+                        policyPhase: null,
+                        enactedPolicy: null,
+                        presidentDrawnCards: [],
+                        presidentDiscardedCard: null,
+                        chancellorDiscardedCard: null,
+                        // Clear current chancellor and nomination
+                        currentChancellorPlayerId: null,
+                        nominatedChancellorPlayerId: null,
+                        // Reset vote state so computePhase() returns 'nomination'
+                        voteResolution: null,
+                        electionVotes: {},
+                        // Set term limits for next turn eligibility
+                        termLimitLastChancellorId: prevChancellorId,
+                        termLimitLastPresidentId: prevPresidentId,
+                        // Rotate president
+                        presidentIndex: nextIndex,
+                        currentPresidentPlayerId: nextPresident ? nextPresident.id : null,
+                        updatedAt: serverTimestamp()
+                    };
+
+                    await updateDoc(gameRef, advanceUpdates);
+
+                    // Announce rotation and prompt nomination
+                    try {
+                        await logPublic(
+                            gameId,
+                            `Next President: ${nextPresident ? (nextPresident.name || 'Player') : 'Unknown'}. President, please nominate a Chancellor.`,
+                            { type: 'rotation', actorId: nextPresident ? nextPresident.id : null }
+                        );
+                    } catch (_) {}
+                } catch (e) {
+                    console.error('Failed to advance to next government', e);
+                }
+
                 // Move to next turn or check win conditions
                 setTimeout(() => {
                     setStatus(gameId, `${enactedPolicy === 'liberal' ? 'Liberal' : 'Fascist'} policy enacted! Moving to next turn...`);
@@ -2275,6 +2341,7 @@
             const menuModal = document.getElementById('menu-modal');
             const menuClose = document.getElementById('menu-close');
             const menuBody = document.getElementById('menu-body');
+            const menuTitle = menuModal?.querySelector('.modal-title');
 
             function isSoundEnabled() {
                 try { return localStorage.getItem('sh_sound_enabled') !== 'false'; } catch (_) { return true; }
@@ -2332,6 +2399,11 @@
 
             function openMenuModal() {
                 renderMenu();
+                try {
+                    const you = youPlayerDoc();
+                    const yourName = you ? (you.name || 'Player') : 'Player';
+                    if (menuTitle) menuTitle.textContent = `Menu — ${yourName}`;
+                } catch (_) {}
                 if (menuModal) menuModal.style.display = 'flex';
                 setRoleBannerVisibility(false);
             }
