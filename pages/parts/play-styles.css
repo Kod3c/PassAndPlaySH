@@ -1,0 +1,589 @@
+/* Secret Hitler Mobile - Play Page Styles */
+
+:root {
+    --liberal-blue: #00AEEF;
+    --fascist-red: #DA291C;
+    --propaganda-black: #101820;
+    --neutral-beige: #D6C6A9;
+    --highlight-cream: #F1E6B2;
+}
+
+.play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
+.play-main { flex:1; display:flex; flex-direction: column; align-items: stretch; justify-content:flex-start; padding: 0 12px 96px; }
+.board-shell { width: 100%; max-width: 1040px; margin: 0 auto; display:flex; flex-direction:column; align-items:center; gap: 12px; }
+.players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
+
+/* When role banner is visible, push players down a bit more */
+body.role-banner-visible .players-strip { margin-top: 8px; }
+
+.player-chip { padding: 4px 10px; border: 2px solid var(--propaganda-black); background:#fff; font-weight:700; }
+.player-chip.is-president { background: #fef3c7; }
+.player-chip.is-chancellor { background: #e0f2fe; }
+
+.board-area { width:100%; display:flex; flex-direction:column; gap:12px; }
+.board-frame { width:100%; border: 6px solid var(--propaganda-black); border-radius: 12px; background: #f6f0df; box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 0 0 4px var(--highlight-cream); padding: 16px; }
+
+.tracks { display:grid; grid-template-columns: 1fr; gap: 16px; }
+.track { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border: 3px solid var(--propaganda-black); background: var(--neutral-beige); box-shadow: inset 0 0 0 3px rgba(0,0,0,0.15); border-radius: 8px; min-height: 88px; }
+.track.liberal { background: var(--liberal-blue); color: #fff; }
+.track.fascist { background: var(--fascist-red); color: #fff; }
+.track-title { font-weight:900; letter-spacing:0.04em; }
+
+.slots { display:flex; gap:8px; align-items:center; justify-content:center; }
+/* Liberal track: 5 slots, more spacing between cards */
+.track.liberal .slots { gap: 16px; }
+/* Fascist track: 6 slots, less spacing between cards to match liberal track width */
+.track.fascist .slots { gap: 4px; }
+
+.slot { width: 50px; height: 68px; border: 3px solid #000; background: rgba(255,255,255,0.18); box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9); border-radius: 4px; position: relative; overflow: hidden; }
+
+/* Enacted policy card placed into track slots */
+.slot .policy-card {
+    position: absolute;
+    /* Centered, with width-first sizing to avoid looking too wide */
+    top: 50%; left: 50%; right: auto; bottom: auto;
+    width: var(--policy-card-w, 68%);
+    height: auto;
+    aspect-ratio: 92 / 132;
+    transform-origin: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 3px solid var(--propaganda-black);
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* When a policy is placed, let it overflow slightly for rotation */
+.slot.filled { overflow: visible; border-color: transparent; box-shadow: none; background: transparent; }
+
+.track.liberal .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/bird.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.6; filter: brightness(0) invert(1); pointer-events: none; }
+.track.fascist .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/skull.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.55; filter: brightness(0) invert(1); pointer-events: none; }
+
+/* Increase opacity for the last three fascist slots */
+.track.fascist .slot:nth-last-child(-n+3):empty::after { opacity: 0.85; }
+/* Decrease opacity for the first three fascist slots */
+.track.fascist .slot:nth-child(-n+3):empty::after { opacity: 0.25; }
+
+.tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
+.tracker-row { display:flex; align-items:center; justify-content:center; gap:10px; padding-top: 4px; }
+.tracker-label { font-weight:900; letter-spacing: 0.02em; }
+.tracker .bubble { width:26px; height:26px; border-radius:50%; background:#fff; border:3px solid var(--propaganda-black); }
+.tracker .square { width:26px; height:26px; border-radius:4px; background:#fff; border:3px solid var(--propaganda-black); display:inline-flex; align-items:center; justify-content:center; font-weight:900; }
+.tracker .square.active { background: var(--highlight-cream); }
+
+.policy-summary { display:flex; align-items:stretch; justify-content:center; gap:10px; margin-top: 8px; }
+.policy-card-wrap { display:flex; flex-direction:column; align-items:center; }
+.policy-card-title { display:none; font-weight:900; margin-bottom: 4px; letter-spacing:0.02em; }
+.policy-chip { padding: 6px 10px; border: 3px solid var(--propaganda-black); background:#fff; font-weight:800; box-shadow: inset 0 0 0 3px rgba(241,230,178,0.6); }
+.policy-chip.liberal { background: var(--liberal-blue); color:#fff; }
+.policy-chip.fascist { background: var(--fascist-red); color:#fff; }
+.policy-chip .count { margin-left: 6px; font-weight: 900; }
+
+@media (max-width: 640px) {
+    /* Show policy counters side-by-side on mobile */
+    .policy-summary { flex-direction: row; align-items: center; justify-content: center; gap: 8px; flex-wrap: nowrap; }
+    .policy-card-title { display:none; }
+    .policy-chip { padding: 6px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    .policy-chip .policy-label { display: inline; }
+    /* Reduce empty space below header by top-aligning content */
+    .play-main { align-items: stretch; justify-content: flex-start; }
+}
+
+/* Compact layout for narrow phones */
+@media (max-width: 480px) {
+    .play-main { padding: 0 8px calc(88px + env(safe-area-inset-bottom)); }
+    /* Role banner: keep standard width on small screens */
+    .role-bar { width: 100%; margin: 0; border-radius: 12px; }
+    .board-frame { padding: 12px; }
+    .track { flex-direction: column; align-items: center; gap: 8px; }
+    .track-title { font-size: 0.95rem; text-align: center; }
+    .slots { gap: 6px; }
+    /* Liberal track: 5 slots, more spacing between cards on mobile */
+    .track.liberal .slots { gap: 12px; }
+    /* Fascist track: 6 slots, less spacing between cards on mobile to match liberal track width */
+    .track.fascist .slots { gap: 4px; }
+    .slot { width: 44px; height: 60px; }
+    /* Use aspect ratio sizing; center horizontally */
+    .slot .policy-card { left: 50%; top: 50%; width: 22px !important; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(0.82) !important; }
+    /* Player strip: larger chips and horizontal scroll */
+    .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+    body.role-banner-visible .players-strip { margin-top: 8px; }
+    .players-strip::-webkit-scrollbar { display: none; }
+    .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
+    /* Floating action bar adjustments for narrow screens */
+    .floating-footer { padding: 0 8px; bottom: calc(8px + env(safe-area-inset-bottom)); }
+    .actions-bar { padding: 8px; gap: 6px; flex-wrap: wrap; justify-content: space-between; }
+    /* First row: center; Second row: left + right */
+    .actions-center { order: 1; flex: 1 1 100%; display: flex; justify-content: center; }
+    .actions-left { order: 2; flex: 1 1 0; display: flex; justify-content: flex-start; }
+    .actions-right { order: 2; flex: 1 1 0; display: flex; justify-content: flex-end; }
+    .actions-bar .btn { min-width: 0; padding: 8px 10px; font-size: 0.95rem; }
+}
+
+@media (max-width: 360px) {
+    .slot { width: 40px; height: 54px; }
+    .slot .policy-card { left: 50%; top: 50%; width: 18px !important; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(0.78) !important; }
+    /* Liberal track: 5 slots, more spacing between cards on very small screens */
+    .track.liberal .slots { gap: 10px; }
+    /* Fascist track: 6 slots, less spacing between cards on very small screens to match liberal track width */
+    .track.fascist .slots { gap: 3px; }
+    .status-banner { font-size: 1rem; padding: 10px 12px; }
+    .player-chip { font-size: 1.05rem; }
+    .actions-bar .btn { padding: 6px 8px; font-size: 0.9rem; }
+}
+
+.floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
+.actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+.actions-left, .actions-center, .actions-right { display:flex; gap:8px; align-items:center; }
+/* Ensure bottom action buttons don't become full-width on mobile */
+.actions-bar .btn { width: auto; flex: 0 0 auto; }
+
+.btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
+.btn-primary { background: var(--highlight-cream); color: var(--propaganda-black); }
+
+.status-banner { 
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding: 12px 16px; background: var(--off-white); border: 4px solid var(--propaganda-black);
+    border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; 
+    font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; 
+    text-align:center; animation: dropIn 180ms ease-out; font-size: 1.125rem; line-height: 1;
+    color: #000;
+}
+.status-text { color: #000; }
+.status-banner.status-updated { animation: dropIn 180ms ease-out; }
+
+/* Floating role banner */
+/* Role banner now inline (not fixed) */
+.floating-role { position: static; padding: 0; margin: 8px 0; z-index: auto; pointer-events: auto; display:none; width: 100%; align-self: stretch; }
+.role-bar { width: 100%; margin: 0; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 12px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.25rem; line-height: 1; }
+.role-tag { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.role-tag.pres { background: #fef3c7; }
+.role-tag.chanc { background: #e0f2fe; }
+
+@keyframes dropIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content:center; z-index: 5000; }
+.modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); position: relative; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); }
+.modal-title { font-weight: 900; }
+.modal-body { padding: 12px; }
+.modal-close { position:absolute; top:8px; right:8px; width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; border:3px solid var(--propaganda-black); background: var(--off-white); font-weight:900; box-shadow: var(--shadow-sm); cursor:pointer; }
+.modal-close:hover { box-shadow: var(--shadow-md); }
+
+/* Role overlay specific */
+.role-content { text-align: center; }
+.role-display { 
+    margin: 20px 0; 
+    padding: 20px; 
+    border: 4px solid var(--propaganda-black); 
+    border-radius: 12px; 
+    background: rgba(255,255,255,0.1); 
+    min-height: 120px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.role-label { 
+    font-weight: 900; 
+    letter-spacing: 0.03em; 
+    font-size: 2rem; 
+    color: #000; 
+    text-align: center; 
+}
+.role-actions { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    align-items: center; 
+}
+.role-actions .btn { 
+    min-width: 200px; 
+    min-height: 48px; 
+    font-size: 1.1rem; 
+}
+
+/* Rules modal specific */
+.rules-modal .modal-card { max-height: 86vh; display:flex; flex-direction:column; }
+.rules-modal .modal-body { overflow:auto; }
+.rules-modal .modal-header { background: var(--off-white); }
+.rules-modal .modal-title { font-family: var(--font-fraktur); letter-spacing: 0.02em; font-size: var(--font-2xl); }
+.rules-modal .modal-subtitle { font-family: var(--font-propaganda); font-size: var(--font-lg); color: var(--dark-beige); }
+.rules-quicknav { display:flex; gap:8px; flex-wrap:nowrap; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); background: var(--bg-card); position: sticky; top: 0; z-index: 1; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
+.rules-quicknav .rule-nav-btn { padding: 6px 10px; flex: 0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; }
+
+/* Bottom nav for rules (mobile) */
+.rules-bottomnav { display:none; position: sticky; bottom: 0; left: 0; right: 0; padding: 8px; background: var(--bg-card); border-top: 3px solid var(--propaganda-black); z-index: 1; }
+.rules-bottomnav-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.rules-bottomnav .indicator { font-weight: 900; letter-spacing: 0.03em; }
+
+@media (max-width: 640px) {
+    .rules-modal .modal-card { width: 96vw; max-height: 92vh; }
+    .rules-modal .modal-body { padding: 8px; padding-bottom: 64px; }
+    .rules-quicknav { gap:6px; padding: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow-x: hidden; overflow-y: visible; }
+    .rules-quicknav .rule-nav-btn { padding: 10px; min-width: 0; width: 100%; }
+    .rules-quicknav .nav-text { display:none; }
+    .rules-quicknav .nav-icon { font-size: 1.125rem; }
+    .rules-bottomnav { display:block; }
+    .rules-bottomnav .btn { min-height: 44px; flex: 1; }
+    .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
+}
+
+@media (max-width: 360px) {
+    .rules-quicknav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.order-list { display:flex; flex-direction:column; gap:8px; }
+.order-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; border: 2px dashed var(--propaganda-black); background:#fff; }
+.order-left { display:flex; align-items:center; gap:10px; }
+/* Space between badges/tags on the right side of player order rows */
+.order-right { display:flex; align-items:center; gap:6px; }
+.order-right > * + * { margin-left: 6px; }
+.order-num { width: 28px; height: 28px; border-radius: 50%; display:inline-flex; align-items:center; justify-content:center; border: 3px solid var(--propaganda-black); font-weight:900; background: var(--highlight-cream); }
+.badge-pres { padding: 2px 8px; background:#fef3c7; border:2px solid var(--propaganda-black); font-weight:800; }
+.badge-chanc { padding: 2px 8px; background:#e0f2fe; border:2px solid var(--propaganda-black); font-weight:800; }
+
+@media (min-width: 720px) {
+    .tracks { grid-template-columns: 1fr; }
+}
+
+/* Voting popover */
+.vote-pop-wrap { position: relative; display: inline-block; }
+.vote-popover { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); background: #fff; border: 3px solid var(--propaganda-black); border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.28); padding: 14px 16px; display: none; z-index: 10; }
+.vote-popover .btn { min-width: 120px; min-height: 48px; padding: 12px 18px; font-size: 1.125rem; }
+.vote-popover::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--propaganda-black); }
+.btn-black { background: #101820; color: #fff; }
+
+/* Table-spread policy cards (design only) */
+.table-spread { 
+    width: 100%; 
+    display: flex; 
+    flex-direction: row-reverse; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 0; 
+    padding: 12px 0 0; 
+    margin: 16px 0 0; 
+    transition: transform 0.2s ease;
+}
+.table-spread:hover {
+    transform: scale(1.02);
+}
+.table-spread .table-card { width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-image: url('../images/policy-back.png'); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); margin: 0 -18px; transform-origin: 50% 100%; }
+/* Ensure cards can host positioned tooltips */
+.table-spread .table-card { position: relative; }
+/* Glow/highlight for actionable table cards (no transform to preserve layout alignment) */
+.table-spread .table-card.glow { 
+    box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6) !important; 
+    animation: pulseGlowSpread 1.2s ease-in-out infinite alternate !important; 
+    will-change: filter, box-shadow; 
+    transition: box-shadow 200ms ease-out, transform 200ms ease-out;
+}
+
+/* Group hover effect for the three glowing cards */
+.table-spread:hover .table-card.glow {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6) !important;
+    transform: translateY(-8px) scale(1.05) !important;
+    z-index: 15;
+    filter: brightness(1.1) saturate(1.15) !important;
+}
+
+/* Ensure non-glowing cards don't get hover effects */
+.table-spread .table-card:not(.glow):hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6);
+}
+
+/* Make glowing cards more interactive */
+.table-spread .table-card.glow {
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* Ensure non-glowing cards have default cursor */
+.table-spread .table-card:not(.glow) {
+    cursor: default;
+}
+
+@keyframes pulseGlowSpread { from { filter: brightness(1) saturate(1); } to { filter: brightness(1.06) saturate(1.12); } }
+
+/* Single tooltip above the spread */
+.table-spread { position: relative; }
+.spread-tooltip { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); background: rgba(255,255,255,0.98); color: #000; padding: 8px 12px; border: 3px solid var(--propaganda-black); border-radius: 10px; box-shadow: 0 6px 14px rgba(0,0,0,0.25); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.9rem; white-space: nowrap; pointer-events: none; z-index: 3; }
+.spread-tooltip::after { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid var(--propaganda-black); }
+
+/* Revealed fronts for table cards */
+.table-spread .table-card.is-front.liberal { background-image: url('../images/liberal.png'); }
+.table-spread .table-card.is-front.facist { background-image: url('../images/facist.png'); }
+.table-spread .table-card.lifting { transition: transform 140ms ease-out; }
+.table-spread .table-card.is-front { transform-origin: 50% 50%; z-index: 10; }
+.table-spread .table-card.revealed { transition: transform 220ms ease-out; }
+
+/* Overlay for centered reveal */
+.reveal-overlay { position: fixed; inset: 0; z-index: 6000; pointer-events: auto; }
+.reveal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+.reveal-card { position: absolute; width: var(--play-card-w, 92px); height: var(--play-card-h, 132px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6); transform-origin: 50% 50%; transition: transform 240ms ease-out, left 240ms ease-out, top 240ms ease-out; }
+.reveal-instruction { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); pointer-events: none; background: rgba(255,255,255,0.97); color: #000; padding: 14px 18px; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,0.4); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.15rem; text-align: center; min-width: min(560px, 86vw); }
+.reveal-actions { position: absolute; bottom: calc(10% + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 10px; }
+.reveal-btn { cursor: pointer; border: 4px solid var(--propaganda-black); background: var(--highlight-cream); color: var(--propaganda-black); padding: 12px 18px; font-weight: 900; letter-spacing: 0.03em; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); text-transform: uppercase; font-family: var(--font-propaganda); font-size: 1.05rem; }
+.reveal-btn[disabled] { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.3); }
+.reveal-card.selected { box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 10px 24px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6); }
+.reveal-card.selected::after { content: "✓"; position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border-radius: 50%; background: var(--highlight-cream); color: #000; display: inline-flex; align-items: center; justify-content: center; border: 3px solid var(--propaganda-black); font-weight: 900; box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
+
+/* Chancellor choice overlay specific styles */
+#chancellor-choice-overlay .reveal-card {
+    transition: box-shadow 200ms ease-out;
+}
+
+#chancellor-choice-overlay .reveal-card:hover {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+}
+
+#chancellor-choice-overlay .reveal-card.selected {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+    z-index: 10;
+}
+
+/* Hover effect for face-down cards - both light up together */
+#chancellor-choice-overlay .reveal-card:not(.flipped):hover {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 24px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+    transition: box-shadow 200ms ease-out;
+}
+
+/* When any face-down card is hovered, both get enhanced glow */
+#chancellor-choice-overlay:hover .reveal-card:not(.flipped) {
+    box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.3), inset 0 0 0 3px rgba(241,230,178,0.6);
+    transition: box-shadow 200ms ease-out;
+}
+
+/* Subtle varied angles to simulate a real table spread */
+.table-spread .table-card:nth-child(1) { transform: rotate(18deg); }
+.table-spread .table-card:nth-child(2) { transform: rotate(14deg); }
+.table-spread .table-card:nth-child(3) { transform: rotate(10deg); }
+.table-spread .table-card:nth-child(4) { transform: rotate(6deg); }
+.table-spread .table-card:nth-child(5) { transform: rotate(3deg); }
+.table-spread .table-card:nth-child(6) { transform: rotate(1deg); }
+.table-spread .table-card:nth-child(7) { transform: rotate(-1deg); }
+.table-spread .table-card:nth-child(8) { transform: rotate(-3deg); }
+.table-spread .table-card:nth-child(9) { transform: rotate(-6deg); }
+.table-spread .table-card:nth-child(10) { transform: rotate(-10deg); }
+.table-spread .table-card:nth-child(11) { transform: rotate(-14deg); }
+.table-spread .table-card:nth-child(12) { transform: rotate(-18deg); }
+
+/* Deck + Discard stacks flanking the spread */
+.cards-area { 
+    width: 100%; 
+    display: flex; 
+    justify-content: center; 
+    margin: 20px 0 0; 
+    padding: 16px;
+    background: rgba(246, 240, 223, 0.3);
+    border-radius: 12px;
+    border: 2px solid rgba(16, 24, 32, 0.1);
+}
+.cards-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 80px; 
+    /* Remove margin since cards-area handles spacing */
+}
+
+/* Role envelope styling - mirrored discard pile */
+.role-envelope {
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    position: relative;
+    z-index: 5;
+    width: calc(var(--play-card-w, 64px) + 8px);
+    height: calc(var(--play-card-h, 92px) + 8px);
+    transform-origin: 50% 100%;
+    transform: translate(8px, 8px) scale(1.3) rotate(-2deg); /* Size similar to discard, moved right */
+}
+.role-envelope:hover {
+    transform: translate(8px, 8px) scale(1.365) rotate(-2deg);
+    filter: brightness(1.1);
+}
+.role-envelope:active {
+    transform: translate(8px, 8px) scale(1.274) rotate(-2deg);
+}
+.envelope-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    border-radius: 6px;
+}
+
+.card-stack.discard { }
+.card-stack { 
+    position: relative; 
+    width: calc(var(--play-card-w, 64px) + 8px); 
+    height: calc(var(--play-card-h, 92px) + 8px); 
+    flex: 0 0 auto; 
+    transition: transform 0.2s ease;
+}
+.card-stack:hover {
+    transform: scale(1.05);
+}
+.stack-card { position: absolute; left: 0; bottom: 0; width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); }
+.stack-card.is-back { background-image: url('../images/policy-back.png'); }
+.stack-card.is-discard { background-image: url('../images/discard.png'); }
+
+/* Discard pile dynamic cards - these will be generated by JavaScript */
+.card-stack.discard .stack-card.policy-on-discard { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-5px) rotate(-15deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 2; 
+}
+.card-stack.discard .stack-card.policy-on-discard-top { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-8px) rotate(12deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 3; 
+}
+/* Additional discard pile cards */
+.card-stack.discard .stack-card.policy-on-discard-2 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-11px) rotate(-8deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 4; 
+}
+.card-stack.discard .stack-card.policy-on-discard-3 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-14px) rotate(18deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 5; 
+}
+.card-stack.discard .stack-card.policy-on-discard-4 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-17px) rotate(-22deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 6; 
+}
+.card-stack.discard .stack-card.policy-on-discard-5 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-20px) rotate(6deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 7; 
+}
+.card-stack.discard .stack-card.policy-on-discard-6 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-23px) rotate(-14deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 8; 
+}
+.card-stack.discard .stack-card.policy-on-discard-7 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-26px) rotate(20deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 9; 
+}
+.card-stack.discard .stack-card.policy-on-discard-8 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-29px) rotate(-10deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 10; 
+}
+.card-stack.discard .stack-card.policy-on-discard-9 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-32px) rotate(16deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 11; 
+}
+.card-stack.discard .stack-card.policy-on-discard-10 { 
+    background-image: url('../images/policy-back.png'); 
+    transform: translateY(-35px) rotate(-25deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 12; 
+}
+
+.card-stack.deck .stack-card:nth-child(1) { transform: translate(0, 0) rotate(-2deg); }
+.card-stack.deck .stack-card:nth-child(2) { transform: translate(4px, -4px) rotate(1deg); }
+.card-stack.deck .stack-card:nth-child(3) { transform: translate(8px, -8px) rotate(-0.5deg); }
+.card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 8px) rotate(2deg) scale(1.3); }
+.card-stack.discard .stack-card:nth-child(2) { transform: translate(2px, 12px) rotate(-1deg) scale(1.3); }
+.card-stack.discard .stack-card:nth-child(3) { transform: translate(-1px, 16px) rotate(3deg) scale(1.3); }
+/* Single, larger discard card */
+.card-stack.discard .stack-card { transform: translateY(8px) scale(1.3); transform-origin: 50% 100%; }
+
+/* Responsive sizing for small screens */
+@media (max-width: 640px) {
+    .table-spread { padding-top: 10px; margin-top: 14px; }
+    .cards-area { margin: 16px 0 0; }
+    .cards-row { gap: 60px; }
+    .table-spread .table-card { width: var(--play-card-w, 56px); height: var(--play-card-h, 82px); margin: 0 -18px; }
+    .card-stack { width: calc(var(--play-card-w, 56px) + 8px); height: calc(var(--play-card-h, 82px) + 8px); }
+    .stack-card { width: var(--play-card-w, 56px); height: var(--play-card-h, 82px); }
+    .envelope-image { width: calc(var(--play-card-w, 56px) + 8px); height: calc(var(--play-card-h, 82px) + 8px); }
+    .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-5px) rotate(-15deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-8px) rotate(12deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-11px) rotate(-8deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-3 { transform: translateY(-14px) rotate(18deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-4 { transform: translateY(-17px) rotate(-22deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-5 { transform: translateY(-20px) rotate(6deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-6 { transform: translateY(-23px) rotate(-14deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-7 { transform: translateY(-26px) rotate(20deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-8 { transform: translateY(-29px) rotate(-10deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-9 { transform: translateY(-32px) rotate(16deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-10 { transform: translateY(-35px) rotate(-25deg) scale(1.0) !important; }
+}
+
+@media (max-width: 360px) {
+    .table-spread { padding-top: 8px; margin-top: 12px; }
+    .cards-area { margin: 14px 0 0; }
+    .cards-row { gap: 48px; }
+    .table-spread .table-card { width: var(--play-card-w, 50px); height: var(--play-card-h, 74px); margin: 0 -20px; }
+    .card-stack { width: calc(var(--play-card-w, 50px) + 8px); height: calc(var(--play-card-h, 74px) + 8px); }
+    .stack-card { width: var(--play-card-w, 50px); height: var(--play-card-h, 74px); }
+    .envelope-image { width: calc(var(--play-card-w, 50px) + 8px); height: calc(var(--play-card-h, 74px) + 8px); }
+    .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-10px) rotate(-15deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-15px) rotate(12deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-20px) rotate(-8deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-3 { transform: translateY(-25px) rotate(18deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-4 { transform: translateY(-30px) rotate(-22deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-5 { transform: translateY(-35px) rotate(6deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-6 { transform: translateY(-40px) rotate(-14deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-7 { transform: translateY(-45px) rotate(20deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-8 { transform: translateY(-50px) rotate(-10deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-9 { transform: translateY(-55px) rotate(16deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-10 { transform: translateY(-60px) rotate(-25deg) scale(1.0) !important; }
+}
+
+/* Larger screens: increase discard pile size */
+@media (min-width: 768px) {
+    .cards-area { margin: 24px 0 0; }
+    .cards-row { gap: 100px; }
+    .envelope-image { width: calc(var(--play-card-w, 64px) + 8px); height: calc(var(--play-card-h, 92px) + 8px); }
+    .card-stack.discard .stack-card { transform: translateY(16px) scale(1.6); transform-origin: 50% 100%; }
+    .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 16px) rotate(2deg) scale(1.6); }
+    .card-stack.discard .stack-card:nth-child(2) { transform: translate(3px, 20px) rotate(-1deg) scale(1.6); }
+    .card-stack.discard .stack-card:nth-child(3) { transform: translate(-2px, 24px) rotate(3deg) scale(1.6); }
+    .role-envelope { transform: translate(16px, 16px) scale(1.6) rotate(-2deg); }
+    .role-envelope:hover { transform: translate(16px, 16px) scale(1.68) rotate(-2deg); }
+    .role-envelope:active { transform: translate(16px, 16px) scale(1.568) rotate(-2deg); }
+    .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-16px) rotate(-15deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-24px) rotate(12deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-32px) rotate(-8deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-3 { transform: translateY(-40px) rotate(18deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-4 { transform: translateY(-48px) rotate(-22deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-5 { transform: translateY(-56px) rotate(6deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-6 { transform: translateY(-64px) rotate(-14deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-7 { transform: translateY(-72px) rotate(20deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-8 { transform: translateY(-80px) rotate(-10deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-9 { transform: translateY(-88px) rotate(16deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-10 { transform: translateY(-96px) rotate(-25deg) scale(1.0) !important; }
+}
+
+/* Preloader overlay */
+.preloader-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
+.preloader-overlay .loader { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.preloader-overlay .spinner { width: 56px; height: 56px; border: 6px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+.preloader-overlay .loader-text { color: #fff; font-weight: 800; letter-spacing: 0.03em; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
