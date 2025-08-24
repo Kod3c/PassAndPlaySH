@@ -176,14 +176,12 @@ export const BoardModule = {
                     card.className = 'policy-card ' + (type === 'liberal' ? 'liberal' : 'fascist');
                     // Use image backgrounds for authenticity
                     card.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
-                    // Rotate left a bit more and scale up 5%
-                    card.style.transform = 'translate(-50%, -50%) rotate(-5deg) scale(1.05)';
+                    // Let CSS handle the transform
                     card.style.zIndex = '3';
                     slot.appendChild(card);
                     slot.classList.add('filled');
                 } else {
                     existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
-                    existing.style.transform = 'translate(-50%, -50%) rotate(-5deg) scale(1.05)';
                     existing.style.zIndex = '3';
                     slot.classList.add('filled');
                 }

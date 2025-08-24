@@ -42,10 +42,11 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     position: absolute;
     /* Centered, with width-first sizing to avoid looking too wide */
     top: 50%; left: 50%; right: auto; bottom: auto;
-    width: var(--policy-card-w, 68%);
+    width: 34px;  /* Fixed pixel width instead of percentage */
     height: auto;
     aspect-ratio: 92 / 132;
     transform-origin: center center;
+    transform: translate(-50%, -50%) rotate(-5deg) scale(1.05);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -107,7 +108,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .track.fascist .slots { gap: 4px; }
     .slot { width: 44px; height: 60px; }
     /* Use aspect ratio sizing; center horizontally */
-    .slot .policy-card { left: 50%; top: 50%; width: 22px !important; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(0.82) !important; }
+    .slot .policy-card { left: 50%; top: 50%; width: 30px; height: auto; border-width: 2px; transform: translate(-50%, -50%) rotate(-5deg) scale(1.05); }
     /* Player strip: larger chips and horizontal scroll */
     .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
     body.role-banner-visible .players-strip { margin-top: 8px; }
@@ -125,7 +126,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 
 @media (max-width: 360px) {
     .slot { width: 40px; height: 54px; }
-    .slot .policy-card { left: 50%; top: 50%; width: 18px !important; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(0.78) !important; }
+    .slot .policy-card { left: 50%; top: 50%; width: 26px; height: auto; border-width: 1.5px; transform: translate(-50%, -50%) rotate(-5deg) scale(1.05); }
     /* Liberal track: 5 slots, more spacing between cards on very small screens */
     .track.liberal .slots { gap: 10px; }
     /* Fascist track: 6 slots, less spacing between cards on very small screens to match liberal track width */
@@ -133,6 +134,14 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .status-banner { font-size: 1rem; padding: 10px 12px; }
     .player-chip { font-size: 1.05rem; }
     .actions-bar .btn { padding: 6px 8px; font-size: 0.9rem; }
+}
+
+/* Ultra narrow screens below 320px */
+@media (max-width: 320px) {
+    .slot { width: 36px; height: 48px; }
+    .slot .policy-card { width: 24px; }
+    .track.liberal .slots { gap: 8px; }
+    .track.fascist .slots { gap: 2px; }
 }
 
 .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
