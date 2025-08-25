@@ -347,6 +347,13 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     background: var(--highlight-cream) !important;
 }
 
+/* Override btn-secondary class specifically for role modal buttons */
+.role-actions .btn.btn-secondary {
+    background: var(--highlight-cream) !important;
+    border-color: var(--propaganda-black) !important;
+    color: var(--propaganda-black) !important;
+}
+
 .role-actions .btn[id="compatriots-btn"]:disabled {
     border-color: #ccc;
     background: #f5f5f5;

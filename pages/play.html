@@ -3064,7 +3064,9 @@
                 party: youPlayer.party,
                 role: youPlayer.role,
                 gamePlayerCount: game.playerCount,
-                latestPlayersLength: (latestPlayers || []).length
+                latestPlayersLength: (latestPlayers || []).length,
+                gameState: game.state,
+                gameId: game.id
             });
             
             // Membership and role always available
