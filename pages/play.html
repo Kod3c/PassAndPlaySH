@@ -132,6 +132,7 @@
         .actions-bar .btn { width: auto; flex: 0 0 auto; }
         .btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
         .btn-primary { background: var(--highlight-cream); color: var(--propaganda-black); }
+        .btn-stuck { background: var(--fascist-red); color: #fff; border-color: var(--propaganda-black); }
         .status-banner { 
             display:flex; align-items:center; justify-content:center; gap:10px;
             padding: 12px 16px; background: var(--off-white); border: 4px solid var(--propaganda-black);
@@ -142,6 +143,24 @@
         }
         .status-text { color: #000; }
         .status-banner.status-updated { animation: dropIn 180ms ease-out; }
+        .status-banner.stuck-warning { 
+            background: var(--fascist-red); 
+            color: #fff; 
+            border-color: var(--propaganda-black);
+            animation: dropIn 180ms ease-out;
+            margin: 8px 0;
+            font-size: 1rem;
+            padding: 10px 12px;
+        }
+        .debug-info { 
+            color: var(--propaganda-black); 
+            font-size: 0.9rem; 
+            opacity: 0.7; 
+            text-align: center; 
+            margin-top: 8px; 
+            font-family: var(--font-propaganda);
+            letter-spacing: 0.02em;
+        }
         /* Floating role banner */
         /* Role banner now inline (not fixed) */
         .floating-role { position: static; padding: 0; margin: 8px 0; z-index: auto; pointer-events: auto; display:none; width: 100%; align-self: stretch; }
@@ -630,6 +649,7 @@
                 </div>
                 <div class="actions-center">
                     <button id="view-cards-btn" class="btn btn-primary" style="display: none;">🃏 View Cards</button>
+                    <button id="repair-game-main-btn" class="btn" style="display: none;" title="Repair game state issues">🔧 Repair</button>
                 </div>
                 <div class="actions-right">
                     <button id="history-btn" class="btn">🕒 History</button>
@@ -1131,25 +1151,35 @@
         
         function updateRoleEnvelope(game, gameId) {
             const envelope = document.getElementById('role-envelope');
-            if (!envelope || !game || !gameId) return;
+            if (!envelope) return;
+            
+            // Always show the role envelope at 100% opacity
+            envelope.style.display = 'block';
+            envelope.style.opacity = '1';
+            envelope.style.filter = 'none';
+            
+            if (!game || !gameId) {
+                envelope.title = 'Role envelope (game loading...)';
+                return;
+            }
             
             const youId = computeYouId(gameId);
             if (!youId) {
-                envelope.style.display = 'none';
+                envelope.title = 'Role envelope (waiting for player ID...)';
                 return;
             }
             
             const youPlayer = (latestPlayers || []).find(p => p && p.id === youId);
             if (!youPlayer || !youPlayer.role) {
-                envelope.style.display = 'none';
+                envelope.title = 'Role envelope (waiting for role assignment...)';
                 return;
             }
             
-            // Only show envelope if player has a role assigned and game is in playing state
+            // Player has a role - envelope is fully functional
             if (game.state === 'playing' && youPlayer.role) {
-                envelope.style.display = 'block';
+                envelope.title = 'Click to view your secret role';
             } else {
-                envelope.style.display = 'none';
+                envelope.title = `Role envelope (game state: ${game.state || 'unknown'})`;
             }
         }
 
@@ -1298,7 +1328,7 @@
             const pres = players.find(p => p && p.id === presId) || null;
             if (youId && youId === presId) {
                 setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
-                try { initSpreadPresidentDrawUI(); } catch (_) {}
+                try { initSpreadPresidentDrawUI(gameId); } catch (_) {}
                 // Clean up any existing chancellor choice overlay
                 cleanupChancellorChoiceOverlay();
             } else {
@@ -1355,9 +1385,7 @@
             if (isStuck) {
                 console.warn('Game appears to be stuck in completed phase for', Math.round(timeSinceUpdate / 1000), 'seconds');
                 const stuckMsg = document.createElement('div');
-                stuckMsg.className = 'status-text';
-                stuckMsg.style.color = '#DA291C';
-                stuckMsg.style.fontWeight = 'bold';
+                stuckMsg.className = 'status-banner stuck-warning';
                 stuckMsg.textContent = '⚠️ Game appears stuck. Use manual advancement below.';
                 actionsCenter.appendChild(stuckMsg);
             }
@@ -1365,7 +1393,7 @@
             // Add a manual advancement button in case automatic advancement fails
             const manualAdvanceBtn = document.createElement('button');
             manualAdvanceBtn.id = 'manual-advance-btn';
-            manualAdvanceBtn.className = 'btn btn-primary';
+            manualAdvanceBtn.className = isStuck ? 'btn btn-stuck' : 'btn btn-primary';
             manualAdvanceBtn.textContent = isStuck ? '🚨 Force Advance (Game Stuck)' : 'Advance to Next Turn';
             manualAdvanceBtn.style.marginTop = '16px';
             manualAdvanceBtn.style.marginBottom = '16px';
@@ -1396,9 +1424,7 @@
             
             // Add debug info
             const debugInfo = document.createElement('div');
-            debugInfo.className = 'status-text';
-            debugInfo.style.fontSize = '0.9rem';
-            debugInfo.style.opacity = '0.7';
+            debugInfo.className = 'debug-info';
             debugInfo.textContent = `Policy: ${enactedPolicy || 'None'} | Phase: ${game.policyPhase || 'None'} | Updated: ${timeSinceUpdate > 0 ? Math.round(timeSinceUpdate / 1000) + 's ago' : 'Unknown'}`;
             actionsCenter.appendChild(debugInfo);
         }
@@ -1620,7 +1646,10 @@
             const totalRemaining = remainingLiberal + remainingFascist;
             
             if (totalRemaining < 3) {
-                // Not enough cards, reshuffle discard pile (this would need proper implementation)
+                // Not enough cards, reshuffle discard pile
+                console.log('Deck running low, should reshuffle discard pile');
+                // Reset discard count when deck is reshuffled
+                resetDiscardCount();
                 return ['liberal', 'liberal', 'fascist']; // Placeholder
             }
             
@@ -1670,7 +1699,13 @@
                 viewCardsBtn.style.display = 'none';
             }
         }
-        function initSpreadPresidentDrawUI() {
+        function initSpreadPresidentDrawUI(gameId) {
+            // Validate gameId parameter
+            if (!gameId) {
+                console.error('initSpreadPresidentDrawUI called without gameId:', gameId);
+                return;
+            }
+            
             const spread = document.querySelector('.table-spread');
             if (!spread) return;
             const cards = Array.from(spread.querySelectorAll('.table-card'));
@@ -1711,7 +1746,12 @@
             let groupDragging = false;
             let startX = 0, startY = 0;
             let moved = false; let tapStart = 0;
-            function revealAllToCenterFan() {
+            
+            // Define revealAllToCenterFan function with access to gameId
+            const revealAllToCenterFan = () => {
+                // Debug logging
+                console.log('revealAllToCenterFan called with gameId:', gameId);
+                
                 if (spreadFanShown) return;
                 spreadFanShown = true;
                 
@@ -1921,7 +1961,14 @@
                 
                 // Handle sending cards to chancellor
                 sendBtn.addEventListener('click', async function() {
-                    console.log('Send button clicked');
+                    console.log('Send button clicked with gameId:', gameId);
+                    
+                    // Validate gameId is available
+                    if (!gameId) {
+                        console.error('gameId is undefined in send button click handler');
+                        alert('Game session error. Please refresh the page and try again.');
+                        return;
+                    }
                     
                     const selected = overlayCards.filter(c => c.classList.contains('selected'));
                     console.log('Selected cards:', selected);
@@ -1989,10 +2036,21 @@
                     } catch (error) {
                         console.error('Failed to update game state:', error);
                         console.error('Full error object:', error);
-                        alert('Failed to send cards to Chancellor. Please try again. Error: ' + error.message);
+                        
+                        // Provide more helpful error messages
+                        let errorMessage = 'Failed to send cards to Chancellor. ';
+                        if (error.message.includes('Game ID not found')) {
+                            errorMessage += 'Game session error. Please refresh the page and try again.';
+                        } else if (error.message.includes('Game data not loaded')) {
+                            errorMessage += 'Game data is still loading. Please wait a moment and try again.';
+                        } else {
+                            errorMessage += 'Please try again. Error: ' + error.message;
+                        }
+                        
+                        alert(errorMessage);
                     }
                 });
-            }
+            };
             topThree.forEach((card, idx) => {
                 const policy = vals[idx];
                 function onDown(e) {
@@ -2061,6 +2119,41 @@
                     
                     // Show the overlay again
                     revealAllToCenterFan();
+                });
+            }
+            
+            // Add event listener for the "Repair Game" button
+            const repairGameMainBtn = document.getElementById('repair-game-main-btn');
+            if (repairGameMainBtn) {
+                repairGameMainBtn.addEventListener('click', async function() {
+                    try {
+                        repairGameMainBtn.disabled = true;
+                        repairGameMainBtn.textContent = '🔧 Repairing...';
+                        
+                        const gameId = getGameId();
+                        const repaired = await repairGameState(gameId);
+                        
+                        if (repaired) {
+                            repairGameMainBtn.textContent = '✅ Repaired!';
+                            setTimeout(() => {
+                                repairGameMainBtn.textContent = '🔧 Repair';
+                                repairGameMainBtn.disabled = false;
+                            }, 2000);
+                        } else {
+                            repairGameMainBtn.textContent = '✅ No Issues';
+                            setTimeout(() => {
+                                repairGameMainBtn.textContent = '🔧 Repair';
+                                repairGameMainBtn.disabled = false;
+                            }, 2000);
+                        }
+                    } catch (err) {
+                        console.error('Game repair failed:', err);
+                        repairGameMainBtn.textContent = '❌ Failed';
+                        repairGameMainBtn.disabled = false;
+                        setTimeout(() => {
+                            repairGameMainBtn.textContent = '🔧 Repair';
+                        }, 3000);
+                    }
                 });
             }
         }
@@ -2316,8 +2409,9 @@
                 policyPhase: null,
                 enactedPolicy: null,
                 presidentDrawnCards: [],
-                presidentDiscardedCard: null,
-                chancellorDiscardedCard: null,
+                // DON'T clear discarded card fields - they represent permanent game state
+                // presidentDiscardedCard: null,        // Keep this for discard pile tracking
+                // chancellorDiscardedCard: null,       // Keep this for discard pile tracking
                 // Clear current chancellor and nomination
                 currentChancellorPlayerId: null,
                 nominatedChancellorPlayerId: null,
@@ -2357,8 +2451,9 @@
                     policyPhase: null,
                     enactedPolicy: null,
                     presidentDrawnCards: [],
-                    presidentDiscardedCard: null,
-                    chancellorDiscardedCard: null,
+                    // Preserve discarded card information to maintain discard pile
+                    // presidentDiscardedCard: null,        // Keep this
+                    // chancellorDiscardedCard: null,       // Keep this
                     currentChancellorPlayerId: null,
                     nominatedChancellorPlayerId: null,
                     voteResolution: null,
@@ -2912,6 +3007,12 @@
                 nameBtn.textContent = '✏️ Change Name';
                 list.appendChild(nameBtn);
 
+                const repairBtn = document.createElement('button');
+                repairBtn.id = 'repair-game-btn';
+                repairBtn.className = 'btn';
+                repairBtn.textContent = '🔧 Repair Game State';
+                list.appendChild(repairBtn);
+
                 const quitBtn = document.createElement('button');
                 quitBtn.id = 'quit-game-btn';
                 quitBtn.className = 'btn';
@@ -3016,6 +3117,39 @@
                     closeMenuModal();
                     return;
                 }
+
+                if (t.id === 'repair-game-btn') {
+                    try {
+                        repairBtn.disabled = true;
+                        repairBtn.textContent = '🔧 Repairing...';
+                        
+                        const repaired = await repairGameState(gid);
+                        
+                        if (repaired) {
+                            repairBtn.textContent = '✅ Repaired!';
+                            setTimeout(() => {
+                                repairBtn.textContent = '🔧 Repair Game State';
+                                repairBtn.disabled = false;
+                            }, 2000);
+                        } else {
+                            repairBtn.textContent = '✅ No Issues Found';
+                            setTimeout(() => {
+                                repairBtn.textContent = '🔧 Repair Game State';
+                                repairBtn.disabled = false;
+                            }, 2000);
+                        }
+                        
+                        // Don't close modal - let user see the result
+                    } catch (err) {
+                        console.error('Game repair failed:', err);
+                        repairBtn.textContent = '❌ Repair Failed';
+                        repairBtn.disabled = false;
+                        setTimeout(() => {
+                            repairBtn.textContent = '🔧 Repair Game State';
+                        }, 3000);
+                    }
+                    return;
+                }
             });
 
             if (!gid) { setStatus('', 'Missing game id'); hidePreloader(); return; }
@@ -3058,6 +3192,21 @@
                 renderActions(gid);
                 // Attempt resolve vote if complete
                 maybeResolveElectionVote(gid);
+                
+                // Check for game issues and show repair button if needed
+                if (latestPlayers && latestPlayers.length > 0) {
+                    const issues = detectGameIssues(gid, latestGame, latestPlayers);
+                    const repairBtn = document.getElementById('repair-game-main-btn');
+                    if (repairBtn) {
+                        if (issues.length > 0) {
+                            repairBtn.style.display = 'block';
+                            repairBtn.title = `Repair ${issues.length} detected issues`;
+                        } else {
+                            repairBtn.style.display = 'none';
+                        }
+                    }
+                }
+                
                 gameReady = true;
                 maybeHide();
             });
@@ -3377,29 +3526,78 @@
         }
 
         // Function to increment discard count (called when cards are discarded)
-        function incrementDiscardCount() {
+        async function incrementDiscardCount() {
             currentDiscardCount++;
             updateDiscardPileVisual(currentDiscardCount);
             
             // Decrease table spread count when cards are discarded
             decrementTableSpreadCount();
             
+            // Persist the discard count to the database so it survives game state reloads
+            try {
+                const gameId = getGameId();
+                if (gameId && latestGame) {
+                    const gameRef = doc(db, 'games', gameId);
+                    await updateDoc(gameRef, {
+                        totalDiscardedCards: increment(1),
+                        updatedAt: serverTimestamp()
+                    });
+                    console.log(`Discard count persisted to database: ${currentDiscardCount}`);
+                }
+            } catch (error) {
+                console.error('Failed to persist discard count to database:', error);
+            }
+            
             console.log(`Discard count increased to: ${currentDiscardCount}`);
         }
 
         // Function to decrement discard count (called when deck is reshuffled)
-        function decrementDiscardCount() {
+        async function decrementDiscardCount() {
             if (currentDiscardCount > 0) {
                 currentDiscardCount--;
                 updateDiscardPileVisual(currentDiscardCount);
+                
+                // Update the database to reflect the decreased count
+                try {
+                    const gameId = getGameId();
+                    if (gameId && latestGame) {
+                        const gameRef = doc(db, 'games', gameId);
+                        await updateDoc(gameRef, {
+                            totalDiscardedCards: increment(-1),
+                            updatedAt: serverTimestamp()
+                        });
+                        console.log(`Discard count decreased in database: ${currentDiscardCount}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to update discard count in database:', error);
+                }
+                
                 console.log(`Discard count decreased to: ${currentDiscardCount}`);
             }
         }
 
         // Function to reset discard count (called when deck is reshuffled)
-        function resetDiscardCount() {
+        async function resetDiscardCount() {
             currentDiscardCount = 0;
             updateDiscardPileVisual(currentDiscardCount);
+            
+            // Reset the cumulative discard count in the database when deck is reshuffled
+            try {
+                const gameId = getGameId();
+                if (gameId && latestGame) {
+                    const gameRef = doc(db, 'games', gameId);
+                    await updateDoc(gameRef, {
+                        totalDiscardedCards: 0,
+                        presidentDiscardedCard: null,
+                        chancellorDiscardedCard: null,
+                        updatedAt: serverTimestamp()
+                    });
+                    console.log(`Discard count reset in database (deck reshuffled)`);
+                }
+            } catch (error) {
+                console.error('Failed to reset discard count in database:', error);
+            }
+            
             console.log(`Discard count reset to 0 (deck reshuffled)`);
         }
 
@@ -3433,7 +3631,10 @@
                 count += game.discardedCards.length;
             }
             
-            // Do not double-count based on policy phase; flags above already include discards
+            // Use cumulative discard count if available (this persists across turns)
+            if (game.totalDiscardedCards && typeof game.totalDiscardedCards === 'number') {
+                count = Math.max(count, game.totalDiscardedCards);
+            }
             
             console.log(`Calculated discard count from game state: ${count}`);
             return count;
@@ -3456,9 +3657,9 @@
             testDiv.style.marginTop = '10px';
             testDiv.style.textAlign = 'center';
             testDiv.innerHTML = `
-                <button onclick="incrementDiscardCount()" style="margin: 2px; padding: 4px 8px; font-size: 12px;">+1 Discard</button>
-                <button onclick="decrementDiscardCount()" style="margin: 2px; padding: 4px 8px; font-size: 12px;">-1 Discard</button>
-                <button onclick="resetDiscardCount()" style="margin: 2px; padding: 4px 8px; font-size: 12px;">Reset</button>
+                <button onclick="incrementDiscardCount().catch(console.error)" style="margin: 2px; padding: 4px 8px; font-size: 12px;">+1 Discard</button>
+                <button onclick="decrementDiscardCount().catch(console.error)" style="margin: 2px; padding: 4px 8px; font-size: 12px;">-1 Discard</button>
+                <button onclick="resetDiscardCount().catch(console.error)" style="margin: 2px; padding: 4px 8px; font-size: 12px;">Reset</button>
                 <span style="margin-left: 10px; font-size: 12px;">Count: <span id="discard-count-display">0</span></span>
             `;
             
@@ -3671,7 +3872,238 @@
 
         // ===== END DYNAMIC TABLE SPREAD MODULE =====
 
-        // Debug function to help identify game state issues
+        // Comprehensive game repair and diagnostic system
+        async function repairGameState(gameId) {
+            console.log('=== GAME REPAIR SYSTEM ACTIVATED ===');
+            
+            if (!gameId || !latestGame) {
+                console.error('Cannot repair: missing game ID or game data');
+                return false;
+            }
+            
+            try {
+                const gameRef = doc(db, 'games', gameId);
+                const repairUpdates = {};
+                let repairsApplied = 0;
+                
+                console.log('Analyzing game state for issues...');
+                
+                // 1. Fix discard pile inconsistencies
+                if (repairDiscardPile(gameId, latestGame, repairUpdates)) {
+                    repairsApplied++;
+                }
+                
+                // 2. Fix stuck game phases
+                if (repairStuckGamePhase(gameId, latestGame, repairUpdates)) {
+                    repairsApplied++;
+                }
+                
+                // 3. Fix player state inconsistencies
+                if (repairPlayerStates(gameId, latestGame, latestPlayers, repairUpdates)) {
+                    repairsApplied++;
+                }
+                
+                // 4. Fix policy count inconsistencies
+                if (repairPolicyCounts(gameId, latestGame, repairUpdates)) {
+                    repairsApplied++;
+                }
+                
+                // 5. Fix election tracker issues
+                if (repairElectionTracker(gameId, latestGame, repairUpdates)) {
+                    repairsApplied++;
+                }
+                
+                // Apply all repairs if any were found
+                if (repairsApplied > 0) {
+                    repairUpdates.updatedAt = serverTimestamp();
+                    repairUpdates.lastRepairAt = serverTimestamp();
+                    repairUpdates.repairsApplied = repairsApplied;
+                    
+                    console.log(`Applying ${repairsApplied} repairs:`, repairUpdates);
+                    await updateDoc(gameRef, repairUpdates);
+                    
+                    // Log the repair action
+                    await logPublic(gameId, `Game automatically repaired: ${repairsApplied} issues fixed`, {
+                        type: 'system_repair',
+                        repairsApplied: repairsApplied
+                    });
+                    
+                    console.log('Game repair completed successfully');
+                    return true;
+                } else {
+                    console.log('No repairs needed - game state is healthy');
+                    return false;
+                }
+                
+            } catch (error) {
+                console.error('Game repair failed:', error);
+                return false;
+            }
+        }
+        
+        // Repair discard pile inconsistencies
+        function repairDiscardPile(gameId, game, repairUpdates) {
+            let needsRepair = false;
+            
+            // Check if discard count is inconsistent with game state
+            const calculatedDiscardCount = calculateDiscardCountFromGameState(game);
+            const storedDiscardCount = game.totalDiscardedCards || 0;
+            
+            if (calculatedDiscardCount !== storedDiscardCount) {
+                console.log(`Discard pile inconsistency detected: calculated=${calculatedDiscardCount}, stored=${storedDiscardCount}`);
+                
+                // Use the calculated count as the source of truth
+                repairUpdates.totalDiscardedCards = calculatedDiscardCount;
+                
+                // Also ensure individual discard fields are consistent
+                if (game.presidentDiscardedCard && !game.presidentDiscardedCards) {
+                    repairUpdates.presidentDiscardedCards = [game.presidentDiscardedCard];
+                }
+                if (game.chancellorDiscardedCard && !game.chancellorDiscardedCards) {
+                    repairUpdates.chancellorDiscardedCards = [game.chancellorDiscardedCard];
+                }
+                
+                needsRepair = true;
+            }
+            
+            return needsRepair;
+        }
+        
+        // Repair stuck game phases
+        function repairStuckGamePhase(gameId, game, repairUpdates) {
+            let needsRepair = false;
+            
+            // Check for stuck completed phase
+            if (game.policyPhase === 'completed' && game.enactedPolicy) {
+                const timeSinceUpdate = game.updatedAt ? (Date.now() - game.updatedAt.toDate().getTime()) : 0;
+                const isStuck = timeSinceUpdate > 10000; // 10 seconds
+                
+                if (isStuck) {
+                    console.log('Stuck game phase detected - advancing to next government');
+                    
+                    // Clear policy phase artifacts
+                    repairUpdates.policyPhase = null;
+                    repairUpdates.enactedPolicy = null;
+                    repairUpdates.presidentDrawnCards = [];
+                    repairUpdates.currentChancellorPlayerId = null;
+                    repairUpdates.nominatedChancellorPlayerId = null;
+                    repairUpdates.voteResolution = null;
+                    repairUpdates.electionVotes = {};
+                    
+                    // Set term limits for next turn
+                    repairUpdates.termLimitLastChancellorId = game.currentChancellorPlayerId;
+                    repairUpdates.termLimitLastPresidentId = game.currentPresidentPlayerId;
+                    
+                    // Find next president
+                    const orderedAlive = (latestPlayers || [])
+                        .filter(p => p && p.alive !== false)
+                        .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+                    
+                    if (orderedAlive.length > 0) {
+                        const currentIndex = orderedAlive.findIndex(p => p.id === game.currentPresidentPlayerId);
+                        const nextIndex = (currentIndex + 1) % orderedAlive.length;
+                        const nextPresident = orderedAlive[nextIndex];
+                        
+                        repairUpdates.presidentIndex = nextIndex;
+                        repairUpdates.currentPresidentPlayerId = nextPresident.id;
+                    }
+                    
+                    needsRepair = true;
+                }
+            }
+            
+            return needsRepair;
+        }
+        
+        // Repair player state inconsistencies
+        function repairPlayerStates(gameId, game, players, repairUpdates) {
+            let needsRepair = false;
+            
+            if (!players || players.length === 0) return false;
+            
+            // Check for players with missing orderIndex
+            const playersNeedingOrder = players.filter(p => p && typeof p.orderIndex !== 'number');
+            if (playersNeedingOrder.length > 0) {
+                console.log(`${playersNeedingOrder.length} players missing orderIndex - fixing`);
+                
+                // Assign order indices based on current array order
+                playersNeedingOrder.forEach((player, index) => {
+                    const playerRef = doc(db, 'games', gameId, 'players', player.id);
+                    updateDoc(playerRef, { orderIndex: index }).catch(console.error);
+                });
+                
+                needsRepair = true;
+            }
+            
+            // Check for dead players who shouldn't be dead
+            const deadPlayers = players.filter(p => p && p.alive === false);
+            if (deadPlayers.length > 0) {
+                console.log(`${deadPlayers.length} dead players detected - this may be intentional`);
+                // Don't auto-repair dead players as this could be legitimate game state
+            }
+            
+            return needsRepair;
+        }
+        
+        // Repair policy count inconsistencies
+        function repairPolicyCounts(gameId, game, repairUpdates) {
+            let needsRepair = false;
+            
+            // Check if policy counts are within valid ranges
+            const liberalPolicies = game.liberalPolicies || 0;
+            const fascistPolicies = game.fascistPolicies || 0;
+            
+            if (liberalPolicies > 5) {
+                console.log(`Invalid liberal policy count: ${liberalPolicies} - capping at 5`);
+                repairUpdates.liberalPolicies = 5;
+                needsRepair = true;
+            }
+            
+            if (fascistPolicies > 6) {
+                console.log(`Invalid fascist policy count: ${fascistPolicies} - capping at 6`);
+                repairUpdates.fascistPolicies = 6;
+                needsRepair = true;
+            }
+            
+            // Check if game should be over
+            if (liberalPolicies >= 5 || fascistPolicies >= 6) {
+                console.log('Game should be over - checking for missing end state');
+                if (game.state === 'playing') {
+                    repairUpdates.state = 'completed';
+                    repairUpdates.winner = liberalPolicies >= 5 ? 'liberal' : 'fascist';
+                    needsRepair = true;
+                }
+            }
+            
+            return needsRepair;
+        }
+        
+        // Repair election tracker issues
+        function repairElectionTracker(gameId, game, repairUpdates) {
+            let needsRepair = false;
+            
+            const electionTracker = game.electionTracker || 0;
+            
+            // Check if election tracker is within valid range
+            if (electionTracker < 0 || electionTracker > 3) {
+                console.log(`Invalid election tracker value: ${electionTracker} - fixing to valid range`);
+                repairUpdates.electionTracker = Math.max(0, Math.min(3, electionTracker));
+                needsRepair = true;
+            }
+            
+            // Check if game should end due to 3 failed elections
+            if (electionTracker >= 3 && game.state === 'playing') {
+                console.log('Game should end due to 3 failed elections');
+                repairUpdates.state = 'completed';
+                repairUpdates.winner = 'fascist';
+                repairUpdates.endReason = 'election_tracker';
+                needsRepair = true;
+            }
+            
+            return needsRepair;
+        }
+        
+        // Enhanced debug function with repair capabilities
         function debugGameState(gameId) {
             console.log('=== GAME STATE DEBUG ===');
             console.log('Game ID:', gameId);
@@ -3691,9 +4123,19 @@
                 console.log('Liberal Policies:', latestGame.liberalPolicies);
                 console.log('Fascist Policies:', latestGame.fascistPolicies);
                 console.log('Election Tracker:', latestGame.electionTracker);
+                console.log('Total Discarded Cards:', latestGame.totalDiscardedCards);
+                console.log('Last Repair:', latestGame.lastRepairAt);
                 
                 const phase = computePhase(latestGame);
                 console.log('Computed Phase:', phase);
+                
+                // Check for common issues
+                const issues = detectGameIssues(gameId, latestGame, latestPlayers);
+                if (issues.length > 0) {
+                    console.log('=== DETECTED ISSUES ===');
+                    issues.forEach(issue => console.log(`- ${issue}`));
+                    console.log('=== END ISSUES ===');
+                }
             }
             
             if (latestPlayers && latestPlayers.length > 0) {
@@ -3705,43 +4147,99 @@
             
             console.log('========================');
         }
+        
+        // Detect common game issues
+        function detectGameIssues(gameId, game, players) {
+            const issues = [];
+            
+            if (!game || !players) return issues;
+            
+            // Check discard pile consistency
+            const calculatedDiscardCount = calculateDiscardCountFromGameState(game);
+            const storedDiscardCount = game.totalDiscardedCards || 0;
+            if (calculatedDiscardCount !== storedDiscardCount) {
+                issues.push(`Discard pile count mismatch: calculated=${calculatedDiscardCount}, stored=${storedDiscardCount}`);
+            }
+            
+            // Check for stuck phases
+            if (game.policyPhase === 'completed' && game.enactedPolicy) {
+                const timeSinceUpdate = game.updatedAt ? (Date.now() - game.updatedAt.toDate().getTime()) : 0;
+                if (timeSinceUpdate > 10000) {
+                    issues.push(`Game stuck in completed phase for ${Math.round(timeSinceUpdate / 1000)} seconds`);
+                }
+            }
+            
+            // Check policy count validity
+            const liberalPolicies = game.liberalPolicies || 0;
+            const fascistPolicies = game.fascistPolicies || 0;
+            if (liberalPolicies > 5) issues.push(`Invalid liberal policy count: ${liberalPolicies}`);
+            if (fascistPolicies > 6) issues.push(`Invalid fascist policy count: ${fascistPolicies}`);
+            
+            // Check election tracker
+            const electionTracker = game.electionTracker || 0;
+            if (electionTracker < 0 || electionTracker > 3) {
+                issues.push(`Invalid election tracker value: ${electionTracker}`);
+            }
+            
+            // Check player consistency
+            const playersWithoutOrder = players.filter(p => p && typeof p.orderIndex !== 'number');
+            if (playersWithoutOrder.length > 0) {
+                issues.push(`${playersWithoutOrder.length} players missing orderIndex`);
+            }
+            
+            return issues;
+        }
 
-        // Periodic check to detect and fix stuck games
+        // Enhanced periodic check to detect and fix stuck games using repair system
         function startStuckGameChecker(gameId) {
             const checkInterval = setInterval(async () => {
                 try {
                     if (!latestGame || latestGame.state !== 'playing') return;
                     
-                    const phase = computePhase(latestGame);
-                    if (phase !== 'completed') return;
-                    
-                    // Check if game has been in completed phase for too long
-                    const timeSinceUpdate = latestGame.updatedAt ? (Date.now() - latestGame.updatedAt.toDate().getTime()) : 0;
-                    const isStuck = timeSinceUpdate > 15000; // 15 seconds
-                    
-                    if (isStuck) {
-                        console.warn('Auto-detected stuck game in completed phase for', Math.round(timeSinceUpdate / 1000), 'seconds');
+                    // Check for any game issues that need repair
+                    const issues = detectGameIssues(gameId, latestGame, latestPlayers);
+                    if (issues.length > 0) {
+                        console.warn('Auto-detected game issues:', issues);
                         
-                        try {
-                            const gameRef = doc(db, 'games', gameId);
-                            await advanceToNextGovernment(gameId, gameRef);
-                            console.log('Auto-advanced stuck game successfully');
-                        } catch (autoAdvanceError) {
-                            console.error('Auto-advancement failed:', autoAdvanceError);
-                            // Try fallback cleanup
+                        // Only auto-repair if there are critical issues (stuck phases, invalid counts)
+                        const criticalIssues = issues.filter(issue => 
+                            issue.includes('stuck') || 
+                            issue.includes('Invalid') || 
+                            issue.includes('mismatch')
+                        );
+                        
+                        if (criticalIssues.length > 0) {
+                            console.log('Auto-repairing critical game issues...');
                             try {
-                                const gameRef = doc(db, 'games', gameId);
-                                await applyFallbackCleanup(gameId, gameRef);
-                                console.log('Applied auto-fallback cleanup');
-                            } catch (cleanupError) {
-                                console.error('Auto-fallback cleanup also failed:', cleanupError);
+                                await repairGameState(gameId);
+                                console.log('Auto-repair completed successfully');
+                            } catch (repairError) {
+                                console.error('Auto-repair failed:', repairError);
+                                
+                                // Fallback to old stuck game handling
+                                const phase = computePhase(latestGame);
+                                if (phase === 'completed') {
+                                    const timeSinceUpdate = latestGame.updatedAt ? (Date.now() - latestGame.updatedAt.toDate().getTime()) : 0;
+                                    const isStuck = timeSinceUpdate > 15000; // 15 seconds
+                                    
+                                    if (isStuck) {
+                                        console.warn('Fallback: Auto-advancing stuck game in completed phase');
+                                        try {
+                                            const gameRef = doc(db, 'games', gameId);
+                                            await advanceToNextGovernment(gameId, gameRef);
+                                        } catch (advanceError) {
+                                            console.error('Fallback advancement failed:', advanceError);
+                                            await applyFallbackCleanup(gameId, gameRef);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 } catch (error) {
-                    console.error('Error in stuck game checker:', error);
+                    console.error('Error in enhanced stuck game checker:', error);
                 }
-            }, 5000); // Check every 5 seconds
+            }, 10000); // Check every 10 seconds (less aggressive than before)
             
             // Return the interval ID so it can be cleared later
             return checkInterval;
