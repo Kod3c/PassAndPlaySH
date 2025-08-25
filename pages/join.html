@@ -140,7 +140,7 @@
             }
 
             if (!claimedPlayerId) {
-                throw new Error('That name is already taken');
+                throw new Error('That name is already taken. Are you sure? (Yes)');
             }
 
             // Extend TTL by 15 minutes when a player joins/claims
@@ -406,7 +406,49 @@
                     setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
                 } catch (e) {
                     console.error(e);
-                    status.textContent = (e && e.message) ? e.message : 'Failed to join. Check the Game ID and try again.';
+                    const errorMessage = (e && e.message) ? e.message : 'Failed to join. Check the Game ID and try again.';
+                    
+                    // Check if this is the "name already taken" error and create a clickable link
+                    if (errorMessage.includes('That name is already taken. Are you sure? (Yes)')) {
+                        status.innerHTML = 'That name is already taken. Are you sure? <a href="#" id="continue-anyway">(Yes)</a>';
+                        
+                        // Add click handler for the continue link
+                        document.getElementById('continue-anyway').addEventListener('click', async function(e) {
+                            e.preventDefault();
+                            try {
+                                // Force join with the same name by bypassing the check
+                                const user = await ensureAuth();
+                                const gameRef = doc(db, 'games', gid);
+                                
+                                // Find the player document and force claim it
+                                const playersCol = collection(gameRef, 'players');
+                                const q = query(playersCol, where('name', '==', name.trim()));
+                                const snap = await getDocs(q);
+                                
+                                if (!snap.empty) {
+                                    // Force claim the first available player slot
+                                    const playerDoc = snap.docs[0];
+                                    await updateDoc(playerDoc.ref, { uid: user.uid, lastSeen: serverTimestamp() });
+                                    
+                                    // Extend TTL by 15 minutes
+                                    await setDoc(gameRef, { updatedAt: serverTimestamp(), expireAt: new Date(Date.now() + 15 * 60 * 1000) }, { merge: true });
+                                    
+                                    // Persist for lobby heartbeat
+                                    try { sessionStorage.setItem(`sh_playerId_${gid}`, playerDoc.id); } catch (_) {}
+                                    
+                                    status.textContent = 'Joined! Redirecting to lobby...';
+                                    setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
+                                    return;
+                                }
+                            } catch (forceError) {
+                                console.error(forceError);
+                                status.textContent = 'Failed to force join. Please try again.';
+                                joinBtn.disabled = false;
+                            }
+                        });
+                    } else {
+                        status.textContent = errorMessage;
+                    }
                     joinBtn.disabled = false;
                 }
             });

@@ -419,10 +419,40 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .rules-bottomnav { display:block; }
     .rules-bottomnav .btn { min-height: 44px; flex: 1; }
     .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
+    
+    /* Ensure role cards fit properly in rules modal */
+    .roles-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+        padding: 0;
+    }
+    
+    .role-card {
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 360px) {
     .rules-quicknav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    
+    /* Additional role card adjustments for very small screens */
+    .roles-grid {
+        gap: var(--space-sm);
+    }
+    
+    .role-card {
+        border-radius: 8px;
+    }
+    
+    .role-header {
+        padding: 8px;
+    }
+    
+    .role-info {
+        padding: 8px;
+    }
 }
 
 .order-list { display:flex; flex-direction:column; gap:8px; }

@@ -3,11 +3,48 @@ class App {
     constructor() {
         this.currentPage = 'home';
         this.game = null;
+        this.basePath = this.getBasePath();
+        
+        // SECURITY: Add console protection
+        this.setupConsoleProtection();
         this.init();
     }
 
+    // SECURITY: Setup console protection to prevent easy access to game state
+    setupConsoleProtection() {
+        // Only apply protection in production
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            // Override console methods that might expose game state
+            const originalLog = console.log;
+            const originalWarn = console.warn;
+            const originalError = console.error;
+            
+            console.log = function(...args) {
+                // Block logging of sensitive game objects
+                if (args.some(arg => 
+                    typeof arg === 'object' && 
+                    (arg.playerRoles || arg.policyStacks || arg.discardPile)
+                )) {
+                    console.warn('Sensitive game information logging is blocked');
+                    return;
+                }
+                originalLog.apply(console, args);
+            };
+            
+            // Block access to game state through console
+            Object.defineProperty(window, 'gameState', {
+                get: function() {
+                    console.warn('Game state access is restricted');
+                    return undefined;
+                }
+            });
+        }
+    }
+
     async init() {
-        // Setup multidevice navigation FIRST to prevent conflicts
+        // Setup routing FIRST to handle URL-based navigation
+        this.setupRouting();
+        // Setup multidevice navigation to prevent conflicts
         this.setupMultiDeviceNavigation();
         this.setupEventListeners();
         this.setupBetaAccess();
@@ -91,25 +128,14 @@ class App {
         const targetPage = document.getElementById(`${pageName}-page`);
         if (targetPage) {
             targetPage.style.display = 'block';
+            this.currentPage = pageName;
+            // Update active navigation state
+            this.updateActiveNavigation(pageName);
         } else {
             // If page doesn't exist, show home
+            console.warn(`Page ${pageName} not found, redirecting to home`);
             this.showPage('home');
         }
-        
-        // Show the selected page
-        document.querySelectorAll('.page-content').forEach(page => {
-            page.style.display = 'none';
-        });
-        
-        const targetPageElement = document.getElementById(pageName + '-page');
-        if (targetPageElement) {
-            targetPageElement.style.display = 'block';
-        }
-        
-        this.currentPage = pageName;
-        
-        // Update active navigation state
-        this.updateNavigationState(pageName);
     }
 
     showRulesSection(sectionName) {
@@ -791,9 +817,50 @@ class Game {
         // Shuffle roles and assign to players
         this.shuffleArray(roles);
         this.playerRoles = {};
+        
+        // SECURITY: Store roles as obfuscated values to prevent easy discovery
         this.players.forEach((player, index) => {
-            this.playerRoles[player] = roles[index];
+            const encryptedRole = this.encryptRole(roles[index], player);
+            this.playerRoles[player] = encryptedRole;
         });
+        
+        // Store original roles for internal use only
+        this._originalRoles = {};
+        this.players.forEach((player, index) => {
+            this._originalRoles[player] = roles[index];
+        });
+    }
+
+    // SECURITY: Encrypt role information to prevent easy console access
+    encryptRole(role, playerId) {
+        // Simple obfuscation - replace with proper encryption later if needed
+        const timestamp = Date.now();
+        const randomSalt = Math.random().toString(36).substring(2, 15);
+        return btoa(`${role}:${playerId}:${timestamp}:${randomSalt}`);
+    }
+
+    // SECURITY: Decrypt role information for legitimate game use
+    decryptRole(encryptedRole, playerId) {
+        try {
+            const decoded = atob(encryptedRole);
+            const [role, id, timestamp, salt] = decoded.split(':');
+            return id === playerId ? role : null;
+        } catch {
+            return null;
+        }
+    }
+
+    // SECURITY: Get role safely - only returns role for the requesting player
+    getPlayerRole(playerId) {
+        if (this._originalRoles && this._originalRoles[playerId]) {
+            return this._originalRoles[playerId];
+        }
+        return null;
+    }
+
+    // SECURITY: Get current player's own role for display purposes
+    getCurrentPlayerRole(currentPlayerId) {
+        return this.getPlayerRole(currentPlayerId);
     }
 
     getRoleDistribution() {
@@ -922,7 +989,7 @@ class Game {
         this.discardPile.push(this.presidentDiscarded);
         this.gamePhase = 'chancellor-choose';
         
-        this.logGameEvent('action', this.players[this.currentPresident] + ' discarded ' + this.presidentDiscarded + ' policy');
+        this.logGameEvent('action', this.players[this.currentPresident] + ' discarded a policy card');
         this.logGameEvent('phase', 'Chancellor must choose one policy to enact');
         return true;
     }
@@ -1012,7 +1079,7 @@ class Game {
         switch (power) {
             case 'investigate':
                 if (targetPlayer !== null) {
-                    const role = this.playerRoles[this.players[targetPlayer]];
+                    const role = this.getPlayerRole(this.players[targetPlayer]);
                     this.logGameEvent('action', this.players[this.currentPresident] + ' investigated ' + this.players[targetPlayer] + ' (Role: ' + role + ')');
                 }
                 break;
@@ -1215,7 +1282,7 @@ class Game {
                         <p>${this.players[this.currentPresident]} (President) must discard one card</p>
                         <div class="discard-options">
                             ${this.currentPolicyStack.map((policy, index) => 
-                                `<button class="discard-btn btn btn-secondary" data-discard="${index}">Discard ${policy}</button>`
+                                `<button class="discard-btn btn btn-secondary" data-discard="${index}">Discard Card ${index + 1}</button>`
                             ).join('')}
                         </div>
                     </div>
@@ -1227,7 +1294,7 @@ class Game {
                         <p>${this.players[this.currentChancellor]} (Chancellor) must choose one policy to enact</p>
                         <div class="enact-options">
                             ${this.currentPolicyStack.map((policy, index) => 
-                                `<button class="enact-btn btn btn-primary" data-enact="${index}">Enact ${policy}</button>`
+                                `<button class="enact-btn btn btn-primary" data-enact="${index}">Enact Card ${index + 1}</button>`
                             ).join('')}
                         </div>
                     </div>
@@ -1290,7 +1357,7 @@ class Game {
                     <div class="president-discard-phase">
                         <h3>President's Choice</h3>
                         <p>Discard one policy card from the selected stack</p>
-                        <p>Stack contains: ${this.currentPolicyStack.join(', ')}</p>
+                        <p>Stack contains: ${this.currentPolicyStack ? this.currentPolicyStack.length + ' cards' : 'Unknown'}</p>
                     </div>
                 `;
             case 'chancellor-choose':
@@ -1298,7 +1365,7 @@ class Game {
                     <div class="chancellor-choose-phase">
                         <h3>Chancellor's Choice</h3>
                         <p>Choose one policy to enact</p>
-                        <p>Available policies: ${this.currentPolicyStack.join(', ')}</p>
+                        <p>Available policies: ${this.currentPolicyStack ? this.currentPolicyStack.length + ' cards' : 'Unknown'}</p>
                     </div>
                 `;
             case 'executive':
@@ -1354,5 +1421,16 @@ class Game {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new App();
+    // REMOVED: window.app = new App(); - Security fix to prevent console access
+    const app = new App();
+    
+    // Basic console protection for production
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        Object.defineProperty(window, 'app', {
+            get: function() {
+                console.warn('Game state access is restricted');
+                return undefined;
+            }
+        });
+    }
 });

@@ -1941,12 +1941,177 @@ footer,
   gap: var(--space-xl);
 }
 
+/* Responsive adjustments for role cards */
+@media (max-width: 1024px) {
+  .roles-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .roles-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-lg);
+    padding: 0 var(--space-sm);
+  }
+  
+  .role-card {
+    min-width: 0;
+  }
+  
+  .role-header {
+    gap: var(--space-sm);
+  }
+  
+  .role-header h4 {
+    font-size: var(--font-lg);
+    line-height: 1.2;
+  }
+  
+  .role-description {
+    font-size: var(--font-base);
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 640px) {
+  .roles-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    padding: 0 var(--space-xs);
+  }
+  
+  .role-card {
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .role-header {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+  
+  .role-info {
+    padding: var(--space-md);
+  }
+  
+  .role-header h4 {
+    font-size: var(--font-lg);
+    line-height: 1.2;
+  }
+  
+  .role-description {
+    font-size: var(--font-base);
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 480px) {
+  .roles-grid {
+    gap: var(--space-sm);
+    padding: 0 var(--space-xs);
+  }
+  
+  .role-card {
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .role-header {
+    padding: var(--space-sm);
+    gap: var(--space-xs);
+  }
+  
+  .role-info {
+    padding: var(--space-sm);
+  }
+  
+  .role-header h4 {
+    font-size: var(--font-lg);
+    line-height: 1.2;
+  }
+  
+  .role-description {
+    font-size: var(--font-sm);
+    line-height: 1.4;
+  }
+  
+  .role-abilities h5,
+  .role-knowledge h5 {
+    font-size: var(--font-base);
+    margin-bottom: var(--space-xs);
+  }
+  
+  .role-abilities ul {
+    padding-left: var(--space-md);
+  }
+  
+  .role-abilities li {
+    font-size: var(--font-sm);
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 360px) {
+  .roles-grid {
+    gap: var(--space-xs);
+    padding: 0;
+  }
+  
+  .role-card {
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--border-radius);
+  }
+  
+  .role-header {
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+  }
+  
+  .role-info {
+    padding: var(--space-xs);
+  }
+  
+  .role-header h4 {
+    font-size: var(--font-base);
+    line-height: 1.2;
+  }
+  
+  .role-description {
+    font-size: var(--font-xs);
+    line-height: 1.4;
+  }
+  
+  .role-abilities h5,
+  .role-knowledge h5 {
+    font-size: var(--font-sm);
+    margin-bottom: var(--space-xs);
+  }
+  
+  .role-abilities ul {
+    padding-left: var(--space-sm);
+  }
+  
+  .role-abilities li {
+    font-size: var(--font-xs);
+    line-height: 1.3;
+  }
+}
+
 .role-card {
   background: var(--bg-card);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-base);
+  min-width: 0; /* Allow cards to shrink below content size */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .role-card:hover {
@@ -1972,10 +2137,13 @@ footer,
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  min-width: 0; /* Allow header to shrink */
+  flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .role-header .role-icon {
   font-size: var(--font-2xl);
+  flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 .role-header h4 {
@@ -1993,6 +2161,8 @@ footer,
   color: var(--text-secondary);
   margin-bottom: var(--space-lg);
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .role-abilities h5,
@@ -2006,6 +2176,8 @@ footer,
 .role-abilities ul {
   margin-bottom: var(--space-lg);
   padding-left: var(--space-lg);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .role-abilities li {
@@ -4034,6 +4206,115 @@ footer,
 
 .hidden { display: none; }
 .invisible { visibility: hidden; }
+
+/* Page Content and Navigation */
+.page-content {
+    width: 100%;
+    min-height: 100vh;
+    padding-top: var(--space-xl);
+}
+
+.page-content.hidden {
+    display: none;
+}
+
+/* Navigation buttons */
+[data-navigate] {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[data-navigate]:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Page-specific styles */
+.multidevice-page,
+.setup-page,
+.game-page {
+    padding: var(--space-xl);
+    text-align: center;
+}
+
+.mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin: var(--space-xl) 0;
+    align-items: center;
+}
+
+.setup-content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.player-count-section {
+    margin-bottom: var(--space-xl);
+}
+
+.player-count-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    margin: var(--space-md) 0;
+}
+
+.current-count {
+    font-size: var(--font-xl);
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+.count-hint {
+    color: var(--text-muted);
+    font-size: var(--font-sm);
+}
+
+.role-info {
+    margin: var(--space-lg) 0;
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border: var(--border-thin) solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.player-inputs {
+    margin: var(--space-lg) 0;
+}
+
+.player-input-group {
+    margin-bottom: var(--space-md);
+}
+
+.player-input-group label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-weight: bold;
+}
+
+.player-input-group input {
+    width: 100%;
+    padding: var(--space-sm);
+    border: var(--border-thin) solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-base);
+}
+
+.create-game-section {
+    margin-top: var(--space-xl);
+    text-align: center;
+}
+
+.create-game-hint {
+    color: var(--text-muted);
+    font-size: var(--font-sm);
+    margin-top: var(--space-sm);
+}
 
 /* Vote popover and black button */
 .vote-pop-wrap { position: relative; display: inline-block; }

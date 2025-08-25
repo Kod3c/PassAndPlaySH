@@ -1363,6 +1363,11 @@
                 if (et > idx) sq.classList.add('active');
                 else sq.classList.remove('active');
             });
+
+            // Update table spread count based on current game state
+            const tableSpreadCount = calculateTableSpreadCountFromGameState(game);
+            setTableSpreadCount(tableSpreadCount);
+            console.log(`Table spread updated from game state: ${tableSpreadCount} cards remaining`);
         }
 
         function updateRoleBanner(game, gameId) {
@@ -2561,6 +2566,16 @@
                 // Increment discard pile count for chancellor's discarded card
                 incrementDiscardCount();
                 
+                // Update table spread count after policy enactment
+                const newTableSpreadCount = calculateTableSpreadCountFromGameState({
+                    ...latestGame,
+                    liberalPolicies: (latestGame.liberalPolicies || 0) + (enactedPolicy === 'liberal' ? 1 : 0),
+                    fascistPolicies: (latestGame.fascistPolicies || 0) + (enactedPolicy === 'fascist' ? 1 : 0)
+                });
+                setTableSpreadCount(newTableSpreadCount);
+                
+                console.log(`Table spread updated after policy enactment: ${newTableSpreadCount} cards remaining`);
+                
                 // Check if this triggers executive powers
                 const newLiberalCount = (latestGame.liberalPolicies || 0) + (enactedPolicy === 'liberal' ? 1 : 0);
                 const newFascistCount = (latestGame.fascistPolicies || 0) + (enactedPolicy === 'fascist' ? 1 : 0);
@@ -3470,7 +3485,8 @@
             const isCurrentlyHidden = roleText.textContent === 'Hidden' || 
                                     roleText.textContent.includes('Party:') ||
                                     roleText.textContent.includes('Your Fascist Comrades:') ||
-                                    roleText.textContent.includes('No other Fascist players');
+                                    roleText.textContent.includes('No other Fascist players') ||
+                                    roleText.textContent.includes('Your Liberal Comrades:');
             
             if (isCurrentlyHidden) {
                 // Close any other views first
@@ -3949,6 +3965,7 @@
                 // Initialize table spread count from game state
                 const tableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
                 setTableSpreadCount(tableSpreadCount);
+                console.log(`Table spread initialized from game state: ${tableSpreadCount} cards remaining`);
                 
                 // Update player strip highlights if ids available
                 renderPlayers(playersStrip, latestPlayers.map(p => ({
@@ -4329,6 +4346,16 @@
             
             // Update count display
             updateCountDisplay(count);
+            
+            // Update table spread count when discard pile changes (if game state is available)
+            if (latestGame && !window.isUpdatingTableSpread) {
+                window.isUpdatingTableSpread = true;
+                setTimeout(() => {
+                    const newTableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
+                    setTableSpreadCount(newTableSpreadCount);
+                    window.isUpdatingTableSpread = false;
+                }, 100);
+            }
         }
 
         // Function to update responsive styles for different screen sizes
@@ -4377,9 +4404,6 @@
             currentDiscardCount++;
             updateDiscardPileVisual(currentDiscardCount);
             
-            // Decrease table spread count when cards are discarded
-            decrementTableSpreadCount();
-            
             // Persist the discard count to the database so it survives game state reloads
             try {
                 const gameId = getGameId();
@@ -4390,6 +4414,13 @@
                         updatedAt: serverTimestamp()
                     });
                     console.log(`Discard count persisted to database: ${currentDiscardCount}`);
+                    
+                    // Update table spread count based on updated game state
+                    const newTableSpreadCount = calculateTableSpreadCountFromGameState({
+                        ...latestGame,
+                        totalDiscardedCards: (latestGame.totalDiscardedCards || 0) + 1
+                    });
+                    setTableSpreadCount(newTableSpreadCount);
                 }
             } catch (error) {
                 console.error('Failed to persist discard count to database:', error);
@@ -4414,6 +4445,13 @@
                             updatedAt: serverTimestamp()
                         });
                         console.log(`Discard count decreased in database: ${currentDiscardCount}`);
+                        
+                        // Update table spread count based on updated game state
+                        const newTableSpreadCount = calculateTableSpreadCountFromGameState({
+                            ...latestGame,
+                            totalDiscardedCards: Math.max(0, (latestGame.totalDiscardedCards || 0) - 1)
+                        });
+                        setTableSpreadCount(newTableSpreadCount);
                     }
                 } catch (error) {
                     console.error('Failed to update discard count in database:', error);
@@ -4427,6 +4465,13 @@
         async function resetDiscardCount() {
             currentDiscardCount = 0;
             updateDiscardPileVisual(currentDiscardCount);
+            
+            // Update table spread count when deck is reshuffled (all discarded cards return to deck)
+            if (latestGame) {
+                const newTableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
+                setTableSpreadCount(newTableSpreadCount);
+                console.log(`Table spread updated after deck reshuffle: ${newTableSpreadCount} cards remaining`);
+            }
             
             // Reset the cumulative discard count in the database when deck is reshuffled
             try {
@@ -4452,6 +4497,14 @@
         function setDiscardCount(count) {
             currentDiscardCount = Math.max(0, count);
             updateDiscardPileVisual(currentDiscardCount);
+            
+            // Update table spread count when discard count is loaded from game state
+            if (latestGame) {
+                const newTableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
+                setTableSpreadCount(newTableSpreadCount);
+                console.log(`Table spread updated after discard count load: ${newTableSpreadCount} cards remaining`);
+            }
+            
             console.log(`Discard count set to: ${currentDiscardCount}`);
         }
 
@@ -4693,24 +4746,45 @@
             console.log(`=== TABLE SPREAD CALCULATION ===`);
             console.log(`Full game object:`, game);
             
-            // For now, let's use a simpler approach - just show the policy stack size
-            // This should be the actual number of cards available to draw
-            const policyStackSize = game.currentPolicyStack?.length || 0;
-            console.log(`Using policy stack size directly: ${policyStackSize}`);
+            // Calculate remaining policy cards
+            let remainingCards = 17; // Total policy deck size
             
-            // If no policy stack data, default to a reasonable number
-            if (policyStackSize === 0) {
-                console.log(`No policy stack data, defaulting to 8 cards`);
-                return 8;
+            // Subtract enacted policies
+            if (game.liberalPolicies) {
+                remainingCards -= game.liberalPolicies;
+            }
+            if (game.fascistPolicies) {
+                remainingCards -= game.fascistPolicies;
             }
             
+            // Subtract discarded policies using the totalDiscardedCards field
+            if (game.totalDiscardedCards) {
+                remainingCards -= game.totalDiscardedCards;
+            }
+            
+            // Subtract cards currently in play (if any)
+            if (game.currentPolicyStack && Array.isArray(game.currentPolicyStack)) {
+                remainingCards -= game.currentPolicyStack.length;
+            }
+            
+            // Ensure we don't go below 0 or above the maximum
+            remainingCards = Math.max(0, Math.min(remainingCards, TABLE_SPREAD_CONFIG.length));
+            
+            console.log(`Liberal policies enacted: ${game.liberalPolicies || 0}`);
+            console.log(`Fascist policies enacted: ${game.fascistPolicies || 0}`);
+            console.log(`Total discarded cards: ${game.totalDiscardedCards || 0}`);
+            console.log(`Current policy stack: ${game.currentPolicyStack?.length || 0}`);
+            console.log(`Calculated remaining cards: ${remainingCards}`);
             console.log(`================================`);
-            return policyStackSize;
+            
+            return remainingCards;
         }
 
-        // Initialize table spread with default count
+        // Initialize table spread with correct count from game state
         document.addEventListener('DOMContentLoaded', function() {
-            setTableSpreadCount(6); // Start with 6 cards
+            // Start with 17 cards (full deck) if no game state, otherwise calculate from game
+            const initialCount = latestGame ? calculateTableSpreadCountFromGameState(latestGame) : 17;
+            setTableSpreadCount(initialCount);
             
             // Update test buttons to include table spread controls
             updateTestButtons();
@@ -4728,8 +4802,9 @@
             tableSpreadControls.innerHTML = `
                 <button onclick="incrementTableSpreadCount()" style="margin: 2px; padding: 4px 8px; font-size: 12px;">+1 Spread</button>
                 <button onclick="decrementTableSpreadCount()" style="margin: 2px; padding: 4px 8px; font-size: 12px;">-1 Spread</button>
-                <button onclick="setTableSpreadCount(6)" style="margin: 2px; padding: 4px 8px; font-size: 12px;">Reset Spread</button>
-                <span style="margin-left: 10px; font-size: 12px;">Spread: <span id="table-spread-count-display">6</span></span>
+                <button onclick="setTableSpreadCount(17)" style="margin: 2px; padding: 4px 8px; font-size: 12px;">Full Deck</button>
+                <button onclick="forceRefreshTableSpread()" style="margin: 2px; padding: 4px 8px; font-size: 12px;">Refresh</button>
+                <span style="margin-left: 10px; font-size: 12px;">Spread: <span id="table-spread-count-display">17</span></span>
             `;
             
             testDiv.appendChild(tableSpreadControls);
@@ -4745,6 +4820,31 @@
                 countDisplay.textContent = count;
             }
         }
+
+        // Manual force refresh function for debugging table spread
+        function forceRefreshTableSpread() {
+            console.log('=== FORCE REFRESH TABLE SPREAD ===');
+            const gameId = getGameId();
+            console.log('Game ID:', gameId);
+            console.log('Latest Game:', latestGame);
+            console.log('Current Table Spread Count:', currentTableSpreadCount);
+            
+            if (latestGame) {
+                const calculatedCount = calculateTableSpreadCountFromGameState(latestGame);
+                console.log('Calculated count from game state:', calculatedCount);
+                
+                // Force update the visual
+                setTableSpreadCount(calculatedCount);
+                
+                console.log('Force refresh completed. New count:', calculatedCount);
+            } else {
+                console.log('No game data available');
+            }
+            console.log('=== END FORCE REFRESH ===');
+        }
+        
+        // Make it globally accessible for console debugging
+        window.forceRefreshTableSpread = forceRefreshTableSpread;
 
         // ===== END DYNAMIC TABLE SPREAD MODULE =====
 

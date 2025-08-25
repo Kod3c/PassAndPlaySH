@@ -29,8 +29,8 @@
             </div>
         </header>
         
-        <!-- Main Content -->
-        <main>
+        <!-- Home Page Content -->
+        <main id="home-page" class="page-content">
             <div class="container">
                 <!-- Welcome Section -->
                 <div class="card text-center mb-4">
@@ -152,8 +152,6 @@
             </div>
         </main>
 
-
-
         <!-- Footer -->
         <footer class="main-footer">
             <div class="container">
@@ -169,12 +167,59 @@
         </footer>
     </div>
 
-    <!-- Game Page Content (placeholder) -->
-            <main id="game-page" class="page-content hidden">
+    <!-- Game Page Content -->
+    <main id="game-page" class="page-content hidden">
         <div class="game-page">
             <h2>Game in Progress</h2>
             <p>Game functionality coming soon...</p>
             <button data-navigate="home" class="btn btn-primary">Back to Home</button>
+        </div>
+    </main>
+
+    <!-- Multidevice Page Content -->
+    <main id="multidevice-page" class="page-content hidden">
+        <div class="multidevice-page">
+            <h2>Multi-Device Game</h2>
+            <p>Choose your game mode:</p>
+            <div class="mode-buttons">
+                <a href="pages/create.html" class="btn btn-primary btn-lg">
+                    <span class="btn-emoji">🎮</span>
+                    <span class="btn-text">Create Game</span>
+                </a>
+                <a href="pages/join.html" class="btn btn-secondary btn-lg">
+                    <span class="btn-emoji">🔗</span>
+                    <span class="btn-text">Join Game</span>
+                </a>
+            </div>
+            <button data-navigate="home" class="btn btn-outline">Back to Home</button>
+        </div>
+    </main>
+
+    <!-- Setup Page Content -->
+    <main id="setup-page" class="page-content hidden">
+        <div class="setup-page">
+            <h2>Pass & Play Game Setup</h2>
+            <p>Configure your local game:</p>
+            <div class="setup-content">
+                <div class="player-count-section">
+                    <h3>Select Number of Players</h3>
+                    <div class="player-count-controls">
+                        <button id="player-minus" class="btn btn-outline">-</button>
+                        <span class="current-count">0</span>
+                        <button id="player-plus" class="btn btn-outline">+</button>
+                    </div>
+                    <p class="count-hint">Select 5-10 players to start</p>
+                </div>
+                
+                <div id="role-info" class="role-info">
+                    <p>Select player count to see role distribution</p>
+                </div>
+                
+                <div id="player-inputs" class="player-inputs">
+                    <!-- Player inputs will be generated here -->
+                </div>
+            </div>
+            <button data-navigate="home" class="btn btn-outline">Back to Home</button>
         </div>
     </main>
 
