@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play - Secret Hitler</title>
     <link rel="stylesheet" href="../styles/app.css">
+    <link rel="stylesheet" href="parts/play-styles.css">
     <meta name="theme-color" content="#101820">
     <style>
         :root {
@@ -230,6 +231,7 @@
         .actions-bar .btn { width: auto; flex: 0 0 auto; }
         .btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
         .btn-primary { background: var(--highlight-cream); color: var(--propaganda-black); }
+        .btn-secondary { background: var(--highlight-cream); color: var(--propaganda-black); }
         .btn-stuck { background: var(--fascist-red); color: #fff; border-color: var(--propaganda-black); }
         .status-banner { 
             display:flex; align-items:center; justify-content:center; gap:10px;
@@ -305,6 +307,68 @@
             min-width: 200px; 
             min-height: 48px; 
             font-size: 1.1rem; 
+            transition: all 0.2s ease;
+        }
+        
+        .role-actions .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .role-actions .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #ccc !important;
+            color: #666 !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Special styling for the role button to make it stand out */
+        .role-actions .btn[id="role-btn"] {
+            background: var(--highlight-cream) !important;
+            color: var(--propaganda-black) !important;
+            border-width: 4px !important;
+            font-weight: 900 !important;
+        }
+        
+        /* Subtle styling for membership and comrades buttons */
+        .role-actions .btn[id="membership-btn"],
+        .role-actions .btn[id="compatriots-btn"] {
+            background: rgba(241, 230, 178, 0.8) !important;
+            color: var(--propaganda-black) !important;
+            border-width: 3px !important;
+        }
+        
+        /* Button hover effects for enabled buttons */
+        .role-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Ensure buttons are always clickable and properly styled */
+        .role-actions .btn {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+        }
+        
+        /* Adjust grid layout when comrades button is hidden */
+        .role-actions-main:has(#compatriots-btn[style*="display: none"]) {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        /* Ensure proper spacing when only 2 buttons are visible */
+        .role-actions-main:has(#compatriots-btn[style*="display: none"]) .btn {
+            min-width: 220px;
+        }
+        
+        /* Fallback for browsers without :has() support */
+        .role-actions-main.comrades-hidden {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .role-actions-main.comrades-hidden .btn {
+            min-width: 220px;
         }
         /* Rules modal specific */
         .rules-modal .modal-card { max-height: 86vh; display:flex; flex-direction:column; }
@@ -318,6 +382,19 @@
         .rules-bottomnav { display:none; position: sticky; bottom: 0; left: 0; right: 0; padding: 8px; background: var(--bg-card); border-top: 3px solid var(--propaganda-black); z-index: 1; }
         .rules-bottomnav-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
         .rules-bottomnav .indicator { font-weight: 900; letter-spacing: 0.03em; }
+        @media (max-width: 768px) {
+            /* Medium screens - start transitioning to mobile layout */
+            .role-actions-main {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .role-actions .btn {
+                min-width: 160px;
+                min-height: 46px;
+            }
+        }
+        
         @media (max-width: 640px) {
             .rules-modal .modal-card { width: 96vw; max-height: 92vh; }
             .rules-modal .modal-body { padding: 8px; padding-bottom: 64px; }
@@ -328,9 +405,39 @@
             .rules-bottomnav { display:block; }
             .rules-bottomnav .btn { min-height: 44px; flex: 1; }
             .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
+            
+            /* Role actions responsive styling */
+            .role-actions .btn { 
+                min-width: 100%; 
+                min-height: 44px; 
+                font-size: 1rem; 
+            }
+            
+            /* Stack buttons vertically on mobile */
+            .role-actions-main {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            
+            /* Ensure buttons take full width on mobile */
+            .role-actions .btn {
+                width: 100% !important;
+                min-width: 100% !important;
+            }
         }
         @media (max-width: 360px) {
             .rules-quicknav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            
+            /* Extra small screen role actions */
+            .role-actions .btn { 
+                min-height: 40px; 
+                font-size: 0.9rem; 
+                padding: 8px 12px;
+            }
+            
+            .role-actions-main {
+                gap: 6px !important;
+            }
         }
         .order-list { display:flex; flex-direction:column; gap:8px; }
         .order-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; border: 2px dashed var(--propaganda-black); background:#fff; }
@@ -1074,7 +1181,7 @@
                         <div class="role-actions-main">
                             <button id="membership-btn" class="btn btn-secondary">🏛️ View Membership</button>
                             <button id="role-btn" class="btn btn-primary">👁️ View Role</button>
-                            <button id="compatriots-btn" class="btn btn-secondary" disabled>👥 View Comrades</button>
+                            <button id="compatriots-btn" class="btn btn-secondary" style="display: none;">👥 View Comrades</button>
                         </div>
                         <button id="role-done-btn" class="btn">✅ Close</button>
                     </div>
@@ -2994,12 +3101,22 @@
         
         // Role overlay functions
         function openRoleOverlay() {
+            console.log('🚀 openRoleOverlay called');
             const roleOverlay = document.getElementById('role-overlay');
             const roleText = document.getElementById('role-text');
             const membershipBtn = document.getElementById('membership-btn');
             const roleBtn = document.getElementById('role-btn');
             const compatriotsBtn = document.getElementById('compatriots-btn');
             const doneBtn = document.getElementById('role-done-btn');
+            
+            console.log('🔍 Found elements:', {
+                roleOverlay: !!roleOverlay,
+                roleText: !!roleText,
+                membershipBtn: !!membershipBtn,
+                roleBtn: !!roleBtn,
+                compatriotsBtn: !!compatriotsBtn,
+                doneBtn: !!doneBtn
+            });
             
             if (!roleOverlay || !roleText || !membershipBtn || !roleBtn || !compatriotsBtn || !doneBtn) {
                 console.error('Role modal elements not found');
@@ -3022,13 +3139,47 @@
                 return;
             }
             
+            // Additional validation for game state
+            if (game.state !== 'playing') {
+                roleText.textContent = 'Game not started yet';
+                roleText.style.color = '#666';
+                // Disable all action buttons
+                membershipBtn.disabled = true;
+                roleBtn.disabled = true;
+                compatriotsBtn.disabled = true;
+                return;
+            }
+            
             // Set up button states and permissions
+            console.log('🎯 Setting up button permissions for player:', youPlayer?.role + ' (' + youPlayer?.party + ')');
             setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatriotsBtn);
             
             // Set up event listeners
             membershipBtn.onclick = () => showMembership(youPlayer, roleText, membershipBtn);
             roleBtn.onclick = () => showRole(youPlayer, roleText, roleBtn);
-            compatriotsBtn.onclick = () => showCompatriots(youPlayer, game, roleText);
+            compatriotsBtn.onclick = () => {
+                if (!compatriotsBtn.disabled) {
+                    showCompatriots(youPlayer, game, roleText);
+                }
+            };
+            
+            // Set up a retry mechanism for permissions in case game data is still loading
+            let retryCount = 0;
+            const maxRetries = 3;
+            const retryPermissions = () => {
+                if (retryCount < maxRetries && (!game.playerCount || game.playerCount <= 0)) {
+                    retryCount++;
+                    console.log(`Retrying permissions setup (attempt ${retryCount}/${maxRetries})`);
+                    setTimeout(() => {
+                        if (latestGame && latestGame.playerCount) {
+                            setupButtonPermissions(youPlayer, latestGame, membershipBtn, roleBtn, compatriotsBtn);
+                        } else if (retryCount < maxRetries) {
+                            retryPermissions();
+                        }
+                    }, 1000 * retryCount); // Exponential backoff
+                }
+            };
+            retryPermissions();
             doneBtn.onclick = () => {
                 roleOverlay.style.display = 'none';
                 setRoleBannerVisibility(true);
@@ -3037,6 +3188,22 @@
             // Start with hidden role
             roleText.textContent = 'Hidden';
             roleText.style.color = '#000';
+            
+            // Reset buttons to censored state
+            membershipBtn.textContent = '🏛️ View Membership';
+            roleBtn.textContent = '👁️ View Role';
+            membershipBtn.style.background = 'rgba(241, 230, 178, 0.8)';
+            roleBtn.style.background = 'var(--highlight-cream)';
+            membershipBtn.style.borderColor = 'var(--propaganda-black)';
+            roleBtn.style.borderColor = 'var(--propaganda-black)';
+            
+            // Clear any existing help text
+            const existingHelpText = roleText.querySelector('div[style*="font-style: italic"]');
+            if (existingHelpText) {
+                existingHelpText.remove();
+            }
+            
+
             
             // Show overlay with smooth transition
             roleOverlay.style.display = 'flex';
@@ -3052,10 +3219,100 @@
             }
         }
         
+        function refreshRoleOverlayPermissions() {
+            // Only refresh if the role overlay is currently open
+            const roleOverlay = document.getElementById('role-overlay');
+            if (!roleOverlay || roleOverlay.style.display === 'none') {
+                return;
+            }
+            
+            const membershipBtn = document.getElementById('membership-btn');
+            const roleBtn = document.getElementById('role-btn');
+            const compatriotsBtn = document.getElementById('compatriots-btn');
+            
+            if (!membershipBtn || !roleBtn || !compatriotsBtn) {
+                return;
+            }
+            
+            const gameId = getGameId();
+            const youId = computeYouId(gameId);
+            const youPlayer = (latestPlayers || []).find(p => p && p.id === youId);
+            const game = latestGame;
+            
+            if (youPlayer && game) {
+                console.log('Refreshing role overlay permissions:', {
+                    gameId,
+                    youId,
+                    youPlayerRole: youPlayer.role,
+                    youPlayerParty: youPlayer.party,
+                    gameState: game.state,
+                    gamePlayerCount: game.playerCount,
+                    latestPlayersLength: latestPlayers.length
+                });
+                setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatriotsBtn);
+                
+
+                
+                // Clear any existing help text
+                const roleText = document.getElementById('role-text');
+                if (roleText) {
+                    const existingHelpText = roleText.querySelector('div[style*="font-style: italic"]');
+                    if (existingHelpText) {
+                        existingHelpText.remove();
+                    }
+                }
+            }
+        }
+        
         // New core functions for the three-button role modal
         function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatriotsBtn) {
-            const playerCount = game.playerCount || (latestPlayers || []).length;
-            const isFascist = youPlayer.party === 'FASCIST' || youPlayer.role === 'FASCIST';
+            console.log('🔍 setupButtonPermissions called with:', {
+                youPlayer: youPlayer?.role + ' (' + youPlayer?.party + ')',
+                gamePlayerCount: game?.playerCount,
+                latestPlayersLength: (latestPlayers || []).length
+            });
+            
+            // Ensure we have a reliable player count
+            let playerCount = game.playerCount;
+            if (!playerCount || playerCount <= 0) {
+                playerCount = (latestPlayers || []).length;
+                // If still no valid count, try to get it from the game document
+                if (!playerCount || playerCount <= 0) {
+                    console.warn('No valid player count found, defaulting to 5');
+                    playerCount = 5; // Default fallback
+                }
+            }
+            
+            // Log the current state for debugging
+            console.log('Setting up button permissions:', {
+                gamePlayerCount: game.playerCount,
+                fallbackPlayerCount: playerCount,
+                latestPlayersLength: latestPlayers.length,
+                gameState: game.state,
+                youPlayerRole: youPlayer.role,
+                youPlayerParty: youPlayer.party
+            });
+            
+            // Additional validation for game state
+            if (!game || game.state !== 'playing') {
+                console.warn('Game not in playing state, disabling comrades button');
+                compatriotsBtn.disabled = true;
+                compatriotsBtn.style.opacity = '0.6';
+                compatriotsBtn.title = 'Game not started yet';
+                return;
+            }
+            
+            // Ensure we have valid player data
+            if (!latestPlayers || latestPlayers.length === 0) {
+                console.warn('No players loaded yet, disabling comrades button');
+                compatriotsBtn.disabled = true;
+                compatriotsBtn.style.opacity = '0.6';
+                compatriotsBtn.title = 'Player data not loaded yet';
+                return;
+            }
+            
+            const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' || 
+                              (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
             
             // Debug logging to help troubleshoot
             console.log('setupButtonPermissions debug:', {
@@ -3063,37 +3320,101 @@
                 isFascist,
                 party: youPlayer.party,
                 role: youPlayer.role,
+                partyUpper: (youPlayer.party || '').toString().toUpperCase(),
+                roleUpper: (youPlayer.role || '').toString().toUpperCase(),
                 gamePlayerCount: game.playerCount,
                 latestPlayersLength: (latestPlayers || []).length,
                 gameState: game.state,
                 gameId: game.id
             });
             
-            // Membership and role always available
+            // Membership and role start enabled but censored (showing placeholder text)
             membershipBtn.disabled = false;
             roleBtn.disabled = false;
+            membershipBtn.style.opacity = '1';
+            roleBtn.style.opacity = '1';
+            membershipBtn.title = 'Click to reveal your party membership';
+            roleBtn.title = 'Click to reveal your secret role';
             
-            // Comrades only for fascists at 5-6 players
-            if (isFascist && (playerCount === 5 || playerCount === 6)) {
+            // Comrades button visibility and permissions
+            const roleActionsMain = document.querySelector('.role-actions-main');
+            console.log('🔍 Found roleActionsMain:', !!roleActionsMain);
+            
+            if (isFascist) {
+                console.log('🎯 Player is Fascist, checking player count:', playerCount);
+                // Show comrades button for Fascists at 5+ players
+                // At 5-6 players: All Fascists (including Hitler) know each other
+                // At 7+ players: Fascists know each other, but Hitler doesn't know them
+                if (playerCount >= 5) {
+                    console.log('✅ Enabling comrades button for Fascist at', playerCount, 'players');
+                    compatriotsBtn.style.removeProperty('display');
+                    compatriotsBtn.disabled = false;
+                    compatriotsBtn.style.opacity = '1';
+                    compatriotsBtn.title = 'View your Fascist allies';
+                    roleActionsMain?.classList.remove('comrades-hidden');
+                    console.log('🔧 Button state after enabling:', {
+                        display: compatriotsBtn.style.display,
+                        disabled: compatriotsBtn.disabled,
+                        opacity: compatriotsBtn.style.opacity,
+                        roleActionsMainClasses: roleActionsMain?.classList.toString()
+                    });
+                    
+                    // Clear any existing help text
+                    const roleText = document.getElementById('role-text');
+                    if (roleText) {
+                        const helpText = roleText.querySelector('div[style*="font-style: italic"]');
+                        if (helpText) {
+                            helpText.remove();
+                        }
+                    }
+                } else {
+                    // Hide button completely for games with less than 5 players
+                    console.log('❌ Hiding comrades button for Fascist at', playerCount, 'players (need 5+ players)');
+                    compatriotsBtn.style.display = 'none';
+                    roleActionsMain?.classList.add('comrades-hidden');
+                }
+            } else {
+                // Show comrades button for Liberals with fun message
+                console.log('🎭 Enabling comrades button for Liberal player');
+                compatriotsBtn.style.removeProperty('display');
                 compatriotsBtn.disabled = false;
                 compatriotsBtn.style.opacity = '1';
-                compatriotsBtn.title = 'View your Fascist allies';
-                console.log('Comrades button ENABLED for Fascist at', playerCount, 'players');
-            } else {
-                compatriotsBtn.disabled = true;
-                compatriotsBtn.style.opacity = '0.6';
-                if (isFascist) {
-                    compatriotsBtn.title = `Fascists can only see allies at 5-6 players (current: ${playerCount})`;
-                    console.log('Comrades button DISABLED for Fascist at', playerCount, 'players');
-                } else {
-                    compatriotsBtn.title = 'Only Fascists can view allies';
-                    console.log('Comrades button DISABLED for non-Fascist');
-                }
+                compatriotsBtn.title = 'See what Liberals see (hint: nothing!)';
+                roleActionsMain?.classList.remove('comrades-hidden');
             }
             
             // Add visual feedback for button states
-            membershipBtn.title = 'View your party membership and role details';
-            roleBtn.title = 'Toggle between hidden and revealed role';
+            membershipBtn.title = 'Click to reveal your party membership';
+            roleBtn.title = 'Click to reveal your secret role';
+        }
+        
+        // Helper function to close all views and reset to hidden state
+        function closeAllViews(roleText) {
+            // Clear any existing help text
+            const existingHelpText = roleText.querySelector('div[style*="font-style: italic"]');
+            if (existingHelpText) {
+                existingHelpText.remove();
+            }
+            
+            // Reset to hidden state
+            roleText.textContent = 'Hidden';
+            roleText.style.color = '#000';
+            
+            // Reset button states back to original
+            const membershipBtn = document.getElementById('membership-btn');
+            const roleBtn = document.getElementById('role-btn');
+            
+            if (membershipBtn) {
+                membershipBtn.textContent = '🏛️ View Membership';
+                membershipBtn.style.background = 'rgba(0, 174, 239, 0.1)';
+                membershipBtn.style.borderColor = 'var(--liberal-blue)';
+            }
+            
+            if (roleBtn) {
+                roleBtn.textContent = '👁️ View Role';
+                roleBtn.style.background = 'var(--highlight-cream)';
+                roleBtn.style.borderColor = 'var(--propaganda-black)';
+            }
         }
         
         function showMembership(youPlayer, roleText, membershipBtn) {
@@ -3113,13 +3434,27 @@
                 membershipBtn.style.background = 'rgba(0, 174, 239, 0.1)';
                 membershipBtn.style.borderColor = 'var(--liberal-blue)';
             } else {
+                // Close any other views first
+                closeAllViews(roleText);
+                
                 // Show membership
                 roleText.textContent = `Party: ${party}`;
-                roleText.style.color = '#000';
+                
+                // Set colors based on party (same color scheme as role text)
+                if (party === 'FASCIST') {
+                    roleText.style.color = '#DA291C'; // Fascist red
+                    membershipBtn.style.background = 'rgba(218, 41, 28, 0.1)';
+                    membershipBtn.style.borderColor = '#DA291C';
+                } else {
+                    roleText.style.color = '#00AEEF'; // Liberal blue
+                    membershipBtn.style.background = 'rgba(0, 174, 239, 0.1)';
+                    membershipBtn.style.borderColor = 'var(--liberal-blue)';
+                }
+                
                 membershipBtn.textContent = '🙈 Hide Membership';
-                membershipBtn.style.background = 'rgba(0, 174, 239, 0.2)';
-                membershipBtn.style.borderColor = 'var(--liberal-blue)';
             }
+            
+
             
             // Add subtle animation
             roleText.style.animation = 'none';
@@ -3138,6 +3473,9 @@
                                     roleText.textContent.includes('No other Fascist players');
             
             if (isCurrentlyHidden) {
+                // Close any other views first
+                closeAllViews(roleText);
+                
                 const label = role ? `${role}${party && role !== party ? ' – ' + party : ''}` : 'Not assigned yet';
                 roleText.textContent = label;
                 
@@ -3157,6 +3495,8 @@
                 roleBtn.style.borderColor = 'var(--propaganda-black)';
             }
             
+
+            
             // Add subtle animation
             roleText.style.animation = 'none';
             roleText.offsetHeight; // Trigger reflow
@@ -3164,18 +3504,59 @@
         }
         
         function showCompatriots(youPlayer, game, roleText) {
-            const fascistPlayers = (latestPlayers || []).filter(p => 
-                p && p.id !== youPlayer.id && 
-                (p.party === 'FASCIST' || p.role === 'FASCIST')
-            );
+            const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' || 
+                              (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
             
-            if (fascistPlayers.length === 0) {
-                roleText.textContent = 'No other Fascist players to reveal';
-                roleText.style.color = '#000';
+            // Close any other views first
+            closeAllViews(roleText);
+            
+            if (isFascist) {
+                // Handle Fascist players
+                const fascistPlayers = (latestPlayers || []).filter(p => 
+                    p && p.id !== youPlayer.id && 
+                    ((p.party || '').toString().toUpperCase() === 'FASCIST' || 
+                     (p.role || '').toString().toUpperCase() === 'FASCIST')
+                );
+                
+                if (fascistPlayers.length === 0) {
+                    roleText.textContent = 'No other Fascist players to reveal';
+                    roleText.style.color = '#000';
+                    
+                    // Add explanation
+                    const helpText = document.createElement('div');
+                    helpText.style.fontSize = '0.75rem';
+                    helpText.style.color = '#666';
+                    helpText.style.marginTop = '8px';
+                    helpText.style.fontStyle = 'italic';
+                    helpText.textContent = 'This means you are the only Fascist player in the game.';
+                    roleText.appendChild(helpText);
+                } else {
+                    const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
+                    roleText.textContent = `Your Fascist Comrades:\n${names}`;
+                    roleText.style.color = '#DA291C';
+                    
+                    // Add explanation
+                    const helpText = document.createElement('div');
+                    helpText.style.fontSize = '0.75rem';
+                    helpText.style.color = '#666';
+                    helpText.style.marginTop = '8px';
+                    helpText.style.fontStyle = 'italic';
+                    helpText.textContent = `You know ${fascistPlayers.length} other Fascist player${fascistPlayers.length === 1 ? '' : 's'}. Work together to pass Fascist policies!`;
+                    roleText.appendChild(helpText);
+                }
             } else {
-                const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
-                roleText.textContent = `Your Fascist Comrades:\n${names}`;
-                roleText.style.color = '#DA291C';
+                // Handle Liberal players with fun message
+                roleText.textContent = '🤷‍♂️ Your Liberal Comrades:';
+                roleText.style.color = '#00AEEF';
+                
+                // Add fun explanation about not knowing teammates
+                const helpText = document.createElement('div');
+                helpText.style.fontSize = '0.75rem';
+                helpText.style.color = '#666';
+                helpText.style.marginTop = '8px';
+                helpText.style.fontStyle = 'italic';
+                helpText.textContent = 'You have no idea who your Liberal teammates are - and that\'s part of the fun! Trust your instincts and work together to pass Liberal policies! 🕵️‍♀️';
+                roleText.appendChild(helpText);
             }
             
             // Add subtle animation
@@ -3578,8 +3959,11 @@
                 // Update policy counters and election tracker if present
                 updateFromGame(latestGame);
                             // Update floating role banner for this device
-            updateRoleBanner(latestGame, gid);
-            updateRoleEnvelope(latestGame, gid);
+                updateRoleBanner(latestGame, gid);
+                updateRoleEnvelope(latestGame, gid);
+                
+                // Refresh role overlay permissions if it's currently open
+                refreshRoleOverlayPermissions();
                 // Update actions (nomination UI etc.)
                 renderActions(gid);
                 // Attempt resolve vote if complete
@@ -3620,6 +4004,10 @@
                 // Also refresh the banner after players load (needed for uid->id map)
                 updateRoleBanner(latestGame, gid);
                 updateRoleEnvelope(latestGame, gid);
+                
+                // Refresh role overlay permissions if it's currently open
+                refreshRoleOverlayPermissions();
+                
                 // Re-render history when players (and thus your party) resolves
                 renderHistory();
                 // Update actions when players change (eligibility)

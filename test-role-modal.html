@@ -55,20 +55,21 @@
         <h1>🎭 Role Modal Test - Secret Hitler</h1>
         <p>This test page demonstrates the new three-button role modal functionality.</p>
         
-        <div class="test-scenario">
-            <h3>🧪 Test Scenarios</h3>
-            <p><strong>Liberal Player:</strong> Should see membership and role buttons enabled, comrades button disabled</p>
-            <p><strong>Fascist at 5-6 players:</strong> All three buttons should be enabled</p>
-            <p><strong>Fascist at 7-10 players:</strong> Membership and role enabled, comrades disabled</p>
-            <p><strong>Hitler:</strong> Same behavior as other Fascists</p>
-        </div>
+                 <div class="test-scenario">
+             <h3>🧪 Test Scenarios</h3>
+             <p><strong>Liberal Player:</strong> Should see membership and role buttons enabled, comrades button disabled</p>
+             <p><strong>Fascist at 5-6 players:</strong> All three buttons should be enabled (including comrades)</p>
+             <p><strong>Fascist at 7-10 players:</strong> All three buttons should be enabled (including comrades)</p>
+             <p><strong>Hitler:</strong> Same behavior as other Fascists - can see comrades at 5+ players</p>
+         </div>
 
         <div class="test-scenario">
             <h3>🎯 Test the Modal</h3>
             <button class="test-button" onclick="testLiberalPlayer()">Test Liberal Player</button>
-            <button class="test-button" onclick="testFascist5Players()">Test Fascist (5 players)</button>
-            <button class="test-button" onclick="testFascist8Players()">Test Fascist (8 players)</button>
-            <button class="test-button" onclick="testHitler()">Test Hitler</button>
+                         <button class="test-button" onclick="testFascist5Players()">Test Fascist (5 players) - Can See Comrades</button>
+             <button class="test-button" onclick="testFascist7Players()">Test Fascist (7 players) - Can See Comrades</button>
+             <button class="test-button" onclick="testFascist8Players()">Test Fascist (8 players) - Can See Comrades</button>
+             <button class="test-button" onclick="testHitler()">Test Hitler (5 players) - Can See Comrades</button>
         </div>
 
         <div class="test-scenario">
@@ -126,12 +127,27 @@
             mockPlayers = [
                 { id: '1', name: 'Alice', role: 'LIBERAL', party: 'LIBERAL' },
                 { id: '2', name: 'Bob', role: 'LIBERAL', party: 'LIBERAL' },
-                { id: '3', name: 'Charlie', role: 'FASCIST', party: 'FASCIST' },
+                { id: '3', name: 'Charlie', role: 'LIBERAL', party: 'LIBERAL' },
                 { id: '4', name: 'David', role: 'FASCIST', party: 'FASCIST' },
                 { id: '5', name: 'Eve', role: 'HITLER', party: 'FASCIST' }
             ];
             mockGame.playerCount = 5;
-            currentPlayer = mockPlayers[2]; // Charlie (Fascist)
+            currentPlayer = mockPlayers[3]; // David (Fascist)
+            openRoleOverlay();
+        }
+
+        function testFascist7Players() {
+            mockPlayers = [
+                { id: '1', name: 'Alice', role: 'LIBERAL', party: 'LIBERAL' },
+                { id: '2', name: 'Bob', role: 'LIBERAL', party: 'LIBERAL' },
+                { id: '3', name: 'Charlie', role: 'LIBERAL', party: 'LIBERAL' },
+                { id: '4', name: 'David', role: 'LIBERAL', party: 'LIBERAL' },
+                { id: '5', name: 'Eve', role: 'FASCIST', party: 'FASCIST' },
+                { id: '6', name: 'Frank', role: 'FASCIST', party: 'FASCIST' },
+                { id: '7', name: 'Grace', role: 'HITLER', party: 'FASCIST' }
+            ];
+            mockGame.playerCount = 7;
+            currentPlayer = mockPlayers[4]; // Eve (Fascist)
             openRoleOverlay();
         }
 
@@ -172,7 +188,8 @@
         // Core functions (copied from the main implementation)
                  function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatriotsBtn) {
              const playerCount = game.playerCount || mockPlayers.length;
-             const isFascist = youPlayer.party === 'FASCIST' || youPlayer.role === 'FASCIST';
+             const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' || 
+                               (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
              
              // Debug logging to help troubleshoot
              console.log('setupButtonPermissions debug:', {
@@ -188,30 +205,57 @@
              membershipBtn.disabled = false;
              roleBtn.disabled = false;
              
-             // Comrades only for fascists at 5-6 players
-             if (isFascist && (playerCount === 5 || playerCount === 6)) {
-                 compatriotsBtn.disabled = false;
-                 compatriotsBtn.style.opacity = '1';
-                 compatriotsBtn.title = 'View your Fascist allies';
-                 console.log('Comrades button ENABLED for Fascist at', playerCount, 'players');
-             } else {
-                 compatriotsBtn.disabled = true;
-                 compatriotsBtn.style.opacity = '0.6';
-                 if (isFascist) {
-                     compatriotsBtn.title = `Fascists can only see allies at 5-6 players (current: ${playerCount})`;
-                     console.log('Comrades button DISABLED for Fascist at', playerCount, 'players');
-                 } else {
-                     compatriotsBtn.title = 'Only Fascists can view allies';
-                     console.log('Comrades button DISABLED for non-Fascist');
-                 }
-             }
+                           // Comrades button logic:
+              // - Fascists at 5+ players: Can see their allies
+              // - Liberals: Always enabled with fun message about not knowing teammates
+              if (isFascist && playerCount >= 5) {
+                  // Fascists can see comrades at 5+ players
+                  compatriotsBtn.disabled = false;
+                  compatriotsBtn.style.opacity = '1';
+                  compatriotsBtn.title = 'View your Fascist allies';
+                  console.log('Comrades button ENABLED for Fascist at', playerCount, 'players');
+              } else if (!isFascist) {
+                  // Liberals always get the comrades button with fun message
+                  compatriotsBtn.disabled = false;
+                  compatriotsBtn.style.opacity = '1';
+                  compatriotsBtn.title = 'See what Liberals see (hint: nothing!)';
+                  console.log('Comrades button ENABLED for Liberal player');
+              } else {
+                  // Fascists at <5 players can't see comrades yet
+                  compatriotsBtn.disabled = true;
+                  compatriotsBtn.style.opacity = '0.6';
+                  compatriotsBtn.title = `Fascists can see allies at 5+ players (current: ${playerCount})`;
+                  console.log('Comrades button DISABLED for Fascist at', playerCount, 'players');
+              }
              
              // Add visual feedback for button states
              membershipBtn.title = 'View your party membership and role details';
              roleBtn.title = 'Toggle between hidden and revealed role';
          }
         
-                 function showMembership(youPlayer, roleText, membershipBtn) {
+                 // Helper function to close all views and reset to hidden state
+         function closeAllViews(roleText) {
+             roleText.textContent = 'Hidden';
+             roleText.style.color = '#000';
+             
+             // Reset button states back to original
+             const membershipBtn = document.getElementById('membership-btn');
+             const roleBtn = document.getElementById('role-btn');
+             
+             if (membershipBtn) {
+                 membershipBtn.textContent = '🏛️ View Membership';
+                 membershipBtn.style.background = 'rgba(0, 174, 239, 0.1)';
+                 membershipBtn.style.borderColor = 'var(--liberal-blue)';
+             }
+             
+             if (roleBtn) {
+                 roleBtn.textContent = '👁️ View Role';
+                 roleBtn.style.background = 'var(--highlight-cream)';
+                 roleBtn.style.borderColor = 'var(--propaganda-black)';
+             }
+         }
+         
+         function showMembership(youPlayer, roleText, membershipBtn) {
              const party = (youPlayer.party || '').toString().toUpperCase();
              
              // Check if membership is currently shown or hidden
@@ -228,6 +272,9 @@
                  membershipBtn.style.background = 'rgba(0, 174, 239, 0.1)';
                  membershipBtn.style.borderColor = 'var(--liberal-blue)';
              } else {
+                 // Close any other views first
+                 closeAllViews(roleText);
+                 
                  // Show membership
                  roleText.textContent = `Party: ${party}`;
                  membershipBtn.textContent = '🙈 Hide Membership';
@@ -242,62 +289,79 @@
              roleText.style.animation = 'fadeIn 0.3s ease-in-out';
          }
         
-        function showRole(youPlayer, roleText, roleBtn) {
-            const role = (youPlayer.role || '').toString().toUpperCase();
-            const party = (youPlayer.party || '').toString().toUpperCase();
-            
-            // Check if role is currently hidden or shown
-            const isCurrentlyHidden = roleText.textContent === 'Hidden' || 
-                                    roleText.textContent.includes('Party:') ||
-                                    roleText.textContent.includes('Your Fascist Comrades:') ||
-                                    roleText.textContent.includes('No other Fascist players');
-            
-            if (isCurrentlyHidden) {
-                const label = role ? `${role}${party && role !== party ? ' – ' + party : ''}` : 'Not assigned yet';
-                roleText.textContent = label;
-                
-                // Set colors based on role
-                if (role === 'HITLER') roleText.style.color = '#DA291C';
-                else if (party === 'FASCIST' || role === 'FASCIST') roleText.style.color = '#DA291C';
-                else roleText.style.color = '#00AEEF';
-                
-                roleBtn.textContent = '🙈 Hide Role';
-                roleBtn.style.background = 'rgba(218, 41, 28, 0.1)';
-                roleBtn.style.borderColor = '#DA291C';
-            } else {
-                roleText.textContent = 'Hidden';
-                roleText.style.color = '#000';
-                roleBtn.textContent = '👁️ View Role';
-                roleBtn.style.background = 'var(--highlight-cream)';
-                roleBtn.style.borderColor = 'var(--propaganda-black)';
-            }
-            
-            // Add subtle animation
-            roleText.style.animation = 'none';
-            roleText.offsetHeight; // Trigger reflow
-            roleText.style.animation = 'fadeIn 0.3s ease-in-out';
-        }
+                 function showRole(youPlayer, roleText, roleBtn) {
+             const role = (youPlayer.role || '').toString().toUpperCase();
+             const party = (youPlayer.party || '').toString().toUpperCase();
+             
+             // Check if role is currently hidden or shown
+             const isCurrentlyHidden = roleText.textContent === 'Hidden' || 
+                                     roleText.textContent.includes('Party:') ||
+                                     roleText.textContent.includes('Your Fascist Comrades:') ||
+                                     roleText.textContent.includes('No other Fascist players');
+             
+             if (isCurrentlyHidden) {
+                 // Close any other views first
+                 closeAllViews(roleText);
+                 
+                 const label = role ? `${role}${party && role !== party ? ' – ' + party : ''}` : 'Not assigned yet';
+                 roleText.textContent = label;
+                 
+                 // Set colors based on role
+                 if (role === 'HITLER') roleText.style.color = '#DA291C';
+                 else if (party === 'FASCIST' || role === 'FASCIST') roleText.style.color = '#DA291C';
+                 else roleText.style.color = '#00AEEF';
+                 
+                 roleBtn.textContent = '🙈 Hide Role';
+                 roleBtn.style.background = 'rgba(218, 41, 28, 0.1)';
+                 roleBtn.style.borderColor = '#DA291C';
+             } else {
+                 roleText.textContent = 'Hidden';
+                 roleText.style.color = '#000';
+                 roleBtn.textContent = '👁️ View Role';
+                 roleBtn.style.background = 'var(--highlight-cream)';
+                 roleBtn.style.borderColor = 'var(--propaganda-black)';
+             }
+             
+             // Add subtle animation
+             roleText.style.animation = 'none';
+             roleText.offsetHeight; // Trigger reflow
+             roleText.style.animation = 'fadeIn 0.3s ease-in-out';
+         }
         
-        function showCompatriots(youPlayer, game, roleText) {
-            const fascistPlayers = mockPlayers.filter(p => 
-                p && p.id !== youPlayer.id && 
-                (p.party === 'FASCIST' || p.role === 'FASCIST')
-            );
-            
-            if (fascistPlayers.length === 0) {
-                roleText.textContent = 'No other Fascist players to reveal';
-                roleText.style.color = '#000';
-            } else {
-                const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
-                roleText.textContent = `Your Fascist Comrades:\n${names}`;
-                roleText.style.color = '#DA291C';
-            }
-            
-            // Add subtle animation
-            roleText.style.animation = 'none';
-            roleText.offsetHeight; // Trigger reflow
-            roleText.style.animation = 'fadeIn 0.3s ease-in-out';
-        }
+                                   function showCompatriots(youPlayer, game, roleText) {
+              const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' || 
+                                (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
+              
+              // Close any other views first
+              closeAllViews(roleText);
+              
+              if (isFascist) {
+                  // Handle Fascist players
+                  const fascistPlayers = mockPlayers.filter(p => 
+                      p && p.id !== youPlayer.id && 
+                      ((p.party || '').toString().toUpperCase() === 'FASCIST' || 
+                       (p.role || '').toString().toUpperCase() === 'FASCIST')
+                  );
+                  
+                  if (fascistPlayers.length === 0) {
+                      roleText.textContent = 'No other Fascist players to reveal';
+                      roleText.style.color = '#000';
+                  } else {
+                      const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
+                      roleText.textContent = `Your Fascist Comrades:\n${names}`;
+                      roleText.style.color = '#DA291C';
+                  }
+              } else {
+                  // Handle Liberal players with fun message
+                  roleText.textContent = '🤷‍♂️ Your Liberal Comrades:';
+                  roleText.style.color = '#00AEEF';
+              }
+              
+              // Add subtle animation
+              roleText.style.animation = 'none';
+              roleText.offsetHeight; // Trigger reflow
+              roleText.style.animation = 'fadeIn 0.3s ease-in-out';
+          }
 
         function openRoleOverlay() {
             const roleOverlay = document.getElementById('role-overlay');
