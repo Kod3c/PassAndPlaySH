@@ -6,6 +6,29 @@
     <title>Secret Hitler - Create Game</title>
     <link href="../styles/app.css" rel="stylesheet">
     <meta name="theme-color" content="#101820">
+    <style>
+        #duplicate-notice {
+            border-left: 4px solid #00AEEF;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            box-shadow: 0 4px 12px rgba(0, 174, 239, 0.15);
+        }
+        #duplicate-notice .card-header {
+            background: transparent;
+        }
+        #duplicate-notice .card-title {
+            color: #0369a1;
+        }
+        #duplicate-notice .section-description {
+            color: #0c4a6e;
+        }
+        .status-message.success {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
     
     
 </head>
@@ -36,6 +59,17 @@
                         <div>
                             <h2 class="card-title">Create New Game</h2>
                             <p class="section-description">Set up a new Secret Hitler game for your group</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicate Game Notice -->
+                <div id="duplicate-notice" class="card mb-4" style="display: none;">
+                    <div class="card-header">
+                        <span class="card-icon">🔄</span>
+                        <div>
+                            <h3 class="card-title">Duplicating Previous Game</h3>
+                            <p class="section-description">The form below is pre-filled with players from your previous game. You can modify any details before creating the new game.</p>
                         </div>
                     </div>
                 </div>
@@ -127,6 +161,9 @@
 
             const MIN_VALID_PLAYERS = 5;
             const MAX_PLAYERS = 10;
+            
+            // Store player names in memory to persist them when changing player count
+            let playerNames = new Map();
 
             function updateControls(count) {
                 if (decreaseBtn) decreaseBtn.disabled = count === 0;
@@ -152,7 +189,17 @@
                     input.placeholder = 'Enter player name';
                     input.maxLength = 24;
                     input.autocomplete = 'name';
-                    input.addEventListener('input', validateForm);
+                    
+                    // Restore saved name if it exists
+                    if (playerNames.has(i)) {
+                        input.value = playerNames.get(i);
+                    }
+                    
+                    input.addEventListener('input', function() {
+                        // Save name to memory as user types
+                        playerNames.set(i, input.value);
+                        validateForm();
+                    });
 
                     group.appendChild(label);
                     group.appendChild(input);
@@ -176,12 +223,27 @@
             }
 
             function setPlayerCount(newCount) {
+                const oldCount = getPlayerCount();
                 const bounded = Math.max(0, Math.min(MAX_PLAYERS, newCount));
+                
+                // Save current names before changing count
+                if (oldCount > 0) {
+                    saveCurrentNames();
+                }
+                
                 currentCountSpan.textContent = String(bounded);
                 renderPlayerInputs(bounded >= MIN_VALID_PLAYERS ? bounded : 0);
                 updateControls(bounded);
                 if (player1Hint) player1Hint.style.display = bounded > 0 ? '' : 'none';
                 validateForm();
+            }
+            
+            function saveCurrentNames() {
+                const inputs = playerInputsContainer.querySelectorAll('input');
+                inputs.forEach((input, index) => {
+                    const playerNumber = index + 1;
+                    playerNames.set(playerNumber, input.value);
+                });
             }
 
             function normalizeForCompare(name) {
@@ -278,8 +340,78 @@
                 }
             }
 
+            // Check for duplicate game parameters
+            function checkForDuplicateGame() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const isDuplicate = urlParams.get('duplicate') === 'true';
+                
+                if (isDuplicate) {
+                    // Show duplicate notice
+                    const duplicateNotice = document.getElementById('duplicate-notice');
+                    if (duplicateNotice) {
+                        duplicateNotice.style.display = 'block';
+                    }
+                    
+                    const gameName = urlParams.get('gameName') || 'Secret Hitler Game';
+                    const playerCount = parseInt(urlParams.get('playerCount') || '0', 10);
+                    const playerNamesParam = urlParams.get('playerNames') || '';
+                    
+                    if (gameNameInput && gameName) {
+                        gameNameInput.value = gameName;
+                    }
+                    
+                    if (playerCount >= MIN_VALID_PLAYERS && playerCount <= MAX_PLAYERS) {
+                        // Set player count
+                        currentCountSpan.textContent = String(playerCount);
+                        renderPlayerInputs(playerCount);
+                        updateControls(playerCount);
+                        
+                        // Pre-fill player names
+                        if (playerNamesParam) {
+                            const names = playerNamesParam.split(',').map(name => name.trim());
+                            names.forEach((name, index) => {
+                                if (index < playerCount) {
+                                    playerNames.set(index + 1, name);
+                                }
+                            });
+                            
+                            // Update the input fields with the names
+                            const inputs = playerInputsContainer.querySelectorAll('input');
+                            inputs.forEach((input, index) => {
+                                if (index < names.length) {
+                                    input.value = names[index];
+                                }
+                            });
+                        }
+                        
+                        if (player1Hint) player1Hint.style.display = 'block';
+                        validateForm();
+                        
+                        // Show success message
+                        const statusContainer = document.getElementById('status-container');
+                        if (statusContainer) {
+                            const successMsg = document.createElement('div');
+                            successMsg.className = 'status-message success';
+                            successMsg.style.cssText = 'background: #10b981; color: white; padding: 12px; border-radius: 8px; margin: 16px 0; text-align: center; font-weight: 600;';
+                            successMsg.textContent = `✅ Successfully loaded ${playerCount} players from previous game!`;
+                            statusContainer.appendChild(successMsg);
+                            
+                            // Remove message after 5 seconds
+                            setTimeout(() => {
+                                if (successMsg.parentNode) {
+                                    successMsg.parentNode.removeChild(successMsg);
+                                }
+                            }, 5000);
+                        }
+                    }
+                }
+            }
+
             // Initialize starting state at 0 players
             setPlayerCount(0);
+            
+            // Check for duplicate game data on page load
+            checkForDuplicateGame();
 
             // Controls: skip 1-4 when increasing from 0, and drop to 0 from 5 when decreasing
             if (increaseBtn) {
