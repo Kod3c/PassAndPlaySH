@@ -333,18 +333,18 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 
 /* Special styling for each button type */
 .role-actions .btn[id="membership-btn"] {
-    border-color: var(--propaganda-black);
-    background: var(--highlight-cream);
+    border-color: var(--propaganda-black) !important;
+    background: var(--highlight-cream) !important;
 }
 
 .role-actions .btn[id="role-btn"] {
-    border-color: var(--propaganda-black);
-    background: var(--highlight-cream);
+    border-color: var(--propaganda-black) !important;
+    background: var(--highlight-cream) !important;
 }
 
 .role-actions .btn[id="compatriots-btn"] {
-    border-color: var(--propaganda-black);
-    background: var(--highlight-cream);
+    border-color: var(--propaganda-black) !important;
+    background: var(--highlight-cream) !important;
 }
 
 .role-actions .btn[id="compatriots-btn"]:disabled {
