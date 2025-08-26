@@ -581,10 +581,10 @@
                                     );
                                     
                                     if (fascistPlayers.length === 0) {
-                                        roleLabel.innerHTML = `${info.label}<br><br>No other Fascist players to reveal`;
+                                        roleLabel.textContent = `${info.label}\n\nNo other Fascist players to reveal`;
                                     } else {
-                                        const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('<br>');
-                                        roleLabel.innerHTML = `${info.label}<br><br>Your Fascist Comrades:<br>${names}`;
+                                        const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
+                                        roleLabel.textContent = `${info.label}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nYour Fascist Comrades:\n${names}`;
                                     }
                                     roleLabel.style.color = '#DA291C';
                                 } else {

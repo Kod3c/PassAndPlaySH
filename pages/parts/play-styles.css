@@ -9,6 +9,76 @@
 }
 
 .play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
+
+/* Dark mode support for play page */
+@media (prefers-color-scheme: dark) {
+  .play-wrapper {
+    background: var(--bg-primary);
+  }
+  
+  .board-frame {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .track {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .slot {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-color);
+  }
+  
+  .player-chip {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .player-chip.is-president {
+    background: rgba(251, 191, 36, 0.2);
+  }
+  
+  .player-chip.is-chancellor {
+    background: rgba(0, 174, 239, 0.2);
+  }
+}
+
+/* Manual dark mode support */
+[data-theme="dark"] .play-wrapper {
+  background: var(--bg-primary);
+}
+
+[data-theme="dark"] .board-frame {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .track {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .slot {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .player-chip {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .player-chip.is-president {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+[data-theme="dark"] .player-chip.is-chancellor {
+  background: rgba(0, 174, 239, 0.2);
+}
 .play-main { flex:1; display:flex; flex-direction: column; align-items: stretch; justify-content:flex-start; padding: 0 12px 96px; }
 .board-shell { width: 100%; max-width: 1040px; margin: 0 auto; display:flex; flex-direction:column; align-items:center; gap: 12px; }
 .players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
@@ -118,6 +188,24 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 /* Decrease opacity for the first three fascist slots */
 .track.fascist .slot:nth-child(-n+3):empty::after { opacity: 0.25; }
 
+/* Bullet overlay for 4th fascist policy slot (superpower unlock) */
+.bullet-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 28px;
+    height: auto;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.bullet-overlay img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
 .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
 .tracker-row { display:flex; align-items:center; justify-content:center; gap:10px; padding-top: 4px; }
 .tracker-label { font-weight:900; letter-spacing: 0.02em; }
@@ -182,6 +270,9 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .actions-left { order: 2; flex: 1 1 0; display: flex; justify-content: flex-start; }
     .actions-right { order: 2; flex: 1 1 0; display: flex; justify-content: flex-end; }
     .actions-bar .btn { min-width: 0; padding: 8px 10px; font-size: 0.95rem; }
+    
+    /* Bullet overlay sizing for mobile */
+    .bullet-overlay { width: 25px; }
 }
 
 @media (max-width: 360px) {
@@ -204,6 +295,9 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .status-banner { font-size: 1rem; padding: 10px 12px; }
     .player-chip { font-size: 1.05rem; }
     .actions-bar .btn { padding: 6px 8px; font-size: 0.9rem; }
+    
+    /* Bullet overlay sizing for small mobile */
+    .bullet-overlay { width: 21px; }
 }
 
 /* Ultra narrow screens below 320px */
@@ -219,6 +313,9 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     }
     .track.liberal .slots { gap: 8px; }
     .track.fascist .slots { gap: 2px; }
+    
+    /* Bullet overlay sizing for ultra narrow */
+    .bullet-overlay { width: 20px; }
 }
 
 /* Very narrow devices (280px and below) */
@@ -236,6 +333,9 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .track.fascist .slots { gap: 1px; }
     .board-frame { padding: 8px; }
     .track { padding: 6px; min-height: 72px; }
+    
+    /* Bullet overlay sizing for very narrow */
+    .bullet-overlay { width: 18px; }
 }
 
 .floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
@@ -903,3 +1003,235 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 .preloader-overlay .loader-text { color: #fff; font-weight: 800; letter-spacing: 0.03em; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================
+   DARK MODE SUPPORT FOR PLAY PAGE
+   ============================================ */
+
+/* Dark mode support for play page components */
+@media (prefers-color-scheme: dark) {
+  .tracker .bubble {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .tracker .square {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .policy-chip {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .btn {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .role-tag.pres {
+    background: rgba(251, 191, 36, 0.2);
+    color: var(--text-primary);
+  }
+  
+  .role-tag.chanc {
+    background: rgba(0, 174, 239, 0.2);
+    color: var(--text-primary);
+  }
+  
+  .modal-card {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .badge-pres {
+    background: rgba(251, 191, 36, 0.2);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .badge-chanc {
+    background: rgba(0, 174, 239, 0.2);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .vote-popover {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .reveal-instruction {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .floating-footer {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .actions-bar .btn {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .actions-bar .btn:hover {
+    background: var(--bg-elevated);
+  }
+  
+  .actions-bar .btn.btn-primary {
+    background: var(--liberal-blue);
+    color: var(--white);
+  }
+  
+  .status-banner {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .tracker-label {
+    color: var(--text-primary);
+  }
+  
+  .policy-card-title {
+    color: var(--text-primary);
+  }
+  
+  .floating-role {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .role-bar {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+  }
+  
+  .role-tag {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+}
+
+/* Manual dark mode support */
+[data-theme="dark"] .tracker .bubble {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .tracker .square {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .policy-chip {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .role-tag.pres {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .role-tag.chanc {
+  background: rgba(0, 174, 239, 0.2);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .badge-pres {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .badge-chanc {
+  background: rgba(0, 174, 239, 0.2);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .vote-popover {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .reveal-instruction {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .floating-footer {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .actions-bar .btn {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .actions-bar .btn:hover {
+  background: var(--bg-elevated);
+}
+
+[data-theme="dark"] .actions-bar .btn.btn-primary {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+[data-theme="dark"] .status-banner {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .tracker-label {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .policy-card-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .floating-role {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .role-bar {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .role-tag {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}

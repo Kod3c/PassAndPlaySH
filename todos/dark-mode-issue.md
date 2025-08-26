@@ -81,7 +81,49 @@ This should be considered a **high priority** issue as it affects:
 - **Proper Solution**: 1-2 days to refactor the CSS architecture and implement comprehensive theming
 
 ## **Current State**
-The current state makes the site look unprofessional and difficult to use for dark mode users, which is a significant UX problem that should be addressed promptly.
+✅ **RESOLVED** - Comprehensive dark mode support has been implemented with the following improvements:
+
+### **Completed Changes:**
+1. **Complete CSS Variable System**: Added comprehensive dark theme variables and semantic color naming
+2. **Enhanced Dark Mode Media Query**: Complete overhaul of `@media (prefers-color-scheme: dark)` with full coverage
+3. **Manual Theme Toggle**: Added theme toggle button to all pages with localStorage persistence
+4. **Theme Management JavaScript**: Created `js/theme.js` for theme switching functionality
+5. **Comprehensive Component Coverage**: Dark mode styles for all UI elements including:
+   - Body and background elements
+   - Typography and text
+   - Buttons and interactive elements
+   - Cards and containers
+   - Form elements and inputs
+   - Header and navigation
+   - Footer elements
+   - Status messages and notifications
+   - Game-specific components (boards, policy cards, player cards)
+   - Modal and overlay elements
+   - Tables and lists
+   - Badges and labels
+   - Progress and loading elements
+   - Tooltips and popovers
+
+### **Accessibility Improvements:**
+- Proper contrast ratios meeting WCAG AA standards
+- Visible focus indicators for all interactive elements
+- Color-independent information conveyance
+- Smooth transitions for theme switching
+
+### **Design Preservation:**
+- Maintained 1930s propaganda poster aesthetic in dark mode
+- Preserved color symbolism (Liberal blue, Fascist red)
+- Adjusted shadows and borders for dark backgrounds
+- Updated paper texture overlay for dark mode
+
+### **Technical Implementation:**
+- System preference detection with manual override
+- localStorage persistence for user preferences
+- Cross-browser compatibility
+- Mobile-responsive dark mode support
+- Game-specific dark mode styles in `play-styles.css`
+
+The dark mode experience is now professional, consistent, and fully functional across all pages and components.
 
 ## **Files Affected**
 - `styles/app.css` - Main stylesheet with incomplete dark mode support

@@ -774,6 +774,7 @@
     </style>
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#101820">
+    <script src="../js/theme.js"></script>
 </head>
 <body>
     <div class="play-wrapper">
@@ -786,6 +787,9 @@
                             <h1>Secret Hitler</h1>
                             <p class="subtitle">Mobile Edition</p>
                         </div>
+                    </div>
+                    <div class="header-actions">
+                        <!-- Theme toggle removed -->
                     </div>
                 </div>
             </div>
@@ -1299,14 +1303,57 @@
                         card.style.zIndex = '3';
                         slot.appendChild(card);
                         slot.classList.add('filled');
+                        
+                        // Add bullet overlay for 4th fascist policy (superpower unlock)
+                        if (type === 'fascist' && i === 3 && latestGame && latestGame.fascistPolicies >= 3) {
+                            const bulletOverlay = document.createElement('div');
+                            bulletOverlay.className = 'bullet-overlay';
+                            bulletOverlay.style.cssText = `
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                width: 28px;
+                                height: auto;
+                                z-index: 10;
+                                pointer-events: none;
+                            `;
+                            bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
+                            slot.appendChild(bulletOverlay);
+                        }
                     } else {
                         existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
                         // Let CSS handle the transform for responsive sizing
                         existing.style.zIndex = '3';
                         slot.classList.add('filled');
+                        
+                        // Add bullet overlay for 4th fascist policy (superpower unlock)
+                        if (type === 'fascist' && i === 3 && latestGame && latestGame.fascistPolicies >= 3) {
+                            // Remove existing bullet overlay if any
+                            const existingBullet = slot.querySelector('.bullet-overlay');
+                            if (!existingBullet) {
+                                const bulletOverlay = document.createElement('div');
+                                bulletOverlay.className = 'bullet-overlay';
+                                bulletOverlay.style.cssText = `
+                                    position: absolute;
+                                    top: 50%;
+                                    left: 50%;
+                                    transform: translate(-50%, -50%);
+                                    width: 28px;
+                                    height: auto;
+                                    z-index: 10;
+                                    pointer-events: none;
+                                `;
+                                bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
+                                slot.appendChild(bulletOverlay);
+                            }
+                        }
                     }
                 } else {
                     if (existing) existing.remove();
+                    // Remove bullet overlay when slot is not filled
+                    const bulletOverlay = slot.querySelector('.bullet-overlay');
+                    if (bulletOverlay) bulletOverlay.remove();
                     slot.classList.remove('filled');
                 }
             }
@@ -1340,6 +1387,36 @@
                 });
             }, 10);
         }
+        
+        // Add bullet overlay to the 4th fascist policy slot (index 3) when there are 3 policies
+        function addBulletOverlayTo4thFascistSlot(containerEl) {
+            if (!containerEl || containerEl.children.length < 4) return;
+            
+            const fourthSlot = containerEl.children[3]; // Index 3 = 4th slot
+            if (!fourthSlot) return;
+            
+            // Only add overlay if the slot is empty (no policy card)
+            if (!fourthSlot.classList.contains('filled')) {
+                // Remove existing bullet overlay if any
+                const existingBullet = fourthSlot.querySelector('.bullet-overlay');
+                if (!existingBullet) {
+                    const bulletOverlay = document.createElement('div');
+                    bulletOverlay.className = 'bullet-overlay';
+                    bulletOverlay.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 28px;
+                        height: auto;
+                        z-index: 10;
+                        pointer-events: none;
+                    `;
+                    bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
+                    fourthSlot.appendChild(bulletOverlay);
+                }
+            }
+        }
 
         function updateFromGame(game) {
             if (!game) return;
@@ -1357,6 +1434,11 @@
             const fascistSlotsEl = document.getElementById('fascist-slots');
             if (liberalSlotsEl) renderPoliciesToSlots(liberalSlotsEl, Math.min(lib, 5), 'liberal');
             if (fascistSlotsEl) renderPoliciesToSlots(fascistSlotsEl, Math.min(fas, 6), 'fascist');
+            
+            // Add bullet overlay to 4th fascist slot when there is at least 1 fascist policy (to show upcoming superpower)
+            if (fascistSlotsEl && fas >= 1) {
+                addBulletOverlayTo4thFascistSlot(fascistSlotsEl);
+            }
 
             const squares = document.querySelectorAll('#election-tracker .square');
             squares.forEach((sq, idx) => {

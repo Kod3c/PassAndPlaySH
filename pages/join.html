@@ -8,6 +8,19 @@
     <link rel="stylesheet" href="../styles/app.css">
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#101820">
+    <script src="../js/theme.js"></script>
+    <style>
+        #player-pin {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        
+        #player-pin::placeholder {
+            letter-spacing: 0.2em;
+        }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -21,6 +34,9 @@
                             <h1>Secret Hitler</h1>
                             <p class="subtitle">Join Game</p>
                         </div>
+                    </div>
+                    <div class="header-actions">
+                        <!-- Theme toggle removed -->
                     </div>
                 </div>
             </div>
@@ -52,6 +68,12 @@
                             <datalist id="existing-names"></datalist>
                             <select id="player-name-select" class="form-control hidden"></select>
                             <small class="form-help">Choose your name from the roster when a valid Game ID is entered</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="player-pin">Reconnection PIN</label>
+                            <input id="player-pin" class="form-control" type="password" placeholder="Enter 4-digit PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="new-password">
+                            <small class="form-help">Set a 4-digit PIN to reconnect if you get disconnected. You can use this PIN to rejoin with the same name later.</small>
                         </div>
                         <div class="btn-group">
                             <button id="join-btn" class="btn btn-primary">Join Lobby</button>
@@ -111,7 +133,27 @@
             return auth.currentUser;
         }
 
-        async function claimOrAddPlayer(gameId, name, uid) {
+        async function checkPlayerReconnection(gameId, name, pin) {
+            const gameRef = doc(db, 'games', gameId);
+            const playersCol = collection(gameRef, 'players');
+            
+            // Check if this player name exists and has a PIN set
+            const q = query(playersCol, where('name', '==', name.trim()));
+            const snap = await getDocs(q);
+            
+            if (!snap.empty) {
+                for (const d of snap.docs) {
+                    const data = d.data() || {};
+                    if (data.pin && data.pin === pin) {
+                        // PIN matches, allow reconnection
+                        return { playerId: d.id, playerData: data };
+                    }
+                }
+            }
+            return null;
+        }
+
+        async function claimOrAddPlayer(gameId, name, uid, pin) {
             const gameRef = doc(db, 'games', gameId);
             const gameSnap = await getDoc(gameRef);
             if (!gameSnap.exists()) throw new Error('Game not found');
@@ -128,12 +170,21 @@
             for (const d of snap.docs) {
                 const data = d.data() || {};
                 if (data.uid === uid) {
-                    await updateDoc(d.ref, { lastSeen: serverTimestamp() });
+                    // Update existing claim with new PIN and timestamp
+                    await updateDoc(d.ref, { 
+                        lastSeen: serverTimestamp(),
+                        pin: pin || null
+                    });
                     claimedPlayerId = d.id;
                     break;
                 }
                 if (!data.uid) {
-                    await updateDoc(d.ref, { uid, lastSeen: serverTimestamp() });
+                    // Claim unclaimed player with PIN
+                    await updateDoc(d.ref, { 
+                        uid, 
+                        lastSeen: serverTimestamp(),
+                        pin: pin || null
+                    });
                     claimedPlayerId = d.id;
                     break;
                 }
@@ -320,6 +371,22 @@
             const nameSelect = document.getElementById('player-name-select');
             const status = document.getElementById('join-status');
             const gameIdInput = document.getElementById('game-id');
+            const playerPinInput = document.getElementById('player-pin');
+
+            // PIN input validation - only allow numbers and limit to 4 digits
+            playerPinInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                value = value.slice(0, 4); // Limit to 4 digits
+                e.target.value = value;
+                updateJoinEnabled();
+            });
+
+            // Prevent non-numeric input
+            playerPinInput.addEventListener('keypress', function(e) {
+                if (!/\d/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
 
             let currentGameId = normalizeGameId(getGameIdFromUrl());
             if (currentGameId) {
@@ -339,7 +406,9 @@
             function updateJoinEnabled() {
                 const name = getSelectedName();
                 const gid = normalizeGameId(gameIdInput.value);
-                joinBtn.disabled = !(name && gid && gid.length === 5);
+                const pin = playerPinInput.value;
+                const validPin = pin && pin.length === 4 && /^\d{4}$/.test(pin);
+                joinBtn.disabled = !(name && gid && gid.length === 5 && validPin);
             }
 
             let debounceTimer = null;
@@ -371,16 +440,48 @@
             nameInput.addEventListener('input', updateJoinEnabled);
             if (nameSelect) nameSelect.addEventListener('change', updateJoinEnabled);
             if (nameSelect) nameSelect.addEventListener('input', updateJoinEnabled);
+            playerPinInput.addEventListener('input', updateJoinEnabled);
             updateJoinEnabled();
 
             joinBtn.addEventListener('click', async function() {
                 const name = getSelectedName();
                 const gid = normalizeGameId(gameIdInput.value);
+                const pin = playerPinInput.value;
+
                 if (!name || !gid || gid.length !== 5) return;
+                if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+                    status.textContent = 'PIN must be 4 digits.';
+                    return;
+                }
+
                 joinBtn.disabled = true;
                 status.textContent = 'Joining...';
                 try {
                     const user = await ensureAuth();
+                    
+                    // First check if this is a reconnection attempt
+                    const reconnection = await checkPlayerReconnection(gid, name, pin);
+                    if (reconnection) {
+                        // Player is reconnecting with correct PIN
+                        await updateDoc(doc(db, 'games', gid, 'players', reconnection.playerId), {
+                            uid: user.uid,
+                            lastSeen: serverTimestamp()
+                        });
+                        
+                        // Extend TTL by 15 minutes
+                        await setDoc(doc(db, 'games', gid), { 
+                            updatedAt: serverTimestamp(), 
+                            expireAt: new Date(Date.now() + 15 * 60 * 1000) 
+                        }, { merge: true });
+                        
+                        // Persist for lobby heartbeat
+                        try { sessionStorage.setItem(`sh_playerId_${gid}`, reconnection.playerId); } catch (_) {}
+                        
+                        status.textContent = 'Reconnected! Redirecting to lobby...';
+                        setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
+                        return;
+                    }
+                    
                     // If attempting to join as host seat, and a password is set, prompt for it
                     const gameRef = doc(db, 'games', gid);
                     const gameSnap = await getDoc(gameRef);
@@ -392,16 +493,16 @@
                         let hostDocRef = null;
                         hostPlayersSnap.forEach(d => { const data = d.data() || {}; hostName = hostName || (data.name || null); if (!hostDocRef) hostDocRef = d.ref; });
                         if (hostName && name === hostName) {
-                            const input = window.prompt('Enter host password to reclaim host:');
+                            const input = window.prompt('Enter host PIN to reclaim host:');
                             const hash = input ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
-                            if (!hash || hash !== hostPass) throw new Error('Incorrect host password');
+                            if (!hash || hash !== hostPass) throw new Error('Incorrect host PIN');
                             // Password verified: transfer host seat to this device's UID
                             if (hostDocRef) {
                                 await updateDoc(hostDocRef, { uid: user.uid, lastSeen: serverTimestamp() });
                             }
                         }
                     }
-                    await claimOrAddPlayer(gid, name, user.uid);
+                    await claimOrAddPlayer(gid, name, user.uid, pin);
                     status.textContent = 'Joined! Redirecting to lobby...';
                     setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
                 } catch (e) {
@@ -428,7 +529,11 @@
                                 if (!snap.empty) {
                                     // Force claim the first available player slot
                                     const playerDoc = snap.docs[0];
-                                    await updateDoc(playerDoc.ref, { uid: user.uid, lastSeen: serverTimestamp() });
+                                    await updateDoc(playerDoc.ref, { 
+                                        uid: user.uid, 
+                                        lastSeen: serverTimestamp(),
+                                        pin: pin || null
+                                    });
                                     
                                     // Extend TTL by 15 minutes
                                     await setDoc(gameRef, { updatedAt: serverTimestamp(), expireAt: new Date(Date.now() + 15 * 60 * 1000) }, { merge: true });

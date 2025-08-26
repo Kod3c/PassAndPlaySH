@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Hitler Superpowers Demo</title>
+    <style>
+        /* ============================================
+           SECRET HITLER - PROPAGANDA DESIGN SYSTEM
+           1930s European Propaganda Poster Aesthetic
+           ============================================ */
+        
+        @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Oswald:wght@400;700&family=Bebas+Neue&display=swap');
+        
+        :root {
+            /* Official Secret Hitler Colors */
+            --liberal-blue: #00AEEF;
+            --fascist-red: #DA291C;
+            --neutral-beige: #D6C6A9;
+            --propaganda-black: #101820;
+            --highlight-cream: #F1E6B2;
+            --white: #FFFFFF;
+            --off-white: #F8F5EC;
+            --dark-cream: #CDB891;
+            --dark-beige: #B8A687;
+            --light-black: #2A2D34;
+            --shadow-black: rgba(16, 24, 32, 0.85);
+            
+            /* Power Colors */
+            --power-gold: #FFD700;
+            --power-orange: #FFA500;
+            --power-glow: rgba(255, 215, 0, 0.8);
+            
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Oswald', sans-serif;
+            background: var(--neutral-beige);
+            color: var(--propaganda-black);
+            line-height: 1.6;
+            padding: var(--space-md);
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--off-white);
+            border: 6px solid var(--propaganda-black);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 0 0 4px var(--highlight-cream);
+            overflow: hidden;
+        }
+        
+        .demo-header {
+            background: var(--propaganda-black);
+            color: var(--highlight-cream);
+            padding: var(--space-lg);
+            text-align: center;
+            border-bottom: 4px solid var(--highlight-cream);
+        }
+        
+        .demo-header h1 {
+            font-family: 'UnifrakturMaguntia', serif;
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .demo-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .demo-content {
+            padding: var(--space-xl);
+        }
+        
+        .demo-section {
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .demo-section h2 {
+            font-family: 'UnifrakturMaguntia', serif;
+            font-size: 1.8rem;
+            margin-bottom: var(--space-lg);
+            color: var(--propaganda-black);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* ============================================
+           ENHANCED BOARD STYLING
+           ============================================ */
+        
+        .board-frame {
+            background: #f6f0df;
+            border: 6px solid var(--propaganda-black);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 0 0 4px var(--highlight-cream);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .tracks {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+        }
+        
+        .track {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-lg);
+            padding: var(--space-lg);
+            border: 3px solid var(--propaganda-black);
+            background: var(--neutral-beige);
+            box-shadow: inset 0 0 0 3px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            min-height: 100px;
+        }
+        
+        .track.liberal {
+            background: var(--liberal-blue);
+            color: var(--white);
+        }
+        
+        .track.fascist {
+            background: var(--fascist-red);
+            color: var(--white);
+        }
+        
+        .track-title {
+            font-weight: 900;
+            font-size: 1.2rem;
+            letter-spacing: 0.04em;
+            min-width: 140px;
+            text-align: center;
+        }
+        
+        .slots {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        /* Liberal track: 5 slots, more spacing */
+        .track.liberal .slots {
+            gap: var(--space-lg);
+        }
+        
+        /* Fascist track: 6 slots, less spacing */
+        .track.fascist .slots {
+            gap: var(--space-sm);
+        }
+        
+        /* ============================================
+           ENHANCED TRACK SPACE STYLING
+           ============================================ */
+        
+        .track-space {
+            width: 60px;
+            height: 80px;
+            border: 3px solid var(--propaganda-black);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.18);
+            box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .track-space.filled {
+            background: var(--propaganda-black);
+            color: var(--white);
+            border-color: var(--propaganda-black);
+        }
+        
+        .track-space.win {
+            background: #4CAF50;
+            color: var(--white);
+            border-color: #4CAF50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+        }
+        
+        /* ============================================
+           SUPERPOWER TILE STYLING
+           ============================================ */
+        
+        .track-space.power {
+            background: linear-gradient(135deg, var(--power-gold), var(--power-orange));
+            border: 3px solid var(--power-gold);
+            color: var(--propaganda-black);
+            box-shadow: 0 0 20px var(--power-glow), inset 0 0 0 3px rgba(255,255,255,0.3);
+            position: relative;
+            font-weight: 900;
+        }
+        
+        .track-space.power.activated {
+            animation: powerPulse 2s infinite;
+            box-shadow: 0 0 30px var(--power-glow), inset 0 0 0 3px rgba(255,255,255,0.5);
+            transform: scale(1.05);
+            border-width: 4px;
+        }
+        
+        .track-space.power:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px var(--power-gold), inset 0 0 0 3px rgba(255,255,255,0.7);
+        }
+        
+        /* Power-specific styling */
+        .track-space.power-investigate {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        
+        .track-space.power-special-election {
+            background: linear-gradient(135deg, #FFD700, #FF8C00);
+        }
+        
+        .track-space.power-policy-peek {
+            background: linear-gradient(135deg, #FFD700, #FF6347);
+        }
+        
+        .track-space.power-investigate-liberal {
+            background: linear-gradient(135deg, #00AEEF, #0084BB);
+            border-color: #00AEEF;
+            color: var(--white);
+        }
+        
+        .track-space.power-policy-peek-liberal {
+            background: linear-gradient(135deg, #00AEEF, #4AC4F3);
+            border-color: #00AEEF;
+            color: var(--white);
+        }
+        
+        .track-space.power-special-election-liberal {
+            background: linear-gradient(135deg, #00AEEF, #0066CC);
+            border-color: #00AEEF;
+            color: var(--white);
+        }
+        
+        /* ============================================
+           POWER ICONS
+           ============================================ */
+        
+        .track-space.power::before {
+            content: "";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: var(--white);
+            border-radius: 50%;
+            border: 2px solid var(--propaganda-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .track-space.power-investigate::before {
+            content: "🔍";
+        }
+        
+        .track-space.power-special-election::before {
+            content: "👑";
+        }
+        
+        .track-space.power-policy-peek::before {
+            content: "👁️";
+        }
+        
+        .track-space.power-investigate-liberal::before {
+            content: "🔍";
+            background: var(--liberal-blue);
+            color: var(--white);
+        }
+        
+        .track-space.power-policy-peek-liberal::before {
+            content: "👁️";
+            background: var(--liberal-blue);
+            color: var(--white);
+        }
+        
+        .track-space.power-special-election-liberal::before {
+            content: "👑";
+            background: var(--liberal-blue);
+            color: var(--white);
+        }
+        
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        
+        @keyframes powerPulse {
+            0%, 100% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 30px var(--power-glow), inset 0 0 0 3px rgba(255,255,255,0.5);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 40px var(--power-gold), inset 0 0 0 3px rgba(255,255,255,0.7);
+            }
+        }
+        
+        @keyframes powerUnlock {
+            0% { 
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+        
+        .track-space.power.unlocking {
+            animation: powerUnlock 0.6s ease-out;
+        }
+        
+        /* ============================================
+           POWER STATUS INDICATORS
+           ============================================ */
+        
+        .power-status {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--white);
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid var(--propaganda-black);
+        }
+        
+        .power-status.available {
+            color: #4CAF50;
+        }
+        
+        .power-status.used {
+            color: var(--text-muted);
+        }
+        
+        /* ============================================
+           POLICY SUMMARY
+           ============================================ */
+        
+        .policy-summary {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+        
+        .policy-card-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .policy-chip {
+            padding: var(--space-md) var(--space-lg);
+            border: 3px solid var(--propaganda-black);
+            background: var(--white);
+            font-weight: 800;
+            box-shadow: inset 0 0 0 3px rgba(241,230,178,0.6);
+            border-radius: 4px;
+        }
+        
+        .policy-chip.liberal {
+            background: var(--liberal-blue);
+            color: var(--white);
+        }
+        
+        .policy-chip.fascist {
+            background: var(--fascist-red);
+            color: var(--white);
+        }
+        
+        .policy-chip .count {
+            margin-left: var(--space-sm);
+            font-weight: 900;
+        }
+        
+        /* ============================================
+           ELECTION TRACKER
+           ============================================ */
+        
+        .tracker-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+        
+        .tracker-label {
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+        
+        .tracker {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .tracker .bubble {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 3px solid var(--propaganda-black);
+        }
+        
+        .tracker .bubble.active {
+            background: var(--highlight-cream);
+        }
+        
+        /* ============================================
+           POWER EXPLANATION
+           ============================================ */
+        
+        .power-explanation {
+            background: var(--white);
+            border: 3px solid var(--propaganda-black);
+            border-radius: 8px;
+            padding: var(--space-lg);
+            margin-top: var(--space-xl);
+        }
+        
+        .power-explanation h3 {
+            font-family: 'UnifrakturMaguntia', serif;
+            font-size: 1.5rem;
+            margin-bottom: var(--space-lg);
+            color: var(--propaganda-black);
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .power-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+        
+        .power-card {
+            border: 2px solid var(--propaganda-black);
+            border-radius: 6px;
+            padding: var(--space-lg);
+            background: var(--off-white);
+        }
+        
+        .power-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: var(--space-sm);
+            color: var(--propaganda-black);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .power-card p {
+            color: var(--light-black);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .power-card .unlock-condition {
+            font-size: 0.9rem;
+            color: var(--dark-beige);
+            font-style: italic;
+        }
+        
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        
+        @media (max-width: 768px) {
+            .demo-container {
+                margin: var(--space-sm);
+            }
+            
+            .demo-content {
+                padding: var(--space-lg);
+            }
+            
+            .track {
+                flex-direction: column;
+                gap: var(--space-md);
+            }
+            
+            .track-title {
+                min-width: auto;
+            }
+            
+            .slots {
+                gap: var(--space-sm);
+            }
+            
+            .track-space {
+                width: 50px;
+                height: 70px;
+                font-size: 1rem;
+            }
+            
+            .power-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+            
+            .track-space {
+                width: 45px;
+                height: 65px;
+                font-size: 0.9rem;
+            }
+            
+            .track-space.power::before {
+                width: 16px;
+                height: 16px;
+                font-size: 10px;
+                top: -6px;
+                right: -6px;
+            }
+        }
+        
+        /* ============================================
+           INTERACTIVE ELEMENTS
+           ============================================ */
+        
+        .demo-controls {
+            background: var(--propaganda-black);
+            color: var(--highlight-cream);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        
+        .demo-controls h3 {
+            margin-bottom: var(--space-md);
+            font-size: 1.3rem;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border: 2px solid var(--highlight-cream);
+            background: transparent;
+            color: var(--highlight-cream);
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .btn:hover {
+            background: var(--highlight-cream);
+            color: var(--propaganda-black);
+        }
+        
+        .btn.active {
+            background: var(--highlight-cream);
+            color: var(--propaganda-black);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Secret Hitler</h1>
+            <p>Enhanced Superpowers Demo - Interactive Policy Track Visualization</p>
+        </div>
+        
+        <div class="demo-content">
+            <div class="demo-section">
+                <h2>Enhanced Game Board</h2>
+                
+                <div class="board-frame">
+                    <div class="tracks">
+                        <!-- Liberal Track -->
+                        <section class="track liberal">
+                            <div class="track-title">Liberal Policies</div>
+                            <div class="slots">
+                                <div class="track-space" data-position="1">1</div>
+                                <div class="track-space power power-investigate-liberal" data-position="2" data-power="investigate-liberal">2</div>
+                                <div class="track-space power power-policy-peek-liberal" data-position="3" data-power="policy-peek-liberal">3</div>
+                                <div class="track-space power power-special-election-liberal" data-position="4" data-power="special-election-liberal">4</div>
+                                <div class="track-space win" data-position="5">5</div>
+                            </div>
+                        </section>
+                        
+                        <!-- Fascist Track -->
+                        <section class="track fascist">
+                            <div class="track-title">Fascist Policies</div>
+                            <div class="slots">
+                                <div class="track-space" data-position="1">1</div>
+                                <div class="track-space" data-position="2">2</div>
+                                <div class="track-space power power-investigate" data-position="3" data-power="investigate">3</div>
+                                <div class="track-space power power-special-election" data-position="4" data-power="special-election">4</div>
+                                <div class="track-space power power-policy-peek" data-position="5" data-power="policy-peek">5</div>
+                                <div class="track-space win" data-position="6">6</div>
+                            </div>
+                        </section>
+                    </div>
+                    
+                    <div class="policy-summary">
+                        <div class="policy-card-wrap">
+                            <div class="policy-chip liberal">
+                                <span class="policy-label">Liberal</span>
+                                <span class="count" id="liberal-count">0/5</span>
+                            </div>
+                        </div>
+                        <div class="policy-card-wrap">
+                            <div class="policy-chip fascist">
+                                <span class="policy-label">Fascist</span>
+                                <span class="count" id="fascist-count">0/6</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tracker-row">
+                        <div class="tracker-label">Failed Elections</div>
+                        <div class="tracker" id="election-tracker">
+                            <div class="bubble"></div>
+                            <div class="bubble"></div>
+                            <div class="bubble"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <h2>Power Explanation</h2>
+                
+                <div class="power-explanation">
+                    <h3>Superpower System</h3>
+                    
+                    <div class="power-grid">
+                        <div class="power-card">
+                            <h4>🔍 Investigation Power</h4>
+                            <p>Learn a player's true party affiliation</p>
+                            <p class="unlock-condition">Unlocked at Fascist Policy #3</p>
+                        </div>
+                        
+                        <div class="power-card">
+                            <h4>👑 Special Election</h4>
+                            <p>Appoint any player as the new President</p>
+                            <p class="unlock-condition">Unlocked at Fascist Policy #4</p>
+                        </div>
+                        
+                        <div class="power-card">
+                            <h4>👁️ Policy Peek</h4>
+                            <p>See the top 3 policy cards in the deck</p>
+                            <p class="unlock-condition">Unlocked at Fascist Policy #5</p>
+                        </div>
+                        
+                        <div class="power-card">
+                            <h4>🔍 Liberal Investigation</h4>
+                            <p>Investigate if a player is Liberal (Liberal track)</p>
+                            <p class="unlock-condition">Unlocked at Liberal Policy #2</p>
+                        </div>
+                        
+                        <div class="power-card">
+                            <h4>👁️ Liberal Policy Peek</h4>
+                            <p>See next 2 Liberal policies (Liberal track)</p>
+                            <p class="unlock-condition">Unlocked at Liberal Policy #3</p>
+                        </div>
+                        
+                        <div class="power-card">
+                            <h4>👑 Liberal Special Election</h4>
+                            <p>Appoint a Liberal as President (Liberal track)</p>
+                            <p class="unlock-condition">Unlocked at Liberal Policy #4</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-controls">
+            <h3>Interactive Demo Controls</h3>
+            <div class="control-buttons">
+                <button class="btn" onclick="simulateLiberalPolicy()">Add Liberal Policy</button>
+                <button class="btn" onclick="simulateFascistPolicy()">Add Fascist Policy</button>
+                <button class="btn" onclick="resetBoard()">Reset Board</button>
+                <button class="btn" onclick="togglePowerAnimation()">Toggle Power Animation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo state
+        let liberalPolicies = 0;
+        let fascistPolicies = 0;
+        let powerAnimationEnabled = true;
+        
+        // Update policy counts
+        function updatePolicyCounts() {
+            document.getElementById('liberal-count').textContent = `${liberalPolicies}/5`;
+            document.getElementById('fascist-count').textContent = `${fascistPolicies}/6`;
+        }
+        
+        // Simulate adding a liberal policy
+        function simulateLiberalPolicy() {
+            if (liberalPolicies < 5) {
+                liberalPolicies++;
+                
+                // Update the visual state
+                const track = document.querySelector('.track.liberal');
+                const slots = track.querySelectorAll('.track-space');
+                
+                // Fill the appropriate slot
+                if (liberalPolicies <= 5) {
+                    const slot = slots[liberalPolicies - 1];
+                    
+                    // Add filled class
+                    slot.classList.add('filled');
+                    
+                    // If it's a power slot, activate it
+                    if (slot.classList.contains('power')) {
+                        slot.classList.add('activated');
+                        
+                        // Add unlocking animation
+                        slot.classList.add('unlocking');
+                        setTimeout(() => {
+                            slot.classList.remove('unlocking');
+                        }, 600);
+                    }
+                }
+                
+                updatePolicyCounts();
+            }
+        }
+        
+        // Simulate adding a fascist policy
+        function simulateFascistPolicy() {
+            if (fascistPolicies < 6) {
+                fascistPolicies++;
+                
+                // Update the visual state
+                const track = document.querySelector('.track.fascist');
+                const slots = track.querySelectorAll('.track-space');
+                
+                // Fill the appropriate slot
+                if (fascistPolicies <= 6) {
+                    const slot = slots[fascistPolicies - 1];
+                    
+                    // Add filled class
+                    slot.classList.add('filled');
+                    
+                    // If it's a power slot, activate it
+                    if (slot.classList.contains('power')) {
+                        slot.classList.add('activated');
+                        
+                        // Add unlocking animation
+                        slot.classList.add('unlocking');
+                        setTimeout(() => {
+                            slot.classList.remove('unlocking');
+                        }, 600);
+                    }
+                }
+                
+                updatePolicyCounts();
+            }
+        }
+        
+        // Reset the board
+        function resetBoard() {
+            liberalPolicies = 0;
+            fascistPolicies = 0;
+            
+            // Remove all filled and activated classes
+            document.querySelectorAll('.track-space').forEach(slot => {
+                slot.classList.remove('filled', 'activated');
+            });
+            
+            updatePolicyCounts();
+        }
+        
+        // Toggle power animation
+        function togglePowerAnimation() {
+            powerAnimationEnabled = !powerAnimationEnabled;
+            
+            const powerSlots = document.querySelectorAll('.track-space.power');
+            powerSlots.forEach(slot => {
+                if (powerAnimationEnabled) {
+                    slot.style.animation = 'powerPulse 2s infinite';
+                } else {
+                    slot.style.animation = 'none';
+                }
+            });
+            
+            // Update button state
+            const btn = event.target;
+            btn.classList.toggle('active');
+        }
+        
+        // Add click effects to power tiles
+        document.querySelectorAll('.track-space.power').forEach(slot => {
+            slot.addEventListener('click', function() {
+                const power = this.dataset.power;
+                const position = this.dataset.position;
+                
+                // Create a temporary highlight effect
+                this.style.transform = 'scale(1.15)';
+                this.style.boxShadow = '0 0 50px var(--power-gold)';
+                
+                setTimeout(() => {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                }, 300);
+                
+                // Show power info
+                alert(`Power: ${power}\nPosition: ${position}\n\nThis power would be activated when a policy is enacted at this position.`);
+            });
+        });
+        
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePolicyCounts();
+            
+            // Add some initial visual interest
+            setTimeout(() => {
+                document.querySelectorAll('.track-space.power').forEach(slot => {
+                    slot.classList.add('unlocking');
+                    setTimeout(() => {
+                        slot.classList.remove('unlocking');
+                    }, 600);
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

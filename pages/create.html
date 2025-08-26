@@ -6,6 +6,7 @@
     <title>Secret Hitler - Create Game</title>
     <link href="../styles/app.css" rel="stylesheet">
     <meta name="theme-color" content="#101820">
+    <script src="../js/theme.js"></script>
     <style>
         #duplicate-notice {
             border-left: 4px solid #00AEEF;
@@ -28,6 +29,16 @@
             from { transform: translateY(-20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+        #host-password-input {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        
+        #host-password-input::placeholder {
+            letter-spacing: 0.2em;
+        }
     </style>
     
     
@@ -44,6 +55,9 @@
                             <h1>Secret Hitler</h1>
                             <p class="subtitle">Game Setup</p>
                         </div>
+                    </div>
+                    <div class="header-actions">
+                        <!-- Theme toggle removed -->
                     </div>
                 </div>
             </div>
@@ -88,9 +102,9 @@
                             <small class="form-help">Choose a memorable name for your game</small>
                         </div>
                         <div class="form-group">
-                            <label for="host-password-input" class="form-label">Host Rejoin Password (optional)</label>
-                            <input type="password" id="host-password-input" class="form-control" placeholder="Set a password to reclaim host if disconnected" maxlength="64" autocomplete="new-password">
-                            <small class="form-help">If set, anyone joining as the host must enter this password.</small>
+                            <label for="host-password-input" class="form-label">Host Rejoin PIN (optional)</label>
+                            <input type="password" id="host-password-input" class="form-control" placeholder="Set a 4-digit PIN to reclaim host if disconnected" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off">
+                            <small class="form-help">If set, anyone joining as the host must enter this 4-digit PIN to reclaim the host seat.</small>
                         </div>
                         
                         <div class="form-group">
@@ -158,6 +172,23 @@
             const player1Hint = document.getElementById('player1-hint');
             const gameNameInput = document.getElementById('game-name-input');
             const namesErrorId = 'names-error';
+
+            // Host PIN input validation - only allow numbers and limit to 4 digits
+            const hostPasswordInput = document.getElementById('host-password-input');
+            if (hostPasswordInput) {
+                hostPasswordInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                    value = value.slice(0, 4); // Limit to 4 digits
+                    e.target.value = value;
+                });
+
+                // Prevent non-numeric input
+                hostPasswordInput.addEventListener('keypress', function(e) {
+                    if (!/\d/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+            }
 
             const MIN_VALID_PLAYERS = 5;
             const MAX_PLAYERS = 10;
@@ -329,6 +360,14 @@
                 const gameName = (gameNameInput && gameNameInput.value || 'Secret Hitler Game').trim();
                 const hostPasswordInput = document.getElementById('host-password-input');
                 const hostPassword = hostPasswordInput ? (hostPasswordInput.value || '').trim() : '';
+                
+                // Validate host PIN if provided
+                if (hostPassword && (!/^\d{4}$/.test(hostPassword))) {
+                    const err = document.getElementById(namesErrorId);
+                    if (err) err.textContent = 'Host PIN must be exactly 4 digits.';
+                    return;
+                }
+                
                 const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
                 try {
                     const gameId = await createGame(gameName, players, hostPasswordHash);
