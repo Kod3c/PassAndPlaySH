@@ -662,6 +662,12 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     transition: box-shadow 200ms ease-out;
 }
 
+/* Ensure cards are visible during flip animation */
+#chancellor-choice-overlay .reveal-card.flipping {
+    z-index: 15;
+    pointer-events: none; /* Prevent clicks during flip */
+}
+
 /* When any face-down card is hovered, both get enhanced glow */
 #chancellor-choice-overlay:hover .reveal-card:not(.flipped) {
     box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.3), inset 0 0 0 3px rgba(241,230,178,0.6);
