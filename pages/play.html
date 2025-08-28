@@ -124,12 +124,78 @@
         
         /* MODULAR SLOT SYSTEM - Easy to enable/disable/change */
         
-        /* HOW TO USE:
-         * To enable a module: add the class to the slot (done automatically in JavaScript)
-         * To disable a module: remove the class from the slot
-         * To change an image: modify the background-image URL in the CSS below
-         * To change size: modify the background-size value
-         * To change opacity: modify the opacity value
+        /* ========================================
+           DEFAULT SETUP FOR 5-6 PLAYERS
+           ========================================
+           
+           This is the standard configuration that should be used for 5-6 player games.
+           All settings are optimized for this player count and provide the best visual experience.
+           
+           SLOT CONFIGURATION:
+           - Slot 1: Skull background (15% opacity) + Custom module (if enabled)
+           - Slot 2: Skull background (15% opacity) + Custom module (if enabled)  
+           - Slot 3: Skull background (15% opacity) + Trio-cards overlay (100% opacity, positioned at 55%)
+           - Slot 4: Skull background (75% opacity) + Bullet overlay (100% opacity)
+           - Slot 5: Skull background (75% opacity) + Bullet overlay (100% opacity)
+           - Slot 6: Fascist-win image (107.64% size, positioned at center 45%)
+           
+           OPACITY SETTINGS:
+           - Early slots (1-3): 15% skull opacity for subtle background
+           - Superpower slots (4-5): 75% skull opacity for prominent background
+           - All overlays: 100% opacity for maximum visibility
+           
+           IMAGE SOURCES:
+           - Skull backgrounds: ../images/skull.png
+           - Trio-cards: ../images/trio-cards.png
+           - Bullets: ../images/bullet.png
+           - Fascist-win: ../images/fascist-win.png
+           
+           ========================================
+           
+           DEFAULT SETUP FOR 7-8 PLAYERS
+           ========================================
+           
+           For larger player counts, slots 2 and 3 should use different images:
+           
+           SLOT CONFIGURATION (7-8 PLAYERS):
+           - Slot 1: Skull background (15% opacity) + Custom module (if enabled)
+           - Slot 2: Skull background (15% opacity) + Eyeglass overlay (100% opacity)
+           - Slot 3: Skull background (15% opacity) + President overlay (100% opacity)
+           - Slot 4: Skull background (75% opacity) + Bullet overlay (100% opacity)
+           - Slot 5: Skull background (75% opacity) + Bullet overlay (100% opacity)
+           - Slot 6: Fascist-win image (107.64% size, positioned at center 45%)
+           
+           IMAGE SOURCES FOR 7-8 PLAYERS:
+           - Eyeglass: ../images/eyeglass.png
+           - President: ../images/president.png
+           
+           ========================================
+           
+           DEFAULT SETUP FOR 9-10 PLAYERS
+           ========================================
+           
+           For the largest player counts, slots 1, 2, and 3 all get specific images:
+           
+           SLOT CONFIGURATION (9-10 PLAYERS):
+           - Slot 1: Skull background (15% opacity) + Eyeglass overlay (100% opacity)
+           - Slot 2: Skull background (15% opacity) + Eyeglass overlay (100% opacity)
+           - Slot 3: Skull background (15% opacity) + President overlay (100% opacity)
+           - Slot 4: Skull background (75% opacity) + Bullet overlay (100% opacity)
+           - Slot 5: Skull background (75% opacity) + Bullet overlay (100% opacity)
+           - Slot 6: Fascist-win image (107.64% size, positioned at center 45%)
+           
+           IMAGE SOURCES FOR 9-10 PLAYERS:
+           - Eyeglass: ../images/eyeglass.png (used in slots 1 and 2)
+           - President: ../images/president.png (used in slot 3)
+           
+           ========================================
+           
+           HOW TO USE:
+           * To enable a module: add the class to the slot (done automatically in JavaScript)
+           * To disable a module: remove the class from the slot
+           * To change an image: modify the background-image URL in the CSS below
+           * To change size: modify the background-size value
+           * To change opacity: modify the opacity value
          */
         
         /* Slot 1 (index 0) - Custom module (shows skull by default) */
@@ -152,9 +218,9 @@
             /* filter: none !important; */
         }
         
-        /* Slot 3 (index 2) - Eyeglass module (enabled by default) */
-        .track.fascist .slot:nth-child(3).eyeglass-module:empty::after {
-            background-image: url('../images/eyeglass.png') !important;
+        /* Slot 3 (index 2) - Trio cards module (enabled by default) */
+        .track.fascist .slot:nth-child(3).trio-cards-module:empty::after {
+            background-image: url('../images/trio-cards.png') !important;
             background-size: 36.4px auto !important;
             opacity: 1.0 !important;
             filter: none !important;
@@ -187,12 +253,12 @@
             pointer-events: none;
         }
         
-        /* Ensure eyeglass overlay is visible on 3rd fascist slot */
-        .eyeglass-overlay {
+        /* Ensure trio-cards overlay is visible on 3rd fascist slot */
+        .trio-cards-overlay {
             z-index: 15 !important;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
             opacity: 1.0;
-            /* Ensure eyeglass doesn't completely cover the slot background */
+            /* Ensure trio-cards doesn't completely cover the slot background */
             pointer-events: none;
         }
         .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
@@ -1359,7 +1425,7 @@
                 if (el.id === 'fascist-slots') {
                     if (i === 0) s.classList.add('custom-module');        // Slot 1
                     if (i === 1) s.classList.add('custom-module');        // Slot 2  
-                    if (i === 2) s.classList.add('eyeglass-module');      // Slot 3
+                    if (i === 2) s.classList.add('trio-cards-module');    // Slot 3
                     // Slots 4 & 5 get bullets (handled separately)
                     // Slot 6 gets fascist-win (handled by CSS)
                 }
@@ -1488,16 +1554,16 @@
                 }
             }
             
-            // Add eyeglass to slot 3 (index 2) on top of skull background
+            // Add trio-cards to slot 3 (index 2) on top of skull background
             const thirdSlot = containerEl.children[2]; // Index 2 = 3rd slot
             if (thirdSlot && !thirdSlot.classList.contains('filled')) {
-                const existingEyeglass = thirdSlot.querySelector('.eyeglass-overlay');
-                if (!existingEyeglass) {
-                    const eyeglassOverlay = document.createElement('div');
-                    eyeglassOverlay.className = 'eyeglass-overlay';
-                    eyeglassOverlay.style.cssText = `
+                const existingTrioCards = thirdSlot.querySelector('.trio-cards-overlay');
+                if (!existingTrioCards) {
+                    const trioCardsOverlay = document.createElement('div');
+                    trioCardsOverlay.className = 'trio-cards-overlay';
+                    trioCardsOverlay.style.cssText = `
                         position: absolute;
-                        top: 50%;
+                        top: 55%;
                         left: 50%;
                         transform: translate(-50%, -50%);
                         width: 36.4px;
@@ -1506,9 +1572,9 @@
                         z-index: 15;
                         opacity: 1.0;
                     `;
-                    eyeglassOverlay.innerHTML = '<img src="../images/eyeglass.png" alt="Eyeglass" style="width: 100%; height: auto;">';
-                    thirdSlot.appendChild(eyeglassOverlay);
-                    console.log('Eyeglass overlay added to 3rd fascist slot');
+                    trioCardsOverlay.innerHTML = '<img src="../images/trio-cards.png" alt="Trio Cards" style="width: 100%; height: auto;">';
+                    thirdSlot.appendChild(trioCardsOverlay);
+                    console.log('Trio cards overlay added to 3rd fascist slot');
                 }
             }
             
