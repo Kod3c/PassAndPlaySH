@@ -152,6 +152,12 @@
                         <span>Back</span>
                     </button>
                 </div>
+                
+                <!-- reCAPTCHA Status -->
+                <div id="recaptcha-status" class="mt-3 text-center text-sm text-gray-600" style="display: none;">
+                    <div id="rate-limit-info"></div>
+                    <div id="cooldown-info"></div>
+                </div>
             </div>
         </main>
 
@@ -162,6 +168,7 @@
     <!-- JavaScript -->
     <script type="module">
         import { createGame } from '../js/db.js?v=2';
+        import recaptchaManager from '../js/recaptcha.js';
         // Player setup logic (skip 1-4 players, dynamic name inputs)
         document.addEventListener('DOMContentLoaded', function() {
             const increaseBtn = document.getElementById('increase-btn');
@@ -367,15 +374,45 @@
                     if (err) err.textContent = 'Host PIN must be exactly 4 digits.';
                     return;
                 }
-                
-                const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
+
+                // Disable create button and show loading state
+                const createGameBtn = document.getElementById('create-game-btn');
+                if (createGameBtn) {
+                    createGameBtn.disabled = true;
+                    createGameBtn.innerHTML = '<span>🔄</span><span>Verifying...</span>';
+                }
+
                 try {
+                    // Execute reCAPTCHA verification
+                    const token = await recaptchaManager.execute('create_game');
+                    
+                    // Verify the token
+                    const verification = await recaptchaManager.verifyToken(token, 'create_game');
+                    
+                    if (!verification.success) {
+                        throw new Error('Verification failed. Please try again.');
+                    }
+
+                    const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
+                    
                     const gameId = await createGame(gameName, players, hostPasswordHash);
                     try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
                     window.location.href = `lobby.html?game=${encodeURIComponent(gameId)}`;
                 } catch (e) {
                     const err = document.getElementById(namesErrorId);
-                    if (err) err.textContent = (e && e.message) ? String(e.message) : 'Failed to create game. Please check player names.';
+                    if (err) {
+                        if (e.message.includes('Please wait') || e.message.includes('Too many attempts')) {
+                            err.textContent = e.message;
+                        } else {
+                            err.textContent = (e && e.message) ? String(e.message) : 'Failed to create game. Please check player names.';
+                        }
+                    }
+                    
+                    // Re-enable create button
+                    if (createGameBtn) {
+                        createGameBtn.disabled = false;
+                        createGameBtn.innerHTML = '<span>🚀</span><span>Create Game</span>';
+                    }
                 }
             }
 
@@ -451,6 +488,40 @@
             
             // Check for duplicate game data on page load
             checkForDuplicateGame();
+            
+            // Update reCAPTCHA status display
+            function updateRecaptchaStatus() {
+                const statusEl = document.getElementById('recaptcha-status');
+                const rateLimitEl = document.getElementById('rate-limit-info');
+                const cooldownEl = document.getElementById('cooldown-info');
+                
+                if (!statusEl || !rateLimitEl || !cooldownEl) return;
+                
+                const remainingActions = recaptchaManager.getRemainingActions();
+                const remainingCooldown = recaptchaManager.getRemainingCooldown();
+                
+                if (remainingActions < 10 || remainingCooldown > 0) {
+                    statusEl.style.display = 'block';
+                    
+                    if (remainingActions < 10) {
+                        rateLimitEl.textContent = `Rate limit: ${remainingActions} actions remaining this minute`;
+                    } else {
+                        rateLimitEl.textContent = '';
+                    }
+                    
+                    if (remainingCooldown > 0) {
+                        cooldownEl.textContent = `Cooldown: ${Math.ceil(remainingCooldown / 1000)}s remaining`;
+                    } else {
+                        cooldownEl.textContent = '';
+                    }
+                } else {
+                    statusEl.style.display = 'none';
+                }
+            }
+            
+            // Update status every second
+            setInterval(updateRecaptchaStatus, 1000);
+            updateRecaptchaStatus();
 
             // Controls: skip 1-4 when increasing from 0, and drop to 0 from 5 when decreasing
             if (increaseBtn) {
