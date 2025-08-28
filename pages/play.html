@@ -104,11 +104,97 @@
         /* When a policy is placed, let it overflow slightly for rotation */
         .slot.filled { overflow: visible; border-color: transparent; box-shadow: none; }
         .track.liberal .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/bird.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.6; filter: brightness(0) invert(1); pointer-events: none; }
-        .track.fascist .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../images/skull.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.55; filter: brightness(0) invert(1); pointer-events: none; }
-        /* Increase opacity for the last three fascist slots */
+        /* Base skull background for all fascist slots */
+        .track.fascist .slot:empty::after { 
+            content: ""; 
+            position: absolute; 
+            inset: 0; 
+            background-image: url('../images/skull.png'); 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: 46% auto; 
+            opacity: 0.55; 
+            filter: brightness(0) invert(1); 
+            pointer-events: none; 
+        }
+        
+        /* Opacity variations for different slot groups */
         .track.fascist .slot:nth-last-child(-n+3):empty::after { opacity: 0.85; }
-        /* Decrease opacity for the first three fascist slots */
         .track.fascist .slot:nth-child(-n+3):empty::after { opacity: 0.25; }
+        
+        /* MODULAR SLOT SYSTEM - Easy to enable/disable/change */
+        
+        /* HOW TO USE:
+         * To enable a module: add the class to the slot (done automatically in JavaScript)
+         * To disable a module: remove the class from the slot
+         * To change an image: modify the background-image URL in the CSS below
+         * To change size: modify the background-size value
+         * To change opacity: modify the opacity value
+         */
+        
+        /* Slot 1 (index 0) - Custom module (shows skull by default) */
+        .track.fascist .slot:nth-child(1).custom-module:empty::after {
+            /* Currently shows skull (default behavior) */
+            /* To enable custom image, uncomment and modify the line below: */
+            /* background-image: url('../images/your-image.png') !important; */
+            /* background-size: 46% auto !important; */
+            /* opacity: 0.7 !important; */
+            /* filter: none !important; */
+        }
+        
+        /* Slot 2 (index 1) - Custom module (shows skull by default) */
+        .track.fascist .slot:nth-child(2).custom-module:empty::after {
+            /* Currently shows skull (default behavior) */
+            /* To enable custom image, uncomment and modify the line below: */
+            /* background-image: url('../images/your-image.png') !important; */
+            /* background-size: 46% auto !important; */
+            /* opacity: 0.7 !important; */
+            /* filter: none !important; */
+        }
+        
+        /* Slot 3 (index 2) - Eyeglass module (enabled by default) */
+        .track.fascist .slot:nth-child(3).eyeglass-module:empty::after {
+            background-image: url('../images/eyeglass.png') !important;
+            background-size: 36.4px auto !important;
+            opacity: 1.0 !important;
+            filter: none !important;
+        }
+        
+        /* Skull backgrounds for slots 4 and 5 are now handled by JavaScript */
+        
+        /* Slot 6 (index 5) - Fascist win (permanent) */
+        .track.fascist .slot:nth-child(6):empty::after { 
+            background-image: url('../images/fascist-win.png') !important;
+            background-size: 107.64% auto !important;
+            background-position: center 45% !important;
+        }
+        
+        /* UTILITY CLASSES - Easy module management */
+        .track.fascist .slot.module-disabled:empty::after {
+            background-image: none !important;
+        }
+        
+        .track.fascist .slot.module-hidden:empty::after {
+            opacity: 0 !important;
+        }
+        
+        /* Ensure bullet overlays are visible on 4th and 5th fascist slots */
+        .bullet-overlay {
+            z-index: 15 !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            opacity: 1.0;
+            /* Ensure bullets don't completely cover the slot background */
+            pointer-events: none;
+        }
+        
+        /* Ensure eyeglass overlay is visible on 3rd fascist slot */
+        .eyeglass-overlay {
+            z-index: 15 !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            opacity: 1.0;
+            /* Ensure eyeglass doesn't completely cover the slot background */
+            pointer-events: none;
+        }
         .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
         .tracker-row { display:flex; align-items:center; justify-content:center; gap:10px; padding-top: 4px; }
         .tracker-label { font-weight:900; letter-spacing: 0.02em; }
@@ -1268,6 +1354,16 @@
             for (let i = 0; i < count; i++) {
                 const s = document.createElement('div');
                 s.className = 'slot';
+                
+                // Add module classes for fascist slots
+                if (el.id === 'fascist-slots') {
+                    if (i === 0) s.classList.add('custom-module');        // Slot 1
+                    if (i === 1) s.classList.add('custom-module');        // Slot 2  
+                    if (i === 2) s.classList.add('eyeglass-module');      // Slot 3
+                    // Slots 4 & 5 get bullets (handled separately)
+                    // Slot 6 gets fascist-win (handled by CSS)
+                }
+                
                 el.appendChild(s);
             }
         }
@@ -1304,56 +1400,26 @@
                         slot.appendChild(card);
                         slot.classList.add('filled');
                         
-                        // Add bullet overlay for 4th fascist policy (superpower unlock)
-                        if (type === 'fascist' && i === 3 && latestGame && latestGame.fascistPolicies >= 3) {
-                            const bulletOverlay = document.createElement('div');
-                            bulletOverlay.className = 'bullet-overlay';
-                            bulletOverlay.style.cssText = `
-                                position: absolute;
-                                top: 50%;
-                                left: 50%;
-                                transform: translate(-50%, -50%);
-                                width: 28px;
-                                height: auto;
-                                z-index: 10;
-                                pointer-events: none;
-                            `;
-                            bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
-                            slot.appendChild(bulletOverlay);
-                        }
+                        // Remove bullet overlay when slot is filled
+                        const bulletOverlay = slot.querySelector('.bullet-overlay');
+                        if (bulletOverlay) bulletOverlay.remove();
                     } else {
                         existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
                         // Let CSS handle the transform for responsive sizing
                         existing.style.zIndex = '3';
                         slot.classList.add('filled');
                         
-                        // Add bullet overlay for 4th fascist policy (superpower unlock)
-                        if (type === 'fascist' && i === 3 && latestGame && latestGame.fascistPolicies >= 3) {
-                            // Remove existing bullet overlay if any
-                            const existingBullet = slot.querySelector('.bullet-overlay');
-                            if (!existingBullet) {
-                                const bulletOverlay = document.createElement('div');
-                                bulletOverlay.className = 'bullet-overlay';
-                                bulletOverlay.style.cssText = `
-                                    position: absolute;
-                                    top: 50%;
-                                    left: 50%;
-                                    transform: translate(-50%, -50%);
-                                    width: 28px;
-                                    height: auto;
-                                    z-index: 10;
-                                    pointer-events: none;
-                                `;
-                                bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
-                                slot.appendChild(bulletOverlay);
-                            }
-                        }
+                        // Remove bullet overlay when slot is filled
+                        const bulletOverlay = slot.querySelector('.bullet-overlay');
+                        if (bulletOverlay) bulletOverlay.remove();
                     }
                 } else {
                     if (existing) existing.remove();
-                    // Remove bullet overlay when slot is not filled
-                    const bulletOverlay = slot.querySelector('.bullet-overlay');
-                    if (bulletOverlay) bulletOverlay.remove();
+                    // Remove bullet overlay when slot is not filled, EXCEPT for the 4th and 5th fascist slots
+                    if (!(type === 'fascist' && (i === 3 || i === 4))) {
+                        const bulletOverlay = slot.querySelector('.bullet-overlay');
+                        if (bulletOverlay) bulletOverlay.remove();
+                    }
                     slot.classList.remove('filled');
                 }
             }
@@ -1388,16 +1454,94 @@
             }, 10);
         }
         
-        // Add bullet overlay to the 4th fascist policy slot (index 3) when there are 3 policies
-        function addBulletOverlayTo4thFascistSlot(containerEl) {
-            if (!containerEl || containerEl.children.length < 4) return;
+        // Add skull backgrounds to all fascist slots and bullet overlays to slots 4 and 5
+        function addBulletOverlaysToFascistSlots(containerEl) {
+            if (!containerEl || containerEl.children.length < 6) return;
+            
+            // Add skull backgrounds to slots 1, 2, and 3 (indices 0, 1, 2) using same method as slots 4 and 5
+            for (let i = 0; i < 3; i++) {
+                const slot = containerEl.children[i];
+                if (!slot) continue;
+                
+                if (!slot.classList.contains('filled')) {
+                    // Add skull background or update existing one
+                    let skullBackground = slot.querySelector('.skull-background');
+                    if (!skullBackground) {
+                        skullBackground = document.createElement('div');
+                        skullBackground.className = 'skull-background';
+                        slot.appendChild(skullBackground);
+                        console.log(`Skull background added to fascist slot ${i + 1}`);
+                    }
+                    // Always update the opacity (whether new or existing)
+                    skullBackground.style.cssText = `
+                        position: absolute;
+                        inset: 0;
+                        background-image: url('../images/skull.png');
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        background-size: 46% auto;
+                        opacity: 0.15;
+                        filter: brightness(0) invert(1);
+                        pointer-events: none;
+                        z-index: 1;
+                    `;
+                }
+            }
+            
+            // Add eyeglass to slot 3 (index 2) on top of skull background
+            const thirdSlot = containerEl.children[2]; // Index 2 = 3rd slot
+            if (thirdSlot && !thirdSlot.classList.contains('filled')) {
+                const existingEyeglass = thirdSlot.querySelector('.eyeglass-overlay');
+                if (!existingEyeglass) {
+                    const eyeglassOverlay = document.createElement('div');
+                    eyeglassOverlay.className = 'eyeglass-overlay';
+                    eyeglassOverlay.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 36.4px;
+                        height: auto;
+                        pointer-events: none;
+                        z-index: 15;
+                        opacity: 1.0;
+                    `;
+                    eyeglassOverlay.innerHTML = '<img src="../images/eyeglass.png" alt="Eyeglass" style="width: 100%; height: auto;">';
+                    thirdSlot.appendChild(eyeglassOverlay);
+                    console.log('Eyeglass overlay added to 3rd fascist slot');
+                }
+            }
             
             const fourthSlot = containerEl.children[3]; // Index 3 = 4th slot
-            if (!fourthSlot) return;
+            const fifthSlot = containerEl.children[4]; // Index 4 = 5th slot
             
-            // Only add overlay if the slot is empty (no policy card)
+            if (!fourthSlot || !fifthSlot) return;
+            
+            // Add skull background and bullet overlay to 4th slot (index 3)
             if (!fourthSlot.classList.contains('filled')) {
-                // Remove existing bullet overlay if any
+                // Add skull background or update existing one
+                let skullBackground = fourthSlot.querySelector('.skull-background');
+                if (!skullBackground) {
+                    skullBackground = document.createElement('div');
+                    skullBackground.className = 'skull-background';
+                    fourthSlot.appendChild(skullBackground);
+                    console.log('Skull background added to 4th fascist slot');
+                }
+                // Always update the opacity (whether new or existing)
+                skullBackground.style.cssText = `
+                    position: absolute;
+                    inset: 0;
+                    background-image: url('../images/skull.png');
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: 46% auto;
+                    opacity: 0.75;
+                    filter: brightness(0) invert(1);
+                    pointer-events: none;
+                    z-index: 1;
+                `;
+                
+                // Add bullet overlay
                 const existingBullet = fourthSlot.querySelector('.bullet-overlay');
                 if (!existingBullet) {
                     const bulletOverlay = document.createElement('div');
@@ -1409,11 +1553,59 @@
                         transform: translate(-50%, -50%);
                         width: 28px;
                         height: auto;
-                        z-index: 10;
                         pointer-events: none;
+                        z-index: 15;
+                        opacity: 1.0;
                     `;
                     bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
                     fourthSlot.appendChild(bulletOverlay);
+                    console.log('Bullet overlay added to 4th fascist slot');
+                }
+            }
+            
+            // Add skull background and bullet overlay to 5th slot (index 4)
+            if (!fifthSlot.classList.contains('filled')) {
+                // Add skull background or update existing one
+                let skullBackground = fifthSlot.querySelector('.skull-background');
+                if (!skullBackground) {
+                    skullBackground = document.createElement('div');
+                    skullBackground.className = 'skull-background';
+                    fifthSlot.appendChild(skullBackground);
+                    console.log('Skull background added to 5th fascist slot');
+                }
+                // Always update the opacity (whether new or existing)
+                skullBackground.style.cssText = `
+                    position: absolute;
+                    inset: 0;
+                    background-image: url('../images/skull.png');
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: 46% auto;
+                    opacity: 0.75;
+                    filter: brightness(0) invert(1);
+                    pointer-events: none;
+                    z-index: 1;
+                `;
+                
+                // Add bullet overlay
+                const existingBullet = fifthSlot.querySelector('.bullet-overlay');
+                if (!existingBullet) {
+                    const bulletOverlay = document.createElement('div');
+                    bulletOverlay.className = 'bullet-overlay';
+                    bulletOverlay.style.cssText = `
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 28px;
+                        height: auto;
+                        pointer-events: none;
+                        z-index: 15;
+                        opacity: 1.0;
+                    `;
+                    bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
+                    fifthSlot.appendChild(bulletOverlay);
+                    console.log('Bullet overlay added to 5th fascist slot');
                 }
             }
         }
@@ -1435,9 +1627,9 @@
             if (liberalSlotsEl) renderPoliciesToSlots(liberalSlotsEl, Math.min(lib, 5), 'liberal');
             if (fascistSlotsEl) renderPoliciesToSlots(fascistSlotsEl, Math.min(fas, 6), 'fascist');
             
-            // Add bullet overlay to 4th fascist slot when there is at least 1 fascist policy (to show upcoming superpower)
-            if (fascistSlotsEl && fas >= 1) {
-                addBulletOverlayTo4thFascistSlot(fascistSlotsEl);
+            // Always add bullet overlays to 4th and 5th fascist slots to show upcoming superpowers
+            if (fascistSlotsEl) {
+                addBulletOverlaysToFascistSlots(fascistSlotsEl);
             }
 
             const squares = document.querySelectorAll('#election-tracker .square');
@@ -2985,6 +3177,11 @@
             renderSlots(liberalSlots, 5);
             renderSlots(fascistSlots, 6);
             renderTracker(tracker);
+            
+            // Add bullet overlays to 4th and 5th fascist slots immediately after creation
+            if (fascistSlots) {
+                addBulletOverlaysToFascistSlots(fascistSlots);
+            }
 
             // Role banner is inline now, no dynamic positioning required
 
