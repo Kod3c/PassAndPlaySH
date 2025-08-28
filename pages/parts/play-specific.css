@@ -1,0 +1,917 @@
+
+
+:root {
+    --liberal-blue: #00AEEF;
+    --fascist-red: #DA291C;
+    --propaganda-black: #101820;
+    --neutral-beige: #D6C6A9;
+    --highlight-cream: #F1E6B2;
+}
+.play-wrapper { display:flex; flex-direction:column; min-height:100vh; background: var(--neutral-beige); }
+.play-main { flex:1; display:flex; flex-direction: column; align-items: stretch; justify-content:flex-start; padding: 0 12px 96px; }
+.board-shell { width: 100%; max-width: 1040px; margin: 0 auto; display:flex; flex-direction:column; align-items:center; gap: 12px; }
+.players-strip { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top: 8px; }
+/* When role banner is visible, push players down a bit more */
+body.role-banner-visible .players-strip { margin-top: 8px; }
+.player-chip { padding: 4px 10px; border: 2px solid var(--propaganda-black); background:#fff; font-weight:700; }
+.player-chip.is-president { background: #fef3c7; }
+.player-chip.is-chancellor { background: #e0f2fe; }
+.board-area { width:100%; display:flex; flex-direction:column; gap:12px; }
+.board-frame { width:100%; border: 6px solid var(--propaganda-black); border-radius: 12px; background: #f6f0df; box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 0 0 4px var(--highlight-cream); padding: 16px; }
+.tracks { display:grid; grid-template-columns: 1fr; gap: 16px; }
+.track { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px; border: 3px solid var(--propaganda-black); background: var(--neutral-beige); box-shadow: inset 0 0 0 3px rgba(0,0,0,0.15); border-radius: 8px; min-height: 88px; }
+.track.liberal { background: var(--liberal-blue); color: #fff; }
+.track.fascist { background: var(--fascist-red); color: #fff; }
+.track-title { font-weight:900; letter-spacing:0.04em; }
+.slots { display:flex; gap:8px; align-items:center; justify-content:center; }
+/* Liberal track: 5 slots, more spacing between cards */
+.track.liberal .slots { gap: 16px; }
+/* Fascist track: 6 slots, less spacing between cards to match liberal track width */
+.track.fascist .slots { gap: 4px; }
+.slot { width: 50px; height: 68px; border: 3px solid #000; background: rgba(255,255,255,0.18); box-shadow: inset 0 0 0 3px rgba(241,230,178,0.9); border-radius: 4px; position: relative; overflow: hidden; }
+/* ========================================
+   POLICY CARD STYLING - BOARD TRACK SLOTS
+   ========================================
+   
+   These styles control the appearance of policy cards that are placed
+   into the board tracks (Liberal and Fascist policy slots).
+   
+   Key Features:
+   - Percentage-based sizing for responsive scaling
+   - Centered positioning with slight rotation
+   - Background images (liberal bird, fascist skull)
+   - Override conflicting styles from app.css
+   
+   QUICK SIZE ADJUSTMENT:
+   To change card sizes, modify the 'width' percentage values below:
+   
+   CURRENT SETTINGS:
+   - Base size: 110% (10% larger than slot width)
+   - Mobile (480px): 110% (same as base)
+   - Small mobile (360px): 102% (slightly smaller)
+   - Ultra narrow (320px): 95% (smaller)
+   - Very narrow (280px): 87% (smallest)
+   
+   EXAMPLES:
+   - For 50% larger cards: change 110% to 165%
+   - For 25% smaller cards: change 110% to 82.5%
+   - For consistent sizing: use same percentage across all breakpoints
+*/
+.slot .policy-card {
+    /* POSITIONING & LAYOUT */
+    position: absolute !important;
+    top: 50% !important; 
+    left: 50% !important; 
+    right: auto !important; 
+    bottom: auto !important;
+    z-index: 2 !important;
+    
+    /* SIZING - Percentage-based for responsive scaling */
+    width: 110% !important;  /* 110% of slot width - easily adjustable */
+    height: auto !important;
+    aspect-ratio: 92 / 132 !important;  /* Maintains card proportions */
+    
+    /* TRANSFORM - Centering and rotation */
+    transform-origin: center center !important;
+    transform: translate(-50%, -50%) rotate(-5deg) !important;  /* Center + slight tilt */
+    
+    /* BACKGROUND IMAGE - Set by JavaScript */
+    background-size: contain !important;      /* Scale to fit card */
+    background-repeat: no-repeat !important;  /* No tiling */
+    background-position: center !important;   /* Center the image */
+    
+    /* VISUAL STYLING */
+    border: 3px solid var(--propaganda-black) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+    
+    /* INTERACTION */
+    pointer-events: none !important;  /* Cards don't interfere with clicks */
+    
+    /* OVERRIDE CONFLICTING STYLES FROM app.css */
+    padding: 0 !important;
+    min-width: unset !important;
+    text-align: unset !important;
+}
+/* When a policy is placed, let it overflow slightly for rotation */
+.slot.filled { overflow: visible; border-color: transparent; box-shadow: none; }
+.track.liberal .slot:empty::after { content: ""; position: absolute; inset: 0; background-image: url('../../images/bird.png'); background-repeat: no-repeat; background-position: center; background-size: 46% auto; opacity: 0.6; filter: brightness(0) invert(1); pointer-events: none; }
+/* Base skull background for all fascist slots */
+.track.fascist .slot:empty::after { 
+    content: ""; 
+    position: absolute; 
+    inset: 0; 
+    background-image: url('../../images/skull.png'); 
+    background-repeat: no-repeat; 
+    background-position: center; 
+    background-size: 46% auto; 
+    opacity: 0.55; 
+    filter: brightness(0) invert(1); 
+    pointer-events: none; 
+}
+
+/* Opacity variations for different slot groups */
+.track.fascist .slot:nth-last-child(-n+3):empty::after { opacity: 0.85; }
+.track.fascist .slot:nth-child(-n+3):empty::after { opacity: 0.25; }
+
+/* MODULAR SLOT SYSTEM - Easy to enable/disable/change */
+
+/* ========================================
+   DEFAULT SETUP FOR 5-6 PLAYERS
+   ========================================
+   
+   This is the standard configuration that should be used for 5-6 player games.
+   All settings are optimized for this player count and provide the best visual experience.
+   
+   SLOT CONFIGURATION:
+   - Slot 1: Skull background (15% opacity) + Custom module (if enabled)
+   - Slot 2: Skull background (15% opacity) + Custom module (if enabled)  
+   - Slot 3: Skull background (15% opacity) + Trio-cards-eye overlay (100% opacity, positioned at 55%)
+   - Slot 4: Skull background (75% opacity) + Bullet overlay (100% opacity)
+   - Slot 5: Skull background (75% opacity) + Bullet overlay (100% opacity)
+   - Slot 6: Fascist-win image (107.64% size, positioned at center 45%)
+   
+   OPACITY SETTINGS:
+   - Early slots (1-3): 15% skull opacity for subtle background
+   - Superpower slots (4-5): 75% skull opacity for prominent background
+   - All overlays: 100% opacity for maximum visibility
+   
+   IMAGE SOURCES:
+   - Skull backgrounds: ../images/skull.png
+   - Trio-cards-eye: ../images/trio-cards-eye.png
+   - Bullets: ../images/bullet.png
+   - Fascist-win: ../images/fascist-win.png
+   
+   ========================================
+   
+   DEFAULT SETUP FOR 7-8 PLAYERS
+   ========================================
+   
+   For larger player counts, slots 2 and 3 should use different images:
+   
+   SLOT CONFIGURATION (7-8 PLAYERS):
+   - Slot 1: Skull background (15% opacity) + Custom module (if enabled)
+   - Slot 2: Skull background (15% opacity) + Eyeglass overlay (100% opacity)
+   - Slot 3: Skull background (15% opacity) + President overlay (100% opacity)
+   - Slot 4: Skull background (75% opacity) + Bullet overlay (100% opacity)
+   - Slot 5: Skull background (75% opacity) + Bullet overlay (100% opacity)
+   - Slot 6: Fascist-win image (107.64% size, positioned at center 45%)
+   
+   IMAGE SOURCES FOR 7-8 PLAYERS:
+   - Eyeglass: ../images/eyeglass.png
+   - President: ../images/president.png
+   
+   ========================================
+   
+   DEFAULT SETUP FOR 9-10 PLAYERS
+   ========================================
+   
+   For the largest player counts, slots 1, 2, and 3 all get specific images:
+   
+   SLOT CONFIGURATION (9-10 PLAYERS):
+   - Slot 1: Skull background (15% opacity) + Eyeglass overlay (100% opacity)
+   - Slot 2: Skull background (15% opacity) + Eyeglass overlay (100% opacity)
+   - Slot 3: Skull background (15% opacity) + President overlay (100% opacity)
+   - Slot 4: Skull background (75% opacity) + Bullet overlay (100% opacity)
+   - Slot 5: Skull background (75% opacity) + Bullet overlay (100% opacity)
+   - Slot 6: Fascist-win image (107.64% size, positioned at center 45%)
+   
+   IMAGE SOURCES FOR 9-10 PLAYERS:
+   - Eyeglass: ../images/eyeglass.png (used in slots 1 and 2)
+   - President: ../images/president.png (used in slot 3)
+   
+   ========================================
+   
+   HOW TO USE:
+   * To enable a module: add the class to the slot (done automatically in JavaScript)
+   * To disable a module: remove the class from the slot
+   * To change an image: modify the background-image URL in the CSS below
+   * To change size: modify the background-size value
+   * To change opacity: modify the opacity value
+ */
+
+/* Slot 1 (index 0) - Custom module (shows skull by default) */
+.track.fascist .slot:nth-child(1).custom-module:empty::after {
+    /* Currently shows skull (default behavior) */
+    /* To enable custom image, uncomment and modify the line below: */
+    /* background-image: url('../../images/your-image.png') !important; */
+    /* background-size: 46% auto !important; */
+    /* opacity: 0.7 !important; */
+    /* filter: none !important; */
+}
+
+/* Slot 2 (index 1) - Custom module (shows skull by default) */
+.track.fascist .slot:nth-child(2).custom-module:empty::after {
+    /* Currently shows skull (default behavior) */
+    /* To enable custom image, uncomment and modify the line below: */
+    /* background-image: url('../../images/your-image.png') !important; */
+    /* background-size: 46% auto !important; */
+    /* opacity: 0.7 !important; */
+    /* filter: none !important; */
+}
+
+/* Slot 3 (index 2) - Trio cards eye module (enabled by default) */
+.track.fascist .slot:nth-child(3).trio-cards-eye-module:empty::after {
+    background-image: url('../../images/trio-cards-eye.png') !important;
+    background-size: 36.4px auto !important;
+    opacity: 1.0 !important;
+    filter: none !important;
+}
+
+/* Skull backgrounds for slots 4 and 5 are now handled by JavaScript */
+
+/* Slot 6 (index 5) - Fascist win (permanent) */
+.track.fascist .slot:nth-child(6):empty::after { 
+    background-image: url('../../images/fascist-win.png') !important;
+    background-size: 107.64% auto !important;
+    background-position: center 45% !important;
+}
+
+/* UTILITY CLASSES - Easy module management */
+.track.fascist .slot.module-disabled:empty::after {
+    background-image: none !important;
+}
+
+.track.fascist .slot.module-hidden:empty::after {
+    opacity: 0 !important;
+}
+
+/* Ensure bullet overlays are visible on 4th and 5th fascist slots */
+.bullet-overlay {
+    z-index: 15 !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    opacity: 1.0;
+    /* Ensure bullets don't completely cover the slot background */
+    pointer-events: none;
+}
+
+/* Ensure trio-cards-eye overlay is visible on 3rd fascist slot */
+.trio-cards-eye-overlay {
+    z-index: 15 !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    opacity: 1.0;
+    /* Ensure trio-cards-eye doesn't completely cover the slot background */
+    pointer-events: none;
+}
+.tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
+.tracker-row { display:flex; align-items:center; justify-content:center; gap:10px; padding-top: 4px; }
+.tracker-label { font-weight:900; letter-spacing: 0.02em; }
+.tracker .bubble { width:26px; height:26px; border-radius:50%; background:#fff; border:3px solid var(--propaganda-black); }
+.tracker .square { width:26px; height:26px; border-radius:4px; background:#fff; border:3px solid var(--propaganda-black); display:inline-flex; align-items:center; justify-content:center; font-weight:900; }
+.tracker .square.active { background: var(--highlight-cream); }
+.policy-summary { display:flex; align-items:stretch; justify-content:center; gap:10px; margin-top: 8px; }
+.policy-card-wrap { display:flex; flex-direction:column; align-items:center; }
+.policy-card-title { display:none; font-weight:900; margin-bottom: 4px; letter-spacing:0.02em; }
+.policy-chip { padding: 6px 10px; border: 3px solid var(--propaganda-black); background:#fff; font-weight:800; box-shadow: inset 0 0 0 3px rgba(241,230,178,0.6); }
+.policy-chip.liberal { background: var(--liberal-blue); color:#fff; }
+.policy-chip.fascist { background: var(--fascist-red); color:#fff; }
+.policy-chip .count { margin-left: 6px; font-weight: 900; }
+@media (max-width: 640px) {
+    /* Show policy counters side-by-side on mobile */
+    .policy-summary { flex-direction: row; align-items: center; justify-content: center; gap: 8px; flex-wrap: nowrap; }
+    .policy-card-title { display:none; }
+    .policy-chip { padding: 6px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    .policy-chip .policy-label { display: inline; }
+    /* Reduce empty space below header by top-aligning content */
+    .play-main { align-items: stretch; justify-content: flex-start; }
+}
+
+/* ========================================
+   RESPONSIVE POLICY CARD SIZING
+   ========================================
+   
+   These media queries ensure policy cards scale appropriately on narrow devices.
+   The percentage values are easily adjustable for fine-tuning card sizes.
+   
+   BREAKPOINT GUIDE:
+   - 480px and below: Mobile phones (landscape)
+   - 360px and below: Small mobile phones
+   - 320px and below: Ultra-narrow devices
+   - 280px and below: Very narrow devices
+   
+   SIZE ADJUSTMENT:
+   To make cards larger: increase the percentage values
+   To make cards smaller: decrease the percentage values
+   Current base size: 110% (10% larger than slot width)
+*/
+
+/* Mobile phones and small tablets */
+@media (max-width: 480px) {
+    html body .slot .policy-card,
+    .slot .policy-card { 
+        width: 110% !important;  /* Same as base size for consistency */
+        border-width: 2px !important;  /* Thinner border for mobile */
+    }
+}
+
+/* Small mobile phones */
+@media (max-width: 360px) {
+    html body .slot .slot .policy-card,
+    .slot .policy-card { 
+        width: 102% !important;  /* Slightly smaller to fit narrow screens */
+        border-width: 1.5px !important;  /* Even thinner border */
+    }
+}
+
+/* Ultra-narrow devices */
+@media (max-width: 320px) {
+    html body .slot .policy-card,
+    .slot .policy-card { 
+        width: 95% !important;  /* Smaller percentage for very narrow screens */
+        border-width: 1px !important;  /* Minimal border */
+    }
+}
+
+/* Very narrow devices (edge cases) */
+@media (max-width: 280px) {
+    html body .slot .policy-card,
+    .slot .policy-card { 
+        width: 87% !important;  /* Smallest size for extremely narrow screens */
+        border-width: 1px !important;  /* Minimal border */
+    }
+}
+/* Compact layout for narrow phones */
+@media (max-width: 480px) {
+    .play-main { padding: 0 8px calc(88px + env(safe-area-inset-bottom)); }
+    /* Role banner: keep standard width on small screens */
+    .role-bar { width: 100%; margin: 0; border-radius: 12px; }
+    .board-frame { padding: 12px; }
+    .track { flex-direction: column; align-items: center; gap: 8px; }
+    .track-title { font-size: 0.95rem; text-align: center; }
+    .slots { gap: 6px; }
+    /* Liberal track: 5 slots, more spacing between cards on mobile */
+    .track.liberal .slots { gap: 12px; }
+    /* Fascist track: 6 slots, less spacing between cards on mobile to match liberal track width */
+    .track.fascist .slots { gap: 4px; }
+    .slot { width: 44px; height: 60px; }
+    /* Player strip: larger chips and horizontal scroll */
+    .players-strip { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+    body.role-banner-visible .players-strip { margin-top: 8px; }
+    .players-strip::-webkit-scrollbar { display: none; }
+    .player-chip { padding: 6px 10px; font-size: 1rem; white-space: nowrap; }
+    /* Floating action bar adjustments for narrow screens */
+    .floating-footer { padding: 0 8px; bottom: calc(8px + env(safe-area-inset-bottom)); }
+    .actions-bar { padding: 8px; gap: 6px; flex-wrap: wrap; justify-content: space-between; }
+    /* First row: center; Second row: left + right */
+    .actions-center { order: 1; flex: 1 1 100%; display: flex; justify-content: center; }
+    .actions-left { order: 2; flex: 1 1 0; display: flex; justify-content: flex-start; }
+    .actions-right { order: 2; flex: 1 1 0; display: flex; justify-content: flex-end; }
+    .actions-bar .btn { min-width: 0; padding: 8px 10px; font-size: 0.95rem; }
+}
+@media (max-width: 360px) {
+    .slot { width: 40px; height: 54px; }
+    /* Liberal track: 5 slots, more spacing between cards on very small screens */
+    .track.liberal .slots { gap: 10px; }
+    /* Fascist track: 6 slots, less spacing between cards on very small screens to match liberal track width */
+    .track.fascist .slots { gap: 3px; }
+    .status-banner { font-size: 1rem; padding: 10px 12px; }
+    .player-chip { font-size: 1.05rem; }
+    .actions-bar .btn { padding: 6px 8px; font-size: 0.9rem; }
+}
+.floating-footer { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 0 12px; z-index: 50; pointer-events: none; }
+.actions-bar { pointer-events: auto; max-width: 960px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 10px 12px; background: rgba(255,255,255,0.95); border: 3px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+.actions-left, .actions-center, .actions-right { display:flex; gap:8px; align-items:center; }
+/* Ensure bottom action buttons don't become full-width on mobile */
+.actions-bar .btn { width: auto; flex: 0 0 auto; }
+.btn { cursor:pointer; border: 3px solid var(--propaganda-black); background:#fff; padding: 8px 12px; font-weight:800; letter-spacing: 0.02em; }
+.btn-primary { background: var(--highlight-cream); color: var(--propaganda-black); }
+.btn-secondary { background: var(--highlight-cream); color: var(--propaganda-black); }
+.btn-stuck { background: var(--fascist-red); color: #fff; border-color: var(--propaganda-black); }
+.status-banner { 
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    padding: 12px 16px; background: var(--off-white); border: 4px solid var(--propaganda-black);
+    border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; 
+    font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; 
+    text-align:center; animation: dropIn 180ms ease-out; font-size: 1.125rem; line-height: 1;
+    color: #000;
+}
+.status-text { color: #000; }
+.status-banner.status-updated { animation: dropIn 180ms ease-out; }
+.status-banner.stuck-warning { 
+    background: var(--fascist-red); 
+    color: #fff; 
+    border-color: var(--propaganda-black);
+    animation: dropIn 180ms ease-out;
+    margin: 8px 0;
+    font-size: 1rem;
+    padding: 10px 12px;
+}
+.debug-info { 
+    color: var(--propaganda-black); 
+    font-size: 0.9rem; 
+    opacity: 0.7; 
+    text-align: center; 
+    margin-top: 8px; 
+    font-family: var(--font-propaganda);
+    letter-spacing: 0.02em;
+}
+/* Floating role banner */
+/* Role banner now inline (not fixed) */
+.floating-role { position: static; padding: 0; margin: 8px 0; z-index: auto; pointer-events: auto; display:none; width: 100%; align-self: stretch; }
+.role-bar { width: 100%; margin: 0; display:flex; align-items:center; justify-content:center; gap:10px; padding: 10px 12px; background: var(--off-white); border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; animation: dropIn 180ms ease-out; font-size: 1.25rem; line-height: 1; }
+.role-tag { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.role-tag.pres { background: #fef3c7; }
+.role-tag.chanc { background: #e0f2fe; }
+@keyframes dropIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display:none; align-items: center; justify-content:center; z-index: 5000; }
+.modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); position: relative; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); }
+.modal-title { font-weight: 900; }
+.modal-body { padding: 12px; }
+.modal-close { position:absolute; top:8px; right:8px; width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; border:3px solid var(--propaganda-black); background: var(--off-white); font-weight:900; box-shadow: var(--shadow-sm); cursor:pointer; }
+.modal-close:hover { box-shadow: var(--shadow-md); }
+/* Role overlay specific */
+.role-content { text-align: center; }
+.role-display { 
+    margin: 20px 0; 
+    padding: 20px; 
+    border: 4px solid var(--propaganda-black); 
+    border-radius: 12px; 
+    background: rgba(255,255,255,0.1); 
+    min-height: 120px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.role-label { 
+    font-weight: 900; 
+    letter-spacing: 0.03em; 
+    font-size: 2rem; 
+    color: #000; 
+    text-align: center; 
+}
+.role-actions { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    align-items: center; 
+}
+.role-actions .btn { 
+    min-width: 200px; 
+    min-height: 48px; 
+    font-size: 1.1rem; 
+    transition: all 0.2s ease;
+}
+
+.role-actions .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.role-actions .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #ccc !important;
+    color: #666 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Special styling for the role button to make it stand out */
+.role-actions .btn[id="role-btn"] {
+    background: var(--highlight-cream) !important;
+    color: var(--propaganda-black) !important;
+    border-width: 4px !important;
+    font-weight: 900 !important;
+}
+
+/* Subtle styling for membership and comrades buttons */
+.role-actions .btn[id="membership-btn"],
+.role-actions .btn[id="compatriots-btn"] {
+    background: rgba(241, 230, 178, 0.8) !important;
+    color: var(--propaganda-black) !important;
+    border-width: 3px !important;
+}
+
+/* Button hover effects for enabled buttons */
+.role-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Ensure buttons are always clickable and properly styled */
+.role-actions .btn {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Adjust grid layout when comrades button is hidden */
+.role-actions-main:has(#compatriots-btn[style*="display: none"]) {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Ensure proper spacing when only 2 buttons are visible */
+.role-actions-main:has(#compatriots-btn[style*="display: none"]) .btn {
+    min-width: 220px;
+}
+
+/* Fallback for browsers without :has() support */
+.role-actions-main.comrades-hidden {
+    grid-template-columns: 1fr 1fr;
+}
+
+.role-actions-main.comrades-hidden .btn {
+    min-width: 220px;
+}
+/* Rules modal specific */
+.rules-modal .modal-card { max-height: 86vh; display:flex; flex-direction:column; }
+.rules-modal .modal-body { overflow:auto; }
+.rules-modal .modal-header { background: var(--off-white); }
+.rules-modal .modal-title { font-family: var(--font-fraktur); letter-spacing: 0.02em; font-size: var(--font-2xl); }
+.rules-modal .modal-subtitle { font-family: var(--font-propaganda); font-size: var(--font-lg); color: var(--dark-beige); }
+.rules-quicknav { display:flex; gap:8px; flex-wrap:nowrap; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); background: var(--bg-card); position: sticky; top: 0; z-index: 1; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
+.rules-quicknav .rule-nav-btn { padding: 6px 10px; flex: 0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; }
+/* Bottom nav for rules (mobile) */
+.rules-bottomnav { display:none; position: sticky; bottom: 0; left: 0; right: 0; padding: 8px; background: var(--bg-card); border-top: 3px solid var(--propaganda-black); z-index: 1; }
+.rules-bottomnav-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.rules-bottomnav .indicator { font-weight: 900; letter-spacing: 0.03em; }
+@media (max-width: 768px) {
+    /* Medium screens - start transitioning to mobile layout */
+    .role-actions-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .role-actions .btn {
+        min-width: 160px;
+        min-height: 46px;
+    }
+}
+
+@media (max-width: 640px) {
+    .rules-modal .modal-card { width: 96vw; max-height: 92vh; }
+    .rules-modal .modal-body { padding: 8px; padding-bottom: 64px; }
+    .rules-quicknav { gap:6px; padding: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow-x: hidden; overflow-y: visible; }
+    .rules-quicknav .rule-nav-btn { padding: 10px; min-width: 0; width: 100%; }
+    .rules-quicknav .nav-text { display:none; }
+    .rules-quicknav .nav-icon { font-size: 1.125rem; }
+    .rules-bottomnav { display:block; }
+    .rules-bottomnav .btn { min-height: 44px; flex: 1; }
+    .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
+    
+    /* Role actions responsive styling */
+    .role-actions .btn { 
+        min-width: 100%; 
+        min-height: 44px; 
+        font-size: 1rem; 
+    }
+    
+    /* Stack buttons vertically on mobile */
+    .role-actions-main {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+    
+    /* Ensure buttons take full width on mobile */
+    .role-actions .btn {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+}
+@media (max-width: 360px) {
+    .rules-quicknav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    
+    /* Extra small screen role actions */
+    .role-actions .btn { 
+        min-height: 40px; 
+        font-size: 0.9rem; 
+        padding: 8px 12px;
+    }
+    
+    .role-actions-main {
+        gap: 6px !important;
+    }
+}
+.order-list { display:flex; flex-direction:column; gap:8px; }
+.order-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; border: 2px dashed var(--propaganda-black); background:#fff; }
+.order-left { display:flex; align-items:center; gap:10px; }
+/* Space between badges/tags on the right side of player order rows */
+.order-right { display:flex; align-items:center; gap:6px; }
+.order-right > * + * { margin-left: 6px; }
+.order-num { width: 28px; height: 28px; border-radius: 50%; display:inline-flex; align-items:center; justify-content:center; border: 3px solid var(--propaganda-black); font-weight:900; background: var(--highlight-cream); }
+.badge-pres { padding: 2px 8px; background:#fef3c7; border:2px solid var(--propaganda-black); font-weight:800; }
+.badge-chanc { padding: 2px 8px; background:#e0f2fe; border:2px solid var(--propaganda-black); font-weight:800; }
+@media (min-width: 720px) {
+    .tracks { grid-template-columns: 1fr; }
+}
+/* Voting popover */
+.vote-pop-wrap { position: relative; display: inline-block; }
+.vote-popover { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); background: #fff; border: 3px solid var(--propaganda-black); border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,0.28); padding: 14px 16px; display: none; z-index: 10; }
+.vote-popover .btn { min-width: 120px; min-height: 48px; padding: 12px 18px; font-size: 1.125rem; }
+.vote-popover::after { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--propaganda-black); }
+.btn-black { background: #101820; color: #fff; }
+/* Table-spread policy cards (design only) */
+.table-spread { 
+    width: 100%; 
+    display: flex; 
+    flex-direction: row-reverse; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 0; 
+    padding: 12px 0 0; 
+    margin: 16px 0 0; 
+    transition: transform 0.2s ease;
+}
+.table-spread:hover {
+    transform: scale(1.02);
+}
+.table-spread .table-card { width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-image: url('../../images/policy-back.png'); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); margin: 0 -18px; transform-origin: 50% 100%; }
+/* Ensure cards can host positioned tooltips */
+.table-spread .table-card { position: relative; }
+/* Glow/highlight for actionable table cards (no transform to preserve layout alignment) */
+.table-spread .table-card.glow { 
+    box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6) !important; 
+    animation: pulseGlowSpread 1.2s ease-in-out infinite alternate !important; 
+    will-change: filter, box-shadow; 
+    transition: box-shadow 200ms ease-out, transform 200ms ease-out;
+}
+
+/* Group hover effect for the three glowing cards */
+.table-spread:hover .table-card.glow {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6) !important;
+    transform: translateY(-8px) scale(1.05) !important;
+    z-index: 15;
+    filter: brightness(1.1) saturate(1.15) !important;
+}
+
+/* Ensure non-glowing cards don't get hover effects */
+.table-spread .table-card:not(.glow):hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6);
+}
+
+/* Make glowing cards more interactive */
+.table-spread .table-card.glow {
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* Ensure non-glowing cards have default cursor */
+.table-spread .table-card:not(.glow) {
+    cursor: default;
+}
+@keyframes pulseGlowSpread { from { filter: brightness(1) saturate(1); } to { filter: brightness(1.06) saturate(1.12); } }
+/* Single tooltip above the spread */
+.table-spread { position: relative; }
+.spread-tooltip { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); background: rgba(255,255,255,0.98); color: #000; padding: 8px 12px; border: 3px solid var(--propaganda-black); border-radius: 10px; box-shadow: 0 6px 14px rgba(0,0,0,0.25); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.9rem; white-space: nowrap; pointer-events: none; z-index: 3; }
+.spread-tooltip::after { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid var(--propaganda-black); }
+/* Revealed fronts for table cards */
+.table-spread .table-card.is-front.liberal { background-image: url('../../images/liberal.png'); }
+.table-spread .table-card.is-front.facist { background-image: url('../../images/facist.png'); }
+.table-spread .table-card.lifting { transition: transform 140ms ease-out; }
+.table-spread .table-card.is-front { transform-origin: 50% 50%; z-index: 10; }
+.table-spread .table-card.revealed { transition: transform 220ms ease-out; }
+/* Overlay for centered reveal */
+.reveal-overlay { position: fixed; inset: 0; z-index: 6000; pointer-events: auto; }
+.reveal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+.reveal-card { position: absolute; width: var(--play-card-w, 92px); height: var(--play-card-h, 132px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6); transform-origin: 50% 50%; transition: transform 240ms ease-out, left 240ms ease-out, top 240ms ease-out; }
+.reveal-instruction { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); pointer-events: none; background: rgba(255,255,255,0.97); color: #000; padding: 14px 18px; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,0.4); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.15rem; text-align: center; min-width: min(560px, 86vw); }
+.reveal-actions { position: absolute; bottom: calc(10% + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 10px; }
+.reveal-btn { cursor: pointer; border: 4px solid var(--propaganda-black); background: var(--highlight-cream); color: var(--propaganda-black); padding: 12px 18px; font-weight: 900; letter-spacing: 0.03em; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); text-transform: uppercase; font-family: var(--font-propaganda); font-size: 1.05rem; }
+.reveal-btn[disabled] { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.3); }
+.reveal-card.selected { box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 10px 24px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6); }
+.reveal-card.selected::after { content: "✓"; position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border-radius: 50%; background: var(--highlight-cream); color: #000; display: inline-flex; align-items: center; justify-content: center; border: 3px solid var(--propaganda-black); font-weight: 900; box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
+
+/* Chancellor choice overlay specific styles */
+#chancellor-choice-overlay .reveal-card {
+    transition: box-shadow 200ms ease-out;
+}
+
+#chancellor-choice-overlay .reveal-card:hover {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+}
+
+#chancellor-choice-overlay .reveal-card.selected {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+    z-index: 10;
+}
+
+/* Hover effect for face-down cards - both light up together */
+#chancellor-choice-overlay .reveal-card:not(.flipped):hover {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 24px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+    transition: box-shadow 200ms ease-out;
+}
+
+/* When any face-down card is hovered, both get enhanced glow */
+#chancellor-choice-overlay:hover .reveal-card:not(.flipped) {
+    box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.3), inset 0 0 0 3px rgba(241,230,178,0.6);
+    transition: box-shadow 200ms ease-out;
+}
+/* Subtle varied angles to simulate a real table spread */
+.table-spread .table-card:nth-child(1) { transform: rotate(18deg); }
+.table-spread .table-card:nth-child(2) { transform: rotate(14deg); }
+.table-spread .table-card:nth-child(3) { transform: rotate(10deg); }
+.table-spread .table-card:nth-child(4) { transform: rotate(6deg); }
+.table-spread .table-card:nth-child(5) { transform: rotate(3deg); }
+.table-spread .table-card:nth-child(6) { transform: rotate(1deg); }
+.table-spread .table-card:nth-child(7) { transform: rotate(-1deg); }
+.table-spread .table-card:nth-child(8) { transform: rotate(-3deg); }
+.table-spread .table-card:nth-child(9) { transform: rotate(-6deg); }
+.table-spread .table-card:nth-child(10) { transform: rotate(-10deg); }
+.table-spread .table-card:nth-child(11) { transform: rotate(-14deg); }
+.table-spread .table-card:nth-child(12) { transform: rotate(-18deg); }
+/* Deck + Discard stacks flanking the spread */
+.cards-area { 
+    width: 100%; 
+    display: flex; 
+    justify-content: center; 
+    margin: 20px 0 0; 
+    padding: 16px;
+    background: rgba(246, 240, 223, 0.3);
+    border-radius: 12px;
+    border: 2px solid rgba(16, 24, 32, 0.1);
+}
+.cards-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 80px; 
+    /* Remove margin since cards-area handles spacing */
+}
+/* Role envelope styling - mirrored discard pile */
+.role-envelope {
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    position: relative;
+    z-index: 5;
+    width: calc(var(--play-card-w, 64px) + 8px);
+    height: calc(var(--play-card-h, 92px) + 8px);
+    transform-origin: 50% 100%;
+    transform: translate(8px, 8px) scale(1.3) rotate(-2deg); /* Size similar to discard, moved right */
+}
+.role-envelope:hover {
+    transform: translate(8px, 8px) scale(1.365) rotate(-2deg);
+    filter: brightness(1.1);
+}
+.role-envelope:active {
+    transform: translate(8px, 8px) scale(1.274) rotate(-2deg);
+}
+.envelope-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    border-radius: 6px;
+}
+.card-stack.discard { }
+.card-stack { 
+    position: relative; 
+    width: calc(var(--play-card-w, 64px) + 8px); 
+    height: calc(var(--play-card-h, 92px) + 8px); 
+    flex: 0 0 auto; 
+    transition: transform 0.2s ease;
+}
+.card-stack:hover {
+    transform: scale(1.05);
+}
+.stack-card { position: absolute; left: 0; bottom: 0; width: var(--play-card-w, 64px); height: var(--play-card-h, 92px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 3px rgba(241,230,178,0.6); }
+.stack-card.is-back { background-image: url('../../images/policy-back.png'); }
+.stack-card.is-discard { background-image: url('../../images/discard.png'); }
+.card-stack.discard .stack-card.policy-on-discard { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-5px) rotate(-15deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 2; 
+}
+.card-stack.discard .stack-card.policy-on-discard-top { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-8px) rotate(12deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 3; 
+}
+.card-stack.discard .stack-card.policy-on-discard-2 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-11px) rotate(-8deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 4; 
+}
+.card-stack.discard .stack-card.policy-on-discard-3 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-14px) rotate(18deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 5; 
+}
+.card-stack.discard .stack-card.policy-on-discard-4 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-17px) rotate(-22deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 6; 
+}
+.card-stack.discard .stack-card.policy-on-discard-5 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-20px) rotate(6deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 7; 
+}
+.card-stack.discard .stack-card.policy-on-discard-6 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-23px) rotate(-14deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 8; 
+}
+.card-stack.discard .stack-card.policy-on-discard-7 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-26px) rotate(20deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 9; 
+}
+.card-stack.discard .stack-card.policy-on-discard-8 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-29px) rotate(-10deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 10; 
+}
+.card-stack.discard .stack-card.policy-on-discard-9 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-32px) rotate(16deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 11; 
+}
+.card-stack.discard .stack-card.policy-on-discard-10 { 
+    background-image: url('../../images/policy-back.png'); 
+    transform: translateY(-35px) rotate(-25deg) scale(1.0) !important; 
+    transform-origin: 50% 50%; 
+    z-index: 12; 
+}
+.card-stack.deck .stack-card:nth-child(1) { transform: translate(0, 0) rotate(-2deg); }
+.card-stack.deck .stack-card:nth-child(2) { transform: translate(4px, -4px) rotate(1deg); }
+.card-stack.deck .stack-card:nth-child(3) { transform: translate(8px, -8px) rotate(-0.5deg); }
+.card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 8px) rotate(2deg) scale(1.3); }
+.card-stack.discard .stack-card:nth-child(2) { transform: translate(2px, 12px) rotate(-1deg) scale(1.3); }
+.card-stack.discard .stack-card:nth-child(3) { transform: translate(-1px, 16px) rotate(3deg) scale(1.3); }
+/* Single, larger discard card */
+.card-stack.discard .stack-card { transform: translateY(8px) scale(1.3); transform-origin: 50% 100%; }
+
+/* Responsive sizing for small screens */
+@media (max-width: 640px) {
+    .table-spread { padding-top: 10px; margin-top: 14px; }
+    .cards-area { margin: 16px 0 0; }
+    .cards-row { gap: 60px; }
+    .table-spread .table-card { width: var(--play-card-w, 56px); height: var(--play-card-h, 82px); margin: 0 -18px; }
+    .card-stack { width: calc(var(--play-card-w, 56px) + 8px); height: calc(var(--play-card-h, 82px) + 8px); }
+    .stack-card { width: var(--play-card-w, 56px); height: var(--play-card-h, 82px); }
+    .envelope-image { width: calc(var(--play-card-w, 56px) + 8px); height: calc(var(--play-card-h, 82px) + 8px); }
+    .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-5px) rotate(-15deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-8px) rotate(12deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-11px) rotate(-8deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-3 { transform: translateY(-14px) rotate(18deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-4 { transform: translateY(-17px) rotate(-22deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-5 { transform: translateY(-20px) rotate(6deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-6 { transform: translateY(-23px) rotate(-14deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-7 { transform: translateY(-26px) rotate(20deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-8 { transform: translateY(-29px) rotate(-10deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-9 { transform: translateY(-32px) rotate(16deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-10 { transform: translateY(-35px) rotate(-25deg) scale(1.0) !important; }
+}
+@media (max-width: 360px) {
+    .table-spread { padding-top: 8px; margin-top: 12px; }
+    .cards-area { margin: 14px 0 0; }
+    .cards-row { gap: 48px; }
+    .table-spread .table-card { width: var(--play-card-w, 50px); height: var(--play-card-h, 74px); margin: 0 -20px; }
+    .card-stack { width: calc(var(--play-card-w, 50px) + 8px); height: calc(var(--play-card-h, 74px) + 8px); }
+    .stack-card { width: var(--play-card-w, 50px); height: var(--play-card-h, 74px); }
+    .envelope-image { width: calc(var(--play-card-w, 50px) + 8px); height: calc(var(--play-card-h, 74px) + 8px); }
+    .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-10px) rotate(-15deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-15px) rotate(12deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-20px) rotate(-8deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-3 { transform: translateY(-25px) rotate(18deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-4 { transform: translateY(-30px) rotate(-22deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-5 { transform: translateY(-35px) rotate(6deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-6 { transform: translateY(-40px) rotate(-14deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-7 { transform: translateY(-45px) rotate(20deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-8 { transform: translateY(-50px) rotate(-10deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-9 { transform: translateY(-55px) rotate(16deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-10 { transform: translateY(-60px) rotate(-25deg) scale(1.0) !important; }
+}
+/* Larger screens: increase discard pile size */
+@media (min-width: 768px) {
+    .cards-area { margin: 24px 0 0; }
+    .cards-row { gap: 100px; }
+    .envelope-image { width: calc(var(--play-card-w, 64px) + 8px); height: calc(var(--play-card-h, 92px) + 8px); }
+    .card-stack.discard .stack-card { transform: translateY(16px) scale(1.6); transform-origin: 50% 100%; }
+    .card-stack.discard .stack-card:nth-child(1) { transform: translate(0, 16px) rotate(2deg) scale(1.6); }
+    .card-stack.discard .stack-card:nth-child(2) { transform: translate(3px, 20px) rotate(-1deg) scale(1.6); }
+    .card-stack.discard .stack-card:nth-child(3) { transform: translate(-2px, 24px) rotate(3deg) scale(1.6); }
+    .role-envelope { transform: translate(16px, 16px) scale(1.6) rotate(-2deg); }
+    .role-envelope:hover { transform: translate(16px, 16px) scale(1.68) rotate(-2deg); }
+    .role-envelope:active { transform: translate(16px, 16px) scale(1.568) rotate(-2deg); }
+    .card-stack.discard .stack-card.policy-on-discard { transform: translateY(-16px) rotate(-15deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-top { transform: translateY(-24px) rotate(12deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-2 { transform: translateY(-32px) rotate(-8deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-3 { transform: translateY(-40px) rotate(18deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-4 { transform: translateY(-48px) rotate(-22deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-5 { transform: translateY(-56px) rotate(6deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-6 { transform: translateY(-64px) rotate(-14deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-7 { transform: translateY(-72px) rotate(20deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-8 { transform: translateY(-80px) rotate(-10deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-9 { transform: translateY(-88px) rotate(16deg) scale(1.0) !important; }
+    .card-stack.discard .stack-card.policy-on-discard-10 { transform: translateY(-96px) rotate(-25deg) scale(1.0) !important; }
+}
+/* Preloader overlay */
+.preloader-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
+.preloader-overlay .loader { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.preloader-overlay .spinner { width: 56px; height: 56px; border: 6px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+.preloader-overlay .loader-text { color: #fff; font-weight: 800; letter-spacing: 0.03em; }
+@keyframes spin { to { transform: rotate(360deg); } }son">
