@@ -140,7 +140,7 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
     console.log(`🎯 Updating fascist slots for player count: ${playerCount}`);
     console.log(`📊 Container has ${containerEl.children.length} slots total`);
     
-    // Clear any existing overlays in slots 1-3 first (from ALL slots, filled or not)
+    // Clear any existing overlays AND CSS module classes in slots 1-3 first (from ALL slots, filled or not)
     for (let i = 0; i < 3; i++) {
         const slot = containerEl.children[i];
         if (slot) {
@@ -150,6 +150,19 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
                 console.log(`🧹 Clearing ${existingOverlays.length} existing overlays from slot ${i + 1} (filled: ${slot.classList.contains('filled')})`);
                 existingOverlays.forEach(overlay => overlay.remove());
             }
+            
+            // Remove CSS module classes that force background images
+            const moduleClasses = ['trio-cards-eye-module', 'custom-module', 'has-president-overlay'];
+            let removedClasses = [];
+            moduleClasses.forEach(className => {
+                if (slot.classList.contains(className)) {
+                    slot.classList.remove(className);
+                    removedClasses.push(className);
+                }
+            });
+            if (removedClasses.length > 0) {
+                console.log(`🧹 Removed CSS classes from slot ${i + 1}: ${removedClasses.join(', ')}`);
+            }
         }
     }
     
@@ -157,7 +170,11 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
     if (playerCount >= 5 && playerCount <= 6) {
         // 5-6 players: Slot 3 gets trio-cards-eye
         console.log('🔧 Applying 5-6 player configuration...');
-        addTrioCardsEyeToSlot(containerEl.children[2]); // Slot 3 (index 2)
+        const slot3 = containerEl.children[2];
+        if (slot3) {
+            slot3.classList.add('trio-cards-eye-module'); // Add CSS class for background image
+            addTrioCardsEyeToSlot(slot3); // Add JavaScript overlay
+        }
         console.log('✅ 5-6 player configuration: Slot 3 = trio-cards-eye');
         
     } else if (playerCount >= 7 && playerCount <= 8) {
@@ -279,6 +296,7 @@ function addPresidentToSlot(slot) {
     
     overlay.appendChild(img);
     slot.appendChild(overlay);
+    slot.classList.add('has-president-overlay'); // Prevents trio-cards-eye CSS from showing
     console.log('👑 President overlay added to fascist slot');
 }
 
