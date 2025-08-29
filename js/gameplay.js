@@ -140,14 +140,14 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
     console.log(`🎯 Updating fascist slots for player count: ${playerCount}`);
     console.log(`📊 Container has ${containerEl.children.length} slots total`);
     
-    // Clear any existing overlays in slots 1-3 first
+    // Clear any existing overlays in slots 1-3 first (from ALL slots, filled or not)
     for (let i = 0; i < 3; i++) {
         const slot = containerEl.children[i];
-        if (slot && !slot.classList.contains('filled')) {
-            // Remove existing overlays
+        if (slot) {
+            // Remove existing overlays from all slots, regardless of filled status
             const existingOverlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-overlay, .trio-cards-eye-overlay');
             if (existingOverlays.length > 0) {
-                console.log(`🧹 Clearing ${existingOverlays.length} existing overlays from slot ${i + 1}`);
+                console.log(`🧹 Clearing ${existingOverlays.length} existing overlays from slot ${i + 1} (filled: ${slot.classList.contains('filled')})`);
                 existingOverlays.forEach(overlay => overlay.remove());
             }
         }
@@ -217,7 +217,7 @@ function addEyeglassToSlot(slot) {
         width: 32px;
         height: auto;
         pointer-events: none;
-        z-index: 15;
+        z-index: 20;
         opacity: 1.0;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     `;
@@ -263,7 +263,7 @@ function addPresidentToSlot(slot) {
         width: 32px;
         height: auto;
         pointer-events: none;
-        z-index: 15;
+        z-index: 20;
         opacity: 1.0;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     `;
@@ -298,7 +298,7 @@ function addTrioCardsEyeToSlot(slot) {
             width: 36.4px;
             height: auto;
             pointer-events: none;
-            z-index: 15;
+            z-index: 20;
             opacity: 1.0;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         `;
@@ -441,7 +441,7 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 width: 28px;
                 height: auto;
                 pointer-events: none;
-                z-index: 15;
+                z-index: 20;
                 opacity: 1.0;
             `;
             bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
@@ -487,7 +487,7 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 width: 28px;
                 height: auto;
                 pointer-events: none;
-                z-index: 15;
+                z-index: 20;
                 opacity: 1.0;
             `;
             bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
@@ -621,28 +621,461 @@ function handleSuperpowerActivation(superpowerType) {
     }
 }
 
-function handlePolicyPeek() {
-    setStatus(getGameId(), 'Policy Peek: Examining the top 3 policy cards...');
-    // TODO: Implement policy peek logic
+async function handlePolicyPeek() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame) {
+        console.error('❌ Cannot perform Policy Peek: No game found');
+        return;
+    }
+    
+    setStatus(gameId, 'Policy Peek: Examining the top 3 policy cards...');
     console.log('🔍 Policy Peek activated - showing top 3 cards to president');
+    
+    try {
+        // Create modal to show the top 3 cards
+        const modal = document.createElement('div');
+        modal.id = 'policy-peek-modal';
+        modal.className = 'modal-overlay policy-peek-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🔍 Policy Peek</div>
+                    <div class="modal-subtitle">Top 3 Policy Cards</div>
+                </div>
+                <div class="modal-body">
+                    <div class="policy-peek-cards">
+                        <div class="peek-card"><div class="policy-card liberal">Liberal</div></div>
+                        <div class="peek-card"><div class="policy-card fascist">Fascist</div></div>
+                        <div class="peek-card"><div class="policy-card fascist">Fascist</div></div>
+                    </div>
+                    <div class="peek-instructions">
+                        <p>These are the next 3 policy cards. They remain in the same order.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="policy-peek-done" class="btn btn-primary">Done</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle completion
+        document.getElementById('policy-peek-done').addEventListener('click', async () => {
+            modal.remove();
+            await completeSuperpower(gameId, 'policy_peek');
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+        // Log the superpower usage
+        await logPublic(gameId, 'President used Policy Peek power', {
+            type: 'superpower_used',
+            superpowerType: 'policy_peek',
+            actorId: latestGame.currentPresidentPlayerId
+        });
+        
+    } catch (error) {
+        console.error('❌ Policy Peek failed:', error);
+        setStatus(gameId, 'Policy Peek failed. Please try again.');
+    }
 }
 
-function handleInvestigation() {
-    setStatus(getGameId(), 'Investigation: President is investigating a player...');
-    // TODO: Implement investigation logic  
+async function handleInvestigation() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame || !latestPlayers) {
+        console.error('❌ Cannot perform Investigation: No game or players found');
+        return;
+    }
+    
+    setStatus(gameId, 'Investigation: President is choosing a player to investigate...');
     console.log('🔍 Investigation activated - president investigating player loyalty');
+    
+    try {
+        const youId = computeYouId(gameId);
+        
+        // Get eligible players (everyone except president and previously investigated)
+        const eligiblePlayers = latestPlayers.filter(p => 
+            p.id !== latestGame.currentPresidentPlayerId && 
+            !p.investigated
+        );
+        
+        if (eligiblePlayers.length === 0) {
+            setStatus(gameId, 'No players available to investigate');
+            await completeSuperpower(gameId, 'investigation');
+            return;
+        }
+        
+        // Create player selection modal
+        const modal = document.createElement('div');
+        modal.id = 'investigation-modal';
+        modal.className = 'modal-overlay investigation-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🔍 Investigation</div>
+                    <div class="modal-subtitle">Choose a player to investigate</div>
+                </div>
+                <div class="modal-body">
+                    <div class="investigation-players">
+                        ${eligiblePlayers.map(player => `
+                            <button class="investigation-player-btn" data-player-id="${player.id}">
+                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="investigation-note">
+                        <p>You will see this player's party membership (Liberal or Fascist).</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle player selection
+        modal.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('investigation-player-btn') || e.target.closest('.investigation-player-btn')) {
+                const btn = e.target.classList.contains('investigation-player-btn') ? e.target : e.target.closest('.investigation-player-btn');
+                const targetPlayerId = btn.dataset.playerId;
+                const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
+                
+                if (!targetPlayer) return;
+                
+                modal.remove();
+                await performInvestigation(gameId, targetPlayer);
+            }
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+    } catch (error) {
+        console.error('❌ Investigation failed:', error);
+        setStatus(gameId, 'Investigation failed. Please try again.');
+    }
 }
 
-function handleSpecialElection() {
-    setStatus(getGameId(), 'Special Election: President is choosing the next candidate...');
-    // TODO: Implement special election logic
+async function handleSpecialElection() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame || !latestPlayers) {
+        console.error('❌ Cannot perform Special Election: No game or players found');
+        return;
+    }
+    
+    setStatus(gameId, 'Special Election: President is choosing the next presidential candidate...');
     console.log('🗳️ Special Election activated - president choosing next presidential candidate');
+    
+    try {
+        const youId = computeYouId(gameId);
+        
+        // Get eligible players (everyone except current president)
+        const eligiblePlayers = latestPlayers.filter(p => 
+            p.id !== latestGame.currentPresidentPlayerId
+        );
+        
+        if (eligiblePlayers.length === 0) {
+            setStatus(gameId, 'No players available for special election');
+            await completeSuperpower(gameId, 'special_election');
+            return;
+        }
+        
+        // Create player selection modal
+        const modal = document.createElement('div');
+        modal.id = 'special-election-modal';
+        modal.className = 'modal-overlay special-election-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🗳️ Special Election</div>
+                    <div class="modal-subtitle">Choose the next Presidential candidate</div>
+                </div>
+                <div class="modal-body">
+                    <div class="special-election-players">
+                        ${eligiblePlayers.map(player => `
+                            <button class="special-election-player-btn" data-player-id="${player.id}">
+                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="special-election-note">
+                        <p>This player will become the next Presidential candidate, bypassing normal turn order.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle player selection
+        modal.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('special-election-player-btn') || e.target.closest('.special-election-player-btn')) {
+                const btn = e.target.classList.contains('special-election-player-btn') ? e.target : e.target.closest('.special-election-player-btn');
+                const targetPlayerId = btn.dataset.playerId;
+                const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
+                
+                if (!targetPlayer) return;
+                
+                modal.remove();
+                await performSpecialElection(gameId, targetPlayer);
+            }
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+    } catch (error) {
+        console.error('❌ Special Election failed:', error);
+        setStatus(gameId, 'Special Election failed. Please try again.');
+    }
 }
 
-function handleExecution() {
-    setStatus(getGameId(), 'Execution: President is choosing a player to execute...');
-    // TODO: Implement execution logic
+async function handleExecution() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame || !latestPlayers) {
+        console.error('❌ Cannot perform Execution: No game or players found');
+        return;
+    }
+    
+    setStatus(gameId, 'Execution: President is choosing a player to execute...');
     console.log('💀 Execution activated - president executing a player');
+    
+    try {
+        const youId = computeYouId(gameId);
+        
+        // Get eligible players (everyone except president)
+        const eligiblePlayers = latestPlayers.filter(p => 
+            p.id !== latestGame.currentPresidentPlayerId
+        );
+        
+        if (eligiblePlayers.length === 0) {
+            setStatus(gameId, 'No players available to execute');
+            await completeSuperpower(gameId, 'execution');
+            return;
+        }
+        
+        // Create player selection modal with warning
+        const modal = document.createElement('div');
+        modal.id = 'execution-modal';
+        modal.className = 'modal-overlay execution-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">💀 Execution</div>
+                    <div class="modal-subtitle">Choose a player to execute</div>
+                </div>
+                <div class="modal-body">
+                    <div class="execution-warning">
+                        <div class="warning-icon">⚠️</div>
+                        <p><strong>Warning:</strong> If you execute Hitler, Liberals win immediately!</p>
+                    </div>
+                    <div class="execution-players">
+                        ${eligiblePlayers.map(player => `
+                            <button class="execution-player-btn" data-player-id="${player.id}">
+                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="execution-note">
+                        <p>The executed player will be removed from the game permanently.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle player selection
+        modal.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('execution-player-btn') || e.target.closest('.execution-player-btn')) {
+                const btn = e.target.classList.contains('execution-player-btn') ? e.target : e.target.closest('.execution-player-btn');
+                const targetPlayerId = btn.dataset.playerId;
+                const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
+                
+                if (!targetPlayer) return;
+                
+                modal.remove();
+                await performExecution(gameId, targetPlayer);
+            }
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+    } catch (error) {
+        console.error('❌ Execution failed:', error);
+        setStatus(gameId, 'Execution failed. Please try again.');
+    }
+}
+
+// Helper function to complete a superpower and clear pending state
+async function completeSuperpower(gameId, superpowerType) {
+    try {
+        const gameRef = doc(db, 'games', gameId);
+        await updateDoc(gameRef, {
+            pendingSuperpower: null,
+            updatedAt: serverTimestamp()
+        });
+        
+        console.log(`✅ Superpower ${superpowerType} completed and cleared from pending state`);
+        setStatus(gameId, `${superpowerType.replace('_', ' ')} power completed.`);
+    } catch (error) {
+        console.error('❌ Failed to complete superpower:', error);
+    }
+}
+
+// Helper function to perform investigation and show result
+async function performInvestigation(gameId, targetPlayer) {
+    try {
+        // Mark player as investigated
+        const playerRef = doc(db, 'games', gameId, 'players', targetPlayer.id);
+        await updateDoc(playerRef, {
+            investigated: true,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Show investigation result to president
+        const membership = targetPlayer.membership || 'Liberal'; // Default to Liberal if not set
+        
+        const resultModal = document.createElement('div');
+        resultModal.id = 'investigation-result-modal';
+        resultModal.className = 'modal-overlay investigation-result-modal';
+        resultModal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🔍 Investigation Result</div>
+                    <div class="modal-subtitle">Player: ${targetPlayer.name || 'Unnamed Player'}</div>
+                </div>
+                <div class="modal-body">
+                    <div class="investigation-result">
+                        <div class="membership-reveal ${membership.toLowerCase()}">
+                            <div class="membership-icon">${membership === 'Liberal' ? '🟦' : '🟥'}</div>
+                            <div class="membership-text">${membership}</div>
+                        </div>
+                    </div>
+                    <div class="investigation-instructions">
+                        <p>You may share this information (or lie about it) with other players.</p>
+                        <p>This player cannot be investigated again.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="investigation-result-done" class="btn btn-primary">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(resultModal);
+        
+        document.getElementById('investigation-result-done').addEventListener('click', () => {
+            resultModal.remove();
+        });
+        
+        requestAnimationFrame(() => {
+            resultModal.style.display = 'flex';
+        });
+        
+        // Log the investigation
+        await logPublic(gameId, `President investigated ${targetPlayer.name || 'a player'}`, {
+            type: 'superpower_used',
+            superpowerType: 'investigation',
+            actorId: latestGame.currentPresidentPlayerId,
+            targetId: targetPlayer.id
+        });
+        
+        await completeSuperpower(gameId, 'investigation');
+        
+    } catch (error) {
+        console.error('❌ Investigation failed:', error);
+        setStatus(gameId, 'Investigation failed. Please try again.');
+    }
+}
+
+// Helper function to perform special election
+async function performSpecialElection(gameId, targetPlayer) {
+    try {
+        const gameRef = doc(db, 'games', gameId);
+        await updateDoc(gameRef, {
+            specialElectionCandidate: targetPlayer.id,
+            nextPresidentPlayerId: targetPlayer.id,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Log the special election
+        await logPublic(gameId, `President chose ${targetPlayer.name || 'a player'} as the next Presidential candidate`, {
+            type: 'superpower_used',
+            superpowerType: 'special_election',
+            actorId: latestGame.currentPresidentPlayerId,
+            targetId: targetPlayer.id
+        });
+        
+        setStatus(gameId, `Special Election: ${targetPlayer.name || 'Player'} will be the next Presidential candidate.`);
+        await completeSuperpower(gameId, 'special_election');
+        
+    } catch (error) {
+        console.error('❌ Special Election failed:', error);
+        setStatus(gameId, 'Special Election failed. Please try again.');
+    }
+}
+
+// Helper function to perform execution
+async function performExecution(gameId, targetPlayer) {
+    try {
+        // Check if target is Hitler - this ends the game with Liberal victory
+        if (targetPlayer.secretRole === 'hitler') {
+            const gameRef = doc(db, 'games', gameId);
+            await updateDoc(gameRef, {
+                gamePhase: 'ended',
+                winner: 'liberal',
+                winCondition: 'hitler_executed',
+                endedAt: serverTimestamp(),
+                pendingSuperpower: null,
+                updatedAt: serverTimestamp()
+            });
+            
+            // Log Hitler execution and game end
+            await logPublic(gameId, `🎯 President executed Hitler! Liberals win!`, {
+                type: 'game_end',
+                winner: 'liberal',
+                winCondition: 'hitler_executed',
+                executedPlayerId: targetPlayer.id
+            });
+            
+            setStatus(gameId, '🎯 Hitler has been executed! Liberals win the game!');
+            return;
+        }
+        
+        // Mark player as executed (remove from game)
+        const playerRef = doc(db, 'games', gameId, 'players', targetPlayer.id);
+        await updateDoc(playerRef, {
+            executed: true,
+            alive: false,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Log the execution
+        await logPublic(gameId, `💀 President executed ${targetPlayer.name || 'a player'}`, {
+            type: 'superpower_used',
+            superpowerType: 'execution',
+            actorId: latestGame.currentPresidentPlayerId,
+            targetId: targetPlayer.id
+        });
+        
+        setStatus(gameId, `💀 ${targetPlayer.name || 'Player'} has been executed and removed from the game.`);
+        await completeSuperpower(gameId, 'execution');
+        
+    } catch (error) {
+        console.error('❌ Execution failed:', error);
+        setStatus(gameId, 'Execution failed. Please try again.');
+    }
 }
 
 function updateFromGame(game) {
