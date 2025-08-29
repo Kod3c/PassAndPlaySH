@@ -146,23 +146,13 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
         if (slot) {
             // Remove existing overlays from all slots, regardless of filled status
             const existingOverlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-overlay, .trio-cards-eye-overlay');
-            if (existingOverlays.length > 0) {
-                console.log(`🧹 Clearing ${existingOverlays.length} existing overlays from slot ${i + 1} (filled: ${slot.classList.contains('filled')})`);
-                existingOverlays.forEach(overlay => overlay.remove());
-            }
+            existingOverlays.forEach(overlay => overlay.remove());
             
             // Remove CSS module classes that force background images
             const moduleClasses = ['trio-cards-eye-module', 'custom-module', 'has-president-overlay'];
-            let removedClasses = [];
             moduleClasses.forEach(className => {
-                if (slot.classList.contains(className)) {
-                    slot.classList.remove(className);
-                    removedClasses.push(className);
-                }
+                slot.classList.remove(className);
             });
-            if (removedClasses.length > 0) {
-                console.log(`🧹 Removed CSS classes from slot ${i + 1}: ${removedClasses.join(', ')}`);
-            }
         }
     }
     
@@ -194,16 +184,6 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
         
     } else {
         console.warn(`⚠️ Unhandled player count: ${playerCount}. No slot configuration applied.`);
-    }
-    
-    // Log final state for debugging
-    for (let i = 0; i < 3; i++) {
-        const slot = containerEl.children[i];
-        if (slot) {
-            const overlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-eye-overlay');
-            const overlayTypes = Array.from(overlays).map(o => o.className.replace('-overlay', '')).join(', ');
-            console.log(`🔍 Slot ${i + 1} final state: ${overlayTypes || 'no overlays'}`);
-        }
     }
 }
 
@@ -296,7 +276,7 @@ function addPresidentToSlot(slot) {
     
     overlay.appendChild(img);
     slot.appendChild(overlay);
-    slot.classList.add('has-president-overlay'); // Prevents trio-cards-eye CSS from showing
+    slot.classList.add('has-president-overlay');
     console.log('👑 President overlay added to fascist slot');
 }
 
@@ -406,29 +386,7 @@ function addBulletOverlaysToFascistSlots(containerEl) {
         }
     }
     
-    // Add trio-cards to slot 3 (index 2) on top of skull background
-    const thirdSlot = containerEl.children[2]; // Index 2 = 3rd slot
-    if (thirdSlot && !thirdSlot.classList.contains('filled')) {
-        const existingTrioCards = thirdSlot.querySelector('.trio-cards-overlay');
-        if (!existingTrioCards) {
-            const trioCardsOverlay = document.createElement('div');
-            trioCardsOverlay.className = 'trio-cards-overlay';
-            trioCardsOverlay.style.cssText = `
-                position: absolute;
-                top: 55%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 36.4px;
-                height: auto;
-                pointer-events: none;
-                z-index: 15;
-                opacity: 1.0;
-            `;
-            trioCardsOverlay.innerHTML = '<img src="../images/trio-cards.png" alt="Trio Cards" style="width: 100%; height: auto;">';
-            thirdSlot.appendChild(trioCardsOverlay);
-            console.log('Trio cards overlay added to 3rd fascist slot');
-        }
-    }
+    // Note: Trio-cards overlays are now handled by player-count-specific logic
     
     const fourthSlot = containerEl.children[3]; // Index 3 = 4th slot
     const fifthSlot = containerEl.children[4]; // Index 4 = 5th slot
