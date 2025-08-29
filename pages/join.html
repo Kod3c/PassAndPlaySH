@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="../styles/app.css">
     <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#101820">
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="icon" href="../icons/favicon.ico">
     <script src="../js/theme.js"></script>
     <script src="https://www.google.com/recaptcha/api.js?render=6Lf5TrUrAAAAAGYRvnOM3iYMhMSABS1ndvIb5CGO" async defer></script>
     <style>
@@ -177,12 +181,6 @@
             let claimedPlayerId = null;
             for (const d of snap.docs) {
                 const data = d.data() || {};
-                
-                // Add PIN validation here - if player has a PIN, it must match
-                if (data.pin && data.pin !== pin) {
-                    throw new Error('Incorrect PIN for this player name');
-                }
-                
                 if (data.uid === uid) {
                     // Update existing claim with new PIN and timestamp
                     await updateDoc(d.ref, { 

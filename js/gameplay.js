@@ -140,16 +140,19 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
     console.log(`🎯 Updating fascist slots for player count: ${playerCount}`);
     console.log(`📊 Container has ${containerEl.children.length} slots total`);
     
-    // Clear any existing overlays in slots 1-3 first
+    // Clear any existing overlays AND CSS module classes in slots 1-3 first (from ALL slots, filled or not)
     for (let i = 0; i < 3; i++) {
         const slot = containerEl.children[i];
-        if (slot && !slot.classList.contains('filled')) {
-            // Remove existing overlays
+        if (slot) {
+            // Remove existing overlays from all slots, regardless of filled status
             const existingOverlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-overlay, .trio-cards-eye-overlay');
-            if (existingOverlays.length > 0) {
-                console.log(`🧹 Clearing ${existingOverlays.length} existing overlays from slot ${i + 1}`);
-                existingOverlays.forEach(overlay => overlay.remove());
-            }
+            existingOverlays.forEach(overlay => overlay.remove());
+            
+            // Remove CSS module classes that force background images
+            const moduleClasses = ['trio-cards-eye-module', 'custom-module', 'has-president-overlay'];
+            moduleClasses.forEach(className => {
+                slot.classList.remove(className);
+            });
         }
     }
     
@@ -157,7 +160,11 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
     if (playerCount >= 5 && playerCount <= 6) {
         // 5-6 players: Slot 3 gets trio-cards-eye
         console.log('🔧 Applying 5-6 player configuration...');
-        addTrioCardsEyeToSlot(containerEl.children[2]); // Slot 3 (index 2)
+        const slot3 = containerEl.children[2];
+        if (slot3) {
+            slot3.classList.add('trio-cards-eye-module'); // Add CSS class for background image
+            addTrioCardsEyeToSlot(slot3); // Add JavaScript overlay
+        }
         console.log('✅ 5-6 player configuration: Slot 3 = trio-cards-eye');
         
     } else if (playerCount >= 7 && playerCount <= 8) {
@@ -177,16 +184,6 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
         
     } else {
         console.warn(`⚠️ Unhandled player count: ${playerCount}. No slot configuration applied.`);
-    }
-    
-    // Log final state for debugging
-    for (let i = 0; i < 3; i++) {
-        const slot = containerEl.children[i];
-        if (slot) {
-            const overlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-eye-overlay');
-            const overlayTypes = Array.from(overlays).map(o => o.className.replace('-overlay', '')).join(', ');
-            console.log(`🔍 Slot ${i + 1} final state: ${overlayTypes || 'no overlays'}`);
-        }
     }
 }
 
@@ -217,7 +214,7 @@ function addEyeglassToSlot(slot) {
         width: 32px;
         height: auto;
         pointer-events: none;
-        z-index: 15;
+        z-index: 20;
         opacity: 1.0;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     `;
@@ -263,7 +260,7 @@ function addPresidentToSlot(slot) {
         width: 32px;
         height: auto;
         pointer-events: none;
-        z-index: 15;
+        z-index: 20;
         opacity: 1.0;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     `;
@@ -279,6 +276,7 @@ function addPresidentToSlot(slot) {
     
     overlay.appendChild(img);
     slot.appendChild(overlay);
+    slot.classList.add('has-president-overlay');
     console.log('👑 President overlay added to fascist slot');
 }
 
@@ -298,7 +296,7 @@ function addTrioCardsEyeToSlot(slot) {
             width: 36.4px;
             height: auto;
             pointer-events: none;
-            z-index: 15;
+            z-index: 20;
             opacity: 1.0;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         `;
@@ -388,16 +386,7 @@ function addBulletOverlaysToFascistSlots(containerEl) {
         }
     }
     
-    // Dynamic slot configuration is now handled by updateFascistSlotsForPlayerCount()
-    // Remove the old trio-cards overlay to prevent conflicts
-    const thirdSlot = containerEl.children[2]; // Index 2 = 3rd slot
-    if (thirdSlot) {
-        const existingTrioCards = thirdSlot.querySelector('.trio-cards-overlay');
-        if (existingTrioCards) {
-            existingTrioCards.remove();
-            console.log('🧹 Removed old trio-cards overlay to prevent conflicts');
-        }
-    }
+    // Note: Trio-cards overlays are now handled by player-count-specific logic
     
     const fourthSlot = containerEl.children[3]; // Index 3 = 4th slot
     const fifthSlot = containerEl.children[4]; // Index 4 = 5th slot
@@ -441,7 +430,7 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 width: 28px;
                 height: auto;
                 pointer-events: none;
-                z-index: 15;
+                z-index: 20;
                 opacity: 1.0;
             `;
             bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
@@ -487,13 +476,594 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 width: 28px;
                 height: auto;
                 pointer-events: none;
-                z-index: 15;
+                z-index: 20;
                 opacity: 1.0;
             `;
             bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
             fifthSlot.appendChild(bulletOverlay);
             console.log('Bullet overlay added to 5th fascist slot');
         }
+    }
+}
+
+// Superpower system functions
+function getSuperpowerForSlot(fascistPolicyCount, playerCount) {
+    const superpowers = {
+        5: { // 5-6 players
+            3: { name: 'Policy Peek', type: 'policy_peek', description: 'President examines the top 3 policy cards' },
+            4: { name: 'Execution', type: 'execution', description: 'President executes a player' },
+            5: { name: 'Execution', type: 'execution', description: 'President executes a player' }
+        },
+        7: { // 7-8 players  
+            2: { name: 'Investigation', type: 'investigation', description: 'President investigates a player\'s loyalty' },
+            3: { name: 'Special Election', type: 'special_election', description: 'President picks the next Presidential candidate' },
+            4: { name: 'Execution', type: 'execution', description: 'President executes a player' },
+            5: { name: 'Execution', type: 'execution', description: 'President executes a player' }
+        },
+        9: { // 9-10 players
+            1: { name: 'Investigation', type: 'investigation', description: 'President investigates a player\'s loyalty' },
+            2: { name: 'Investigation', type: 'investigation', description: 'President investigates a player\'s loyalty' },
+            3: { name: 'Special Election', type: 'special_election', description: 'President picks the next Presidential candidate' },
+            4: { name: 'Execution', type: 'execution', description: 'President executes a player' },
+            5: { name: 'Execution', type: 'execution', description: 'President executes a player' }
+        }
+    };
+
+    // Determine superpower config based on player count
+    let config;
+    if (playerCount <= 6) {
+        config = superpowers[5];
+    } else if (playerCount <= 8) {
+        config = superpowers[7];
+    } else {
+        config = superpowers[9];
+    }
+
+    return config[fascistPolicyCount] || null;
+}
+
+async function triggerSuperpowerUI(gameId, superpower, fascistSlot) {
+    console.log(`🎯 Triggering superpower UI for: ${superpower.name}`);
+    
+    // Update game state to indicate superpower is pending
+    const gameRef = doc(db, 'games', gameId);
+    await updateDoc(gameRef, {
+        pendingSuperpower: {
+            type: superpower.type,
+            name: superpower.name,
+            description: superpower.description,
+            slot: fascistSlot,
+            activatedAt: serverTimestamp()
+        },
+        updatedAt: serverTimestamp()
+    });
+
+    // Show superpower modal to the president
+    showSuperpowerModal(superpower, fascistSlot);
+}
+
+function showSuperpowerModal(superpower, fascistSlot) {
+    // Check if user is the current president
+    const youId = computeYouId(getGameId());
+    const isPresident = latestGame && latestGame.currentPresidentPlayerId === youId;
+    
+    if (!isPresident) {
+        // Show notification for non-president players
+        setStatus(getGameId(), `${superpower.name} activated! President must use this power.`);
+        return;
+    }
+
+    // Create modal for president
+    const modal = document.createElement('div');
+    modal.id = 'superpower-modal';
+    modal.className = 'modal-overlay superpower-modal';
+    modal.innerHTML = `
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">🦸‍♂️ Executive Power Activated</div>
+                <div class="modal-subtitle">Fascist Policy ${fascistSlot}</div>
+            </div>
+            <div class="modal-body">
+                <div class="superpower-info">
+                    <div class="superpower-name">${superpower.name}</div>
+                    <div class="superpower-description">${superpower.description}</div>
+                </div>
+                <div class="superpower-actions">
+                    <button id="activate-superpower-btn" class="btn btn-primary">Activate Power</button>
+                    <div class="superpower-note">You must use this power before the next government</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle activation
+    const activateBtn = document.getElementById('activate-superpower-btn');
+    activateBtn.addEventListener('click', () => {
+        handleSuperpowerActivation(superpower.type);
+        modal.remove();
+    });
+
+    // Show modal
+    requestAnimationFrame(() => {
+        modal.style.display = 'flex';
+    });
+}
+
+function handleSuperpowerActivation(superpowerType) {
+    switch (superpowerType) {
+        case 'policy_peek':
+            handlePolicyPeek();
+            break;
+        case 'investigation':
+            handleInvestigation();
+            break;
+        case 'special_election':
+            handleSpecialElection();
+            break;
+        case 'execution':
+            handleExecution();
+            break;
+        default:
+            console.error('Unknown superpower type:', superpowerType);
+    }
+}
+
+async function handlePolicyPeek() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame) {
+        console.error('❌ Cannot perform Policy Peek: No game found');
+        return;
+    }
+    
+    setStatus(gameId, 'Policy Peek: Examining the top 3 policy cards...');
+    console.log('🔍 Policy Peek activated - showing top 3 cards to president');
+    
+    try {
+        // Create modal to show the top 3 cards
+        const modal = document.createElement('div');
+        modal.id = 'policy-peek-modal';
+        modal.className = 'modal-overlay policy-peek-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🔍 Policy Peek</div>
+                    <div class="modal-subtitle">Top 3 Policy Cards</div>
+                </div>
+                <div class="modal-body">
+                    <div class="policy-peek-cards">
+                        <div class="peek-card"><div class="policy-card liberal">Liberal</div></div>
+                        <div class="peek-card"><div class="policy-card fascist">Fascist</div></div>
+                        <div class="peek-card"><div class="policy-card fascist">Fascist</div></div>
+                    </div>
+                    <div class="peek-instructions">
+                        <p>These are the next 3 policy cards. They remain in the same order.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="policy-peek-done" class="btn btn-primary">Done</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle completion
+        document.getElementById('policy-peek-done').addEventListener('click', async () => {
+            modal.remove();
+            await completeSuperpower(gameId, 'policy_peek');
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+        // Log the superpower usage
+        await logPublic(gameId, 'President used Policy Peek power', {
+            type: 'superpower_used',
+            superpowerType: 'policy_peek',
+            actorId: latestGame.currentPresidentPlayerId
+        });
+        
+    } catch (error) {
+        console.error('❌ Policy Peek failed:', error);
+        setStatus(gameId, 'Policy Peek failed. Please try again.');
+    }
+}
+
+async function handleInvestigation() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame || !latestPlayers) {
+        console.error('❌ Cannot perform Investigation: No game or players found');
+        return;
+    }
+    
+    setStatus(gameId, 'Investigation: President is choosing a player to investigate...');
+    console.log('🔍 Investigation activated - president investigating player loyalty');
+    
+    try {
+        const youId = computeYouId(gameId);
+        
+        // Get eligible players (everyone except president and previously investigated)
+        const eligiblePlayers = latestPlayers.filter(p => 
+            p.id !== latestGame.currentPresidentPlayerId && 
+            !p.investigated
+        );
+        
+        if (eligiblePlayers.length === 0) {
+            setStatus(gameId, 'No players available to investigate');
+            await completeSuperpower(gameId, 'investigation');
+            return;
+        }
+        
+        // Create player selection modal
+        const modal = document.createElement('div');
+        modal.id = 'investigation-modal';
+        modal.className = 'modal-overlay investigation-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🔍 Investigation</div>
+                    <div class="modal-subtitle">Choose a player to investigate</div>
+                </div>
+                <div class="modal-body">
+                    <div class="investigation-players">
+                        ${eligiblePlayers.map(player => `
+                            <button class="investigation-player-btn" data-player-id="${player.id}">
+                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="investigation-note">
+                        <p>You will see this player's party membership (Liberal or Fascist).</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle player selection
+        modal.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('investigation-player-btn') || e.target.closest('.investigation-player-btn')) {
+                const btn = e.target.classList.contains('investigation-player-btn') ? e.target : e.target.closest('.investigation-player-btn');
+                const targetPlayerId = btn.dataset.playerId;
+                const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
+                
+                if (!targetPlayer) return;
+                
+                modal.remove();
+                await performInvestigation(gameId, targetPlayer);
+            }
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+    } catch (error) {
+        console.error('❌ Investigation failed:', error);
+        setStatus(gameId, 'Investigation failed. Please try again.');
+    }
+}
+
+async function handleSpecialElection() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame || !latestPlayers) {
+        console.error('❌ Cannot perform Special Election: No game or players found');
+        return;
+    }
+    
+    setStatus(gameId, 'Special Election: President is choosing the next presidential candidate...');
+    console.log('🗳️ Special Election activated - president choosing next presidential candidate');
+    
+    try {
+        const youId = computeYouId(gameId);
+        
+        // Get eligible players (everyone except current president)
+        const eligiblePlayers = latestPlayers.filter(p => 
+            p.id !== latestGame.currentPresidentPlayerId
+        );
+        
+        if (eligiblePlayers.length === 0) {
+            setStatus(gameId, 'No players available for special election');
+            await completeSuperpower(gameId, 'special_election');
+            return;
+        }
+        
+        // Create player selection modal
+        const modal = document.createElement('div');
+        modal.id = 'special-election-modal';
+        modal.className = 'modal-overlay special-election-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🗳️ Special Election</div>
+                    <div class="modal-subtitle">Choose the next Presidential candidate</div>
+                </div>
+                <div class="modal-body">
+                    <div class="special-election-players">
+                        ${eligiblePlayers.map(player => `
+                            <button class="special-election-player-btn" data-player-id="${player.id}">
+                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="special-election-note">
+                        <p>This player will become the next Presidential candidate, bypassing normal turn order.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle player selection
+        modal.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('special-election-player-btn') || e.target.closest('.special-election-player-btn')) {
+                const btn = e.target.classList.contains('special-election-player-btn') ? e.target : e.target.closest('.special-election-player-btn');
+                const targetPlayerId = btn.dataset.playerId;
+                const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
+                
+                if (!targetPlayer) return;
+                
+                modal.remove();
+                await performSpecialElection(gameId, targetPlayer);
+            }
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+    } catch (error) {
+        console.error('❌ Special Election failed:', error);
+        setStatus(gameId, 'Special Election failed. Please try again.');
+    }
+}
+
+async function handleExecution() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame || !latestPlayers) {
+        console.error('❌ Cannot perform Execution: No game or players found');
+        return;
+    }
+    
+    setStatus(gameId, 'Execution: President is choosing a player to execute...');
+    console.log('💀 Execution activated - president executing a player');
+    
+    try {
+        const youId = computeYouId(gameId);
+        
+        // Get eligible players (everyone except president)
+        const eligiblePlayers = latestPlayers.filter(p => 
+            p.id !== latestGame.currentPresidentPlayerId
+        );
+        
+        if (eligiblePlayers.length === 0) {
+            setStatus(gameId, 'No players available to execute');
+            await completeSuperpower(gameId, 'execution');
+            return;
+        }
+        
+        // Create player selection modal with warning
+        const modal = document.createElement('div');
+        modal.id = 'execution-modal';
+        modal.className = 'modal-overlay execution-modal';
+        modal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">💀 Execution</div>
+                    <div class="modal-subtitle">Choose a player to execute</div>
+                </div>
+                <div class="modal-body">
+                    <div class="execution-warning">
+                        <div class="warning-icon">⚠️</div>
+                        <p><strong>Warning:</strong> If you execute Hitler, Liberals win immediately!</p>
+                    </div>
+                    <div class="execution-players">
+                        ${eligiblePlayers.map(player => `
+                            <button class="execution-player-btn" data-player-id="${player.id}">
+                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="execution-note">
+                        <p>The executed player will be removed from the game permanently.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Handle player selection
+        modal.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('execution-player-btn') || e.target.closest('.execution-player-btn')) {
+                const btn = e.target.classList.contains('execution-player-btn') ? e.target : e.target.closest('.execution-player-btn');
+                const targetPlayerId = btn.dataset.playerId;
+                const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
+                
+                if (!targetPlayer) return;
+                
+                modal.remove();
+                await performExecution(gameId, targetPlayer);
+            }
+        });
+        
+        // Show modal
+        requestAnimationFrame(() => {
+            modal.style.display = 'flex';
+        });
+        
+    } catch (error) {
+        console.error('❌ Execution failed:', error);
+        setStatus(gameId, 'Execution failed. Please try again.');
+    }
+}
+
+// Helper function to complete a superpower and clear pending state
+async function completeSuperpower(gameId, superpowerType) {
+    try {
+        const gameRef = doc(db, 'games', gameId);
+        await updateDoc(gameRef, {
+            pendingSuperpower: null,
+            updatedAt: serverTimestamp()
+        });
+        
+        console.log(`✅ Superpower ${superpowerType} completed and cleared from pending state`);
+        setStatus(gameId, `${superpowerType.replace('_', ' ')} power completed.`);
+    } catch (error) {
+        console.error('❌ Failed to complete superpower:', error);
+    }
+}
+
+// Helper function to perform investigation and show result
+async function performInvestigation(gameId, targetPlayer) {
+    try {
+        // Mark player as investigated
+        const playerRef = doc(db, 'games', gameId, 'players', targetPlayer.id);
+        await updateDoc(playerRef, {
+            investigated: true,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Show investigation result to president
+        const membership = targetPlayer.membership || 'Liberal'; // Default to Liberal if not set
+        
+        const resultModal = document.createElement('div');
+        resultModal.id = 'investigation-result-modal';
+        resultModal.className = 'modal-overlay investigation-result-modal';
+        resultModal.innerHTML = `
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🔍 Investigation Result</div>
+                    <div class="modal-subtitle">Player: ${targetPlayer.name || 'Unnamed Player'}</div>
+                </div>
+                <div class="modal-body">
+                    <div class="investigation-result">
+                        <div class="membership-reveal ${membership.toLowerCase()}">
+                            <div class="membership-icon">${membership === 'Liberal' ? '🟦' : '🟥'}</div>
+                            <div class="membership-text">${membership}</div>
+                        </div>
+                    </div>
+                    <div class="investigation-instructions">
+                        <p>You may share this information (or lie about it) with other players.</p>
+                        <p>This player cannot be investigated again.</p>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="investigation-result-done" class="btn btn-primary">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(resultModal);
+        
+        document.getElementById('investigation-result-done').addEventListener('click', () => {
+            resultModal.remove();
+        });
+        
+        requestAnimationFrame(() => {
+            resultModal.style.display = 'flex';
+        });
+        
+        // Log the investigation
+        await logPublic(gameId, `President investigated ${targetPlayer.name || 'a player'}`, {
+            type: 'superpower_used',
+            superpowerType: 'investigation',
+            actorId: latestGame.currentPresidentPlayerId,
+            targetId: targetPlayer.id
+        });
+        
+        await completeSuperpower(gameId, 'investigation');
+        
+    } catch (error) {
+        console.error('❌ Investigation failed:', error);
+        setStatus(gameId, 'Investigation failed. Please try again.');
+    }
+}
+
+// Helper function to perform special election
+async function performSpecialElection(gameId, targetPlayer) {
+    try {
+        const gameRef = doc(db, 'games', gameId);
+        await updateDoc(gameRef, {
+            specialElectionCandidate: targetPlayer.id,
+            nextPresidentPlayerId: targetPlayer.id,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Log the special election
+        await logPublic(gameId, `President chose ${targetPlayer.name || 'a player'} as the next Presidential candidate`, {
+            type: 'superpower_used',
+            superpowerType: 'special_election',
+            actorId: latestGame.currentPresidentPlayerId,
+            targetId: targetPlayer.id
+        });
+        
+        setStatus(gameId, `Special Election: ${targetPlayer.name || 'Player'} will be the next Presidential candidate.`);
+        await completeSuperpower(gameId, 'special_election');
+        
+    } catch (error) {
+        console.error('❌ Special Election failed:', error);
+        setStatus(gameId, 'Special Election failed. Please try again.');
+    }
+}
+
+// Helper function to perform execution
+async function performExecution(gameId, targetPlayer) {
+    try {
+        // Check if target is Hitler - this ends the game with Liberal victory
+        if (targetPlayer.secretRole === 'hitler') {
+            const gameRef = doc(db, 'games', gameId);
+            await updateDoc(gameRef, {
+                gamePhase: 'ended',
+                winner: 'liberal',
+                winCondition: 'hitler_executed',
+                endedAt: serverTimestamp(),
+                pendingSuperpower: null,
+                updatedAt: serverTimestamp()
+            });
+            
+            // Log Hitler execution and game end
+            await logPublic(gameId, `🎯 President executed Hitler! Liberals win!`, {
+                type: 'game_end',
+                winner: 'liberal',
+                winCondition: 'hitler_executed',
+                executedPlayerId: targetPlayer.id
+            });
+            
+            setStatus(gameId, '🎯 Hitler has been executed! Liberals win the game!');
+            return;
+        }
+        
+        // Mark player as executed (remove from game)
+        const playerRef = doc(db, 'games', gameId, 'players', targetPlayer.id);
+        await updateDoc(playerRef, {
+            executed: true,
+            alive: false,
+            updatedAt: serverTimestamp()
+        });
+        
+        // Log the execution
+        await logPublic(gameId, `💀 President executed ${targetPlayer.name || 'a player'}`, {
+            type: 'superpower_used',
+            superpowerType: 'execution',
+            actorId: latestGame.currentPresidentPlayerId,
+            targetId: targetPlayer.id
+        });
+        
+        setStatus(gameId, `💀 ${targetPlayer.name || 'Player'} has been executed and removed from the game.`);
+        await completeSuperpower(gameId, 'execution');
+        
+    } catch (error) {
+        console.error('❌ Execution failed:', error);
+        setStatus(gameId, 'Execution failed. Please try again.');
     }
 }
 
@@ -517,18 +1087,6 @@ function updateFromGame(game) {
     // Always add bullet overlays to 4th and 5th fascist slots to show upcoming superpowers
     if (fascistSlotsEl) {
         addBulletOverlaysToFascistSlots(fascistSlotsEl);
-        
-        // Update fascist slots 1-3 based on player count
-        let playerCount = latestGame?.playerCount;
-        if (!playerCount || playerCount <= 0) {
-            playerCount = (latestPlayers || []).length;
-        }
-        if (!playerCount || playerCount <= 0) {
-            console.warn('No valid player count found for slot updates, defaulting to 5');
-            playerCount = 5; // Default fallback
-        }
-        
-        updateFascistSlotsForPlayerCount(fascistSlotsEl, playerCount);
     }
 
     const squares = document.querySelectorAll('#election-tracker .square');
@@ -931,7 +1489,6 @@ function showChancellorChoiceOverlay(game) {
         clone.style.transformOrigin = 'center center';
         clone.style.transition = 'transform 300ms ease-out, box-shadow 200ms ease-out';
         clone.dataset.originalTransform = `scale(${scale}) rotate(${angle}deg)`; // Store original transform
-        clone.style.setProperty('--original-transform', `scale(${scale}) rotate(${angle}deg)`); // For CSS animation
         
         overlay.appendChild(clone);
         overlayCards.push(clone);
@@ -967,29 +1524,90 @@ function showChancellorChoiceOverlay(game) {
     
     // Function to flip all cards simultaneously
     function flipAllCards() {
+        console.log('Starting card flip animation...');
+        
         // Mark all cards as flipping to prevent multiple simultaneous flips
-        overlayCards.forEach(card => {
-            if (card.classList.contains('flipping')) return; // Already flipping
-            
-            card.classList.add('flipping');
-            const index = parseInt(card.dataset.index);
+        overlayCards.forEach(card => card.classList.add('flipping'));
+        
+        overlayCards.forEach((card, index) => {
             const policy = presidentCards[index];
+            console.log(`Flipping card ${index}: ${policy} policy`);
             
-            // Add flip class for CSS animation
-            card.classList.add('flip-animation');
+            // Temporarily disable CSS transitions during the flip
+            const originalTransition = card.style.transition;
+            card.style.transition = 'none';
             
-            // Change the image and mark as flipped after half the animation
+            // Start the flip animation for each card
+            const originalTransform = card.dataset.originalTransform;
+            console.log(`Card ${index} original transform:`, originalTransform);
+            // Add rotateY(90deg) to the existing transform
+            card.style.transform = originalTransform + ' rotateY(90deg)';
+            console.log(`Card ${index} flipped transform:`, card.style.transform);
+            
+            // Halfway through the flip, change the image
             setTimeout(() => {
-                card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
-                card.classList.add(policy);
-                card.classList.add('flipped');
-                card.classList.remove('flipping');
-            }, 150); // Half of 300ms animation
-            
-            // Clean up animation class after it completes
-            setTimeout(() => {
-                card.classList.remove('flip-animation');
-            }, 300);
+                console.log(`Card ${index} changing image to:`, policy);
+                
+                // Preload the image to ensure it's available
+                const img = new Image();
+                img.onload = () => {
+                    card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
+                    card.classList.add(policy);
+                    card.classList.add('flipped');
+                    card.classList.remove('flipping'); // Remove flipping class
+                    console.log(`Card ${index} flipped classes:`, card.className);
+                    
+                    // Complete the flip - remove the rotateY(90deg) to return to original state
+                    setTimeout(() => {
+                        console.log(`Card ${index} completing flip, restoring transform:`, originalTransform);
+                        card.style.transform = originalTransform;
+                        // Re-enable CSS transitions
+                        card.style.transition = originalTransition;
+                    }, 200);
+                };
+                
+                // Safety timeout to ensure cards are always restored
+                setTimeout(() => {
+                    if (card.classList.contains('flipping')) {
+                        console.warn(`Card ${index} still flipping after timeout, forcing completion`);
+                        card.classList.remove('flipping');
+                        card.style.transform = originalTransform;
+                        card.style.transition = originalTransition;
+                    }
+                }, 1000);
+                img.onerror = () => {
+                    console.error(`Failed to load image for ${policy} policy`);
+                    // Still complete the flip even if image fails
+                    card.classList.add(policy);
+                    card.classList.add('flipped');
+                    card.classList.remove('flipping');
+                    
+                    // Fallback: ensure card is visible with a colored background
+                    if (policy === 'liberal') {
+                        card.style.backgroundColor = 'var(--liberal-blue)';
+                        card.style.backgroundImage = 'none';
+                    } else {
+                        card.style.backgroundColor = 'var(--fascist-red)';
+                        card.style.backgroundImage = 'none';
+                    }
+                    
+                    setTimeout(() => {
+                        card.style.transform = originalTransform;
+                        card.style.transition = originalTransition;
+                    }, 200);
+                };
+                
+                // Safety timeout for error case too
+                setTimeout(() => {
+                    if (card.classList.contains('flipping')) {
+                        console.warn(`Card ${index} still flipping after error timeout, forcing completion`);
+                        card.classList.remove('flipping');
+                        card.style.transform = originalTransform;
+                        card.style.transition = originalTransition;
+                    }
+                }, 1000);
+                img.src = policy === 'liberal' ? '../images/liberal.png' : '../images/facist.png';
+            }, 200);
         });
     }
     
@@ -1519,10 +2137,7 @@ function initSpreadPresidentDrawUI(gameId) {
             if (deltaY < -60 || (!moved && tapDuration < 300)) {
                 revealAllToCenterFan();
             } else {
-                // Add small delay to allow click event to fire first
-                setTimeout(() => {
-                    topThree.forEach(c => { c.style.transform = ''; });
-                }, 10);
+                topThree.forEach(c => { c.style.transform = ''; });
             }
         }
         card.addEventListener('mousedown', onDown);
@@ -1742,12 +2357,25 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
         const newLiberalCount = (latestGame.liberalPolicies || 0) + (enactedPolicy === 'liberal' ? 1 : 0);
         const newFascistCount = (latestGame.fascistPolicies || 0) + (enactedPolicy === 'fascist' ? 1 : 0);
         
-        if (newFascistCount >= 3 && newFascistCount <= 5) {
-            // Executive powers unlocked
-            await logPublic(gameId, `Executive powers unlocked! President gains special abilities`, {
-                type: 'executive_powers',
-                fascistPolicies: newFascistCount
-            });
+        // Only trigger superpowers if a fascist policy was enacted
+        if (enactedPolicy === 'fascist') {
+            const playerCount = latestGame.playerCount || (latestPlayers || []).length;
+            const superpower = getSuperpowerForSlot(newFascistCount, playerCount);
+            
+            if (superpower) {
+                console.log(`🦸‍♂️ Superpower triggered: ${superpower.name} for slot ${newFascistCount} with ${playerCount} players`);
+                
+                // Log the superpower activation
+                await logPublic(gameId, `${superpower.name} activated! President must use this power.`, {
+                    type: 'superpower_activated',
+                    superpower: superpower.name,
+                    fascistPolicies: newFascistCount,
+                    playerCount: playerCount
+                });
+                
+                // Trigger the superpower UI
+                await triggerSuperpowerUI(gameId, superpower, newFascistCount);
+            }
         }
         
         // Clean up all overlays immediately after policy enactment
@@ -1999,18 +2627,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Add bullet overlays to 4th and 5th fascist slots immediately after creation
     if (fascistSlots) {
         addBulletOverlaysToFascistSlots(fascistSlots);
-        
-        // Update fascist slots 1-3 based on player count (using fallback for initial render)
-        let playerCount = latestGame?.playerCount;
-        if (!playerCount || playerCount <= 0) {
-            playerCount = (latestPlayers || []).length;
-        }
-        if (!playerCount || playerCount <= 0) {
-            console.warn('No valid player count found for initial slot setup, defaulting to 5');
-            playerCount = 5; // Default fallback
-        }
-        
-        updateFascistSlotsForPlayerCount(fascistSlots, playerCount);
     }
 
     // Role banner is inline now, no dynamic positioning required
@@ -3054,12 +3670,7 @@ function showCompatriots(youPlayer, game, roleText) {
         })));
         // Update policy counters and election tracker if present
         updateFromGame(latestGame);
-        
-        // Refresh fascist slot superpowers based on current player count
-        console.log('🔄 About to call refreshFascistSlotsForPlayerCount() from game update');
-        refreshFascistSlotsForPlayerCount();
-        
-        // Update floating role banner for this device
+                    // Update floating role banner for this device
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
         
@@ -3105,10 +3716,6 @@ function showCompatriots(youPlayer, game, roleText) {
         // Also refresh the banner after players load (needed for uid->id map)
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
-        
-        // Refresh fascist slot superpowers when player list updates
-        console.log('🔄 About to call refreshFascistSlotsForPlayerCount() from player update');
-        refreshFascistSlotsForPlayerCount();
         
         // Refresh role overlay permissions if it's currently open
         refreshRoleOverlayPermissions();
