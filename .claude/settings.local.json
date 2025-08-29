@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebSearch",
+      "WebFetch(domain:www.secrethitler.com)"
     ],
     "deny": [],
     "ask": []
