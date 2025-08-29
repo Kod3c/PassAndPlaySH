@@ -177,12 +177,6 @@
             let claimedPlayerId = null;
             for (const d of snap.docs) {
                 const data = d.data() || {};
-                
-                // Add PIN validation here - if player has a PIN, it must match
-                if (data.pin && data.pin !== pin) {
-                    throw new Error('Incorrect PIN for this player name');
-                }
-                
                 if (data.uid === uid) {
                     // Update existing claim with new PIN and timestamp
                     await updateDoc(d.ref, { 

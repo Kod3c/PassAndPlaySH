@@ -388,14 +388,27 @@ function addBulletOverlaysToFascistSlots(containerEl) {
         }
     }
     
-    // Dynamic slot configuration is now handled by updateFascistSlotsForPlayerCount()
-    // Remove the old trio-cards overlay to prevent conflicts
+    // Add trio-cards to slot 3 (index 2) on top of skull background
     const thirdSlot = containerEl.children[2]; // Index 2 = 3rd slot
-    if (thirdSlot) {
+    if (thirdSlot && !thirdSlot.classList.contains('filled')) {
         const existingTrioCards = thirdSlot.querySelector('.trio-cards-overlay');
-        if (existingTrioCards) {
-            existingTrioCards.remove();
-            console.log('🧹 Removed old trio-cards overlay to prevent conflicts');
+        if (!existingTrioCards) {
+            const trioCardsOverlay = document.createElement('div');
+            trioCardsOverlay.className = 'trio-cards-overlay';
+            trioCardsOverlay.style.cssText = `
+                position: absolute;
+                top: 55%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 36.4px;
+                height: auto;
+                pointer-events: none;
+                z-index: 15;
+                opacity: 1.0;
+            `;
+            trioCardsOverlay.innerHTML = '<img src="../images/trio-cards.png" alt="Trio Cards" style="width: 100%; height: auto;">';
+            thirdSlot.appendChild(trioCardsOverlay);
+            console.log('Trio cards overlay added to 3rd fascist slot');
         }
     }
     
@@ -1098,18 +1111,6 @@ function updateFromGame(game) {
     // Always add bullet overlays to 4th and 5th fascist slots to show upcoming superpowers
     if (fascistSlotsEl) {
         addBulletOverlaysToFascistSlots(fascistSlotsEl);
-        
-        // Update fascist slots 1-3 based on player count
-        let playerCount = latestGame?.playerCount;
-        if (!playerCount || playerCount <= 0) {
-            playerCount = (latestPlayers || []).length;
-        }
-        if (!playerCount || playerCount <= 0) {
-            console.warn('No valid player count found for slot updates, defaulting to 5');
-            playerCount = 5; // Default fallback
-        }
-        
-        updateFascistSlotsForPlayerCount(fascistSlotsEl, playerCount);
     }
 
     const squares = document.querySelectorAll('#election-tracker .square');
@@ -2650,18 +2651,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Add bullet overlays to 4th and 5th fascist slots immediately after creation
     if (fascistSlots) {
         addBulletOverlaysToFascistSlots(fascistSlots);
-        
-        // Update fascist slots 1-3 based on player count (using fallback for initial render)
-        let playerCount = latestGame?.playerCount;
-        if (!playerCount || playerCount <= 0) {
-            playerCount = (latestPlayers || []).length;
-        }
-        if (!playerCount || playerCount <= 0) {
-            console.warn('No valid player count found for initial slot setup, defaulting to 5');
-            playerCount = 5; // Default fallback
-        }
-        
-        updateFascistSlotsForPlayerCount(fascistSlots, playerCount);
     }
 
     // Role banner is inline now, no dynamic positioning required
@@ -3705,12 +3694,7 @@ function showCompatriots(youPlayer, game, roleText) {
         })));
         // Update policy counters and election tracker if present
         updateFromGame(latestGame);
-        
-        // Refresh fascist slot superpowers based on current player count
-        console.log('🔄 About to call refreshFascistSlotsForPlayerCount() from game update');
-        refreshFascistSlotsForPlayerCount();
-        
-        // Update floating role banner for this device
+                    // Update floating role banner for this device
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
         
@@ -3756,10 +3740,6 @@ function showCompatriots(youPlayer, game, roleText) {
         // Also refresh the banner after players load (needed for uid->id map)
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
-        
-        // Refresh fascist slot superpowers when player list updates
-        console.log('🔄 About to call refreshFascistSlotsForPlayerCount() from player update');
-        refreshFascistSlotsForPlayerCount();
         
         // Refresh role overlay permissions if it's currently open
         refreshRoleOverlayPermissions();
