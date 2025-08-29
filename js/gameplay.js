@@ -931,6 +931,7 @@ function showChancellorChoiceOverlay(game) {
         clone.style.transformOrigin = 'center center';
         clone.style.transition = 'transform 300ms ease-out, box-shadow 200ms ease-out';
         clone.dataset.originalTransform = `scale(${scale}) rotate(${angle}deg)`; // Store original transform
+        clone.style.setProperty('--original-transform', `scale(${scale}) rotate(${angle}deg)`); // For CSS animation
         
         overlay.appendChild(clone);
         overlayCards.push(clone);
@@ -966,90 +967,29 @@ function showChancellorChoiceOverlay(game) {
     
     // Function to flip all cards simultaneously
     function flipAllCards() {
-        console.log('Starting card flip animation...');
-        
         // Mark all cards as flipping to prevent multiple simultaneous flips
-        overlayCards.forEach(card => card.classList.add('flipping'));
-        
-        overlayCards.forEach((card, index) => {
+        overlayCards.forEach(card => {
+            if (card.classList.contains('flipping')) return; // Already flipping
+            
+            card.classList.add('flipping');
+            const index = parseInt(card.dataset.index);
             const policy = presidentCards[index];
-            console.log(`Flipping card ${index}: ${policy} policy`);
             
-            // Temporarily disable CSS transitions during the flip
-            const originalTransition = card.style.transition;
-            card.style.transition = 'none';
+            // Add flip class for CSS animation
+            card.classList.add('flip-animation');
             
-            // Start the flip animation for each card
-            const originalTransform = card.dataset.originalTransform;
-            console.log(`Card ${index} original transform:`, originalTransform);
-            // Add rotateY(90deg) to the existing transform
-            card.style.transform = originalTransform + ' rotateY(90deg)';
-            console.log(`Card ${index} flipped transform:`, card.style.transform);
-            
-            // Halfway through the flip, change the image
+            // Change the image and mark as flipped after half the animation
             setTimeout(() => {
-                console.log(`Card ${index} changing image to:`, policy);
-                
-                // Preload the image to ensure it's available
-                const img = new Image();
-                img.onload = () => {
-                    card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping'); // Remove flipping class
-                    console.log(`Card ${index} flipped classes:`, card.className);
-                    
-                    // Complete the flip - remove the rotateY(90deg) to return to original state
-                    setTimeout(() => {
-                        console.log(`Card ${index} completing flip, restoring transform:`, originalTransform);
-                        card.style.transform = originalTransform;
-                        // Re-enable CSS transitions
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout to ensure cards are always restored
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.onerror = () => {
-                    console.error(`Failed to load image for ${policy} policy`);
-                    // Still complete the flip even if image fails
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping');
-                    
-                    // Fallback: ensure card is visible with a colored background
-                    if (policy === 'liberal') {
-                        card.style.backgroundColor = 'var(--liberal-blue)';
-                        card.style.backgroundImage = 'none';
-                    } else {
-                        card.style.backgroundColor = 'var(--fascist-red)';
-                        card.style.backgroundImage = 'none';
-                    }
-                    
-                    setTimeout(() => {
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout for error case too
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after error timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.src = policy === 'liberal' ? '../images/liberal.png' : '../images/facist.png';
-            }, 200);
+                card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
+                card.classList.add(policy);
+                card.classList.add('flipped');
+                card.classList.remove('flipping');
+            }, 150); // Half of 300ms animation
+            
+            // Clean up animation class after it completes
+            setTimeout(() => {
+                card.classList.remove('flip-animation');
+            }, 300);
         });
     }
     
@@ -1579,7 +1519,10 @@ function initSpreadPresidentDrawUI(gameId) {
             if (deltaY < -60 || (!moved && tapDuration < 300)) {
                 revealAllToCenterFan();
             } else {
-                topThree.forEach(c => { c.style.transform = ''; });
+                // Add small delay to allow click event to fire first
+                setTimeout(() => {
+                    topThree.forEach(c => { c.style.transform = ''; });
+                }, 10);
             }
         }
         card.addEventListener('mousedown', onDown);

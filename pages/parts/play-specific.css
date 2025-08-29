@@ -677,6 +677,24 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     transition: box-shadow 200ms ease-out;
 }
 
+/* Flip animation for chancellor cards */
+.reveal-card.flip-animation {
+    animation: cardFlip 300ms ease-in-out;
+    animation-fill-mode: forwards;
+    transform-style: preserve-3d;
+}
+
+.reveal-card.flipped {
+    /* Once flipped, keep the card face-up */
+    transform: var(--original-transform, scale(1.4) rotate(0deg)) !important;
+}
+
+@keyframes cardFlip {
+    0% { transform: var(--original-transform, scale(1.4) rotate(0deg)) rotateY(0deg); }
+    50% { transform: var(--original-transform, scale(1.4) rotate(0deg)) rotateY(90deg); }
+    100% { transform: var(--original-transform, scale(1.4) rotate(0deg)) rotateY(0deg); }
+}
+
 #chancellor-choice-overlay .reveal-card:hover {
     box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
 }
