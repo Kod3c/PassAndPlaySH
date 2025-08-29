@@ -210,8 +210,8 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     /* filter: none !important; */
 }
 
-/* Slot 3 (index 2) - Trio cards eye module (enabled by default) */
-.track.fascist .slot:nth-child(3).trio-cards-eye-module:empty::after {
+/* Slot 3 (index 2) - Trio cards eye module (only for 5-6 players) */
+.track.fascist .slot:nth-child(3).trio-cards-eye-module:empty:not(.has-president-overlay)::after {
     background-image: url('../../images/trio-cards-eye.png') !important;
     background-size: 36.4px auto !important;
     opacity: 1.0 !important;
@@ -251,6 +251,22 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     opacity: 1.0;
     /* Ensure trio-cards-eye doesn't completely cover the slot background */
+    pointer-events: none;
+}
+
+/* Eyeglass overlay for investigation power */
+.eyeglass-overlay {
+    z-index: 15 !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    opacity: 1.0;
+    pointer-events: none;
+}
+
+/* President overlay for special election power */
+.president-overlay {
+    z-index: 15 !important;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    opacity: 1.0;
     pointer-events: none;
 }
 .tracker { display:flex; align-items:center; gap:10px; justify-content:center; padding-top: 4px; }
