@@ -13,7 +13,7 @@ export function renderSlots(el, count) {
         if (el.id === 'fascist-slots') {
             if (i === 0) s.classList.add('custom-module');        // Slot 1
             if (i === 1) s.classList.add('custom-module');        // Slot 2  
-            if (i === 2) s.classList.add('trio-cards-eye-module');    // Slot 3
+            // Slot 3 trio-cards-eye is now managed by JavaScript based on player count
             // Slots 4 & 5 get bullets (handled separately)
             // Slot 6 gets fascist-win (handled by CSS)
         }
