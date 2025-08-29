@@ -130,6 +130,230 @@ function renderPoliciesToSlots(containerEl, filledCount, type) {
     }, 10);
 }
 
+// Dynamic function to update fascist slots 1-3 based on player count
+function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
+    if (!containerEl || containerEl.children.length < 6) {
+        console.warn('🚫 Cannot update fascist slots: invalid container or insufficient slots');
+        return;
+    }
+    
+    console.log(`🎯 Updating fascist slots for player count: ${playerCount}`);
+    console.log(`📊 Container has ${containerEl.children.length} slots total`);
+    
+    // Clear any existing overlays in slots 1-3 first
+    for (let i = 0; i < 3; i++) {
+        const slot = containerEl.children[i];
+        if (slot && !slot.classList.contains('filled')) {
+            // Remove existing overlays
+            const existingOverlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-overlay, .trio-cards-eye-overlay');
+            if (existingOverlays.length > 0) {
+                console.log(`🧹 Clearing ${existingOverlays.length} existing overlays from slot ${i + 1}`);
+                existingOverlays.forEach(overlay => overlay.remove());
+            }
+        }
+    }
+    
+    // Configure slots based on player count
+    if (playerCount >= 5 && playerCount <= 6) {
+        // 5-6 players: Slot 3 gets trio-cards-eye
+        console.log('🔧 Applying 5-6 player configuration...');
+        addTrioCardsEyeToSlot(containerEl.children[2]); // Slot 3 (index 2)
+        console.log('✅ 5-6 player configuration: Slot 3 = trio-cards-eye');
+        
+    } else if (playerCount >= 7 && playerCount <= 8) {
+        // 7-8 players: Slot 2 gets eyeglass, Slot 3 gets president
+        console.log('🔧 Applying 7-8 player configuration...');
+        addEyeglassToSlot(containerEl.children[1]); // Slot 2 (index 1)
+        addPresidentToSlot(containerEl.children[2]); // Slot 3 (index 2)
+        console.log('✅ 7-8 player configuration: Slot 2 = eyeglass, Slot 3 = president');
+        
+    } else if (playerCount >= 9 && playerCount <= 10) {
+        // 9-10 players: Slots 1 & 2 get eyeglass, Slot 3 gets president
+        console.log('🔧 Applying 9-10 player configuration...');
+        addEyeglassToSlot(containerEl.children[0]); // Slot 1 (index 0)
+        addEyeglassToSlot(containerEl.children[1]); // Slot 2 (index 1)
+        addPresidentToSlot(containerEl.children[2]); // Slot 3 (index 2)
+        console.log('✅ 9-10 player configuration: Slots 1&2 = eyeglass, Slot 3 = president');
+        
+    } else {
+        console.warn(`⚠️ Unhandled player count: ${playerCount}. No slot configuration applied.`);
+    }
+    
+    // Log final state for debugging
+    for (let i = 0; i < 3; i++) {
+        const slot = containerEl.children[i];
+        if (slot) {
+            const overlays = slot.querySelectorAll('.eyeglass-overlay, .president-overlay, .trio-cards-eye-overlay');
+            const overlayTypes = Array.from(overlays).map(o => o.className.replace('-overlay', '')).join(', ');
+            console.log(`🔍 Slot ${i + 1} final state: ${overlayTypes || 'no overlays'}`);
+        }
+    }
+}
+
+// Helper function to add eyeglass overlay to a slot
+function addEyeglassToSlot(slot) {
+    if (!slot) {
+        console.warn('🚫 Cannot add eyeglass: slot is null');
+        return;
+    }
+    if (slot.classList.contains('filled')) {
+        console.log('⏭️ Skipping eyeglass on filled slot');
+        return;
+    }
+    
+    const existingOverlay = slot.querySelector('.eyeglass-overlay');
+    if (existingOverlay) {
+        console.log('ℹ️ Eyeglass overlay already exists');
+        return;
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'eyeglass-overlay';
+    overlay.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 32px;
+        height: auto;
+        pointer-events: none;
+        z-index: 15;
+        opacity: 1.0;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    `;
+    
+    // Create image element to handle loading errors
+    const img = document.createElement('img');
+    img.src = '../images/eyeglass.png';
+    img.alt = 'Investigation Power';
+    img.style.cssText = 'width: 100%; height: auto;';
+    
+    img.onload = () => console.log('✅ Eyeglass image loaded successfully');
+    img.onerror = () => console.error('❌ Failed to load eyeglass.png');
+    
+    overlay.appendChild(img);
+    slot.appendChild(overlay);
+    console.log('👓 Eyeglass overlay added to fascist slot');
+}
+
+// Helper function to add president overlay to a slot
+function addPresidentToSlot(slot) {
+    if (!slot) {
+        console.warn('🚫 Cannot add president: slot is null');
+        return;
+    }
+    if (slot.classList.contains('filled')) {
+        console.log('⏭️ Skipping president on filled slot');
+        return;
+    }
+    
+    const existingOverlay = slot.querySelector('.president-overlay');
+    if (existingOverlay) {
+        console.log('ℹ️ President overlay already exists');
+        return;
+    }
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'president-overlay';
+    overlay.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 32px;
+        height: auto;
+        pointer-events: none;
+        z-index: 15;
+        opacity: 1.0;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    `;
+    
+    // Create image element to handle loading errors
+    const img = document.createElement('img');
+    img.src = '../images/president.png';
+    img.alt = 'Special Election Power';
+    img.style.cssText = 'width: 100%; height: auto;';
+    
+    img.onload = () => console.log('✅ President image loaded successfully');
+    img.onerror = () => console.error('❌ Failed to load president.png');
+    
+    overlay.appendChild(img);
+    slot.appendChild(overlay);
+    console.log('👑 President overlay added to fascist slot');
+}
+
+// Helper function to add trio-cards-eye overlay to a slot (for 5-6 players)
+function addTrioCardsEyeToSlot(slot) {
+    if (!slot || slot.classList.contains('filled')) return;
+    
+    const existingOverlay = slot.querySelector('.trio-cards-eye-overlay');
+    if (!existingOverlay) {
+        const overlay = document.createElement('div');
+        overlay.className = 'trio-cards-eye-overlay';
+        overlay.style.cssText = `
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36.4px;
+            height: auto;
+            pointer-events: none;
+            z-index: 15;
+            opacity: 1.0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        `;
+        overlay.innerHTML = '<img src="../images/trio-cards-eye.png" alt="Policy Peek Power" style="width: 100%; height: auto;">';
+        slot.appendChild(overlay);
+        console.log('🔍 Trio-cards-eye overlay added to fascist slot');
+    }
+}
+
+// Utility function to refresh fascist slots when player count changes
+function refreshFascistSlotsForPlayerCount() {
+    const fascistSlotsEl = document.getElementById('fascist-slots');
+    if (!fascistSlotsEl) {
+        console.warn('🚫 Cannot refresh slots: fascist-slots element not found');
+        return;
+    }
+    
+    let playerCount = latestGame?.playerCount;
+    const playersLength = (latestPlayers || []).length;
+    
+    console.log('🔍 DEBUG: Player count detection:', {
+        'latestGame.playerCount': latestGame?.playerCount,
+        'latestPlayers.length': playersLength,
+        'latestGame': latestGame ? 'exists' : 'null',
+        'latestPlayers': latestPlayers ? `array with ${playersLength} items` : 'null'
+    });
+    
+    if (!playerCount || playerCount <= 0) {
+        playerCount = playersLength;
+        console.log(`🔄 Using fallback player count from latestPlayers.length: ${playerCount}`);
+    }
+    if (!playerCount || playerCount <= 0) {
+        console.warn('No valid player count found for slot refresh, defaulting to 5');
+        playerCount = 5; // Default fallback
+    }
+    
+    console.log(`🎯 Final player count for slot update: ${playerCount}`);
+    console.log(`🔄 Refreshing fascist slots for updated player count: ${playerCount}`);
+    updateFascistSlotsForPlayerCount(fascistSlotsEl, playerCount);
+}
+
+// Manual debug function - call this from browser console to force update slots for testing
+window.debugFascistSlots = function(testPlayerCount) {
+    console.log('🧪 Manual fascist slots debug called');
+    if (testPlayerCount) {
+        console.log(`🎯 Testing with forced player count: ${testPlayerCount}`);
+        const fascistSlotsEl = document.getElementById('fascist-slots');
+        if (fascistSlotsEl) {
+            updateFascistSlotsForPlayerCount(fascistSlotsEl, testPlayerCount);
+        }
+    } else {
+        refreshFascistSlotsForPlayerCount();
+    }
+};
+
 // Add skull backgrounds to all fascist slots and bullet overlays to slots 4 and 5
 function addBulletOverlaysToFascistSlots(containerEl) {
     if (!containerEl || containerEl.children.length < 6) return;
@@ -164,27 +388,14 @@ function addBulletOverlaysToFascistSlots(containerEl) {
         }
     }
     
-    // Add trio-cards to slot 3 (index 2) on top of skull background
+    // Dynamic slot configuration is now handled by updateFascistSlotsForPlayerCount()
+    // Remove the old trio-cards overlay to prevent conflicts
     const thirdSlot = containerEl.children[2]; // Index 2 = 3rd slot
-    if (thirdSlot && !thirdSlot.classList.contains('filled')) {
+    if (thirdSlot) {
         const existingTrioCards = thirdSlot.querySelector('.trio-cards-overlay');
-        if (!existingTrioCards) {
-            const trioCardsOverlay = document.createElement('div');
-            trioCardsOverlay.className = 'trio-cards-overlay';
-            trioCardsOverlay.style.cssText = `
-                position: absolute;
-                top: 55%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 36.4px;
-                height: auto;
-                pointer-events: none;
-                z-index: 15;
-                opacity: 1.0;
-            `;
-            trioCardsOverlay.innerHTML = '<img src="../images/trio-cards.png" alt="Trio Cards" style="width: 100%; height: auto;">';
-            thirdSlot.appendChild(trioCardsOverlay);
-            console.log('Trio cards overlay added to 3rd fascist slot');
+        if (existingTrioCards) {
+            existingTrioCards.remove();
+            console.log('🧹 Removed old trio-cards overlay to prevent conflicts');
         }
     }
     
@@ -306,6 +517,18 @@ function updateFromGame(game) {
     // Always add bullet overlays to 4th and 5th fascist slots to show upcoming superpowers
     if (fascistSlotsEl) {
         addBulletOverlaysToFascistSlots(fascistSlotsEl);
+        
+        // Update fascist slots 1-3 based on player count
+        let playerCount = latestGame?.playerCount;
+        if (!playerCount || playerCount <= 0) {
+            playerCount = (latestPlayers || []).length;
+        }
+        if (!playerCount || playerCount <= 0) {
+            console.warn('No valid player count found for slot updates, defaulting to 5');
+            playerCount = 5; // Default fallback
+        }
+        
+        updateFascistSlotsForPlayerCount(fascistSlotsEl, playerCount);
     }
 
     const squares = document.querySelectorAll('#election-tracker .square');
@@ -708,6 +931,7 @@ function showChancellorChoiceOverlay(game) {
         clone.style.transformOrigin = 'center center';
         clone.style.transition = 'transform 300ms ease-out, box-shadow 200ms ease-out';
         clone.dataset.originalTransform = `scale(${scale}) rotate(${angle}deg)`; // Store original transform
+        clone.style.setProperty('--original-transform', `scale(${scale}) rotate(${angle}deg)`); // For CSS animation
         
         overlay.appendChild(clone);
         overlayCards.push(clone);
@@ -743,90 +967,29 @@ function showChancellorChoiceOverlay(game) {
     
     // Function to flip all cards simultaneously
     function flipAllCards() {
-        console.log('Starting card flip animation...');
-        
         // Mark all cards as flipping to prevent multiple simultaneous flips
-        overlayCards.forEach(card => card.classList.add('flipping'));
-        
-        overlayCards.forEach((card, index) => {
+        overlayCards.forEach(card => {
+            if (card.classList.contains('flipping')) return; // Already flipping
+            
+            card.classList.add('flipping');
+            const index = parseInt(card.dataset.index);
             const policy = presidentCards[index];
-            console.log(`Flipping card ${index}: ${policy} policy`);
             
-            // Temporarily disable CSS transitions during the flip
-            const originalTransition = card.style.transition;
-            card.style.transition = 'none';
+            // Add flip class for CSS animation
+            card.classList.add('flip-animation');
             
-            // Start the flip animation for each card
-            const originalTransform = card.dataset.originalTransform;
-            console.log(`Card ${index} original transform:`, originalTransform);
-            // Add rotateY(90deg) to the existing transform
-            card.style.transform = originalTransform + ' rotateY(90deg)';
-            console.log(`Card ${index} flipped transform:`, card.style.transform);
-            
-            // Halfway through the flip, change the image
+            // Change the image and mark as flipped after half the animation
             setTimeout(() => {
-                console.log(`Card ${index} changing image to:`, policy);
-                
-                // Preload the image to ensure it's available
-                const img = new Image();
-                img.onload = () => {
-                    card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping'); // Remove flipping class
-                    console.log(`Card ${index} flipped classes:`, card.className);
-                    
-                    // Complete the flip - remove the rotateY(90deg) to return to original state
-                    setTimeout(() => {
-                        console.log(`Card ${index} completing flip, restoring transform:`, originalTransform);
-                        card.style.transform = originalTransform;
-                        // Re-enable CSS transitions
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout to ensure cards are always restored
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.onerror = () => {
-                    console.error(`Failed to load image for ${policy} policy`);
-                    // Still complete the flip even if image fails
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping');
-                    
-                    // Fallback: ensure card is visible with a colored background
-                    if (policy === 'liberal') {
-                        card.style.backgroundColor = 'var(--liberal-blue)';
-                        card.style.backgroundImage = 'none';
-                    } else {
-                        card.style.backgroundColor = 'var(--fascist-red)';
-                        card.style.backgroundImage = 'none';
-                    }
-                    
-                    setTimeout(() => {
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout for error case too
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after error timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.src = policy === 'liberal' ? '../images/liberal.png' : '../images/facist.png';
-            }, 200);
+                card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
+                card.classList.add(policy);
+                card.classList.add('flipped');
+                card.classList.remove('flipping');
+            }, 150); // Half of 300ms animation
+            
+            // Clean up animation class after it completes
+            setTimeout(() => {
+                card.classList.remove('flip-animation');
+            }, 300);
         });
     }
     
@@ -1356,7 +1519,10 @@ function initSpreadPresidentDrawUI(gameId) {
             if (deltaY < -60 || (!moved && tapDuration < 300)) {
                 revealAllToCenterFan();
             } else {
-                topThree.forEach(c => { c.style.transform = ''; });
+                // Add small delay to allow click event to fire first
+                setTimeout(() => {
+                    topThree.forEach(c => { c.style.transform = ''; });
+                }, 10);
             }
         }
         card.addEventListener('mousedown', onDown);
@@ -1833,6 +1999,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Add bullet overlays to 4th and 5th fascist slots immediately after creation
     if (fascistSlots) {
         addBulletOverlaysToFascistSlots(fascistSlots);
+        
+        // Update fascist slots 1-3 based on player count (using fallback for initial render)
+        let playerCount = latestGame?.playerCount;
+        if (!playerCount || playerCount <= 0) {
+            playerCount = (latestPlayers || []).length;
+        }
+        if (!playerCount || playerCount <= 0) {
+            console.warn('No valid player count found for initial slot setup, defaulting to 5');
+            playerCount = 5; // Default fallback
+        }
+        
+        updateFascistSlotsForPlayerCount(fascistSlots, playerCount);
     }
 
     // Role banner is inline now, no dynamic positioning required
@@ -2876,7 +3054,12 @@ function showCompatriots(youPlayer, game, roleText) {
         })));
         // Update policy counters and election tracker if present
         updateFromGame(latestGame);
-                    // Update floating role banner for this device
+        
+        // Refresh fascist slot superpowers based on current player count
+        console.log('🔄 About to call refreshFascistSlotsForPlayerCount() from game update');
+        refreshFascistSlotsForPlayerCount();
+        
+        // Update floating role banner for this device
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
         
@@ -2922,6 +3105,10 @@ function showCompatriots(youPlayer, game, roleText) {
         // Also refresh the banner after players load (needed for uid->id map)
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
+        
+        // Refresh fascist slot superpowers when player list updates
+        console.log('🔄 About to call refreshFascistSlotsForPlayerCount() from player update');
+        refreshFascistSlotsForPlayerCount();
         
         // Refresh role overlay permissions if it's currently open
         refreshRoleOverlayPermissions();
