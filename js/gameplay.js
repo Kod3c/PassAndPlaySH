@@ -497,6 +497,154 @@ function addBulletOverlaysToFascistSlots(containerEl) {
     }
 }
 
+// Superpower system functions
+function getSuperpowerForSlot(fascistPolicyCount, playerCount) {
+    const superpowers = {
+        5: { // 5-6 players
+            3: { name: 'Policy Peek', type: 'policy_peek', description: 'President examines the top 3 policy cards' },
+            4: { name: 'Execution', type: 'execution', description: 'President executes a player' },
+            5: { name: 'Execution', type: 'execution', description: 'President executes a player' }
+        },
+        7: { // 7-8 players  
+            2: { name: 'Investigation', type: 'investigation', description: 'President investigates a player\'s loyalty' },
+            3: { name: 'Special Election', type: 'special_election', description: 'President picks the next Presidential candidate' },
+            4: { name: 'Execution', type: 'execution', description: 'President executes a player' },
+            5: { name: 'Execution', type: 'execution', description: 'President executes a player' }
+        },
+        9: { // 9-10 players
+            1: { name: 'Investigation', type: 'investigation', description: 'President investigates a player\'s loyalty' },
+            2: { name: 'Investigation', type: 'investigation', description: 'President investigates a player\'s loyalty' },
+            3: { name: 'Special Election', type: 'special_election', description: 'President picks the next Presidential candidate' },
+            4: { name: 'Execution', type: 'execution', description: 'President executes a player' },
+            5: { name: 'Execution', type: 'execution', description: 'President executes a player' }
+        }
+    };
+
+    // Determine superpower config based on player count
+    let config;
+    if (playerCount <= 6) {
+        config = superpowers[5];
+    } else if (playerCount <= 8) {
+        config = superpowers[7];
+    } else {
+        config = superpowers[9];
+    }
+
+    return config[fascistPolicyCount] || null;
+}
+
+async function triggerSuperpowerUI(gameId, superpower, fascistSlot) {
+    console.log(`🎯 Triggering superpower UI for: ${superpower.name}`);
+    
+    // Update game state to indicate superpower is pending
+    const gameRef = doc(db, 'games', gameId);
+    await updateDoc(gameRef, {
+        pendingSuperpower: {
+            type: superpower.type,
+            name: superpower.name,
+            description: superpower.description,
+            slot: fascistSlot,
+            activatedAt: serverTimestamp()
+        },
+        updatedAt: serverTimestamp()
+    });
+
+    // Show superpower modal to the president
+    showSuperpowerModal(superpower, fascistSlot);
+}
+
+function showSuperpowerModal(superpower, fascistSlot) {
+    // Check if user is the current president
+    const youId = computeYouId(getGameId());
+    const isPresident = latestGame && latestGame.currentPresidentPlayerId === youId;
+    
+    if (!isPresident) {
+        // Show notification for non-president players
+        setStatus(getGameId(), `${superpower.name} activated! President must use this power.`);
+        return;
+    }
+
+    // Create modal for president
+    const modal = document.createElement('div');
+    modal.id = 'superpower-modal';
+    modal.className = 'modal-overlay superpower-modal';
+    modal.innerHTML = `
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">🦸‍♂️ Executive Power Activated</div>
+                <div class="modal-subtitle">Fascist Policy ${fascistSlot}</div>
+            </div>
+            <div class="modal-body">
+                <div class="superpower-info">
+                    <div class="superpower-name">${superpower.name}</div>
+                    <div class="superpower-description">${superpower.description}</div>
+                </div>
+                <div class="superpower-actions">
+                    <button id="activate-superpower-btn" class="btn btn-primary">Activate Power</button>
+                    <div class="superpower-note">You must use this power before the next government</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle activation
+    const activateBtn = document.getElementById('activate-superpower-btn');
+    activateBtn.addEventListener('click', () => {
+        handleSuperpowerActivation(superpower.type);
+        modal.remove();
+    });
+
+    // Show modal
+    requestAnimationFrame(() => {
+        modal.style.display = 'flex';
+    });
+}
+
+function handleSuperpowerActivation(superpowerType) {
+    switch (superpowerType) {
+        case 'policy_peek':
+            handlePolicyPeek();
+            break;
+        case 'investigation':
+            handleInvestigation();
+            break;
+        case 'special_election':
+            handleSpecialElection();
+            break;
+        case 'execution':
+            handleExecution();
+            break;
+        default:
+            console.error('Unknown superpower type:', superpowerType);
+    }
+}
+
+function handlePolicyPeek() {
+    setStatus(getGameId(), 'Policy Peek: Examining the top 3 policy cards...');
+    // TODO: Implement policy peek logic
+    console.log('🔍 Policy Peek activated - showing top 3 cards to president');
+}
+
+function handleInvestigation() {
+    setStatus(getGameId(), 'Investigation: President is investigating a player...');
+    // TODO: Implement investigation logic  
+    console.log('🔍 Investigation activated - president investigating player loyalty');
+}
+
+function handleSpecialElection() {
+    setStatus(getGameId(), 'Special Election: President is choosing the next candidate...');
+    // TODO: Implement special election logic
+    console.log('🗳️ Special Election activated - president choosing next presidential candidate');
+}
+
+function handleExecution() {
+    setStatus(getGameId(), 'Execution: President is choosing a player to execute...');
+    // TODO: Implement execution logic
+    console.log('💀 Execution activated - president executing a player');
+}
+
 function updateFromGame(game) {
     if (!game) return;
     const lib = Number(game.liberalPolicies || 0);
@@ -1799,12 +1947,25 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
         const newLiberalCount = (latestGame.liberalPolicies || 0) + (enactedPolicy === 'liberal' ? 1 : 0);
         const newFascistCount = (latestGame.fascistPolicies || 0) + (enactedPolicy === 'fascist' ? 1 : 0);
         
-        if (newFascistCount >= 3 && newFascistCount <= 5) {
-            // Executive powers unlocked
-            await logPublic(gameId, `Executive powers unlocked! President gains special abilities`, {
-                type: 'executive_powers',
-                fascistPolicies: newFascistCount
-            });
+        // Only trigger superpowers if a fascist policy was enacted
+        if (enactedPolicy === 'fascist') {
+            const playerCount = latestGame.playerCount || (latestPlayers || []).length;
+            const superpower = getSuperpowerForSlot(newFascistCount, playerCount);
+            
+            if (superpower) {
+                console.log(`🦸‍♂️ Superpower triggered: ${superpower.name} for slot ${newFascistCount} with ${playerCount} players`);
+                
+                // Log the superpower activation
+                await logPublic(gameId, `${superpower.name} activated! President must use this power.`, {
+                    type: 'superpower_activated',
+                    superpower: superpower.name,
+                    fascistPolicies: newFascistCount,
+                    playerCount: playerCount
+                });
+                
+                // Trigger the superpower UI
+                await triggerSuperpowerUI(gameId, superpower, newFascistCount);
+            }
         }
         
         // Clean up all overlays immediately after policy enactment
