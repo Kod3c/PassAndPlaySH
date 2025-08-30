@@ -25,7 +25,7 @@ function sanitizeGameName(raw) {
   const trimmed = String(raw || '').trim();
   const collapsed = trimmed.replace(/\s+/g, ' ');
   const cleaned = collapsed.replace(/[^A-Za-z0-9 _\-'.!?:()/]/g, '');
-  return cleaned.slice(0, 48) || 'Secret Hitler Game';
+  return cleaned.slice(0, 48) || 'Secret Hitler';
 }
 
 function sanitizePlayerName(raw) {
@@ -55,10 +55,10 @@ async function ensureAnonymousAuth() {
 }
 
 function generateGameId() {
-  // 5-character unambiguous code (exclude 0/O and 1/I)
+  // 4-character unambiguous code (exclude 0/O and 1/I)
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let id = '';
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 4; i++) {
     id += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
   return id;
@@ -66,7 +66,7 @@ function generateGameId() {
 
 export async function createGame(gameName, playerNames, hostPasswordHash = null) {
   await ensureAnonymousAuth();
-  // Generate a unique 5-char ID (retry a few times just in case of collision)
+  // Generate a unique 4-char ID (retry a few times just in case of collision)
   let gameId = '';
   let gameRef = null;
   for (let attempt = 0; attempt < 5; attempt++) {
