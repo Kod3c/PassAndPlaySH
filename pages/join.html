@@ -61,7 +61,7 @@
                     <div class="card-content">
                         <div class="form-group">
                             <label class="form-label" for="game-id">Game Code</label>
-                            <input id="game-id" class="form-control code-input" type="text" placeholder="e.g. 7K3MZ" maxlength="10" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
+                            <input id="game-id" class="form-control code-input" type="text" placeholder="e.g. 7K3M" maxlength="10" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" autocapitalize="characters">
                             <small class="form-help">Paste or type the game code</small>
                         </div>
 
@@ -125,13 +125,13 @@
         }
 
         function normalizeGameId(id) {
-            // Accept only A-Z and 2-9, excluding I/O/1/0; limit to 5 chars
+            // Accept only A-Z and 2-9, excluding I/O/1/0; limit to 4 chars
             const raw = (id || '').toString();
             const upper = raw.toUpperCase();
             const cleaned = upper
                 .replace(/[IO10]/g, '') // remove ambiguous chars entirely
                 .replace(/[^A-Z2-9]/g, '');
-            return cleaned.slice(0, 5);
+            return cleaned.slice(0, 4);
         }
 
         function formatGameIdForDisplay(normalized) {
@@ -402,6 +402,8 @@
 
             let currentGameId = normalizeGameId(getGameIdFromUrl());
             if (currentGameId) {
+                // Auto-fill the game code input field
+                gameIdInput.value = currentGameId;
                 // Do not mutate the field; only use normalized copy for lookups
                 if (currentGameId.length === 5) loadGameMeta(currentGameId);
             }

@@ -69,20 +69,33 @@ export function closeOrderModal(orderModal, setRoleBannerVisibility) {
 export function openHistoryModal(historyModal, historyBody, historyUnsub, gid, onHistory, historyItems, canSeeEvent, formatTime, setRoleBannerVisibility) {
     if (!historyModal) return;
     
+    console.log('Opening history modal for game:', gid);
+    
     historyModal.style.display = 'flex';
     setRoleBannerVisibility(false);
     
+    let localHistoryUnsub = historyUnsub;
+    let localHistoryItems = historyItems || [];
+    
     // Subscribe on open
-    if (!historyUnsub) {
+    if (!localHistoryUnsub) {
+        console.log('Creating new history subscription...');
         try {
-            historyUnsub = onHistory(gid, (items) => {
-                historyItems = items || [];
+            localHistoryUnsub = onHistory(gid, (items) => {
+                console.log('History items received:', items);
+                localHistoryItems = items || [];
                 renderHistory();
             });
-        } catch (_) {}
+            console.log('History subscription created successfully');
+        } catch (err) {
+            console.error('Failed to create history subscription:', err);
+        }
+    } else {
+        console.log('Using existing history subscription');
     }
     
     function renderHistory() {
+        console.log('Rendering history, historyBody exists:', !!historyBody);
         if (!historyBody) return;
         historyBody.innerHTML = '';
         const wrap = document.createElement('div');
@@ -90,7 +103,9 @@ export function openHistoryModal(historyModal, historyBody, historyUnsub, gid, o
         wrap.style.flexDirection = 'column';
         wrap.style.gap = '8px';
 
-        const visibleItems = (historyItems || []).filter(evt => canSeeEvent(evt));
+        console.log('Local history items:', localHistoryItems);
+        const visibleItems = (localHistoryItems || []).filter(evt => canSeeEvent(evt));
+        console.log('Visible items after filtering:', visibleItems);
 
         if (visibleItems.length === 0) {
             const p = document.createElement('p');
@@ -128,10 +143,13 @@ export function openHistoryModal(historyModal, historyBody, historyUnsub, gid, o
     }
     
     renderHistory();
+    
+    // Return the subscription so it can be maintained
+    return localHistoryUnsub;
 }
 
 export function closeHistoryModal(historyModal, setRoleBannerVisibility, historyUnsub) {
     if (historyModal) historyModal.style.display = 'none';
     setRoleBannerVisibility(true);
-    if (historyUnsub) { try { historyUnsub(); } catch (_) {} historyUnsub = null; }
+    // Don't unsubscribe here - keep the subscription active
 }
