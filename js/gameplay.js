@@ -1489,24 +1489,32 @@ function showChancellorChoiceOverlay(game) {
         clone.style.transformOrigin = 'center center';
         clone.style.transition = 'transform 300ms ease-out, box-shadow 200ms ease-out';
         clone.dataset.originalTransform = `scale(${scale}) rotate(${angle}deg)`; // Store original transform
+        clone.style.userSelect = 'none'; // Prevent text selection
+        clone.style.webkitUserSelect = 'none'; // Safari support
         
         overlay.appendChild(clone);
         overlayCards.push(clone);
         
         // Add click handler for flipping and selection
-        clone.addEventListener('click', function() {
+        const handleCardClick = function(e) {
+            // Prevent event bubbling
+            e.stopPropagation();
+
             if (!clone.classList.contains('flipped')) {
                 // First click: flip both cards simultaneously
                 // Prevent multiple simultaneous flips
                 if (overlayCards.some(card => card.classList.contains('flipping'))) {
+                    console.log('Already flipping, ignoring click');
                     return;
                 }
+                console.log('Flipping cards...');
                 flipAllCards();
             } else {
                 // Second click: select/deselect the card
                 if (clone.classList.contains('selected')) {
                     clone.classList.remove('selected');
                     clone.style.zIndex = ''; // Reset z-index
+                    console.log('Card deselected');
                 } else {
                     // Deselect all cards first
                     overlayCards.forEach(c => {
@@ -1516,98 +1524,115 @@ function showChancellorChoiceOverlay(game) {
                     // Select this card
                     clone.classList.add('selected');
                     clone.style.zIndex = '10'; // Bring selected card to front
+                    console.log('Card selected');
                 }
                 updateEnactButtonState();
             }
+        };
+
+        // Add both click and touch handlers for better mobile support
+        clone.addEventListener('click', handleCardClick);
+        clone.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            handleCardClick(e);
         });
     });
     
     // Function to flip all cards simultaneously
     function flipAllCards() {
         console.log('Starting card flip animation...');
-        
+
         // Mark all cards as flipping to prevent multiple simultaneous flips
         overlayCards.forEach(card => card.classList.add('flipping'));
-        
+
         overlayCards.forEach((card, index) => {
             const policy = presidentCards[index];
             console.log(`Flipping card ${index}: ${policy} policy`);
-            
-            // Temporarily disable CSS transitions during the flip
-            const originalTransition = card.style.transition;
-            card.style.transition = 'none';
-            
-            // Start the flip animation for each card
+
             const originalTransform = card.dataset.originalTransform;
-            console.log(`Card ${index} original transform:`, originalTransform);
-            // Add rotateY(90deg) to the existing transform
-            card.style.transform = originalTransform + ' rotateY(90deg)';
-            console.log(`Card ${index} flipped transform:`, card.style.transform);
-            
-            // Halfway through the flip, change the image
+            const imgSrc = policy === 'liberal' ? '../images/liberal.png' : '../images/facist.png';
+
+            // Preload the image BEFORE starting animation to avoid race conditions
+            const img = new Image();
+
+            const completeFlip = () => {
+                // Change image and update classes
+                card.style.backgroundImage = `url(${imgSrc})`;
+                card.classList.add(policy);
+                card.classList.add('flipped');
+
+                // Second half of flip - rotate back to 0deg
+                requestAnimationFrame(() => {
+                    card.style.transform = originalTransform + ' rotateY(180deg)';
+
+                    // After animation completes, remove flipping state
+                    setTimeout(() => {
+                        card.classList.remove('flipping');
+                        console.log(`Card ${index} flip complete`);
+                    }, 150);
+                });
+            };
+
+            const completeFlipWithFallback = () => {
+                console.warn(`Using fallback for card ${index}`);
+                // Fallback: use colored background instead
+                card.classList.add(policy);
+                card.classList.add('flipped');
+                card.style.backgroundColor = policy === 'liberal' ? 'var(--liberal-blue)' : 'var(--fascist-red)';
+                card.style.backgroundImage = 'none';
+
+                requestAnimationFrame(() => {
+                    card.style.transform = originalTransform + ' rotateY(180deg)';
+                    setTimeout(() => {
+                        card.classList.remove('flipping');
+                    }, 150);
+                });
+            };
+
+            img.onload = () => {
+                console.log(`Card ${index} image preloaded, continuing flip`);
+                completeFlip();
+            };
+
+            img.onerror = () => {
+                console.error(`Failed to load image for ${policy} policy`);
+                completeFlipWithFallback();
+            };
+
+            // Start preloading immediately
+            img.src = imgSrc;
+
+            // Use CSS transition for smooth animation
+            card.style.transition = 'transform 300ms ease-out';
+
+            // First half of flip - rotate to 90deg (edge-on)
+            requestAnimationFrame(() => {
+                card.style.transform = originalTransform + ' rotateY(90deg)';
+
+                // After first half of animation (150ms), change the image
+                setTimeout(() => {
+                    // If image hasn't loaded yet, wait a bit more or use fallback
+                    if (img.complete && img.naturalWidth > 0) {
+                        completeFlip();
+                    } else if (img.complete && img.naturalWidth === 0) {
+                        // Image failed to load
+                        completeFlipWithFallback();
+                    }
+                    // Otherwise img.onload/onerror will handle it
+                }, 150);
+            });
+
+            // Safety timeout to ensure cards are always restored (1 second)
             setTimeout(() => {
-                console.log(`Card ${index} changing image to:`, policy);
-                
-                // Preload the image to ensure it's available
-                const img = new Image();
-                img.onload = () => {
-                    card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping'); // Remove flipping class
-                    console.log(`Card ${index} flipped classes:`, card.className);
-                    
-                    // Complete the flip - remove the rotateY(90deg) to return to original state
-                    setTimeout(() => {
-                        console.log(`Card ${index} completing flip, restoring transform:`, originalTransform);
-                        card.style.transform = originalTransform;
-                        // Re-enable CSS transitions
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout to ensure cards are always restored
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.onerror = () => {
-                    console.error(`Failed to load image for ${policy} policy`);
-                    // Still complete the flip even if image fails
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
+                if (card.classList.contains('flipping')) {
+                    console.warn(`Card ${index} still flipping after 1s timeout, forcing completion`);
                     card.classList.remove('flipping');
-                    
-                    // Fallback: ensure card is visible with a colored background
-                    if (policy === 'liberal') {
-                        card.style.backgroundColor = 'var(--liberal-blue)';
-                        card.style.backgroundImage = 'none';
-                    } else {
-                        card.style.backgroundColor = 'var(--fascist-red)';
-                        card.style.backgroundImage = 'none';
+                    card.style.transform = originalTransform + ' rotateY(180deg)';
+                    if (!card.classList.contains('flipped')) {
+                        completeFlipWithFallback();
                     }
-                    
-                    setTimeout(() => {
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout for error case too
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after error timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.src = policy === 'liberal' ? '../images/liberal.png' : '../images/facist.png';
-            }, 200);
+                }
+            }, 1000);
         });
     }
     
