@@ -107,16 +107,48 @@
         import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         (function() {
+            let preloaderInterval = null;
+            const preloaderMessages = [
+                'Loading Game…',
+                'Building Board…',
+                'Placing Pieces…',
+                'Shuffling Policy Deck…',
+                'Preparing Roles…',
+                'Setting Up Tables…',
+                'Almost Ready…'
+            ];
+            let currentMessageIndex = 0;
+
             function showPreloader(text) {
                 const o = document.getElementById('preloader-overlay');
                 if (!o) return;
                 o.style.display = 'flex';
                 const t = o.querySelector('.loader-text');
                 if (t && text) t.textContent = text;
+
+                // Clear any existing interval
+                if (preloaderInterval) {
+                    clearInterval(preloaderInterval);
+                    preloaderInterval = null;
+                }
+
+                // Start cycling through messages
+                currentMessageIndex = 0;
+                preloaderInterval = setInterval(() => {
+                    currentMessageIndex = (currentMessageIndex + 1) % preloaderMessages.length;
+                    if (t) t.textContent = preloaderMessages[currentMessageIndex];
+                }, 8000);
             }
+
             function hidePreloader() {
                 const o = document.getElementById('preloader-overlay');
                 if (o) o.style.display = 'none';
+
+                // Clear the interval when hiding
+                if (preloaderInterval) {
+                    clearInterval(preloaderInterval);
+                    preloaderInterval = null;
+                }
             }
             const lobbyInfo = document.getElementById('lobby-info');
             const playersList = document.getElementById('players-list');

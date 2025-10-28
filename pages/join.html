@@ -402,6 +402,8 @@
 
             let currentGameId = normalizeGameId(getGameIdFromUrl());
             if (currentGameId) {
+                // Auto-fill the game code input field
+                gameIdInput.value = currentGameId;
                 // Do not mutate the field; only use normalized copy for lookups
                 if (currentGameId.length === 5) loadGameMeta(currentGameId);
             }

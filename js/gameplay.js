@@ -2718,9 +2718,25 @@ roleEnvelope?.addEventListener('click', openRoleOverlay);
     // Function moved to modals.js
 
     // Function moved to modals.js
-    historyBtn?.addEventListener('click', () => openHistoryModal(historyModal, historyBody, historyUnsub, gid, onHistory, historyItems, canSeeEvent, formatTime, setRoleBannerVisibility));
+    historyBtn?.addEventListener('click', () => {
+        historyUnsub = openHistoryModal(historyModal, historyBody, historyUnsub, gid, onHistory, historyItems, canSeeEvent, formatTime, setRoleBannerVisibility);
+    });
     historyClose?.addEventListener('click', () => closeHistoryModal(historyModal, setRoleBannerVisibility, historyUnsub));
     historyModal?.addEventListener('click', function(e) { if (e.target === historyModal) closeHistoryModal(historyModal, setRoleBannerVisibility, historyUnsub); });
+    
+    // Test history button
+    const testHistoryBtn = document.getElementById('test-history-btn');
+    testHistoryBtn?.addEventListener('click', async () => {
+        console.log('Test history button clicked, writing test event...');
+        try {
+            await logPublic(gid, 'Test history event - Game started!', { type: 'test' });
+            console.log('Test history event written successfully');
+            alert('Test history event created! Now click History to see it.');
+        } catch (err) {
+            console.error('Failed to write test history event:', err);
+            alert('Failed to create test event: ' + err.message);
+        }
+    });
 
     function openNominationModal() {
         if (!nominationModal) return;
