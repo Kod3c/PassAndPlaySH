@@ -4024,25 +4024,26 @@ function showCompatriots(youPlayer, game, roleText) {
                 // Close modal
                 closeMenuModal();
 
-                // Redirect to create page FIRST (before ending game to avoid onSnapshot redirect)
-                window.location.href = `../pages/create.html?${params.toString()}`;
-
-                // End the current game (this will happen as page unloads)
-                updateDoc(doc(db, 'games', gid), {
+                // End the current game first
+                await updateDoc(doc(db, 'games', gid), {
                     state: 'cancelled',
                     updatedAt: serverTimestamp()
-                }).catch(() => {});
+                });
 
                 try {
-                    logPublic(gid, `Game ended by ${yourName} to duplicate with same players`, {
+                    await logPublic(gid, `Game ended by ${yourName} to duplicate with same players`, {
                         type: 'end',
                         actorId: youId || null
-                    }).catch(() => {});
+                    });
                 } catch (_) {}
+
+                // Now redirect to create page (snapshot listener will see the flag and skip redirect)
+                window.location.href = `../pages/create.html?${params.toString()}`;
 
             } catch (err) {
                 console.error('Failed to duplicate game:', err);
                 alert('Failed to duplicate game. Please try again.');
+                isHostQuitting = false; // Reset flag on error
             }
             return;
         }
@@ -4081,6 +4082,19 @@ function showCompatriots(youPlayer, game, roleText) {
     }
     const snap = await getDoc(gameRef);
     if (!snap.exists()) { setStatus(gid, 'Game not found'); hidePreloaderWithCleanup(); return; }
+
+    // Check if game is cancelled on initial load
+    const initialGameData = snap.data();
+    if (initialGameData && initialGameData.state === 'cancelled') {
+        setStatus(gid, 'Game cancelled');
+        hidePreloaderWithCleanup();
+        try {
+            alert('This game has been ended. You can join a new game or rejoin this one.');
+        } catch (_) {}
+        window.location.href = `./join.html?game=${encodeURIComponent(gid)}`;
+        return;
+    }
+
     setStatus(gid, 'Game in progress');
 
     onSnapshot(gameRef, (s) => {
