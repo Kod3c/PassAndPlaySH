@@ -765,7 +765,21 @@ class App {
     }
 }
 
-// Game Engine Class
+// ============================================================================
+// DEPRECATED: Local Game Engine Class
+// ============================================================================
+// This Game class was used for the original local-only pass-and-play version.
+// The current Firebase-based multiplayer implementation (pages/play.html,
+// js/gameplay.js) does NOT use this code.
+//
+// Known issues with this class (never fixed because it's deprecated):
+// - setupPolicyStacks() only uses 15 of 17 cards due to while loop condition
+// - Policy deck is not persisted or tracked properly
+// - Role assignment uses insecure client-side logic
+//
+// DO NOT use this class for new features. It is kept only for the legacy
+// index.html local demo mode.
+// ============================================================================
 class Game {
     constructor(players) {
         this.players = players;

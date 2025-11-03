@@ -108,13 +108,12 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="game-mode-select" class="form-label">Game Mode</label>
-                            <select id="game-mode-select" class="form-control" disabled>
-                                <option value="standard" selected>Standard Game</option>
-                                <option value="quick" disabled>Quick Game</option>
-                                <option value="extended" disabled>Extended Game</option>
+                            <label for="vote-mode-select" class="form-label">Vote Visibility</label>
+                            <select id="vote-mode-select" class="form-control">
+                                <option value="visible" selected>Standard: Individual Votes Visible</option>
+                                <option value="hidden">Hidden: Individual Votes Secret</option>
                             </select>
-                            <small class="form-help">Standard: Full rules (other modes disabled)</small>
+                            <small class="form-help">Choose whether individual vote choices (Ja/Nein) are logged in history. Totals are always shown after voting completes.</small>
                         </div>
                     </div>
                 </div>
@@ -393,8 +392,12 @@
 
                     const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
 
+                    // Get vote visibility setting
+                    const voteModeSelect = document.getElementById('vote-mode-select');
+                    const showVoteDetails = voteModeSelect ? voteModeSelect.value === 'visible' : true;
+
                     // Pass null for game name - it will be generated as "Secret Hitler - {gameId}"
-                    const gameId = await createGame(null, players, hostPasswordHash);
+                    const gameId = await createGame(null, players, hostPasswordHash, showVoteDetails);
                     try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
                     window.location.href = `lobby.html?game=${encodeURIComponent(gameId)}`;
                 } catch (e) {

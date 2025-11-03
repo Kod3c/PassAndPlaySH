@@ -107,17 +107,57 @@
         import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         (function() {
+            let preloaderRotationInterval = null;
+
             function showPreloader(text) {
                 const o = document.getElementById('preloader-overlay');
                 if (!o) return;
                 o.style.display = 'flex';
                 const t = o.querySelector('.loader-text');
                 if (t && text) t.textContent = text;
+
+                // Start rotation if showing "Loading board…"
+                if (text === 'Loading board…') {
+                    startPreloaderRotation();
+                }
             }
+
             function hidePreloader() {
                 const o = document.getElementById('preloader-overlay');
                 if (o) o.style.display = 'none';
+                stopPreloaderRotation();
             }
+
+            function startPreloaderRotation() {
+                // Clear any existing interval
+                if (preloaderRotationInterval) {
+                    clearInterval(preloaderRotationInterval);
+                }
+
+                const messages = [
+                    'Loading board…',
+                    'Preparing game…',
+                    'Setting up board…',
+                    'Almost ready…'
+                ];
+                let index = 0;
+
+                preloaderRotationInterval = setInterval(() => {
+                    index = (index + 1) % messages.length;
+                    const t = document.querySelector('#preloader-overlay .loader-text');
+                    if (t) t.textContent = messages[index];
+                }, 1500);
+            }
+
+            function stopPreloaderRotation() {
+                if (preloaderRotationInterval) {
+                    clearInterval(preloaderRotationInterval);
+                    preloaderRotationInterval = null;
+                }
+            }
+
+            // Clean up on page unload
+            window.addEventListener('beforeunload', stopPreloaderRotation);
             const lobbyInfo = document.getElementById('lobby-info');
             const playersList = document.getElementById('players-list');
             const inviteInput = document.getElementById('invite-link');
@@ -850,6 +890,20 @@
                             });
                         }
 
+                        // Generate and shuffle the policy deck (6 Liberal, 11 Fascist)
+                        const policyDeck = [];
+                        for (let i = 0; i < 6; i++) {
+                            policyDeck.push('liberal');
+                        }
+                        for (let i = 0; i < 11; i++) {
+                            policyDeck.push('fascist');
+                        }
+                        // Fisher-Yates shuffle
+                        for (let i = policyDeck.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [policyDeck[i], policyDeck[j]] = [policyDeck[j], policyDeck[i]];
+                        }
+
                         const initialPresidentId = arr[0] && arr[0].id ? arr[0].id : null;
                         await updateDoc(gameRef, {
                             state: 'reveal',
@@ -860,7 +914,9 @@
                             currentPresidentPlayerId: initialPresidentId,
                             currentChancellorPlayerId: null,
                             termLimitLastPresidentId: null,
-                            termLimitLastChancellorId: null
+                            termLimitLastChancellorId: null,
+                            policyDeckOrder: policyDeck,
+                            deckPosition: 0
                         });
                         // Log role assignment and knowledge
                         try {

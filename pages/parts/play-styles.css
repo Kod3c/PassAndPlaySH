@@ -379,6 +379,112 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 .modal-close { position:absolute; top:8px; right:8px; width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; border:3px solid var(--propaganda-black); background: var(--off-white); font-weight:900; box-shadow: var(--shadow-sm); cursor:pointer; }
 .modal-close:hover { box-shadow: var(--shadow-md); }
 
+/* Superpower modal specific */
+.superpower-modal .modal-subtitle { font-size: 0.9rem; opacity: 0.7; margin-top: 4px; }
+.superpower-info { text-align: center; margin: 20px 0; }
+.superpower-name { font-weight: 900; font-size: 1.5rem; margin-bottom: 8px; }
+.superpower-description { font-size: 1rem; opacity: 0.8; }
+.superpower-actions { text-align: center; margin-top: 24px; }
+.superpower-note { font-size: 0.85rem; opacity: 0.7; margin-top: 12px; }
+
+/* Policy Peek specific */
+.policy-peek-cards {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin: 24px 0;
+    flex-wrap: wrap;
+}
+
+.policy-peek-card {
+    width: 120px;
+    height: 168px;
+    border-radius: 8px;
+    border: 3px solid var(--propaganda-black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transition: transform 0.2s ease;
+    animation: slideIn 0.3s ease-out both;
+}
+
+.policy-peek-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.policy-peek-card.liberal {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.policy-peek-card.fascist {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+.policy-peek-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.policy-peek-card .card-label {
+    color: white;
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0 8px;
+}
+
+.policy-peek-card .card-number {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.policy-peek-info {
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 24px 0;
+    text-align: center;
+}
+
+.policy-peek-info p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.policy-peek-actions {
+    text-align: center;
+    margin-top: 24px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Role overlay specific */
 .role-content { text-align: center; }
 .role-display { 

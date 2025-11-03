@@ -112,11 +112,12 @@
 
     <script type="module">
         import { app } from '../js/firebase.js';
-        import { getFirestore, doc, collection, serverTimestamp, getDoc, setDoc, query, getDocs, where, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { getFirestore, doc, collection, serverTimestamp, getDoc, setDoc, query, getDocs, where, updateDoc, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         import recaptchaManager from '../js/recaptcha.js';
 
         const db = getFirestore(app);
+        let playersUnsubscribe = null; // Track the listener so we can unsubscribe when game changes
 
         function getGameIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -218,6 +219,13 @@
             const datalist = document.getElementById('existing-names');
             const nameInput = document.getElementById('player-name');
             const nameSelect = document.getElementById('player-name-select');
+
+            // Unsubscribe from previous game's player updates
+            if (playersUnsubscribe) {
+                playersUnsubscribe();
+                playersUnsubscribe = null;
+            }
+
             datalist.innerHTML = '';
             if (!gameId) {
                 statusEl.textContent = '';
@@ -246,10 +254,23 @@
                 const btn = document.getElementById('join-btn');
                 if (btn) btn.textContent = (state === 'reveal' || state === 'playing') ? 'Join Game' : 'Join Lobby';
             } catch (_) {}
-            const playersSnap = await getDocs(query(collection(gameRef, 'players'), orderBy('createdAt', 'asc')));
+
+            // Set up real-time listener for player changes
+            const playersQuery = query(collection(gameRef, 'players'), orderBy('createdAt', 'asc'));
+            playersUnsubscribe = onSnapshot(playersQuery, (playersSnap) => {
+                updatePlayerDropdown(playersSnap, gameId);
+            });
+
+            try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
+            return game;
+        }
+
+        async function updatePlayerDropdown(playersSnap, gameId) {
+            const datalist = document.getElementById('existing-names');
+            const nameInput = document.getElementById('player-name');
+            const nameSelect = document.getElementById('player-name-select');
+
             // Read host pass requirement from game
-            const hostPasswordHash = (snap.data() && snap.data().hostPasswordHash) || null;
-            // Determine availability per name based on presence window
             const PRESENT_WINDOW_MS = 90 * 1000; // 90s: faster reclaim from a new device
             let currentUser = null;
             try { currentUser = await ensureAuth(); } catch (_) { currentUser = null; }
@@ -257,6 +278,7 @@
             const now = Date.now();
             const idToName = new Map();
             const nameInfo = new Map();
+
             playersSnap.docs.forEach(d => {
                 const data = d.data() || {};
                 const n = (data.name || '').toString().trim();
@@ -295,6 +317,9 @@
                 const youNames = Array.from(nameInfo.values()).filter(i => i.youMatches > 0).map(i => i.name);
                 if (youNames.length === 1) youSeatName = youNames[0];
             }
+
+            // Save current selection before updating dropdown
+            const currentSelection = nameSelect ? nameSelect.value : '';
 
             // Populate dropdown and datalist with optgroups
             if (nameSelect) { nameSelect.innerHTML = ''; }
@@ -350,14 +375,27 @@
                 if (availableNames.length) nameSelect.appendChild(availableGroup);
                 if (unavailableNames.length) nameSelect.appendChild(unavailableGroup);
 
-                // If your seat is present, auto-select it; otherwise if exactly one available, select it
-                const yours = youSeatName ? availableNames.find(i => i.name === youSeatName) : null;
-                if (yours) {
-                    nameSelect.value = yours.name;
-                    try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
-                } else if (availableNames.length === 1) {
-                    nameSelect.value = availableNames[0].name;
-                    try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
+                // Auto-select logic: prioritize available players
+                const stillExists = allNames.includes(currentSelection);
+                const currentlyAvailable = availableNames.some(info => info.name === currentSelection);
+
+                // Keep selection if it still exists AND is available, otherwise auto-select an available player
+                if (stillExists && currentSelection && currentlyAvailable) {
+                    nameSelect.value = currentSelection;
+                } else {
+                    // Priority: 1) Your seat, 2) First available player, 3) Keep current if unavailable but exists
+                    const yours = youSeatName ? availableNames.find(i => i.name === youSeatName) : null;
+                    if (yours) {
+                        nameSelect.value = yours.name;
+                        try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
+                    } else if (availableNames.length > 0) {
+                        // Always select the first available player if there are any
+                        nameSelect.value = availableNames[0].name;
+                        try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
+                    } else if (stillExists && currentSelection) {
+                        // No available players, but keep current selection if it exists
+                        nameSelect.value = currentSelection;
+                    }
                 }
             }
 
@@ -374,8 +412,6 @@
                     : Boolean(nameInput && (nameInput.value || '').trim());
                 joinBtnEl.disabled = !(selectedValid && !!gameId);
             }
-            try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
-            return game;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
