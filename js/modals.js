@@ -76,6 +76,7 @@ export function openHistoryModal(historyModal, historyBody, historyItems, youPla
     renderHistory();
 
     function renderHistory() {
+        console.log('Rendering history, historyBody exists:', !!historyBody);
         if (!historyBody) return;
         historyBody.innerHTML = '';
         const wrap = document.createElement('div');

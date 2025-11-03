@@ -3845,6 +3845,10 @@ function showCompatriots(youPlayer, game, roleText) {
         })));
         // Update policy counters and election tracker if present
         updateFromGame(latestGame);
+        
+        // Update fascist slots based on player count
+        refreshFascistSlotsForPlayerCount();
+        
                     // Update floating role banner for this device
         updateRoleBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
