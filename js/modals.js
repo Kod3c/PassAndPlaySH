@@ -123,7 +123,6 @@ export function openHistoryModal(historyModal, historyBody, historyItems, youPla
                 console.log('Skipping game started message:', currentMsg);
                 continue;
             }
-
             // Skip player-specific action prompts (e.g., "Allison: Draw 3 policy cards")
             // But keep general status messages like "President is picking policy cards"
             if (currentMsg.includes(': Draw 3 policy cards') ||
@@ -132,6 +131,7 @@ export function openHistoryModal(historyModal, historyBody, historyItems, youPla
                 console.log('Skipping player action prompt:', currentMsg);
                 continue;
             }
+
 
             // Skip if identical to previous message
             const prev = deduplicatedItems[deduplicatedItems.length - 1];
