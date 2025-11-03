@@ -25,6 +25,6 @@ export function formatTime(ts) {
         if (!ts) return '';
         const d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
         if (!d) return '';
-        return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+        return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(d);
     } catch (_) { return ''; }
 }

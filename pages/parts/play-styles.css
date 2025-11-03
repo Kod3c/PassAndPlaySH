@@ -372,10 +372,10 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 
 /* Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display:none; align-items: center; justify-content:center; z-index: 5000; }
-.modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); position: relative; }
-.modal-header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); }
+.modal-card { width: min(720px, 92vw); background: #fff; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); position: relative; max-height: 86vh; display: flex; flex-direction: column; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); flex-shrink: 0; }
 .modal-title { font-weight: 900; }
-.modal-body { padding: 12px; }
+.modal-body { padding: 12px; overflow-y: auto; flex: 1; min-height: 0; }
 .modal-close { position:absolute; top:8px; right:8px; width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; border:3px solid var(--propaganda-black); background: var(--off-white); font-weight:900; box-shadow: var(--shadow-sm); cursor:pointer; }
 .modal-close:hover { box-shadow: var(--shadow-md); }
 
@@ -495,30 +495,9 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     }
 }
 
-/* Rules modal specific */
-.rules-modal .modal-card { max-height: 86vh; display:flex; flex-direction:column; }
-.rules-modal .modal-body { overflow:auto; }
-.rules-modal .modal-header { background: var(--off-white); }
-.rules-modal .modal-title { font-family: var(--font-fraktur); letter-spacing: 0.02em; font-size: var(--font-2xl); }
-.rules-modal .modal-subtitle { font-family: var(--font-propaganda); font-size: var(--font-lg); color: var(--dark-beige); }
-.rules-quicknav { display:flex; gap:8px; flex-wrap:nowrap; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); background: var(--bg-card); position: sticky; top: 0; z-index: 1; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
-.rules-quicknav .rule-nav-btn { padding: 6px 10px; flex: 0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; }
-
-/* Bottom nav for rules (mobile) */
-.rules-bottomnav { display:none; position: sticky; bottom: 0; left: 0; right: 0; padding: 8px; background: var(--bg-card); border-top: 3px solid var(--propaganda-black); z-index: 1; }
-.rules-bottomnav-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.rules-bottomnav .indicator { font-weight: 900; letter-spacing: 0.03em; }
+/* Rules modal styles are now defined in play-specific.css to avoid duplication */
 
 @media (max-width: 640px) {
-    .rules-modal .modal-card { width: 96vw; max-height: 92vh; }
-    .rules-modal .modal-body { padding: 8px; padding-bottom: 64px; }
-    .rules-quicknav { gap:6px; padding: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow-x: hidden; overflow-y: visible; }
-    .rules-quicknav .rule-nav-btn { padding: 10px; min-width: 0; width: 100%; }
-    .rules-quicknav .nav-text { display:none; }
-    .rules-quicknav .nav-icon { font-size: 1.125rem; }
-    .rules-bottomnav { display:block; }
-    .rules-bottomnav .btn { min-height: 44px; flex: 1; }
-    .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
     
     /* Ensure role cards fit properly in rules modal */
     .roles-grid {
@@ -557,11 +536,12 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 
 .order-list { display:flex; flex-direction:column; gap:8px; }
 .order-item { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 8px 10px; border: 2px dashed var(--propaganda-black); background:#fff; }
-.order-left { display:flex; align-items:center; gap:10px; }
+.order-left { display:flex; align-items:center; gap:10px; flex: 1; min-width: 0; }
 /* Space between badges/tags on the right side of player order rows */
 .order-right { display:flex; align-items:center; gap:6px; }
 .order-right > * + * { margin-left: 6px; }
 .order-num { width: 28px; height: 28px; border-radius: 50%; display:inline-flex; align-items:center; justify-content:center; border: 3px solid var(--propaganda-black); font-weight:900; background: var(--highlight-cream); }
+.history-time { font-weight: 700; font-size: 0.875rem; color: #666; white-space: nowrap; min-width: 60px; }
 .badge-pres { padding: 2px 8px; background:#fef3c7; border:2px solid var(--propaganda-black); font-weight:800; }
 .badge-chanc { padding: 2px 8px; background:#e0f2fe; border:2px solid var(--propaganda-black); font-weight:800; }
 
@@ -733,8 +713,8 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 
 /* Overlay for centered reveal */
 .reveal-overlay { position: fixed; inset: 0; z-index: 6000; pointer-events: auto; }
-.reveal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
-.reveal-card { position: absolute; width: var(--play-card-w, 92px); height: var(--play-card-h, 132px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 3px rgba(241,230,178,0.6); transform-origin: 50% 50%; transition: transform 240ms ease-out, left 240ms ease-out, top 240ms ease-out; }
+.reveal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); pointer-events: none; }
+.reveal-card { position: absolute; width: var(--play-card-w, 92px); height: var(--play-card-h, 132px); background-size: cover; background-position: center; border: 3px solid var(--propaganda-black); border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.35); transform-origin: 50% 50%; transition: transform 240ms ease-out, left 240ms ease-out, top 240ms ease-out, box-shadow 200ms ease-out; }
 .reveal-instruction { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); pointer-events: none; background: rgba(255,255,255,0.97); color: #000; padding: 14px 18px; border: 4px solid var(--propaganda-black); border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,0.4); font-weight: 900; font-family: var(--font-propaganda); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.15rem; text-align: center; min-width: min(560px, 86vw); }
 .reveal-actions { position: absolute; bottom: calc(10% + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 10px; }
 .reveal-btn { cursor: pointer; border: 4px solid var(--propaganda-black); background: var(--highlight-cream); color: var(--propaganda-black); padding: 12px 18px; font-weight: 900; letter-spacing: 0.03em; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); text-transform: uppercase; font-family: var(--font-propaganda); font-size: 1.05rem; }
@@ -747,8 +727,14 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     transition: box-shadow 200ms ease-out;
 }
 
-#chancellor-choice-overlay .reveal-card:hover {
-    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
+/* After cards are flipped, only highlight the individual hovered card */
+#chancellor-choice-overlay .reveal-card.flipped:hover:not(.selected) {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4);
+}
+
+/* Before cards are flipped, hovering over either card highlights both */
+#chancellor-choice-overlay:has(.reveal-card:not(.flipped):hover) .reveal-card:not(.flipped) {
+    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 28px rgba(0,0,0,0.4);
 }
 
 #chancellor-choice-overlay .reveal-card.selected {
@@ -756,22 +742,10 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     z-index: 10;
 }
 
-/* Hover effect for face-down cards - both light up together */
-#chancellor-choice-overlay .reveal-card:not(.flipped):hover {
-    box-shadow: 0 0 0 4px var(--highlight-cream), 0 0 0 8px var(--propaganda-black), 0 12px 24px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(241,230,178,0.6);
-    transition: box-shadow 200ms ease-out;
-}
-
 /* Ensure cards are visible during flip animation */
 #chancellor-choice-overlay .reveal-card.flipping {
     z-index: 15;
     pointer-events: none; /* Prevent clicks during flip */
-}
-
-/* When any face-down card is hovered, both get enhanced glow */
-#chancellor-choice-overlay:hover .reveal-card:not(.flipped) {
-    box-shadow: 0 0 0 3px var(--highlight-cream), 0 0 0 6px var(--propaganda-black), 0 8px 16px rgba(0,0,0,0.3), inset 0 0 0 3px rgba(241,230,178,0.6);
-    transition: box-shadow 200ms ease-out;
 }
 
 /* Subtle varied angles to simulate a real table spread */

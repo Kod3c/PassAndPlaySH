@@ -88,7 +88,6 @@
                         
                         <!-- reCAPTCHA Status -->
                         <div id="recaptcha-status" class="mt-3 text-center text-sm text-gray-600" style="display: none;">
-                            <div id="rate-limit-info"></div>
                             <div id="cooldown-info"></div>
                         </div>
                     </div>
@@ -335,14 +334,16 @@
                 availableNames.forEach(info => {
                     const o = document.createElement('option');
                     o.value = info.name;
-                    o.textContent = info.name + (youSeatName && info.name === youSeatName ? ' – Your seat' : (info.staleClaimed && info.unclaimed === 0 ? ' – Available' : ''));
+                    // Show "Available" for stale/unclaimed seats, no label for unclaimed
+                    const label = (info.staleClaimed && info.unclaimed === 0) ? ' - Available' : '';
+                    o.textContent = info.name + label;
                     availableGroup.appendChild(o);
                 });
                 unavailableNames.forEach(info => {
                     const o = document.createElement('option');
                     o.value = info.name;
-                    o.textContent = info.name + ' - Taken';
-                    o.disabled = true;
+                    o.textContent = info.name + ' - Taken (PIN required)';
+                    // DO NOT disable - allow selection but require correct PIN
                     unavailableGroup.appendChild(o);
                 });
 
@@ -369,7 +370,7 @@
             if (joinBtnEl) {
                 const usingSelect = nameSelect && nameSelect.style.display !== 'none';
                 const selectedValid = usingSelect
-                    ? (nameSelect.value && nameSelect.selectedOptions.length && !nameSelect.selectedOptions[0].disabled)
+                    ? (nameSelect.value && nameSelect.selectedOptions.length)
                     : Boolean(nameInput && (nameInput.value || '').trim());
                 joinBtnEl.disabled = !(selectedValid && !!gameId);
             }
@@ -402,7 +403,7 @@
 
             let currentGameId = normalizeGameId(getGameIdFromUrl());
             if (currentGameId) {
-                // Auto-fill the game code input field
+                // Populate the input field with the game ID from the URL
                 gameIdInput.value = currentGameId;
                 // Do not mutate the field; only use normalized copy for lookups
                 if (currentGameId.length === 5) loadGameMeta(currentGameId);
@@ -411,7 +412,7 @@
             function getSelectedName() {
                 if (nameSelect && nameSelect.style.display !== 'none') {
                     const val = (nameSelect.value || '').trim();
-                    if (val === '' || nameSelect.selectedOptions.length === 0 || nameSelect.selectedOptions[0].disabled) return '';
+                    if (val === '' || nameSelect.selectedOptions.length === 0) return '';
                     return val;
                 }
                 return (nameInput.value || '').trim();
@@ -460,22 +461,14 @@
             // Update reCAPTCHA status display
             function updateRecaptchaStatus() {
                 const statusEl = document.getElementById('recaptcha-status');
-                const rateLimitEl = document.getElementById('rate-limit-info');
                 const cooldownEl = document.getElementById('cooldown-info');
-                
-                if (!statusEl || !rateLimitEl || !cooldownEl) return;
-                
-                const remainingActions = recaptchaManager.getRemainingActions();
+
+                if (!statusEl || !cooldownEl) return;
+
                 const remainingCooldown = recaptchaManager.getRemainingCooldown();
-                
-                if (remainingActions < 10 || remainingCooldown > 0) {
+
+                if (remainingCooldown > 0) {
                     statusEl.style.display = 'block';
-                    
-                    if (remainingActions < 10) {
-                        rateLimitEl.textContent = `Rate limit: ${remainingActions} actions remaining this minute`;
-                    } else {
-                        rateLimitEl.textContent = '';
-                    }
                     
                     if (remainingCooldown > 0) {
                         cooldownEl.textContent = `Cooldown: ${Math.ceil(remainingCooldown / 1000)}s remaining`;
@@ -519,31 +512,55 @@
                     status.textContent = 'Joining...';
                     const user = await ensureAuth();
                     
-                    // First check if this is a reconnection attempt
-                    const reconnection = await checkPlayerReconnection(gid, name, pin);
-                    if (reconnection) {
-                        // Player is reconnecting with correct PIN
-                        await updateDoc(doc(db, 'games', gid, 'players', reconnection.playerId), {
+                    // Check if this name is already taken (has a PIN set)
+                    const gameRef = doc(db, 'games', gid);
+                    const playersCol = collection(gameRef, 'players');
+                    const q = query(playersCol, where('name', '==', name.trim()));
+                    const snap = await getDocs(q);
+
+                    let playerHasPin = false;
+                    let existingPin = null;
+                    let playerId = null;
+
+                    if (!snap.empty) {
+                        for (const d of snap.docs) {
+                            const data = d.data() || {};
+                            if (data.pin) {
+                                playerHasPin = true;
+                                existingPin = data.pin;
+                                playerId = d.id;
+                                break;
+                            }
+                        }
+                    }
+
+                    // If name is taken and has a PIN, validate it
+                    if (playerHasPin) {
+                        if (pin !== existingPin) {
+                            throw new Error('Incorrect PIN for this name. Please enter the correct PIN.');
+                        }
+
+                        // PIN matches - allow reconnection
+                        await updateDoc(doc(db, 'games', gid, 'players', playerId), {
                             uid: user.uid,
                             lastSeen: serverTimestamp()
                         });
-                        
+
                         // Extend TTL by 15 minutes
-                        await setDoc(doc(db, 'games', gid), { 
-                            updatedAt: serverTimestamp(), 
-                            expireAt: new Date(Date.now() + 15 * 60 * 1000) 
+                        await setDoc(gameRef, {
+                            updatedAt: serverTimestamp(),
+                            expireAt: new Date(Date.now() + 15 * 60 * 1000)
                         }, { merge: true });
-                        
+
                         // Persist for lobby heartbeat
-                        try { sessionStorage.setItem(`sh_playerId_${gid}`, reconnection.playerId); } catch (_) {}
-                        
-                        status.textContent = 'Reconnected! Redirecting to lobby...';
+                        try { sessionStorage.setItem(`sh_playerId_${gid}`, playerId); } catch (_) {}
+
+                        status.textContent = 'Joined! Redirecting to lobby...';
                         setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
                         return;
                     }
-                    
+
                     // If attempting to join as host seat, and a password is set, prompt for it
-                    const gameRef = doc(db, 'games', gid);
                     const gameSnap = await getDoc(gameRef);
                     const hostPass = gameSnap.exists() ? (gameSnap.data().hostPasswordHash || null) : null;
                     if (hostPass) {

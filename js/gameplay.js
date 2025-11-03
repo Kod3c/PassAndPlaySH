@@ -1,7 +1,7 @@
 
 
 import { app } from '../js/firebase.js';
-import { onHistory, logPublic } from '../js/db.js?v=2';
+import { onHistory, logPublic, logPrivate } from '../js/db.js?v=2';
 import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy, updateDoc, serverTimestamp, runTransaction, increment } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
@@ -23,6 +23,17 @@ let lastStatusMessage = null;
 let heartbeatTimer = null;
 let afkUnsub = null; let lastAfkSeenOrder = 0;
 let isNominating = false; // Flag to prevent modal re-opening during nomination
+
+// Track last logged state to prevent duplicate console logs
+let lastLoggedState = {
+    renderActionsPhase: null,
+    renderActionsPolicyPhase: null,
+    roleOverlayElements: null,
+    buttonPermissionsState: null,
+    buttonPermissionsDebug: null,
+    buttonState: null,
+    refreshPlayerInfo: null
+};
 
 // Functions moved to utils.js
 
@@ -137,8 +148,6 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
         return;
     }
     
-    console.log(`🎯 Updating fascist slots for player count: ${playerCount}`);
-    console.log(`📊 Container has ${containerEl.children.length} slots total`);
     
     // Clear any existing overlays AND CSS module classes in slots 1-3 first (from ALL slots, filled or not)
     for (let i = 0; i < 3; i++) {
@@ -159,28 +168,22 @@ function updateFascistSlotsForPlayerCount(containerEl, playerCount) {
     // Configure slots based on player count
     if (playerCount >= 5 && playerCount <= 6) {
         // 5-6 players: Slot 3 gets trio-cards-eye
-        console.log('🔧 Applying 5-6 player configuration...');
         const slot3 = containerEl.children[2];
         if (slot3) {
             slot3.classList.add('trio-cards-eye-module'); // Add CSS class for background image
             addTrioCardsEyeToSlot(slot3); // Add JavaScript overlay
         }
-        console.log('✅ 5-6 player configuration: Slot 3 = trio-cards-eye');
         
     } else if (playerCount >= 7 && playerCount <= 8) {
         // 7-8 players: Slot 2 gets eyeglass, Slot 3 gets president
-        console.log('🔧 Applying 7-8 player configuration...');
         addEyeglassToSlot(containerEl.children[1]); // Slot 2 (index 1)
         addPresidentToSlot(containerEl.children[2]); // Slot 3 (index 2)
-        console.log('✅ 7-8 player configuration: Slot 2 = eyeglass, Slot 3 = president');
         
     } else if (playerCount >= 9 && playerCount <= 10) {
         // 9-10 players: Slots 1 & 2 get eyeglass, Slot 3 gets president
-        console.log('🔧 Applying 9-10 player configuration...');
         addEyeglassToSlot(containerEl.children[0]); // Slot 1 (index 0)
         addEyeglassToSlot(containerEl.children[1]); // Slot 2 (index 1)
         addPresidentToSlot(containerEl.children[2]); // Slot 3 (index 2)
-        console.log('✅ 9-10 player configuration: Slots 1&2 = eyeglass, Slot 3 = president');
         
     } else {
         console.warn(`⚠️ Unhandled player count: ${playerCount}. No slot configuration applied.`);
@@ -194,13 +197,11 @@ function addEyeglassToSlot(slot) {
         return;
     }
     if (slot.classList.contains('filled')) {
-        console.log('⏭️ Skipping eyeglass on filled slot');
         return;
     }
     
     const existingOverlay = slot.querySelector('.eyeglass-overlay');
     if (existingOverlay) {
-        console.log('ℹ️ Eyeglass overlay already exists');
         return;
     }
     
@@ -230,7 +231,6 @@ function addEyeglassToSlot(slot) {
     
     overlay.appendChild(img);
     slot.appendChild(overlay);
-    console.log('👓 Eyeglass overlay added to fascist slot');
 }
 
 // Helper function to add president overlay to a slot
@@ -240,13 +240,11 @@ function addPresidentToSlot(slot) {
         return;
     }
     if (slot.classList.contains('filled')) {
-        console.log('⏭️ Skipping president on filled slot');
         return;
     }
     
     const existingOverlay = slot.querySelector('.president-overlay');
     if (existingOverlay) {
-        console.log('ℹ️ President overlay already exists');
         return;
     }
     
@@ -277,7 +275,6 @@ function addPresidentToSlot(slot) {
     overlay.appendChild(img);
     slot.appendChild(overlay);
     slot.classList.add('has-president-overlay');
-    console.log('👑 President overlay added to fascist slot');
 }
 
 // Helper function to add trio-cards-eye overlay to a slot (for 5-6 players)
@@ -302,7 +299,6 @@ function addTrioCardsEyeToSlot(slot) {
         `;
         overlay.innerHTML = '<img src="../images/trio-cards-eye.png" alt="Policy Peek Power" style="width: 100%; height: auto;">';
         slot.appendChild(overlay);
-        console.log('🔍 Trio-cards-eye overlay added to fascist slot');
     }
 }
 
@@ -326,23 +322,18 @@ function refreshFascistSlotsForPlayerCount() {
     
     if (!playerCount || playerCount <= 0) {
         playerCount = playersLength;
-        console.log(`🔄 Using fallback player count from latestPlayers.length: ${playerCount}`);
     }
     if (!playerCount || playerCount <= 0) {
         console.warn('No valid player count found for slot refresh, defaulting to 5');
         playerCount = 5; // Default fallback
     }
     
-    console.log(`🎯 Final player count for slot update: ${playerCount}`);
-    console.log(`🔄 Refreshing fascist slots for updated player count: ${playerCount}`);
     updateFascistSlotsForPlayerCount(fascistSlotsEl, playerCount);
 }
 
 // Manual debug function - call this from browser console to force update slots for testing
 window.debugFascistSlots = function(testPlayerCount) {
-    console.log('🧪 Manual fascist slots debug called');
     if (testPlayerCount) {
-        console.log(`🎯 Testing with forced player count: ${testPlayerCount}`);
         const fascistSlotsEl = document.getElementById('fascist-slots');
         if (fascistSlotsEl) {
             updateFascistSlotsForPlayerCount(fascistSlotsEl, testPlayerCount);
@@ -368,7 +359,6 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 skullBackground = document.createElement('div');
                 skullBackground.className = 'skull-background';
                 slot.appendChild(skullBackground);
-                console.log(`Skull background added to fascist slot ${i + 1}`);
             }
             // Always update the opacity (whether new or existing)
             skullBackground.style.cssText = `
@@ -378,7 +368,7 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 background-repeat: no-repeat;
                 background-position: center;
                 background-size: 46% auto;
-                opacity: 0.15;
+                opacity: 0.75;
                 filter: brightness(0) invert(1);
                 pointer-events: none;
                 z-index: 1;
@@ -393,30 +383,8 @@ function addBulletOverlaysToFascistSlots(containerEl) {
     
     if (!fourthSlot || !fifthSlot) return;
     
-    // Add skull background and bullet overlay to 4th slot (index 3)
+    // Add bullet overlay to 4th slot (index 3)
     if (!fourthSlot.classList.contains('filled')) {
-        // Add skull background or update existing one
-        let skullBackground = fourthSlot.querySelector('.skull-background');
-        if (!skullBackground) {
-            skullBackground = document.createElement('div');
-            skullBackground.className = 'skull-background';
-            fourthSlot.appendChild(skullBackground);
-            console.log('Skull background added to 4th fascist slot');
-        }
-        // Always update the opacity (whether new or existing)
-        skullBackground.style.cssText = `
-            position: absolute;
-            inset: 0;
-            background-image: url('../images/skull.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 46% auto;
-            opacity: 0.75;
-            filter: brightness(0) invert(1);
-            pointer-events: none;
-            z-index: 1;
-        `;
-        
         // Add bullet overlay
         const existingBullet = fourthSlot.querySelector('.bullet-overlay');
         if (!existingBullet) {
@@ -435,34 +403,11 @@ function addBulletOverlaysToFascistSlots(containerEl) {
             `;
             bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
             fourthSlot.appendChild(bulletOverlay);
-            console.log('Bullet overlay added to 4th fascist slot');
         }
     }
     
-    // Add skull background and bullet overlay to 5th slot (index 4)
+    // Add bullet overlay to 5th slot (index 4)
     if (!fifthSlot.classList.contains('filled')) {
-        // Add skull background or update existing one
-        let skullBackground = fifthSlot.querySelector('.skull-background');
-        if (!skullBackground) {
-            skullBackground = document.createElement('div');
-            skullBackground.className = 'skull-background';
-            fifthSlot.appendChild(skullBackground);
-            console.log('Skull background added to 5th fascist slot');
-        }
-        // Always update the opacity (whether new or existing)
-        skullBackground.style.cssText = `
-            position: absolute;
-            inset: 0;
-            background-image: url('../images/skull.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 46% auto;
-            opacity: 0.75;
-            filter: brightness(0) invert(1);
-            pointer-events: none;
-            z-index: 1;
-        `;
-        
         // Add bullet overlay
         const existingBullet = fifthSlot.querySelector('.bullet-overlay');
         if (!existingBullet) {
@@ -481,7 +426,6 @@ function addBulletOverlaysToFascistSlots(containerEl) {
             `;
             bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
             fifthSlot.appendChild(bulletOverlay);
-            console.log('Bullet overlay added to 5th fascist slot');
         }
     }
 }
@@ -523,7 +467,6 @@ function getSuperpowerForSlot(fascistPolicyCount, playerCount) {
 }
 
 async function triggerSuperpowerUI(gameId, superpower, fascistSlot) {
-    console.log(`🎯 Triggering superpower UI for: ${superpower.name}`);
     
     // Update game state to indicate superpower is pending
     const gameRef = doc(db, 'games', gameId);
@@ -591,6 +534,71 @@ function showSuperpowerModal(superpower, fascistSlot) {
     });
 }
 
+function showDangerZoneOverlay() {
+    // Check if the overlay has already been shown this game
+    const gameId = getGameId();
+    console.log('showDangerZoneOverlay called for game:', gameId);
+    if (!gameId) return;
+
+    // Check if modal already exists on the page (prevent duplicates)
+    if (document.getElementById('danger-zone-modal')) {
+        console.log('Danger zone modal already exists on page, skipping');
+        return;
+    }
+
+    // Check localStorage to see if this game already showed the danger zone
+    const storageKey = `dangerZone_${gameId}`;
+    const alreadyShown = localStorage.getItem(storageKey);
+    console.log('Danger zone already shown?', alreadyShown);
+    if (alreadyShown === 'shown') {
+        console.log('Danger zone already shown, skipping');
+        return; // Already shown, don't show again
+    }
+
+    // Mark as shown
+    console.log('Showing danger zone overlay');
+    localStorage.setItem(storageKey, 'shown');
+
+    // Create danger zone modal for all players
+    const modal = document.createElement('div');
+    modal.id = 'danger-zone-modal';
+    modal.className = 'modal-overlay danger-zone-modal';
+    modal.innerHTML = `
+        <div class="modal-card danger-zone-card">
+            <div class="modal-header danger-zone-header">
+                <div class="modal-title">⚠️ DANGER ZONE ACTIVATED</div>
+                <div class="modal-subtitle">3 Fascist Policies Enacted</div>
+            </div>
+            <div class="modal-body">
+                <div class="danger-zone-warning">
+                    <div class="warning-icon">🎭</div>
+                    <div class="warning-text">
+                        <h3>Critical Game State</h3>
+                        <p><strong>If Hitler is elected as Chancellor, the Fascists win immediately!</strong></p>
+                        <p>Be extremely careful when voting on Chancellor nominations from this point forward.</p>
+                    </div>
+                </div>
+                <div class="danger-zone-actions">
+                    <button id="danger-zone-understood" class="btn btn-primary">I Understand</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle dismissal
+    const understoodBtn = document.getElementById('danger-zone-understood');
+    understoodBtn.addEventListener('click', () => {
+        modal.remove();
+    });
+
+    // Show modal
+    requestAnimationFrame(() => {
+        modal.style.display = 'flex';
+    });
+}
+
 function handleSuperpowerActivation(superpowerType) {
     switch (superpowerType) {
         case 'policy_peek':
@@ -618,7 +626,6 @@ async function handlePolicyPeek() {
     }
     
     setStatus(gameId, 'Policy Peek: Examining the top 3 policy cards...');
-    console.log('🔍 Policy Peek activated - showing top 3 cards to president');
     
     try {
         // Create modal to show the top 3 cards
@@ -681,7 +688,6 @@ async function handleInvestigation() {
     }
     
     setStatus(gameId, 'Investigation: President is choosing a player to investigate...');
-    console.log('🔍 Investigation activated - president investigating player loyalty');
     
     try {
         const youId = computeYouId(gameId);
@@ -758,7 +764,6 @@ async function handleSpecialElection() {
     }
     
     setStatus(gameId, 'Special Election: President is choosing the next presidential candidate...');
-    console.log('🗳️ Special Election activated - president choosing next presidential candidate');
     
     try {
         const youId = computeYouId(gameId);
@@ -834,7 +839,6 @@ async function handleExecution() {
     }
     
     setStatus(gameId, 'Execution: President is choosing a player to execute...');
-    console.log('💀 Execution activated - president executing a player');
     
     try {
         const youId = computeYouId(gameId);
@@ -914,9 +918,11 @@ async function completeSuperpower(gameId, superpowerType) {
             pendingSuperpower: null,
             updatedAt: serverTimestamp()
         });
-        
-        console.log(`✅ Superpower ${superpowerType} completed and cleared from pending state`);
+
         setStatus(gameId, `${superpowerType.replace('_', ' ')} power completed.`);
+
+        // Now advance to next government after superpower is complete
+        await advanceToNextGovernment(gameId, gameRef);
     } catch (error) {
         console.error('❌ Failed to complete superpower:', error);
     }
@@ -1091,14 +1097,18 @@ function updateFromGame(game) {
 
     const squares = document.querySelectorAll('#election-tracker .square');
     squares.forEach((sq, idx) => {
-        if (et > idx) sq.classList.add('active');
-        else sq.classList.remove('active');
+        if (et > idx) {
+            sq.classList.add('active');
+            sq.textContent = 'X';
+        } else {
+            sq.classList.remove('active');
+            sq.textContent = sq.dataset.defaultNumber || String(idx + 1);
+        }
     });
 
     // Update table spread count based on current game state
     const tableSpreadCount = calculateTableSpreadCountFromGameState(game);
     setTableSpreadCount(tableSpreadCount);
-    console.log(`Table spread updated from game state: ${tableSpreadCount} cards remaining`);
 }
 
 function updateRoleBanner(game, gameId) {
@@ -1158,17 +1168,17 @@ function updateRoleEnvelope(game, gameId) {
     }
 }
 
-function setStatus(gameId, message, delayMs = 0) {
+function setStatus(gameId, message, delayMs = 0, logToHistory = false) {
     try {
         const el = document.getElementById('status');
         if (!el) return;
-        
+
         if (delayMs > 0) {
             // Clear any existing delayed status
             if (window.delayedStatusTimer) {
                 clearTimeout(window.delayedStatusTimer);
             }
-            
+
             // Set delayed status
             window.delayedStatusTimer = setTimeout(() => {
                 el.textContent = message || '';
@@ -1176,7 +1186,8 @@ function setStatus(gameId, message, delayMs = 0) {
                 el.classList.remove('status-updated');
                 void el.offsetWidth;
                 el.classList.add('status-updated');
-                if (gameId && message && message !== lastStatusMessage) {
+                // Only log to history if explicitly requested and message is different
+                if (logToHistory && gameId && message && message !== lastStatusMessage) {
                     lastStatusMessage = message;
                     try { logPublic(gameId, message, { type: 'status' }); } catch (_) {}
                 }
@@ -1188,7 +1199,8 @@ function setStatus(gameId, message, delayMs = 0) {
             el.classList.remove('status-updated');
             void el.offsetWidth;
             el.classList.add('status-updated');
-            if (gameId && message && message !== lastStatusMessage) {
+            // Only log to history if explicitly requested and message is different
+            if (logToHistory && gameId && message && message !== lastStatusMessage) {
                 lastStatusMessage = message;
                 try { logPublic(gameId, message, { type: 'status' }); } catch (_) {}
             }
@@ -1300,10 +1312,59 @@ function renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter) {
     const presId = game.currentPresidentPlayerId || null;
     const pres = players.find(p => p && p.id === presId) || null;
     if (youId && youId === presId) {
-        setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
+        // Check if there are enough cards to draw
+        if (currentTableSpreadCount < 3) {
+            setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Shuffle discard pile`);
+        } else {
+            setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
+        }
+
         try { initSpreadPresidentDrawUI(gameId); } catch (_) {}
         // Clean up any existing overlays when entering president draw phase
         cleanupAllPolicyOverlays();
+
+        // Add shuffle button if there are too few cards to draw
+        if (currentTableSpreadCount < 3) {
+            const shuffleBtn = document.createElement('button');
+            shuffleBtn.id = 'shuffle-discard-btn';
+            shuffleBtn.className = 'btn btn-primary';
+            shuffleBtn.textContent = 'Shuffle Discard Pile';
+
+            shuffleBtn.addEventListener('click', async function() {
+                try {
+                    shuffleBtn.disabled = true;
+                    shuffleBtn.textContent = 'Shuffling...';
+
+                    await resetDiscardCount();
+
+                    // Update status message after successful shuffle
+                    setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
+
+                    // Reinitialize the president draw UI to enable card selection
+                    try {
+                        teardownSpreadPresidentDrawUI();
+                        initSpreadPresidentDrawUI(gameId);
+                    } catch (err) {
+                        console.error('Failed to reinitialize president draw UI:', err);
+                    }
+
+                    // Success - remove button after shuffle
+                    shuffleBtn.textContent = '✅ Shuffled!';
+                    setTimeout(() => {
+                        if (shuffleBtn.parentNode) {
+                            shuffleBtn.parentNode.removeChild(shuffleBtn);
+                        }
+                    }, 1000);
+                } catch (error) {
+                    console.error('Shuffle failed:', error);
+                    shuffleBtn.disabled = false;
+                    shuffleBtn.textContent = '❌ Failed - Try Again';
+                    alert('Shuffle failed: ' + error.message);
+                }
+            });
+
+            actionsCenter.appendChild(shuffleBtn);
+        }
     } else {
         setStatus(gameId, 'Waiting for the President to draw policy cards…');
         try { teardownSpreadPresidentDrawUI(); } catch (_) {}
@@ -1315,30 +1376,34 @@ function renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter) {
 function renderPhaseChancellorChoice(gameId, youId, game, players, actionsCenter) {
     const chancId = game.currentChancellorPlayerId || null;
     const chanc = players.find(p => p && p.id === chancId) || null;
-    
+
     if (youId && youId === chancId) {
         setStatus(gameId, `${chanc ? (chanc.name || 'Chancellor') : 'Chancellor'}: Choose 1 policy to enact`);
-        
-        // Automatically show the chancellor choice overlay for the chancellor
-        showChancellorChoiceOverlay(game);
-        
-        // Also show the button as a fallback in case they need to reopen it
-        const showCardsBtn = document.createElement('button');
-        showCardsBtn.id = 'show-chancellor-cards-btn';
-        showCardsBtn.className = 'btn btn-secondary';
-        showCardsBtn.textContent = 'Reopen Policy Cards';
-        showCardsBtn.style.marginTop = '16px';
-        showCardsBtn.style.marginBottom = '16px';
-        showCardsBtn.style.display = 'block';
-        showCardsBtn.style.marginLeft = 'auto';
-        showCardsBtn.style.marginRight = 'auto';
-        
-        showCardsBtn.addEventListener('click', function() {
+
+        // Only show the overlay if it doesn't already exist
+        if (!document.getElementById('chancellor-choice-overlay')) {
             showChancellorChoiceOverlay(game);
-        });
-        
-        actionsCenter.appendChild(showCardsBtn);
-        
+        }
+
+        // Also show the button as a fallback in case they need to reopen it
+        if (!document.getElementById('show-chancellor-cards-btn')) {
+            const showCardsBtn = document.createElement('button');
+            showCardsBtn.id = 'show-chancellor-cards-btn';
+            showCardsBtn.className = 'btn btn-secondary';
+            showCardsBtn.textContent = 'Reopen Policy Cards';
+            showCardsBtn.style.marginTop = '16px';
+            showCardsBtn.style.marginBottom = '16px';
+            showCardsBtn.style.display = 'block';
+            showCardsBtn.style.marginLeft = 'auto';
+            showCardsBtn.style.marginRight = 'auto';
+
+            showCardsBtn.addEventListener('click', function() {
+                showChancellorChoiceOverlay(game);
+            });
+
+            actionsCenter.appendChild(showCardsBtn);
+        }
+
     } else {
         setStatus(gameId, `Waiting for ${chanc ? (chanc.name || 'Chancellor') : 'Chancellor'} to choose a policy…`);
         // Clean up any existing overlays for non-chancellors
@@ -1346,72 +1411,77 @@ function renderPhaseChancellorChoice(gameId, youId, game, players, actionsCenter
     }
 }
 
+// Track if we've already initiated advancement for this completed phase
+let advancementInitiated = false;
+let lastAdvancedCompletedTimestamp = null;
+
 function renderPhaseCompleted(gameId, youId, game, players, actionsCenter) {
     // Clean up any remaining overlays when entering completed phase
     cleanupAllPolicyOverlays();
-    
+
     const enactedPolicy = game.enactedPolicy;
     if (enactedPolicy) {
-        setStatus(gameId, `${enactedPolicy === 'liberal' ? 'Liberal' : 'Fascist'} policy enacted! Policy phase completed.`);
+        setStatus(gameId, `${enactedPolicy === 'liberal' ? 'Liberal' : 'Fascist'} policy enacted! Advancing to next turn...`);
     } else {
-        setStatus(gameId, 'Policy phase completed. Waiting for next turn...');
+        setStatus(gameId, 'Policy phase completed. Advancing to next turn...');
     }
-    
-    // Add a manual advancement button in case automatic advancement fails
-    const manualAdvanceBtn = document.createElement('button');
-    manualAdvanceBtn.id = 'manual-advance-btn';
-    manualAdvanceBtn.className = 'btn btn-primary';
-    manualAdvanceBtn.textContent = 'Advance to Next Turn';
-    manualAdvanceBtn.style.marginTop = '16px';
-    manualAdvanceBtn.style.marginBottom = '16px';
-    manualAdvanceBtn.style.display = 'block';
-    manualAdvanceBtn.style.marginLeft = 'auto';
-    manualAdvanceBtn.style.marginRight = 'auto';
-    
-    manualAdvanceBtn.addEventListener('click', async function() {
-        try {
-            console.log('Manual advancement triggered');
-            manualAdvanceBtn.disabled = true;
-            manualAdvanceBtn.textContent = 'Advancing...';
-            
-            const gameRef = doc(db, 'games', gameId);
-            await advanceToNextGovernment(gameId, gameRef);
-            
-            // Success - button will be removed when phase changes
-            manualAdvanceBtn.textContent = '✅ Advanced!';
-        } catch (error) {
-            console.error('Manual advancement failed:', error);
-            manualAdvanceBtn.disabled = false;
-            manualAdvanceBtn.textContent = '❌ Failed - Try Again';
-            alert('Manual advancement failed: ' + error.message);
-        }
-    });
-    
-    actionsCenter.appendChild(manualAdvanceBtn);
+
+    // Check if we've already advanced for this specific completed phase
+    // Use game's updatedAt timestamp as a unique identifier for this phase
+    const currentPhaseTimestamp = game.updatedAt?.seconds || game.updatedAt;
+
+    if (advancementInitiated && lastAdvancedCompletedTimestamp === currentPhaseTimestamp) {
+        // Already advancing for this phase, don't call again
+        return;
+    }
+
+    // Mark that we're advancing for this specific phase
+    advancementInitiated = true;
+    lastAdvancedCompletedTimestamp = currentPhaseTimestamp;
+
+    // Auto-advance to next turn immediately
+    const gameRef = doc(db, 'games', gameId);
+    advanceToNextGovernment(gameId, gameRef)
+        .then(() => {
+            // Reset flag on success so we can advance again next time
+            advancementInitiated = false;
+        })
+        .catch(error => {
+            console.error('Auto-advancement failed:', error);
+            setStatus(gameId, '❌ Failed to advance to next turn');
+            // Reset flag on error so manual retry is possible
+            advancementInitiated = false;
+        });
 }
 
-// Chancellor choice overlay (similar to president's overlay)
+// Chancellor choice overlay (matching president's overlay logic)
 function showChancellorChoiceOverlay(game) {
     const presidentCards = game.presidentDrawnCards || [];
     if (presidentCards.length !== 2) {
         console.error('Expected 2 president cards, got:', presidentCards.length);
         return;
     }
-    
+
     // Build overlay similar to president's reveal overlay
     const overlayId = 'chancellor-choice-overlay';
     let overlay = document.getElementById(overlayId);
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = overlayId;
-        overlay.className = 'reveal-overlay';
-        document.body.appendChild(overlay);
+    if (overlay) {
+        // If overlay already exists, remove it completely and create fresh
+        if (overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+        }
     }
-    
+
+    // Create new overlay
+    overlay = document.createElement('div');
+    overlay.id = overlayId;
+    overlay.className = 'reveal-overlay';
+    document.body.appendChild(overlay);
+
     // Add instruction banner
     const instr = document.createElement('div');
     instr.className = 'reveal-instruction';
-                    instr.textContent = 'Click to flip, then select one to enact';
+    instr.textContent = 'Click to flip, then select one to enact';
     overlay.appendChild(instr);
 
     // Add a close (X) button to dismiss the overlay without changing state
@@ -1439,7 +1509,7 @@ function showChancellorChoiceOverlay(game) {
         if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
     });
     overlay.appendChild(closeBtn);
-    
+
     // Add actions
     const actions = document.createElement('div');
     actions.className = 'reveal-actions';
@@ -1449,201 +1519,137 @@ function showChancellorChoiceOverlay(game) {
     enactBtn.disabled = true;
     actions.appendChild(enactBtn);
     overlay.appendChild(actions);
-    
+
     const centerX = Math.round(window.innerWidth / 2);
     const centerY = Math.round(window.innerHeight / 2);
     // Responsive scale: reduce card size on narrow screens so overlays don't overwhelm UI
     const _vw = window.innerWidth || (document && document.documentElement && document.documentElement.clientWidth) || 0;
     let scale = 1.4;
     if (_vw <= 360) {
-        scale = 0.95;
+        scale = 1.0;
     } else if (_vw <= 640) {
-        scale = 1.1;
+        scale = 1.15;
     }
-    
+
     const overlayCards = [];
-    
-    // Create two cards fanned out in an arc, starting face down
+    let cardsFlipped = false;
+
+    // Create two cards starting face down
     presidentCards.forEach((policy, index) => {
         const clone = document.createElement('div');
         clone.className = 'reveal-card';
         clone.style.backgroundImage = 'url(../images/policy-back.png)'; // Start face down
         clone.style.cursor = 'pointer';
-        clone.dataset.policy = policy; // Store the policy type for later
-        clone.dataset.index = index; // Store the index
-        
+        clone.dataset.policy = policy; // Store policy for later
+
         // Fan the cards in an arc - left card rotated left, right card rotated right
-        const angle = index === 0 ? -12 : 12; // Left card -12°, right card +12° (reduced rotation)
-        const radius = 100; // Distance from center (reduced from 140)
-        const cardAngle = (index - 0.5) * Math.PI / 4; // Spread over 45 degrees (reduced from 60)
-        
-        const targetX = centerX + Math.sin(cardAngle) * radius;
-        const targetY = centerY - Math.cos(cardAngle) * radius;
-        
+        const rot = index === 0 ? -8 : 8; // Matching president's rotation
+        const spacing = 120; // Horizontal spacing between cards
+
+        const targetX = centerX + (index - 0.5) * spacing;
+        const targetY = centerY;
+
         const finalLeft = Math.round(targetX - (92 * scale) / 2); // 92 is card width
         const finalTop = Math.round(targetY - (132 * scale) / 2); // 132 is card height
-        
+
         clone.style.left = finalLeft + 'px';
         clone.style.top = finalTop + 'px';
-        clone.style.transform = `scale(${scale}) rotate(${angle}deg)`;
-        clone.style.transformOrigin = 'center center';
-        clone.style.transition = 'transform 300ms ease-out, box-shadow 200ms ease-out';
-        clone.dataset.originalTransform = `scale(${scale}) rotate(${angle}deg)`; // Store original transform
-        
+        clone.style.transform = `scale(${scale}) rotate(${rot}deg)`;
+        clone.style.transition = 'transform 300ms ease-out';
+        clone.style.zIndex = '10'; // Set initial z-index
+
         overlay.appendChild(clone);
         overlayCards.push(clone);
-        
-        // Add click handler for flipping and selection
-        clone.addEventListener('click', function() {
-            if (!clone.classList.contains('flipped')) {
-                // First click: flip both cards simultaneously
-                // Prevent multiple simultaneous flips
-                if (overlayCards.some(card => card.classList.contains('flipping'))) {
-                    return;
-                }
-                flipAllCards();
+    });
+
+    // Function to flip all cards
+    function flipAllCards() {
+        if (cardsFlipped) return; // Already flipped
+        cardsFlipped = true;
+
+        overlayCards.forEach((clone, index) => {
+            const policy = presidentCards[index];
+            const rot = index === 0 ? -8 : 8;
+
+            clone.style.transition = 'transform 300ms ease-out';
+            clone.style.transform = `scale(${scale}) rotate(${rot}deg) rotateY(180deg)`;
+
+            // Halfway through flip, change to front image
+            setTimeout(() => {
+                clone.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
+                clone.classList.add(policy);
+                clone.classList.add('flipped'); // Mark as flipped for CSS styling
+            }, 150);
+
+            // Complete the flip
+            setTimeout(() => {
+                clone.style.transform = `scale(${scale}) rotate(${rot}deg)`;
+            }, 300);
+        });
+    }
+
+    // Selection logic: click to toggle; enable enact when exactly 1 selected
+    function updateEnactState() {
+        const selected = overlayCards.filter(c => c.classList.contains('selected'));
+        enactBtn.disabled = (selected.length !== 1);
+
+        // Update z-index for selected cards to make them pop to the top
+        overlayCards.forEach(card => {
+            if (card.classList.contains('selected')) {
+                card.style.zIndex = '20'; // Higher z-index for selected cards
             } else {
-                // Second click: select/deselect the card
-                if (clone.classList.contains('selected')) {
-                    clone.classList.remove('selected');
-                    clone.style.zIndex = ''; // Reset z-index
-                } else {
-                    // Deselect all cards first
-                    overlayCards.forEach(c => {
-                        c.classList.remove('selected');
-                        c.style.zIndex = ''; // Reset z-index for all cards
-                    });
-                    // Select this card
-                    clone.classList.add('selected');
-                    clone.style.zIndex = '10'; // Bring selected card to front
-                }
-                updateEnactButtonState();
+                card.style.zIndex = '10'; // Lower z-index for unselected cards
             }
         });
-    });
-    
-    // Function to flip all cards simultaneously
-    function flipAllCards() {
-        console.log('Starting card flip animation...');
-        
-        // Mark all cards as flipping to prevent multiple simultaneous flips
-        overlayCards.forEach(card => card.classList.add('flipping'));
-        
-        overlayCards.forEach((card, index) => {
-            const policy = presidentCards[index];
-            console.log(`Flipping card ${index}: ${policy} policy`);
-            
-            // Temporarily disable CSS transitions during the flip
-            const originalTransition = card.style.transition;
-            card.style.transition = 'none';
-            
-            // Start the flip animation for each card
-            const originalTransform = card.dataset.originalTransform;
-            console.log(`Card ${index} original transform:`, originalTransform);
-            // Add rotateY(90deg) to the existing transform
-            card.style.transform = originalTransform + ' rotateY(90deg)';
-            console.log(`Card ${index} flipped transform:`, card.style.transform);
-            
-            // Halfway through the flip, change the image
-            setTimeout(() => {
-                console.log(`Card ${index} changing image to:`, policy);
-                
-                // Preload the image to ensure it's available
-                const img = new Image();
-                img.onload = () => {
-                    card.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping'); // Remove flipping class
-                    console.log(`Card ${index} flipped classes:`, card.className);
-                    
-                    // Complete the flip - remove the rotateY(90deg) to return to original state
-                    setTimeout(() => {
-                        console.log(`Card ${index} completing flip, restoring transform:`, originalTransform);
-                        card.style.transform = originalTransform;
-                        // Re-enable CSS transitions
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout to ensure cards are always restored
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.onerror = () => {
-                    console.error(`Failed to load image for ${policy} policy`);
-                    // Still complete the flip even if image fails
-                    card.classList.add(policy);
-                    card.classList.add('flipped');
-                    card.classList.remove('flipping');
-                    
-                    // Fallback: ensure card is visible with a colored background
-                    if (policy === 'liberal') {
-                        card.style.backgroundColor = 'var(--liberal-blue)';
-                        card.style.backgroundImage = 'none';
-                    } else {
-                        card.style.backgroundColor = 'var(--fascist-red)';
-                        card.style.backgroundImage = 'none';
-                    }
-                    
-                    setTimeout(() => {
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }, 200);
-                };
-                
-                // Safety timeout for error case too
-                setTimeout(() => {
-                    if (card.classList.contains('flipping')) {
-                        console.warn(`Card ${index} still flipping after error timeout, forcing completion`);
-                        card.classList.remove('flipping');
-                        card.style.transform = originalTransform;
-                        card.style.transition = originalTransition;
-                    }
-                }, 1000);
-                img.src = policy === 'liberal' ? '../images/liberal.png' : '../images/facist.png';
-            }, 200);
+    }
+
+    overlayCards.forEach((c) => {
+        c.addEventListener('click', function() {
+            // First click flips all cards
+            if (!cardsFlipped) {
+                flipAllCards();
+                return;
+            }
+
+            // After cards are flipped, handle selection
+            if (c.classList.contains('selected')) {
+                c.classList.remove('selected');
+            } else {
+                // Limit to 1 selected
+                const selected = overlayCards.filter(cc => cc.classList.contains('selected'));
+                if (selected.length >= 1) {
+                    // Deselect all others
+                    overlayCards.forEach(cc => cc.classList.remove('selected'));
+                }
+                c.classList.add('selected');
+            }
+            updateEnactState();
         });
-    }
-    
-    // Update enact button state
-    function updateEnactButtonState() {
-        const flipped = overlayCards.filter(c => c.classList.contains('flipped'));
-        const selected = overlayCards.filter(c => c.classList.contains('selected'));
-        
-        // Only enable enact button when both cards are flipped AND one is selected
-        enactBtn.disabled = (flipped.length !== 2 || selected.length !== 1);
-    }
-    
+    });
+    updateEnactState();
+
     // Handle enact button click
     enactBtn.addEventListener('click', async function() {
         const selected = overlayCards.find(c => c.classList.contains('selected'));
         if (!selected) return;
-        
+
         const selectedIndex = overlayCards.indexOf(selected);
         const enactedPolicy = presidentCards[selectedIndex];
         const discardedPolicy = presidentCards[1 - selectedIndex];
-        
+
         try {
             await enactPolicyAsChancellor(enactedPolicy, discardedPolicy);
-            
+
             // Close the overlay
             if (overlay && overlay.parentNode) {
                 overlay.parentNode.removeChild(overlay);
             }
-            
+
         } catch (error) {
             console.error('Failed to enact policy:', error);
             alert('Failed to enact policy. Please try again. Error: ' + error.message);
         }
     });
-    
-    updateEnactButtonState();
 }
 
 // Clean up all policy-related overlays
@@ -1705,7 +1711,6 @@ function getActualTopThreePolicies() {
     
     if (totalRemaining < 3) {
         // Not enough cards, reshuffle discard pile
-        console.log('Deck running low, should reshuffle discard pile');
         // Reset discard count when deck is reshuffled
         resetDiscardCount();
         return ['liberal', 'liberal', 'fascist']; // Placeholder
@@ -1808,7 +1813,6 @@ function initSpreadPresidentDrawUI(gameId) {
     // Define revealAllToCenterFan function with access to gameId
     const revealAllToCenterFan = () => {
         // Debug logging
-        console.log('revealAllToCenterFan called with gameId:', gameId);
         
         if (spreadFanShown) return;
         spreadFanShown = true;
@@ -2019,7 +2023,6 @@ function initSpreadPresidentDrawUI(gameId) {
         
         // Handle sending cards to chancellor
         sendBtn.addEventListener('click', async function() {
-            console.log('Send button clicked with gameId:', gameId);
             
             // Validate gameId is available
             if (!gameId) {
@@ -2029,10 +2032,8 @@ function initSpreadPresidentDrawUI(gameId) {
             }
             
             const selected = overlayCards.filter(c => c.classList.contains('selected'));
-            console.log('Selected cards:', selected);
             
             if (selected.length !== 2) {
-                console.log('Not enough cards selected:', selected.length);
                 return;
             }
             
@@ -2043,21 +2044,17 @@ function initSpreadPresidentDrawUI(gameId) {
                 return 'liberal'; // fallback
             });
             
-            console.log('Selected policies:', selectedPolicies);
             
             // Get the discarded policy (the one not selected)
             const discardedPolicy = overlayCards.find(card => !card.classList.contains('selected'));
             const discardedPolicyType = discardedPolicy ? 
                 (discardedPolicy.classList.contains('liberal') ? 'liberal' : 'fascist') : 'liberal';
             
-            console.log('Discarded policy:', discardedPolicyType);
             
             try {
-                console.log('Calling updateGameStateAfterPresidentDraw...');
                 // Update game state to remove the top 3 cards and move to chancellor phase
                 await updateGameStateAfterPresidentDraw(selectedPolicies, discardedPolicyType);
                 
-                console.log('Game state updated successfully');
                 
                 // Close the overlay and clean up
                 if (overlay && overlay.parentNode) {
@@ -2179,47 +2176,11 @@ function initSpreadPresidentDrawUI(gameId) {
             revealAllToCenterFan();
         });
     }
-    
-    // Add event listener for the "Repair Game" button
-    const repairGameMainBtn = document.getElementById('repair-game-main-btn');
-    if (repairGameMainBtn) {
-        repairGameMainBtn.addEventListener('click', async function() {
-            try {
-                repairGameMainBtn.disabled = true;
-                repairGameMainBtn.textContent = '🔧 Repairing...';
-                
-                const gameId = getGameId();
-                const repaired = await repairGameState(gameId);
-                
-                if (repaired) {
-                    repairGameMainBtn.textContent = '✅ Repaired!';
-                    setTimeout(() => {
-                        repairGameMainBtn.textContent = '🔧 Repair';
-                        repairGameMainBtn.disabled = false;
-                    }, 2000);
-                } else {
-                    repairGameMainBtn.textContent = '✅ No Issues';
-                    setTimeout(() => {
-                        repairGameMainBtn.textContent = '🔧 Repair';
-                        repairGameMainBtn.disabled = false;
-                    }, 2000);
-                }
-            } catch (err) {
-                console.error('Game repair failed:', err);
-                repairGameMainBtn.textContent = '❌ Failed';
-                repairGameMainBtn.disabled = false;
-                setTimeout(() => {
-                    repairGameMainBtn.textContent = '🔧 Repair';
-                }, 3000);
-            }
-        });
-    }
 }
 
 // Helper function to update game state after president draws cards
 async function updateGameStateAfterPresidentDraw(selectedPolicies, discardedPolicy) {
     const gameId = getGameId();
-    console.log('updateGameStateAfterPresidentDraw called with:', { gameId, selectedPolicies, discardedPolicy });
     
     if (!gameId) {
         throw new Error('Game ID not found');
@@ -2229,12 +2190,10 @@ async function updateGameStateAfterPresidentDraw(selectedPolicies, discardedPoli
         throw new Error('Game data not loaded yet');
     }
     
-    console.log('Current game state:', latestGame);
     
     try {
         // Update the game document to reflect that cards have been drawn
         const gameRef = doc(db, 'games', gameId);
-        console.log('Updating game document:', gameRef.path);
         
         const updateData = {
             policyPhase: 'chancellor_choice',
@@ -2243,20 +2202,16 @@ async function updateGameStateAfterPresidentDraw(selectedPolicies, discardedPoli
             updatedAt: serverTimestamp()
         };
         
-        console.log('Update data:', updateData);
         
         await updateDoc(gameRef, updateData);
-        console.log('Game document updated successfully');
         
         // Log the action
-        console.log('Logging public action...');
         await logPublic(gameId, `President drew 3 policy cards and discarded 1 ${discardedPolicy} policy`, {
             type: 'policy_draw',
             actorId: latestGame.currentPresidentPlayerId,
             selectedPolicies: selectedPolicies,
             discardedPolicy: discardedPolicy
         });
-        console.log('Public action logged successfully');
         
     } catch (error) {
         console.error('Error updating game state:', error);
@@ -2293,12 +2248,10 @@ function updateDeckVisualAfterDraw() {
 
 // Helper function to add discarded card to discard pile
 function addDiscardedCardToPile() {
-    console.log('Adding discarded card to discard pile');
     
     // Use our dynamic discard pile module to increment the count
     incrementDiscardCount();
     
-    console.log('Discarded card added successfully');
 }
 
 // Helper function for chancellor to enact a policy
@@ -2309,8 +2262,6 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
     }
     
     try {
-        console.log('Enacting policy:', enactedPolicy, 'Discarded:', discardedPolicy);
-        console.log('Current game state before update:', latestGame);
         
         // Update the game document to reflect the enacted policy
         const gameRef = doc(db, 'games', gameId);
@@ -2328,9 +2279,7 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
             updates.fascistPolicies = increment(1);
         }
         
-        console.log('Updating game with:', updates);
         await updateDoc(gameRef, updates);
-        console.log('Policy enacted successfully');
         
         // Log the action
         await logPublic(gameId, `Chancellor enacted a ${enactedPolicy} policy`, {
@@ -2351,20 +2300,29 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
         });
         setTableSpreadCount(newTableSpreadCount);
         
-        console.log(`Table spread updated after policy enactment: ${newTableSpreadCount} cards remaining`);
         
         // Check if this triggers executive powers
         const newLiberalCount = (latestGame.liberalPolicies || 0) + (enactedPolicy === 'liberal' ? 1 : 0);
         const newFascistCount = (latestGame.fascistPolicies || 0) + (enactedPolicy === 'fascist' ? 1 : 0);
-        
+
+        console.log(`📊 Policy enacted: ${enactedPolicy}, New fascist count: ${newFascistCount}, Previous count: ${latestGame.fascistPolicies || 0}`);
+
+        // Show danger zone overlay when exactly 3 fascist policies are enacted
+        if (newFascistCount === 3 && enactedPolicy === 'fascist') {
+            console.log('🚨 Danger Zone: 3 fascist policies enacted');
+            // Delay showing the danger zone slightly to avoid blocking the game flow
+            setTimeout(() => {
+                showDangerZoneOverlay();
+            }, 500);
+        }
+
         // Only trigger superpowers if a fascist policy was enacted
         if (enactedPolicy === 'fascist') {
             const playerCount = latestGame.playerCount || (latestPlayers || []).length;
             const superpower = getSuperpowerForSlot(newFascistCount, playerCount);
-            
+
             if (superpower) {
-                console.log(`🦸‍♂️ Superpower triggered: ${superpower.name} for slot ${newFascistCount} with ${playerCount} players`);
-                
+
                 // Log the superpower activation
                 await logPublic(gameId, `${superpower.name} activated! President must use this power.`, {
                     type: 'superpower_activated',
@@ -2372,7 +2330,7 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
                     fascistPolicies: newFascistCount,
                     playerCount: playerCount
                 });
-                
+
                 // Trigger the superpower UI
                 await triggerSuperpowerUI(gameId, superpower, newFascistCount);
             }
@@ -2398,30 +2356,112 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
     }
 }
 
+// Function to enact chaos policy (when 3 elections fail)
+async function enactChaosPolicy(gameId, gameRef) {
+    try {
+        // Calculate remaining cards in deck
+        const liberalTotal = 6;
+        const fascistTotal = 11;
+        const liberalEnacted = latestGame?.liberalPolicies || 0;
+        const fascistEnacted = latestGame?.fascistPolicies || 0;
+        const totalDiscarded = latestGame?.totalDiscardedCards || 0;
+
+        // Calculate remaining cards of each type
+        const remainingLiberal = Math.max(0, liberalTotal - liberalEnacted);
+        const remainingFascist = Math.max(0, fascistTotal - fascistEnacted);
+        const totalRemaining = remainingLiberal + remainingFascist - totalDiscarded;
+
+        // Randomly select a policy weighted by remaining cards
+        const liberalRatio = totalRemaining > 0 ? remainingLiberal / (remainingLiberal + remainingFascist) : 0.35;
+        const chaosPolicy = Math.random() < liberalRatio ? 'liberal' : 'fascist';
+
+        // Update game state
+        const updates = {
+            electionTracker: 0, // Reset tracker after chaos
+            updatedAt: serverTimestamp()
+        };
+
+        // Increment the appropriate policy counter
+        if (chaosPolicy === 'liberal') {
+            updates.liberalPolicies = increment(1);
+        } else {
+            updates.fascistPolicies = increment(1);
+        }
+
+        await updateDoc(gameRef, updates);
+
+        // Log the chaos policy enactment
+        await logPublic(gameId, `🎲 Chaos! A ${chaosPolicy} policy was enacted from the top of the deck`, {
+            type: 'chaos_policy',
+            enactedPolicy: chaosPolicy
+        });
+
+        // Update table spread count
+        const newTableSpreadCount = calculateTableSpreadCountFromGameState({
+            ...latestGame,
+            liberalPolicies: (latestGame.liberalPolicies || 0) + (chaosPolicy === 'liberal' ? 1 : 0),
+            fascistPolicies: (latestGame.fascistPolicies || 0) + (chaosPolicy === 'fascist' ? 1 : 0)
+        });
+        setTableSpreadCount(newTableSpreadCount);
+
+        // Check for danger zone overlay (3 fascist policies)
+        const newFascistCount = (latestGame.fascistPolicies || 0) + (chaosPolicy === 'fascist' ? 1 : 0);
+        if (newFascistCount === 3) {
+            showDangerZoneOverlay();
+        }
+
+        // Note: Chaos policies do NOT trigger executive powers per game rules
+
+        // Wait a moment, then advance to next government
+        setTimeout(async () => {
+            try {
+                await advanceToNextGovernment(gameId, gameRef);
+            } catch (advanceError) {
+                console.error('Failed to advance after chaos policy:', advanceError);
+                await applyFallbackCleanup(gameId, gameRef);
+            }
+        }, 1500);
+
+    } catch (error) {
+        console.error('Error enacting chaos policy:', error);
+        throw error;
+    }
+}
+
 // Separate function to advance to next government
 async function advanceToNextGovernment(gameId, gameRef) {
-    console.log('Advancing to next government...');
-    
+
     // Get fresh game state
     const gameSnap = await getDoc(gameRef);
     if (!gameSnap.exists()) {
         throw new Error('Game no longer exists');
     }
     const currentGame = gameSnap.data();
+
+    // Don't advance if there's a pending superpower
+    if (currentGame.pendingSuperpower) {
+        console.log('Skipping advancement - pending superpower exists');
+        return;
+    }
+
+    // Check if we're still in completed phase OR if this is a failed election - if not, someone else already advanced
+    const isCompletedPhase = currentGame.policyPhase === 'completed';
+    const isFailedElection = currentGame.voteResolution && !currentGame.voteResolution.passed;
+
+    if (!isCompletedPhase && !isFailedElection) {
+        console.log('Skipping advancement - already advanced (not in completed phase or failed election)');
+        return;
+    }
     
     const prevChancellorId = currentGame.currentChancellorPlayerId || null;
     const prevPresidentId = currentGame.currentPresidentPlayerId || null;
     
-    console.log('Previous chancellor:', prevChancellorId);
-    console.log('Previous president:', prevPresidentId);
-    console.log('Current players:', latestPlayers);
     
     // Get alive players and sort by orderIndex
     const orderedAlive = (latestPlayers || [])
         .filter(p => p && p.alive !== false)
         .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
     
-    console.log('Ordered alive players:', orderedAlive);
     
     if (orderedAlive.length === 0) {
         console.error('No alive players found!');
@@ -2432,14 +2472,11 @@ async function advanceToNextGovernment(gameId, gameRef) {
     const currentPresidentId = currentGame.currentPresidentPlayerId;
     const currentIndex = orderedAlive.findIndex(p => p.id === currentPresidentId);
     
-    console.log('Current president ID:', currentPresidentId);
-    console.log('Current president index:', currentIndex);
     
     if (currentIndex === -1) {
         console.error('Current president not found in alive players!');
         // Fallback: use the first player as next president
         const nextPresident = orderedAlive[0];
-        console.log('Using fallback next president:', nextPresident);
         
         const fallbackUpdates = {
             // Clear out policy phase artifacts
@@ -2464,7 +2501,6 @@ async function advanceToNextGovernment(gameId, gameRef) {
         };
         
         await updateDoc(gameRef, fallbackUpdates);
-        console.log('Fallback government advancement completed');
         
         // Clean up any remaining overlays after fallback advancement
         cleanupAllPolicyOverlays();
@@ -2483,8 +2519,6 @@ async function advanceToNextGovernment(gameId, gameRef) {
     const nextIndex = (currentIndex + 1) % orderedAlive.length;
     const nextPresident = orderedAlive[nextIndex];
     
-    console.log('Next president index:', nextIndex);
-    console.log('Next president:', nextPresident);
     
     if (!nextPresident) {
         console.error('Next president calculation failed!');
@@ -2514,9 +2548,7 @@ async function advanceToNextGovernment(gameId, gameRef) {
         updatedAt: serverTimestamp()
     };
 
-    console.log('Advancing with updates:', advanceUpdates);
     await updateDoc(gameRef, advanceUpdates);
-    console.log('Government advancement completed successfully');
     
     // Clean up any remaining overlays after advancing
     cleanupAllPolicyOverlays();
@@ -2535,7 +2567,6 @@ async function advanceToNextGovernment(gameId, gameRef) {
 
 // Fallback cleanup function to prevent getting stuck
 async function applyFallbackCleanup(gameId, gameRef) {
-    console.log('Applying fallback cleanup to prevent getting stuck...');
     try {
         const fallbackUpdates = {
             policyPhase: null,
@@ -2552,7 +2583,6 @@ async function applyFallbackCleanup(gameId, gameRef) {
         };
         
         await updateDoc(gameRef, fallbackUpdates);
-        console.log('Fallback cleanup applied successfully');
         
         // Clean up any remaining overlays after fallback cleanup
         cleanupAllPolicyOverlays();
@@ -2570,6 +2600,11 @@ async function applyFallbackCleanup(gameId, gameRef) {
 function renderActions(gameId) {
     const actionsCenter = document.querySelector('.actions-center');
     if (!actionsCenter) return;
+
+    // Preserve vote popover state before clearing
+    const votePopover = document.getElementById('vote-popover');
+    const wasPopoverOpen = votePopover && votePopover.style.display === 'block';
+
     actionsCenter.innerHTML = '';
 
     const youId = computeYouId(gameId);
@@ -2588,20 +2623,36 @@ function renderActions(gameId) {
     if (game.state !== 'playing') return;
 
     const phase = computePhase(game);
-    console.log('Rendering actions for phase:', phase, 'Game state:', {
-        policyPhase: game.policyPhase,
-        enactedPolicy: game.enactedPolicy,
-        currentPresident: game.currentPresidentPlayerId,
-        currentChancellor: game.currentChancellorPlayerId,
-        voteResolution: game.voteResolution
-    });
+
+    // Only log when phase or policy phase changes
+    if (lastLoggedState.renderActionsPhase !== phase || lastLoggedState.renderActionsPolicyPhase !== game.policyPhase) {
+        console.log('Rendering actions for phase:', phase, 'Game state:', {
+            policyPhase: game.policyPhase,
+            enactedPolicy: game.enactedPolicy,
+            currentPresident: game.currentPresidentPlayerId,
+            currentChancellor: game.currentChancellorPlayerId,
+            voteResolution: game.voteResolution
+        });
+        lastLoggedState.renderActionsPhase = phase;
+        lastLoggedState.renderActionsPolicyPhase = game.policyPhase;
+    }
     
     if (phase === 'nomination') {
         // Clean up any lingering overlays when entering nomination phase
         cleanupAllPolicyOverlays();
         return renderPhaseNomination(gameId, youId, game, players, actionsCenter);
     }
-    if (phase === 'voting') return renderPhaseVoting(gameId, youId, game, players, actionsCenter);
+    if (phase === 'voting') {
+        renderPhaseVoting(gameId, youId, game, players, actionsCenter);
+        // Restore vote popover state if it was open before re-render
+        if (wasPopoverOpen) {
+            const newPopover = document.getElementById('vote-popover');
+            if (newPopover) {
+                newPopover.style.display = 'block';
+            }
+        }
+        return;
+    }
     if (phase === 'president_draw') return renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter);
     if (phase === 'chancellor_choice') return renderPhaseChancellorChoice(gameId, youId, game, players, actionsCenter);
     if (phase === 'completed') return renderPhaseCompleted(gameId, youId, game, players, actionsCenter);
@@ -2659,54 +2710,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Function moved to helpers.js
 
-    function renderHistory() {
-        if (!historyBody) return;
-        historyBody.innerHTML = '';
-        const wrap = document.createElement('div');
-        wrap.style.display = 'flex';
-        wrap.style.flexDirection = 'column';
-        wrap.style.gap = '8px';
-
-        const visibleItems = (historyItems || []).filter(evt => canSeeEvent(evt, youPlayerDoc()));
-
-        if (visibleItems.length === 0) {
-            const p = document.createElement('p');
-            p.textContent = 'No history yet.';
-            historyBody.appendChild(p);
-            return;
-        }
-
-        visibleItems.forEach((evt) => {
-            const row = document.createElement('div');
-            row.className = 'order-item';
-            const left = document.createElement('div');
-            left.className = 'order-left';
-            const time = document.createElement('div');
-            time.className = 'order-num';
-            time.textContent = formatTime(evt.ts);
-            const msg = document.createElement('div');
-            msg.style.fontWeight = '800';
-            msg.textContent = evt.message || '';
-            left.appendChild(time);
-            left.appendChild(msg);
-            row.appendChild(left);
-
-            const right = document.createElement('div');
-            right.className = 'order-right';
-            const tag = document.createElement('span');
-            tag.className = 'badge-pres';
-            tag.textContent = (evt.visibility || 'public').toUpperCase();
-            right.appendChild(tag);
-            row.appendChild(right);
-
-            wrap.appendChild(row);
-        });
-        historyBody.appendChild(wrap);
-    }
-
-    // Function moved to modals.js
-
-    // Function moved to modals.js
+    // renderHistory function removed - now handled in modals.js
             orderBtn?.addEventListener('click', () => openOrderModal(latestPlayers, latestGame, orderBody, orderModal, setRoleBannerVisibility));
 orderClose?.addEventListener('click', () => closeOrderModal(orderModal, setRoleBannerVisibility));
 orderModal?.addEventListener('click', function(e) { if (e.target === orderModal) closeOrderModal(orderModal, setRoleBannerVisibility); });
@@ -2718,25 +2722,22 @@ roleEnvelope?.addEventListener('click', openRoleOverlay);
     // Function moved to modals.js
 
     // Function moved to modals.js
-    historyBtn?.addEventListener('click', () => {
-        historyUnsub = openHistoryModal(historyModal, historyBody, historyUnsub, gid, onHistory, historyItems, canSeeEvent, formatTime, setRoleBannerVisibility);
-    });
-    historyClose?.addEventListener('click', () => closeHistoryModal(historyModal, setRoleBannerVisibility, historyUnsub));
-    historyModal?.addEventListener('click', function(e) { if (e.target === historyModal) closeHistoryModal(historyModal, setRoleBannerVisibility, historyUnsub); });
-    
-    // Test history button
-    const testHistoryBtn = document.getElementById('test-history-btn');
-    testHistoryBtn?.addEventListener('click', async () => {
-        console.log('Test history button clicked, writing test event...');
-        try {
-            await logPublic(gid, 'Test history event - Game started!', { type: 'test' });
-            console.log('Test history event written successfully');
-            alert('Test history event created! Now click History to see it.');
-        } catch (err) {
-            console.error('Failed to write test history event:', err);
-            alert('Failed to create test event: ' + err.message);
+    historyBtn?.addEventListener('click', async () => {
+        // Subscribe to history if not already subscribed
+        if (!historyUnsub) {
+            // Wait for initial history data before opening modal
+            await new Promise((resolve) => {
+                historyUnsub = onHistory(gid, (items) => {
+                    historyItems = items || [];
+                    resolve(); // Resolve on first data receive
+                });
+            });
         }
+        const youPlayer = youPlayerDoc();
+        openHistoryModal(historyModal, historyBody, historyItems, youPlayer, canSeeEvent, formatTime, setRoleBannerVisibility);
     });
+    historyClose?.addEventListener('click', () => closeHistoryModal(historyModal, setRoleBannerVisibility));
+    historyModal?.addEventListener('click', function(e) { if (e.target === historyModal) closeHistoryModal(historyModal, setRoleBannerVisibility); });
 
     function openNominationModal() {
         if (!nominationModal) return;
@@ -2751,29 +2752,45 @@ roleEnvelope?.addEventListener('click', openRoleOverlay);
             return;
         }
         nominationBody.innerHTML = '';
-        const ids = eligibleChancellorIds(latestGame, latestPlayers || []);
-        if (!ids.length) {
+        const eligibleIds = eligibleChancellorIds(latestGame, latestPlayers || []);
+        const alivePlayers = (latestPlayers || []).filter(p => p && p.id && p.alive !== false);
+
+        if (alivePlayers.length === 0) {
             const p = document.createElement('p');
-            p.textContent = 'No eligible candidates right now.';
+            p.textContent = 'No players available.';
             nominationBody.appendChild(p);
         } else {
             const list = document.createElement('div');
             list.style.display = 'grid';
             list.style.gridTemplateColumns = '1fr 1fr';
             list.style.gap = '10px';
-            ids.forEach(id => {
-                const pl = (latestPlayers || []).find(pp => pp && pp.id === id);
+
+            alivePlayers.forEach(pl => {
+                const isEligible = eligibleIds.includes(pl.id);
+                const isYou = pl.id === youId;
                 const btn = document.createElement('button');
-                btn.className = 'btn btn-primary';
                 btn.style.width = '100%';
                 btn.style.minHeight = '56px';
                 btn.style.fontSize = '1rem';
-                btn.setAttribute('data-nominate', id);
-                btn.textContent = pl ? (pl.name || 'Player') : 'Player';
+
+                if (isEligible) {
+                    btn.className = 'btn btn-primary';
+                    btn.setAttribute('data-nominate', pl.id);
+                    btn.textContent = pl.name || 'Player';
+                } else {
+                    btn.className = 'btn';
+                    btn.disabled = true;
+                    const reason = isYou ? "(INELIGIBLE - THAT'S YOU!)" : '(Ineligible)';
+                    btn.textContent = (pl.name || 'Player') + ' ' + reason;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                }
+
                 list.appendChild(btn);
             });
+
             // If odd count, center the last button across both columns
-            if (ids.length % 2 === 1) {
+            if (alivePlayers.length % 2 === 1) {
                 const lastBtn = list.lastElementChild;
                 if (lastBtn) {
                     lastBtn.style.gridColumn = '1 / -1';
@@ -2827,23 +2844,27 @@ function closeRulesModal() { if (rulesModal) { rulesModal.style.display = 'none'
 
 // Role overlay functions
 function openRoleOverlay() {
-    console.log('🚀 openRoleOverlay called');
     const roleOverlay = document.getElementById('role-overlay');
     const roleText = document.getElementById('role-text');
     const membershipBtn = document.getElementById('membership-btn');
     const roleBtn = document.getElementById('role-btn');
     const compatriotsBtn = document.getElementById('compatriots-btn');
     const doneBtn = document.getElementById('role-done-btn');
-    
-    console.log('🔍 Found elements:', {
-        roleOverlay: !!roleOverlay,
-        roleText: !!roleText,
-        membershipBtn: !!membershipBtn,
-        roleBtn: !!roleBtn,
-        compatriotsBtn: !!compatriotsBtn,
-        doneBtn: !!doneBtn
-    });
-    
+
+    // Only log element detection once (when state changes)
+    const elementsFound = `${!!roleOverlay}${!!roleText}${!!membershipBtn}${!!roleBtn}${!!compatriotsBtn}${!!doneBtn}`;
+    if (lastLoggedState.roleOverlayElements !== elementsFound) {
+        console.log('🔍 Found elements:', {
+            roleOverlay: !!roleOverlay,
+            roleText: !!roleText,
+            membershipBtn: !!membershipBtn,
+            roleBtn: !!roleBtn,
+            compatriotsBtn: !!compatriotsBtn,
+            doneBtn: !!doneBtn
+        });
+        lastLoggedState.roleOverlayElements = elementsFound;
+    }
+
     if (!roleOverlay || !roleText || !membershipBtn || !roleBtn || !compatriotsBtn || !doneBtn) {
         console.error('Role modal elements not found');
         return;
@@ -2875,9 +2896,13 @@ function openRoleOverlay() {
         compatriotsBtn.disabled = true;
         return;
     }
-    
-    // Set up button states and permissions
-    console.log('🎯 Setting up button permissions for player:', youPlayer?.role + ' (' + youPlayer?.party + ')');
+
+    // Set up button states and permissions (log only when player role/party changes)
+    const playerInfo = `${youPlayer?.role}:${youPlayer?.party}`;
+    if (lastLoggedState.refreshPlayerInfo !== playerInfo) {
+        console.log('🎯 Setting up button permissions for player:', youPlayer?.role + ' (' + youPlayer?.party + ')');
+        lastLoggedState.refreshPlayerInfo = playerInfo;
+    }
     setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatriotsBtn);
     
     // Set up event listeners
@@ -2992,12 +3017,6 @@ function refreshRoleOverlayPermissions() {
 
 // New core functions for the three-button role modal
 function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatriotsBtn) {
-    console.log('🔍 setupButtonPermissions called with:', {
-        youPlayer: youPlayer?.role + ' (' + youPlayer?.party + ')',
-        gamePlayerCount: game?.playerCount,
-        latestPlayersLength: (latestPlayers || []).length
-    });
-    
     // Ensure we have a reliable player count
     let playerCount = game.playerCount;
     if (!playerCount || playerCount <= 0) {
@@ -3008,16 +3027,25 @@ function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatr
             playerCount = 5; // Default fallback
         }
     }
-    
-    // Log the current state for debugging
-    console.log('Setting up button permissions:', {
-        gamePlayerCount: game.playerCount,
-        fallbackPlayerCount: playerCount,
-        latestPlayersLength: latestPlayers.length,
-        gameState: game.state,
-        youPlayerRole: youPlayer.role,
-        youPlayerParty: youPlayer.party
-    });
+
+    // Only log when state changes (role, party, or player count)
+    const stateKey = `${youPlayer?.role}:${youPlayer?.party}:${playerCount}`;
+    if (lastLoggedState.buttonPermissionsState !== stateKey) {
+        console.log('🔍 setupButtonPermissions called with:', {
+            youPlayer: youPlayer?.role + ' (' + youPlayer?.party + ')',
+            gamePlayerCount: game?.playerCount,
+            latestPlayersLength: (latestPlayers || []).length
+        });
+        console.log('Setting up button permissions:', {
+            gamePlayerCount: game.playerCount,
+            fallbackPlayerCount: playerCount,
+            latestPlayersLength: latestPlayers.length,
+            gameState: game.state,
+            youPlayerRole: youPlayer.role,
+            youPlayerParty: youPlayer.party
+        });
+        lastLoggedState.buttonPermissionsState = stateKey;
+    }
     
     // Additional validation for game state
     if (!game || game.state !== 'playing') {
@@ -3037,22 +3065,26 @@ function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatr
         return;
     }
     
-    const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' || 
+    const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' ||
                       (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
-    
-    // Debug logging to help troubleshoot
-    console.log('setupButtonPermissions debug:', {
-        playerCount,
-        isFascist,
-        party: youPlayer.party,
-        role: youPlayer.role,
-        partyUpper: (youPlayer.party || '').toString().toUpperCase(),
-        roleUpper: (youPlayer.role || '').toString().toUpperCase(),
-        gamePlayerCount: game.playerCount,
-        latestPlayersLength: (latestPlayers || []).length,
-        gameState: game.state,
-        gameId: game.id
-    });
+
+    // Debug logging (only when fascist status changes within same state)
+    const fascistKey = `${stateKey}:${isFascist}`;
+    if (lastLoggedState.buttonPermissionsDebug !== fascistKey) {
+        console.log('setupButtonPermissions debug:', {
+            playerCount,
+            isFascist,
+            party: youPlayer.party,
+            role: youPlayer.role,
+            partyUpper: (youPlayer.party || '').toString().toUpperCase(),
+            roleUpper: (youPlayer.role || '').toString().toUpperCase(),
+            gamePlayerCount: game.playerCount,
+            latestPlayersLength: (latestPlayers || []).length,
+            gameState: game.state,
+            gameId: game.id
+        });
+        lastLoggedState.buttonPermissionsDebug = fascistKey;
+    }
     
     // Membership and role start enabled but censored (showing placeholder text)
     membershipBtn.disabled = false;
@@ -3064,27 +3096,30 @@ function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatr
     
     // Comrades button visibility and permissions
     const roleActionsMain = document.querySelector('.role-actions-main');
-    console.log('🔍 Found roleActionsMain:', !!roleActionsMain);
     
     if (isFascist) {
-        console.log('🎯 Player is Fascist, checking player count:', playerCount);
         // Show comrades button for Fascists at 5+ players
         // At 5-6 players: All Fascists (including Hitler) know each other
         // At 7+ players: Fascists know each other, but Hitler doesn't know them
         if (playerCount >= 5) {
-            console.log('✅ Enabling comrades button for Fascist at', playerCount, 'players');
             compatriotsBtn.style.removeProperty('display');
             compatriotsBtn.disabled = false;
             compatriotsBtn.style.opacity = '1';
             compatriotsBtn.title = 'View your Fascist allies';
             roleActionsMain?.classList.remove('comrades-hidden');
-            console.log('🔧 Button state after enabling:', {
-                display: compatriotsBtn.style.display,
-                disabled: compatriotsBtn.disabled,
-                opacity: compatriotsBtn.style.opacity,
-                roleActionsMainClasses: roleActionsMain?.classList.toString()
-            });
-            
+
+            // Only log button state once per configuration
+            const buttonStateKey = `${fascistKey}:enabled:${playerCount}`;
+            if (lastLoggedState.buttonState !== buttonStateKey) {
+                console.log('🔧 Button state after enabling:', {
+                    display: compatriotsBtn.style.display,
+                    disabled: compatriotsBtn.disabled,
+                    opacity: compatriotsBtn.style.opacity,
+                    roleActionsMainClasses: roleActionsMain?.classList.toString()
+                });
+                lastLoggedState.buttonState = buttonStateKey;
+            }
+
             // Clear any existing help text
             const roleText = document.getElementById('role-text');
             if (roleText) {
@@ -3095,13 +3130,16 @@ function setupButtonPermissions(youPlayer, game, membershipBtn, roleBtn, compatr
             }
         } else {
             // Hide button completely for games with less than 5 players
-            console.log('❌ Hiding comrades button for Fascist at', playerCount, 'players (need 5+ players)');
+            const hideStateKey = `${fascistKey}:hidden:${playerCount}`;
+            if (lastLoggedState.buttonState !== hideStateKey) {
+                console.log('❌ Hiding comrades button for Fascist at', playerCount, 'players (need 5+ players)');
+                lastLoggedState.buttonState = hideStateKey;
+            }
             compatriotsBtn.style.display = 'none';
             roleActionsMain?.classList.add('comrades-hidden');
         }
     } else {
         // Show comrades button for Liberals with fun message
-        console.log('🎭 Enabling comrades button for Liberal player');
         compatriotsBtn.style.removeProperty('display');
         compatriotsBtn.disabled = false;
         compatriotsBtn.style.opacity = '1';
@@ -3431,11 +3469,46 @@ function showCompatriots(youPlayer, game, roleText) {
         nameBtn.textContent = '✏️ Change Name';
         list.appendChild(nameBtn);
 
-        const repairBtn = document.createElement('button');
-        repairBtn.id = 'repair-game-btn';
-        repairBtn.className = 'btn';
-        repairBtn.textContent = '🔧 Repair Game State';
-        list.appendChild(repairBtn);
+        // Add host-only buttons (seat 1)
+        const you = youPlayerDoc();
+        if (you && you.seat === 1) {
+            const hostOptionsBtn = document.createElement('button');
+            hostOptionsBtn.id = 'host-options-btn';
+            hostOptionsBtn.className = 'btn';
+            hostOptionsBtn.textContent = '👑 Host Only Options';
+            list.appendChild(hostOptionsBtn);
+        }
+
+        menuBody.appendChild(list);
+    }
+
+    function renderHostOptionsMenu() {
+        if (!menuBody) return;
+        menuBody.innerHTML = '';
+        const list = document.createElement('div');
+        list.style.display = 'flex';
+        list.style.flexDirection = 'column';
+        list.style.gap = '8px';
+
+        const backBtn = document.createElement('button');
+        backBtn.id = 'host-back-btn';
+        backBtn.className = 'btn';
+        backBtn.textContent = '← Back to Menu';
+        list.appendChild(backBtn);
+
+        // Vote details toggle
+        const showVoteDetails = latestGame?.settings?.showVoteDetails !== false; // Default true
+        const voteToggleBtn = document.createElement('button');
+        voteToggleBtn.id = 'toggle-vote-details-btn';
+        voteToggleBtn.className = 'btn';
+        voteToggleBtn.textContent = showVoteDetails ? '🗳️ Individual Votes: Shown' : '🗳️ Individual Votes: Hidden';
+        list.appendChild(voteToggleBtn);
+
+        const debugBtn = document.createElement('button');
+        debugBtn.id = 'debug-menu-btn';
+        debugBtn.className = 'btn';
+        debugBtn.textContent = '🔧 Debug Menu';
+        list.appendChild(debugBtn);
 
         const quitBtn = document.createElement('button');
         quitBtn.id = 'quit-game-btn';
@@ -3443,15 +3516,40 @@ function showCompatriots(youPlayer, game, roleText) {
         quitBtn.textContent = '⚠️ Quit Game for Everyone';
         list.appendChild(quitBtn);
 
-        // Add duplicate game button only for host (seat 1)
-        const you = youPlayerDoc();
-        if (you && you.seat === 1) {
-            const duplicateBtn = document.createElement('button');
-            duplicateBtn.id = 'duplicate-game-btn';
-            duplicateBtn.className = 'btn';
-            duplicateBtn.textContent = '🔄 End and Duplicate Game';
-            list.appendChild(duplicateBtn);
-        }
+        const duplicateBtn = document.createElement('button');
+        duplicateBtn.id = 'duplicate-game-btn';
+        duplicateBtn.className = 'btn';
+        duplicateBtn.textContent = '🔄 End and Duplicate Game';
+        list.appendChild(duplicateBtn);
+
+        menuBody.appendChild(list);
+    }
+
+    function renderDebugMenu() {
+        if (!menuBody) return;
+        menuBody.innerHTML = '';
+        const list = document.createElement('div');
+        list.style.display = 'flex';
+        list.style.flexDirection = 'column';
+        list.style.gap = '8px';
+
+        const backBtn = document.createElement('button');
+        backBtn.id = 'debug-back-btn';
+        backBtn.className = 'btn';
+        backBtn.textContent = '← Back to Host Options';
+        list.appendChild(backBtn);
+
+        const advanceBtn = document.createElement('button');
+        advanceBtn.id = 'debug-advance-btn';
+        advanceBtn.className = 'btn btn-primary';
+        advanceBtn.textContent = '⏭️ Force Advance to Next Election';
+        list.appendChild(advanceBtn);
+
+        const resetVotesBtn = document.createElement('button');
+        resetVotesBtn.id = 'debug-reset-votes-btn';
+        resetVotesBtn.className = 'btn';
+        resetVotesBtn.textContent = '🔄 Reset Election Votes';
+        list.appendChild(resetVotesBtn);
 
         menuBody.appendChild(list);
     }
@@ -3552,89 +3650,130 @@ function showCompatriots(youPlayer, game, roleText) {
             return;
         }
 
-        if (t.id === 'repair-game-btn') {
+        if (t.id === 'host-options-btn') {
+            renderHostOptionsMenu();
+            return;
+        }
+
+        if (t.id === 'host-back-btn') {
+            renderMenu();
+            return;
+        }
+
+        if (t.id === 'toggle-vote-details-btn') {
             try {
-                repairBtn.disabled = true;
-                repairBtn.textContent = '🔧 Repairing...';
-                
-                const repaired = await repairGameState(gid);
-                
-                if (repaired) {
-                    repairBtn.textContent = '✅ Repaired!';
-                    setTimeout(() => {
-                        repairBtn.textContent = '🔧 Repair Game State';
-                        repairBtn.disabled = false;
-                    }, 2000);
-                } else {
-                    repairBtn.textContent = '✅ No Issues Found';
-                    setTimeout(() => {
-                        repairBtn.textContent = '🔧 Repair Game State';
-                        repairBtn.disabled = false;
-                    }, 2000);
-                }
-                
-                // Don't close modal - let user see the result
+                const currentValue = latestGame?.settings?.showVoteDetails !== false; // Default true
+                const newValue = !currentValue;
+                const gameRef = doc(db, 'games', gid);
+                await updateDoc(gameRef, {
+                    'settings.showVoteDetails': newValue,
+                    updatedAt: serverTimestamp()
+                });
+                await logPublic(gid, `Host ${newValue ? 'enabled' : 'disabled'} individual vote logging`, { type: 'settings', actorId: youId || null });
+                renderHostOptionsMenu();
             } catch (err) {
-                console.error('Game repair failed:', err);
-                repairBtn.textContent = '❌ Repair Failed';
-                repairBtn.disabled = false;
-                setTimeout(() => {
-                    repairBtn.textContent = '🔧 Repair Game State';
-                }, 3000);
+                console.error('Failed to toggle vote details', err);
+                alert('Failed to update setting: ' + err.message);
             }
             return;
         }
 
-        if (t.id === 'duplicate-game-btn') {
-            const ok = confirm('This will end the current game and create a new one with the same players. Are you sure?');
+        if (t.id === 'debug-menu-btn') {
+            renderDebugMenu();
+            return;
+        }
+
+        if (t.id === 'debug-back-btn') {
+            renderHostOptionsMenu();
+            return;
+        }
+
+        if (t.id === 'debug-advance-btn') {
+            const ok = confirm('Force advance to next election? This will skip any pending actions.');
             if (!ok) return;
-            
+            try {
+                const gameRef = doc(db, 'games', gid);
+
+                // Force the game into a state where advancement can proceed
+                await updateDoc(gameRef, {
+                    policyPhase: 'completed',
+                    pendingSuperpower: null,
+                    updatedAt: serverTimestamp()
+                });
+
+                // Now advance
+                await advanceToNextGovernment(gid, gameRef);
+                await logPublic(gid, `${yourName} forced advancement to next election`, { type: 'debug', actorId: youId || null });
+                alert('Advanced to next election!');
+            } catch (err) {
+                console.error('Failed to advance', err);
+                alert('Failed to advance: ' + err.message);
+            }
+            closeMenuModal();
+            return;
+        }
+
+        if (t.id === 'debug-reset-votes-btn') {
+            const ok = confirm('Reset all election votes? This will clear all votes cast in the current election.');
+            if (!ok) return;
+            try {
+                const gameRef = doc(db, 'games', gid);
+                await updateDoc(gameRef, {
+                    electionVotes: {},
+                    updatedAt: serverTimestamp()
+                });
+                await logPublic(gid, `${yourName} reset all election votes`, { type: 'debug', actorId: youId || null });
+                alert('Election votes have been reset!');
+            } catch (err) {
+                console.error('Failed to reset votes', err);
+                alert('Failed to reset votes: ' + err.message);
+            }
+            closeMenuModal();
+            return;
+        }
+
+        if (t.id === 'duplicate-game-btn') {
             try {
                 // Collect current game data
-                const currentGame = latestGame;
                 const currentPlayers = latestPlayers || [];
-                
+
                 // Validate we have enough players
                 const validPlayers = currentPlayers.filter(p => p && p.name && p.name.trim());
                 if (validPlayers.length < 5) {
                     alert('Cannot duplicate game: Need at least 5 valid player names.');
                     return;
                 }
-                
+
                 // Sort players by seat to maintain order
                 const sortedPlayers = validPlayers
                     .sort((a, b) => (a.seat || 0) - (b.seat || 0))
                     .map(p => p.name.trim());
-                
-                // End the current game
-                await updateDoc(doc(db, 'games', gid), { 
-                    state: 'cancelled', 
-                    updatedAt: serverTimestamp() 
-                });
-                
-                try { 
-                    await logPublic(gid, `Game ended by ${yourName} to duplicate with same players`, { 
-                        type: 'end', 
-                        actorId: youId || null 
-                    }); 
-                } catch (_) {}
-                
-                // Close modal and redirect to create page with pre-filled data
-                closeMenuModal();
-                
+
                 // Build URL with game data
                 const params = new URLSearchParams();
                 params.set('duplicate', 'true');
-                params.set('gameName', currentGame?.name || 'Secret Hitler Game');
                 params.set('playerCount', String(sortedPlayers.length));
                 params.set('playerNames', sortedPlayers.join(','));
-                
-                // Note: Host password is not preserved for security reasons
-                // Users will need to set a new password if desired
-                
-                // Redirect to create page
+
+                // Close modal
+                closeMenuModal();
+
+                // Redirect to create page FIRST (before ending game to avoid onSnapshot redirect)
                 window.location.href = `../pages/create.html?${params.toString()}`;
-                
+
+                // End the current game (this will happen as page unloads)
+                updateDoc(doc(db, 'games', gid), {
+                    state: 'cancelled',
+                    updatedAt: serverTimestamp()
+                }).catch(() => {});
+
+                try {
+                    logPublic(gid, `Game ended by ${yourName} to duplicate with same players`, {
+                        type: 'end',
+                        actorId: youId || null
+                    }).catch(() => {});
+                } catch (_) {}
+
             } catch (err) {
                 console.error('Failed to duplicate game:', err);
                 alert('Failed to duplicate game. Please try again.');
@@ -3645,22 +3784,43 @@ function showCompatriots(youPlayer, game, roleText) {
 
     if (!gid) { setStatus('', 'Missing game id'); hidePreloader(); return; }
 
+    // Preloader text rotation
+    const preloaderMessages = [
+        'Loading game…',
+        'Shuffling policies…',
+        'Setting up the board…',
+        'Preparing roles…',
+        'Almost ready…'
+    ];
+    let preloaderIndex = 0;
+    const preloaderInterval = setInterval(() => {
+        preloaderIndex = (preloaderIndex + 1) % preloaderMessages.length;
+        setPreloader(preloaderMessages[preloaderIndex]);
+    }, 2000);
+
+    // Clear interval when preloader is hidden
+    const originalHidePreloader = hidePreloader;
+    const hidePreloaderWithCleanup = () => {
+        clearInterval(preloaderInterval);
+        originalHidePreloader();
+    };
+
     const gameRef = doc(db, 'games', gid);
     let gameReady = false;
     let playersReady = false;
     function maybeHide() {
-        if (gameReady && playersReady) hidePreloader();
+        if (gameReady && playersReady) hidePreloaderWithCleanup();
     }
     const snap = await getDoc(gameRef);
-    if (!snap.exists()) { setStatus(gid, 'Game not found'); hidePreloader(); return; }
+    if (!snap.exists()) { setStatus(gid, 'Game not found'); hidePreloaderWithCleanup(); return; }
     setStatus(gid, 'Game in progress');
 
     onSnapshot(gameRef, (s) => {
         latestGame = s.exists() ? s.data() : null;
-        if (!latestGame) { setStatus(gid, 'Game unavailable'); hidePreloader(); return; }
-        if (latestGame.state === 'cancelled') { 
-            setStatus(gid, 'Game cancelled'); 
-            hidePreloader();
+        if (!latestGame) { setStatus(gid, 'Game unavailable'); hidePreloaderWithCleanup(); return; }
+        if (latestGame.state === 'cancelled') {
+            setStatus(gid, 'Game cancelled');
+            hidePreloaderWithCleanup();
             // Redirect all players to join page when game is cancelled
             try { 
                 alert('This game has been ended. You can join a new game or rejoin this one.'); 
@@ -3676,7 +3836,6 @@ function showCompatriots(youPlayer, game, roleText) {
         // Initialize table spread count from game state
         const tableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
         setTableSpreadCount(tableSpreadCount);
-        console.log(`Table spread initialized from game state: ${tableSpreadCount} cards remaining`);
         
         // Update player strip highlights if ids available
         renderPlayers(playersStrip, latestPlayers.map(p => ({
@@ -3707,19 +3866,6 @@ function showCompatriots(youPlayer, game, roleText) {
             isNominating = false;
         }
         
-        // Check for game issues and show repair button if needed
-        if (latestPlayers && latestPlayers.length > 0) {
-            const issues = detectGameIssues(gid, latestGame, latestPlayers);
-            const repairBtn = document.getElementById('repair-game-main-btn');
-            if (repairBtn) {
-                if (issues.length > 0) {
-                    repairBtn.style.display = 'block';
-                    repairBtn.title = `Repair ${issues.length} detected issues`;
-                } else {
-                    repairBtn.style.display = 'none';
-                }
-            }
-        }
         
         gameReady = true;
         maybeHide();
@@ -3739,13 +3885,10 @@ function showCompatriots(youPlayer, game, roleText) {
         
         // Refresh role overlay permissions if it's currently open
         refreshRoleOverlayPermissions();
-        
-        // Re-render history when players (and thus your party) resolves
-        renderHistory();
+
         // Update actions when players change (eligibility)
         renderActions(gid);
-        // Attempt to resolve election when players/votes change
-        maybeResolveElectionVote(gid);
+        // Note: maybeResolveElectionVote is already called by game listener, no need to duplicate here
         playersReady = true;
         maybeHide();
     });
@@ -3892,7 +4035,18 @@ function showCompatriots(youPlayer, game, roleText) {
             });
             const pop = document.getElementById('vote-popover');
             if (pop) pop.style.display = 'none';
-            
+
+            // Log vote - show individual choice if setting enabled (default true)
+            const voter = latestPlayers.find(p => p.id === youId);
+            if (voter) {
+                const showVoteDetails = game.settings?.showVoteDetails !== false; // Default true
+                if (showVoteDetails) {
+                    await logPublic(gid, `${voter.name} voted ${vote.toUpperCase()}`, { type: 'vote', actorId: youId });
+                } else {
+                    await logPublic(gid, `${voter.name} voted`, { type: 'vote', actorId: youId });
+                }
+            }
+
             // Try to resolve the election immediately after this vote
             maybeResolveElectionVote(gid);
         } catch (err) {
@@ -3902,7 +4056,24 @@ function showCompatriots(youPlayer, game, roleText) {
 
     // Helper: resolve election when enough votes are in to determine outcome
     let lastResolvedNomineeId = null;
+    let resolveElectionTimer = null;
+    let isResolvingElection = false;
     async function maybeResolveElectionVote(gameId) {
+        // Debounce: prevent multiple simultaneous calls
+        if (isResolvingElection) {
+            return;
+        }
+
+        // Debounce: wait 100ms for multiple rapid changes to settle
+        clearTimeout(resolveElectionTimer);
+        resolveElectionTimer = setTimeout(async () => {
+            await maybeResolveElectionVoteInternal(gameId);
+        }, 100);
+    }
+
+    async function maybeResolveElectionVoteInternal(gameId) {
+        if (isResolvingElection) return;
+        isResolvingElection = true;
         try {
             const game = latestGame;
             if (!game) return;
@@ -3919,19 +4090,21 @@ function showCompatriots(youPlayer, game, roleText) {
             const validVotes = Object.entries(votes).filter(([pid]) => aliveIds.includes(pid)).map(([,v]) => String(v));
             const ja = validVotes.filter(v => v === 'ja').length;
             const nein = validVotes.filter(v => v === 'nein').length;
-            
+
             // Early resolution: if remaining votes can't change the outcome
-            // Note: 50/50 is a failed election (nein >= majority threshold)
+            // Note: 50/50 is a failed election (need MORE than half to pass)
             const remainingVotes = totalVoters - numVotes;
             const canPass = ja > (totalVoters / 2);
-            const canFail = nein >= Math.ceil((totalVoters + 1) / 2); // nein >= majority threshold
-            
+            const canFail = nein >= Math.ceil(totalVoters / 2); // nein >= half means fail
+
             // Log early resolution attempt
-            console.log(`Election check: ${ja} Ja, ${nein} Nein, ${numVotes}/${totalVoters} votes. Can pass: ${canPass}, Can fail: ${canFail}`);
-            
+            console.log(`Vote resolution check: ${ja} ja, ${nein} nein, ${numVotes}/${totalVoters} votes in. canPass=${canPass}, canFail=${canFail}, remaining=${remainingVotes}`);
+            console.log(`Alive players:`, aliveIds);
+            console.log(`Votes:`, votes);
+
             // If we can't resolve early, wait for more votes
             if (!canPass && !canFail && numVotes < totalVoters) {
-                console.log('Waiting for more votes - outcome still uncertain');
+                console.log(`Not resolving yet - waiting for more votes`);
                 return;
             }
             
@@ -3972,28 +4145,55 @@ function showCompatriots(youPlayer, game, roleText) {
                     payload.termLimitLastPresidentId = g.currentPresidentPlayerId || null;
                     payload.termLimitLastChancellorId = currentNominee;
                 } else {
-                    payload.electionTracker = (typeof g.electionTracker === 'number' ? g.electionTracker : 0) + 1;
+                    // Cap election tracker at 3 maximum
+                    const newTrackerValue = Math.min(3, (typeof g.electionTracker === 'number' ? g.electionTracker : 0) + 1);
+                    payload.electionTracker = newTrackerValue;
                     // Clear failed nominee
                     payload.nominatedChancellorPlayerId = null;
                 }
                 tx.update(gameRef, payload);
-                return { ja, nein, passed };
+                return { ja, nein, passed, electionTracker: payload.electionTracker };
             });
 
             if (outcome) {
                 lastResolvedNomineeId = nomineeId;
-                console.log(`Election resolved: ${outcome.passed ? 'PASSED' : 'FAILED'} with ${outcome.ja} Ja / ${outcome.nein} Nein votes`);
                 try {
                     if (outcome.passed) {
-                        await logPublic(gameId, `Election passed: ${outcome.ja} Ja / ${outcome.nein} Nein`, { type: 'vote' });
+                        await logPublic(gameId, `Election passed`, { type: 'vote' });
+
+                        // Log the new government formation with President and Chancellor names
+                        const presPlayer = latestPlayers.find(p => p.id === latestGame.currentPresidentPlayerId);
+                        const chancPlayer = latestPlayers.find(p => p.id === nomineeId);
+                        const presName = presPlayer ? presPlayer.name : 'Unknown';
+                        const chancName = chancPlayer ? chancPlayer.name : 'Unknown';
+                        await logPublic(gameId, `${presName} (President) and ${chancName} (Chancellor) form the government`, { type: 'government' });
                     } else {
-                        await logPublic(gameId, `Election failed: ${outcome.nein} Nein / ${outcome.ja} Ja`, { type: 'vote' });
-                        await logPublic(gameId, 'Election tracker advanced by 1', { type: 'system' });
+                        await logPublic(gameId, `Election failed`, { type: 'vote' });
+
+                        // Use the tracker value returned from the transaction
+                        const newTrackerValue = outcome.electionTracker || 0;
+                        await logPublic(gameId, `⚠️ Election tracker: ${newTrackerValue}/3 failed elections`, { type: 'system' });
+
+                        const gameRef = doc(db, 'games', gameId);
+
+                        if (newTrackerValue >= 3) {
+                            // Three failed elections - enact chaos policy
+                            await enactChaosPolicy(gameId, gameRef);
+                        } else {
+                            // Less than 3 failures - just warn and advance
+                            if (newTrackerValue === 2) {
+                                await logPublic(gameId, '⚠️ Warning: One more failed election will enact a random policy!', { type: 'warning' });
+                            }
+                            // Advance to next president after failed election
+                            await advanceToNextGovernment(gameId, gameRef);
+                        }
                     }
                 } catch (_) {}
             }
         } catch (err) {
             console.error('Failed to resolve election vote', err);
+        } finally {
+            isResolvingElection = false;
         }
     }
 
@@ -4011,17 +4211,17 @@ function showCompatriots(youPlayer, game, roleText) {
 
 // Card configuration data - memorized visual order
 const DISCARD_CARD_CONFIG = [
-    { translateY: -2, rotate: -15, zIndex: 2, className: 'policy-on-discard' },
-    { translateY: -3, rotate: 12, zIndex: 3, className: 'policy-on-discard-top' },
-    { translateY: -4, rotate: -8, zIndex: 4, className: 'policy-on-discard-2' },
-    { translateY: -5, rotate: 18, zIndex: 5, className: 'policy-on-discard-3' },
-    { translateY: -6, rotate: -22, zIndex: 6, className: 'policy-on-discard-4' },
-    { translateY: -7, rotate: 6, zIndex: 7, className: 'policy-on-discard-5' },
-    { translateY: -8, rotate: -14, zIndex: 8, className: 'policy-on-discard-6' },
-    { translateY: -9, rotate: 20, zIndex: 9, className: 'policy-on-discard-7' },
-    { translateY: -10, rotate: -10, zIndex: 10, className: 'policy-on-discard-8' },
-    { translateY: -11, rotate: 16, zIndex: 11, className: 'policy-on-discard-9' },
-    { translateY: -12, rotate: -25, zIndex: 12, className: 'policy-on-discard-10' }
+    { translateY: -4, rotate: -15, zIndex: 2, className: 'policy-on-discard' },
+    { translateY: -8, rotate: 12, zIndex: 3, className: 'policy-on-discard-top' },
+    { translateY: -12, rotate: -8, zIndex: 4, className: 'policy-on-discard-2' },
+    { translateY: -16, rotate: 18, zIndex: 5, className: 'policy-on-discard-3' },
+    { translateY: -20, rotate: -22, zIndex: 6, className: 'policy-on-discard-4' },
+    { translateY: -23, rotate: 6, zIndex: 7, className: 'policy-on-discard-5' },
+    { translateY: -25.5, rotate: -14, zIndex: 8, className: 'policy-on-discard-6' },
+    { translateY: -27.5, rotate: 20, zIndex: 9, className: 'policy-on-discard-7' },
+    { translateY: -29, rotate: -10, zIndex: 10, className: 'policy-on-discard-8' },
+    { translateY: -30.25, rotate: 16, zIndex: 11, className: 'policy-on-discard-9' },
+    { translateY: -31.25, rotate: -25, zIndex: 12, className: 'policy-on-discard-10' }
 ];
 
 // Responsive scaling factors
@@ -4049,10 +4249,10 @@ function updateDiscardPileVisual(count) {
         const card = document.createElement('div');
         card.className = `stack-card ${config.className}`;
         card.style.backgroundImage = 'url(../images/policy-back.png)';
-        card.style.transform = `translateY(${config.translateY}px) rotate(${config.rotate}deg) scale(${RESPONSIVE_SCALES.base})`;
+        card.style.setProperty('transform', `translateY(${config.translateY}px) rotate(${config.rotate}deg) scale(${RESPONSIVE_SCALES.base})`, 'important');
         card.style.transformOrigin = '50% 50%';
         card.style.zIndex = config.zIndex;
-        
+
         discardStack.appendChild(card);
     }
 
@@ -4128,7 +4328,6 @@ async function incrementDiscardCount() {
                 totalDiscardedCards: increment(1),
                 updatedAt: serverTimestamp()
             });
-            console.log(`Discard count persisted to database: ${currentDiscardCount}`);
             
             // Update table spread count based on updated game state
             const newTableSpreadCount = calculateTableSpreadCountFromGameState({
@@ -4141,7 +4340,6 @@ async function incrementDiscardCount() {
         console.error('Failed to persist discard count to database:', error);
     }
     
-    console.log(`Discard count increased to: ${currentDiscardCount}`);
 }
 
 // Function to decrement discard count (called when deck is reshuffled)
@@ -4159,7 +4357,6 @@ async function decrementDiscardCount() {
                     totalDiscardedCards: increment(-1),
                     updatedAt: serverTimestamp()
                 });
-                console.log(`Discard count decreased in database: ${currentDiscardCount}`);
                 
                 // Update table spread count based on updated game state
                 const newTableSpreadCount = calculateTableSpreadCountFromGameState({
@@ -4172,7 +4369,6 @@ async function decrementDiscardCount() {
             console.error('Failed to update discard count in database:', error);
         }
         
-        console.log(`Discard count decreased to: ${currentDiscardCount}`);
     }
 }
 
@@ -4185,7 +4381,6 @@ async function resetDiscardCount() {
     if (latestGame) {
         const newTableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
         setTableSpreadCount(newTableSpreadCount);
-        console.log(`Table spread updated after deck reshuffle: ${newTableSpreadCount} cards remaining`);
     }
     
     // Reset the cumulative discard count in the database when deck is reshuffled
@@ -4217,10 +4412,8 @@ function setDiscardCount(count) {
     if (latestGame) {
         const newTableSpreadCount = calculateTableSpreadCountFromGameState(latestGame);
         setTableSpreadCount(newTableSpreadCount);
-        console.log(`Table spread updated after discard count load: ${newTableSpreadCount} cards remaining`);
     }
     
-    console.log(`Discard count set to: ${currentDiscardCount}`);
 }
 
 // Function to calculate discard count from game state
@@ -4251,7 +4444,6 @@ function calculateDiscardCountFromGameState(game) {
         count = Math.max(count, game.totalDiscardedCards);
     }
     
-    console.log(`Calculated discard count from game state: ${count}`);
     return count;
 }
 
@@ -4295,27 +4487,18 @@ function updateCountDisplay(count) {
 
 // Manual force refresh function for debugging
 function forceRefreshDiscardPile() {
-    console.log('=== FORCE REFRESH DISCARD PILE ===');
     const gameId = getGameId();
-    console.log('Game ID:', gameId);
-    console.log('Latest Game:', latestGame);
-    console.log('Current Discard Count:', currentDiscardCount);
     
     if (latestGame) {
         const calculatedCount = calculateDiscardCountFromGameState(latestGame);
-        console.log('Calculated count from game state:', calculatedCount);
-        console.log('Stored count in game:', latestGame.totalDiscardedCards);
         
         // Force update the visual
         setDiscardCount(calculatedCount);
         updateDiscardPileVisual(calculatedCount);
         updateCountDisplay(calculatedCount);
         
-        console.log('Force refresh completed. New count:', calculatedCount);
     } else {
-        console.log('No game data available');
     }
-    console.log('=== END FORCE REFRESH ===');
 }
 
 // Make it globally accessible for console debugging
@@ -4434,7 +4617,6 @@ function incrementTableSpreadCount() {
     if (currentTableSpreadCount < TABLE_SPREAD_CONFIG.length) {
         currentTableSpreadCount++;
         updateTableSpreadVisual(currentTableSpreadCount);
-        console.log(`Table spread count increased to: ${currentTableSpreadCount}`);
     }
 }
 
@@ -4443,7 +4625,6 @@ function decrementTableSpreadCount() {
     if (currentTableSpreadCount > 0) {
         currentTableSpreadCount--;
         updateTableSpreadVisual(currentTableSpreadCount);
-        console.log(`Table spread count decreased to: ${currentTableSpreadCount}`);
     }
 }
 
@@ -4451,15 +4632,12 @@ function decrementTableSpreadCount() {
 function setTableSpreadCount(count) {
     currentTableSpreadCount = Math.max(0, Math.min(count, TABLE_SPREAD_CONFIG.length));
     updateTableSpreadVisual(currentTableSpreadCount);
-    console.log(`Table spread count set to: ${currentTableSpreadCount}`);
 }
 
 // Function to calculate table spread count from game state
 function calculateTableSpreadCountFromGameState(game) {
     if (!game) return 0;
     
-    console.log(`=== TABLE SPREAD CALCULATION ===`);
-    console.log(`Full game object:`, game);
     
     // Calculate remaining policy cards
     let remainingCards = 17; // Total policy deck size
@@ -4485,12 +4663,6 @@ function calculateTableSpreadCountFromGameState(game) {
     // Ensure we don't go below 0 or above the maximum
     remainingCards = Math.max(0, Math.min(remainingCards, TABLE_SPREAD_CONFIG.length));
     
-    console.log(`Liberal policies enacted: ${game.liberalPolicies || 0}`);
-    console.log(`Fascist policies enacted: ${game.fascistPolicies || 0}`);
-    console.log(`Total discarded cards: ${game.totalDiscardedCards || 0}`);
-    console.log(`Current policy stack: ${game.currentPolicyStack?.length || 0}`);
-    console.log(`Calculated remaining cards: ${remainingCards}`);
-    console.log(`================================`);
     
     return remainingCards;
 }
@@ -4538,24 +4710,16 @@ function updateTableSpreadCountDisplay(count) {
 
 // Manual force refresh function for debugging table spread
 function forceRefreshTableSpread() {
-    console.log('=== FORCE REFRESH TABLE SPREAD ===');
     const gameId = getGameId();
-    console.log('Game ID:', gameId);
-    console.log('Latest Game:', latestGame);
-    console.log('Current Table Spread Count:', currentTableSpreadCount);
     
     if (latestGame) {
         const calculatedCount = calculateTableSpreadCountFromGameState(latestGame);
-        console.log('Calculated count from game state:', calculatedCount);
         
         // Force update the visual
         setTableSpreadCount(calculatedCount);
         
-        console.log('Force refresh completed. New count:', calculatedCount);
     } else {
-        console.log('No game data available');
     }
-    console.log('=== END FORCE REFRESH ===');
 }
 
 // Make it globally accessible for console debugging
@@ -4565,7 +4729,6 @@ window.forceRefreshTableSpread = forceRefreshTableSpread;
 
 // Comprehensive game repair and diagnostic system
 async function repairGameState(gameId) {
-    console.log('=== GAME REPAIR SYSTEM ACTIVATED ===');
     
     if (!gameId || !latestGame) {
         console.error('Cannot repair: missing game ID or game data');
@@ -4577,7 +4740,6 @@ async function repairGameState(gameId) {
         const repairUpdates = {};
         let repairsApplied = 0;
         
-        console.log('Analyzing game state for issues...');
         
         // 1. Fix discard pile inconsistencies
         if (repairDiscardPile(gameId, latestGame, repairUpdates)) {
@@ -4610,7 +4772,6 @@ async function repairGameState(gameId) {
             repairUpdates.lastRepairAt = serverTimestamp();
             repairUpdates.repairsApplied = repairsApplied;
             
-            console.log(`Applying ${repairsApplied} repairs:`, repairUpdates);
             await updateDoc(gameRef, repairUpdates);
             
             // Log the repair action
@@ -4621,22 +4782,18 @@ async function repairGameState(gameId) {
             
             // Refresh the visual discard pile after repair
             if (repairUpdates.totalDiscardedCards !== undefined) {
-                console.log('Refreshing discard pile visual after repair');
                 setDiscardCount(repairUpdates.totalDiscardedCards);
                 
                 // Force a complete visual refresh
                 setTimeout(() => {
                     const newCount = repairUpdates.totalDiscardedCards;
-                    console.log(`Force refreshing discard pile to show ${newCount} cards`);
                     updateDiscardPileVisual(newCount);
                     updateCountDisplay(newCount);
                 }, 100);
             }
             
-            console.log('Game repair completed successfully');
             return true;
         } else {
-            console.log('No repairs needed - game state is healthy');
             return false;
         }
         
@@ -4650,24 +4807,14 @@ async function repairGameState(gameId) {
 function repairDiscardPile(gameId, game, repairUpdates) {
     let needsRepair = false;
     
-    console.log('=== DISCARD PILE REPAIR ANALYSIS ===');
-    console.log('Game object:', game);
-    console.log('President discarded card:', game.presidentDiscardedCard);
-    console.log('Chancellor discarded card:', game.chancellorDiscardedCard);
-    console.log('President discarded cards array:', game.presidentDiscardedCards);
-    console.log('Chancellor discarded cards array:', game.chancellorDiscardedCards);
-    console.log('Other discarded cards:', game.discardedCards);
     console.log('Total discarded cards (stored):', game.totalDiscardedCards);
     
     // Check if discard count is inconsistent with game state
     const calculatedDiscardCount = calculateDiscardCountFromGameState(game);
     const storedDiscardCount = game.totalDiscardedCards || 0;
     
-    console.log('Calculated discard count:', calculatedDiscardCount);
-    console.log('Stored discard count:', storedDiscardCount);
     
     if (calculatedDiscardCount !== storedDiscardCount) {
-        console.log(`Discard pile inconsistency detected: calculated=${calculatedDiscardCount}, stored=${storedDiscardCount}`);
         
         // Use the calculated count as the source of truth
         repairUpdates.totalDiscardedCards = calculatedDiscardCount;
@@ -4681,26 +4828,27 @@ function repairDiscardPile(gameId, game, repairUpdates) {
         }
         
         needsRepair = true;
-        console.log('Repair needed: true');
     } else {
-        console.log('No discard pile repair needed');
     }
     
-    console.log('=== END DISCARD PILE REPAIR ANALYSIS ===');
     return needsRepair;
 }
 
 // Repair stuck game phases
 function repairStuckGamePhase(gameId, game, repairUpdates) {
     let needsRepair = false;
-    
+
     // Check for stuck completed phase
     if (game.policyPhase === 'completed' && game.enactedPolicy) {
+        // Don't repair if there's a pending superpower waiting to be used
+        if (game.pendingSuperpower) {
+            return false;
+        }
+
         const timeSinceUpdate = game.updatedAt ? (Date.now() - game.updatedAt.toDate().getTime()) : 0;
         const isStuck = timeSinceUpdate > 10000; // 10 seconds
-        
+
         if (isStuck) {
-            console.log('Stuck game phase detected - advancing to next government');
             
             // Clear policy phase artifacts
             repairUpdates.policyPhase = null;
@@ -4745,7 +4893,6 @@ function repairPlayerStates(gameId, game, players, repairUpdates) {
     // Check for players with missing orderIndex
     const playersNeedingOrder = players.filter(p => p && typeof p.orderIndex !== 'number');
     if (playersNeedingOrder.length > 0) {
-        console.log(`${playersNeedingOrder.length} players missing orderIndex - fixing`);
         
         // Assign order indices based on current array order
         playersNeedingOrder.forEach((player, index) => {
@@ -4759,7 +4906,6 @@ function repairPlayerStates(gameId, game, players, repairUpdates) {
     // Check for dead players who shouldn't be dead
     const deadPlayers = players.filter(p => p && p.alive === false);
     if (deadPlayers.length > 0) {
-        console.log(`${deadPlayers.length} dead players detected - this may be intentional`);
         // Don't auto-repair dead players as this could be legitimate game state
     }
     
@@ -4775,20 +4921,17 @@ function repairPolicyCounts(gameId, game, repairUpdates) {
     const fascistPolicies = game.fascistPolicies || 0;
     
     if (liberalPolicies > 5) {
-        console.log(`Invalid liberal policy count: ${liberalPolicies} - capping at 5`);
         repairUpdates.liberalPolicies = 5;
         needsRepair = true;
     }
     
     if (fascistPolicies > 6) {
-        console.log(`Invalid fascist policy count: ${fascistPolicies} - capping at 6`);
         repairUpdates.fascistPolicies = 6;
         needsRepair = true;
     }
     
     // Check if game should be over
     if (liberalPolicies >= 5 || fascistPolicies >= 6) {
-        console.log('Game should be over - checking for missing end state');
         if (game.state === 'playing') {
             repairUpdates.state = 'completed';
             repairUpdates.winner = liberalPolicies >= 5 ? 'liberal' : 'fascist';
@@ -4802,71 +4945,41 @@ function repairPolicyCounts(gameId, game, repairUpdates) {
 // Repair election tracker issues
 function repairElectionTracker(gameId, game, repairUpdates) {
     let needsRepair = false;
-    
+
     const electionTracker = game.electionTracker || 0;
-    
+
     // Check if election tracker is within valid range
     if (electionTracker < 0 || electionTracker > 3) {
-        console.log(`Invalid election tracker value: ${electionTracker} - fixing to valid range`);
         repairUpdates.electionTracker = Math.max(0, Math.min(3, electionTracker));
         needsRepair = true;
     }
-    
-    // Check if game should end due to 3 failed elections
-    if (electionTracker >= 3 && game.state === 'playing') {
-        console.log('Game should end due to 3 failed elections');
-        repairUpdates.state = 'completed';
-        repairUpdates.winner = 'fascist';
-        repairUpdates.endReason = 'election_tracker';
-        needsRepair = true;
-    }
-    
+
+    // Note: 3 failed elections should enact a chaos policy, not end the game
+    // The chaos policy itself can end the game if it results in 5 liberal or 6 fascist policies
+
     return needsRepair;
 }
 
 // Enhanced debug function with repair capabilities
 function debugGameState(gameId) {
-    console.log('=== GAME STATE DEBUG ===');
-    console.log('Game ID:', gameId);
-    console.log('Latest Game:', latestGame);
-    console.log('Latest Players:', latestPlayers);
     
     if (latestGame) {
-        console.log('Game State:', latestGame.state);
-        console.log('Policy Phase:', latestGame.policyPhase);
-        console.log('Enacted Policy:', latestGame.enactedPolicy);
-        console.log('Current President:', latestGame.currentPresidentPlayerId);
-        console.log('Current Chancellor:', latestGame.currentChancellorPlayerId);
-        console.log('Nominated Chancellor:', latestGame.nominatedChancellorPlayerId);
-        console.log('Vote Resolution:', latestGame.voteResolution);
-        console.log('Election Votes:', latestGame.electionVotes);
-        console.log('President Index:', latestGame.presidentIndex);
-        console.log('Liberal Policies:', latestGame.liberalPolicies);
-        console.log('Fascist Policies:', latestGame.fascistPolicies);
-        console.log('Election Tracker:', latestGame.electionTracker);
-        console.log('Total Discarded Cards:', latestGame.totalDiscardedCards);
-        console.log('Last Repair:', latestGame.lastRepairAt);
         
         const phase = computePhase(latestGame);
-        console.log('Computed Phase:', phase);
         
         // Check for common issues
         const issues = detectGameIssues(gameId, latestGame, latestPlayers);
         if (issues.length > 0) {
-            console.log('=== DETECTED ISSUES ===');
             issues.forEach(issue => console.log(`- ${issue}`));
-            console.log('=== END ISSUES ===');
         }
     }
     
     if (latestPlayers && latestPlayers.length > 0) {
-        console.log('Player Details:');
         latestPlayers.forEach((player, index) => {
             console.log(`  ${index + 1}. ${player.name || 'Player'} (ID: ${player.id}, Order: ${player.orderIndex}, Alive: ${player.alive !== false})`);
         });
     }
     
-    console.log('========================');
 }
 
 // Detect common game issues
@@ -4930,10 +5043,8 @@ function startStuckGameChecker(gameId) {
                 );
                 
                 if (criticalIssues.length > 0) {
-                    console.log('Auto-repairing critical game issues...');
                     try {
                         await repairGameState(gameId);
-                        console.log('Auto-repair completed successfully');
                     } catch (repairError) {
                         console.error('Auto-repair failed:', repairError);
                         
