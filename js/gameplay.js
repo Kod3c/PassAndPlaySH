@@ -2810,7 +2810,8 @@ roleEnvelope?.addEventListener('click', openRoleOverlay);
             });
         }
         const youPlayer = youPlayerDoc();
-        openHistoryModal(historyModal, historyBody, historyItems, youPlayer, canSeeEvent, formatTime, setRoleBannerVisibility);
+        const showVoteDetails = latestGame?.settings?.showVoteDetails !== false; // Default true
+        openHistoryModal(historyModal, historyBody, historyItems, youPlayer, canSeeEvent, formatTime, setRoleBannerVisibility, showVoteDetails);
     });
     historyClose?.addEventListener('click', () => closeHistoryModal(historyModal, setRoleBannerVisibility));
     historyModal?.addEventListener('click', function(e) { if (e.target === historyModal) closeHistoryModal(historyModal, setRoleBannerVisibility); });
@@ -3572,35 +3573,14 @@ function showCompatriots(youPlayer, game, roleText) {
         backBtn.textContent = '← Back to Menu';
         list.appendChild(backBtn);
 
-        // Vote details toggle - styled like policy cards
+        // Vote details toggle - simple button style
         const showVoteDetails = latestGame?.settings?.showVoteDetails !== false; // Default true
         const voteToggleBtn = document.createElement('button');
         voteToggleBtn.id = 'toggle-vote-details-btn';
-        voteToggleBtn.className = 'btn vote-details-toggle';
-
-        // Create inner structure with icons/images
-        const toggleInner = document.createElement('div');
-        toggleInner.className = 'vote-toggle-inner';
-
-        const toggleLabel = document.createElement('span');
-        toggleLabel.className = 'vote-toggle-label';
-        toggleLabel.textContent = 'Vote Visibility';
-
-        const toggleState = document.createElement('span');
-        toggleState.className = 'vote-toggle-state';
-        toggleState.textContent = showVoteDetails ? 'SHOWN' : 'HIDDEN';
-        toggleState.style.color = showVoteDetails ? 'var(--liberal-blue)' : 'var(--fascist-red)';
-        toggleState.style.fontWeight = '900';
-
-        const toggleIcon = document.createElement('span');
-        toggleIcon.className = 'vote-toggle-icon';
-        toggleIcon.textContent = showVoteDetails ? '👁️' : '🔒';
-        toggleIcon.style.fontSize = '1.5rem';
-
-        toggleInner.appendChild(toggleIcon);
-        toggleInner.appendChild(toggleLabel);
-        toggleInner.appendChild(toggleState);
-        voteToggleBtn.appendChild(toggleInner);
+        voteToggleBtn.className = 'btn';
+        const icon = showVoteDetails ? '👁️' : '🔒';
+        const state = showVoteDetails ? 'SHOWN' : 'HIDDEN';
+        voteToggleBtn.textContent = `${icon} Vote Visibility: ${state}`;
 
         list.appendChild(voteToggleBtn);
 
@@ -3946,7 +3926,7 @@ function showCompatriots(youPlayer, game, roleText) {
                     'settings.showVoteDetails': newValue,
                     updatedAt: serverTimestamp()
                 });
-                await logPublic(gid, `Host ${newValue ? 'enabled' : 'disabled'} individual vote logging`, { type: 'settings', actorId: youId || null });
+                await logPublic(gid, `Host ${newValue ? 'enabled' : 'hid'} individual vote choices in history`, { type: 'settings', actorId: youId || null });
                 renderHostOptionsMenu();
             } catch (err) {
                 console.error('Failed to toggle vote details', err);
@@ -4037,6 +4017,9 @@ function showCompatriots(youPlayer, game, roleText) {
                 params.set('duplicate', 'true');
                 params.set('playerCount', String(sortedPlayers.length));
                 params.set('playerNames', sortedPlayers.join(','));
+
+                // Set flag to prevent snapshot redirect for host
+                isHostQuitting = true;
 
                 // Close modal
                 closeMenuModal();

@@ -66,7 +66,7 @@ export function closeOrderModal(orderModal, setRoleBannerVisibility) {
     setRoleBannerVisibility(true);
 }
 
-export function openHistoryModal(historyModal, historyBody, historyItems, youPlayer, canSeeEvent, formatTime, setRoleBannerVisibility) {
+export function openHistoryModal(historyModal, historyBody, historyItems, youPlayer, canSeeEvent, formatTime, setRoleBannerVisibility, showVoteDetails = true) {
     if (!historyModal) return;
 
     historyModal.style.display = 'flex';
@@ -87,9 +87,13 @@ export function openHistoryModal(historyModal, historyBody, historyItems, youPla
         console.log('History items:', historyItems);
         console.log('You player:', youPlayer);
         console.log('Total history items:', (historyItems || []).length);
+        console.log('Show vote details:', showVoteDetails);
 
         let visibleItems = (historyItems || []).filter(evt => canSeeEvent(evt, youPlayer));
         console.log('Visible items after canSeeEvent:', visibleItems.length);
+
+        // Don't filter out vote messages here - we'll handle the display later during rendering
+        // This allows vote grouping to work correctly
 
         // Deduplicate consecutive identical messages and filter out noise
         const deduplicatedItems = [];
@@ -267,7 +271,12 @@ export function openHistoryModal(historyModal, historyBody, historyItems, youPla
                         vMsg.style.fontWeight = '600';
                         vMsg.style.flex = '1';
                         vMsg.style.fontSize = '0.9em';
-                        vMsg.textContent = voteEvt.message || '';
+                        // Strip out JA/NEIN if showVoteDetails is false
+                        let voteMessage = voteEvt.message || '';
+                        if (!showVoteDetails) {
+                            voteMessage = voteMessage.replace(/\s+(JA|NEIN)$/i, '');
+                        }
+                        vMsg.textContent = voteMessage;
                         vLeft.appendChild(vTime);
                         vLeft.appendChild(vMsg);
                         voteRow.appendChild(vLeft);
