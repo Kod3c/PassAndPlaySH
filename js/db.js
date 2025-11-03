@@ -93,9 +93,12 @@ export async function createGame(gameName, playerNames, hostPasswordHash = null)
     throw new Error('Duplicate player names are not allowed.');
   }
 
+  // Generate game name as "Secret Hitler - {gameId}"
+  const generatedGameName = `Secret Hitler - ${gameId}`;
+
   await setDoc(gameRef, {
     id: gameId,
-    name: sanitizeGameName(gameName),
+    name: generatedGameName,
     state: 'lobby',
     playerCount: sanitized.length,
     createdAt,

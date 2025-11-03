@@ -102,11 +102,6 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-3">
                         <div class="form-group">
-                            <label for="game-name-input" class="form-label">Game Name</label>
-                            <input type="text" id="game-name-input" class="form-control" placeholder="Enter game name" value="Secret Hitler">
-                            <small class="form-help">Choose a memorable name for your game</small>
-                        </div>
-                        <div class="form-group">
                             <label for="host-password-input" class="form-label">Host Rejoin PIN (optional)</label>
                             <input type="password" id="host-password-input" class="form-control" placeholder="Set a 4-digit PIN to reclaim host if disconnected" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off">
                             <small class="form-help">If set, anyone joining as the host must enter this 4-digit PIN to reclaim the host seat.</small>
@@ -160,7 +155,6 @@
                 
                 <!-- reCAPTCHA Status -->
                 <div id="recaptcha-status" class="mt-3 text-center text-sm text-gray-600" style="display: none;">
-                    <div id="rate-limit-info"></div>
                     <div id="cooldown-info"></div>
                 </div>
             </div>
@@ -182,7 +176,6 @@
             const playerInputsContainer = document.getElementById('player-inputs');
             const createGameBtn = document.getElementById('create-game-btn');
             const player1Hint = document.getElementById('player1-hint');
-            const gameNameInput = document.getElementById('game-name-input');
             const namesErrorId = 'names-error';
 
             // Host PIN input validation - only allow numbers and limit to 4 digits
@@ -369,7 +362,7 @@
                     return;
                 }
 
-                const gameName = (gameNameInput && gameNameInput.value || 'Secret Hitler Game').trim();
+                // Game name will be generated after we get the game ID
                 const hostPasswordInput = document.getElementById('host-password-input');
                 const hostPassword = hostPasswordInput ? (hostPasswordInput.value || '').trim() : '';
                 
@@ -399,8 +392,9 @@
                     }
 
                     const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
-                    
-                    const gameId = await createGame(gameName, players, hostPasswordHash);
+
+                    // Pass null for game name - it will be generated as "Secret Hitler - {gameId}"
+                    const gameId = await createGame(null, players, hostPasswordHash);
                     try { localStorage.setItem('sh_currentGameId', gameId); } catch (_) {}
                     window.location.href = `lobby.html?game=${encodeURIComponent(gameId)}`;
                 } catch (e) {
@@ -433,14 +427,9 @@
                         duplicateNotice.style.display = 'block';
                     }
                     
-                    const gameName = urlParams.get('gameName') || 'Secret Hitler Game';
                     const playerCount = parseInt(urlParams.get('playerCount') || '0', 10);
                     const playerNamesParam = urlParams.get('playerNames') || '';
-                    
-                    if (gameNameInput && gameName) {
-                        gameNameInput.value = gameName;
-                    }
-                    
+
                     if (playerCount >= MIN_VALID_PLAYERS && playerCount <= MAX_PLAYERS) {
                         // Set player count
                         currentCountSpan.textContent = String(playerCount);
@@ -497,22 +486,14 @@
             // Update reCAPTCHA status display
             function updateRecaptchaStatus() {
                 const statusEl = document.getElementById('recaptcha-status');
-                const rateLimitEl = document.getElementById('rate-limit-info');
                 const cooldownEl = document.getElementById('cooldown-info');
-                
-                if (!statusEl || !rateLimitEl || !cooldownEl) return;
-                
-                const remainingActions = recaptchaManager.getRemainingActions();
+
+                if (!statusEl || !cooldownEl) return;
+
                 const remainingCooldown = recaptchaManager.getRemainingCooldown();
-                
-                if (remainingActions < 10 || remainingCooldown > 0) {
+
+                if (remainingCooldown > 0) {
                     statusEl.style.display = 'block';
-                    
-                    if (remainingActions < 10) {
-                        rateLimitEl.textContent = `Rate limit: ${remainingActions} actions remaining this minute`;
-                    } else {
-                        rateLimitEl.textContent = '';
-                    }
                     
                     if (remainingCooldown > 0) {
                         cooldownEl.textContent = `Cooldown: ${Math.ceil(remainingCooldown / 1000)}s remaining`;
