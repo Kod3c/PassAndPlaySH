@@ -530,298 +530,18 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 .role-actions-main.comrades-hidden .btn {
     min-width: 220px;
 }
-/* ==================== RULES MODAL VISUAL ENHANCEMENTS ==================== */
-
-/* Enhanced card styles for better visual hierarchy */
-.rules-modal .overview-card,
-.rules-modal .power-card,
-.rules-modal .role-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 240, 223, 0.95) 100%);
-    border: 2px solid rgba(16, 24, 32, 0.12);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    transition: all 0.25s ease;
-}
-
-.rules-modal .overview-card:hover,
-.rules-modal .power-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    border-color: rgba(16, 24, 32, 0.2);
-}
-
-/* Enhanced section icons */
-.rules-modal .section-icon {
-    background: linear-gradient(135deg, var(--highlight-cream) 0%, #f1e6b2 100%);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    border: 2px solid var(--propaganda-black);
-}
-
-/* Improve list readability */
-.rules-modal ul,
-.rules-modal ol {
-    line-height: 1.8;
-    padding-left: 24px;
-}
-
-.rules-modal li {
-    margin-bottom: 8px;
-}
-
-.rules-modal li:last-child {
-    margin-bottom: 0;
-}
-
-/* Better typography for emphasis */
-.rules-modal strong {
-    color: var(--propaganda-black);
-    font-weight: 800;
-}
-
-/* Improve power cards */
-.rules-modal .power-header {
-    background: linear-gradient(135deg, rgba(218, 41, 28, 0.08) 0%, rgba(218, 41, 28, 0.04) 100%);
-    border-bottom: 2px solid rgba(218, 41, 28, 0.15);
-    padding: 12px;
-    margin: -12px -12px 12px;
-    border-radius: 8px 8px 0 0;
-}
-
-.rules-modal .power-number {
-    background: var(--fascist-red);
-    color: white;
-    font-weight: 900;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(218, 41, 28, 0.3);
-}
-
-/* Improve win conditions */
-.rules-modal .win-condition {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 240, 223, 0.9) 100%);
-    border: 3px solid;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.rules-modal .win-condition.liberal-win {
-    border-color: var(--liberal-blue);
-    background: linear-gradient(135deg, rgba(0, 174, 239, 0.08) 0%, rgba(0, 174, 239, 0.02) 100%);
-}
-
-.rules-modal .win-condition.fascist-win {
-    border-color: var(--fascist-red);
-    background: linear-gradient(135deg, rgba(218, 41, 28, 0.08) 0%, rgba(218, 41, 28, 0.02) 100%);
-}
-
 /* Rules modal specific */
-.rules-modal .modal-card {
-    max-height: 86vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.rules-modal .modal-body {
-    overflow: auto;
-    padding: 20px;
-    line-height: 1.7;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(16, 24, 32, 0.3) rgba(16, 24, 32, 0.05);
-}
-
-/* Webkit scrollbar styling */
-.rules-modal .modal-body::-webkit-scrollbar {
-    width: 10px;
-}
-
-.rules-modal .modal-body::-webkit-scrollbar-track {
-    background: rgba(16, 24, 32, 0.05);
-    border-radius: 5px;
-}
-
-.rules-modal .modal-body::-webkit-scrollbar-thumb {
-    background: rgba(16, 24, 32, 0.3);
-    border-radius: 5px;
-    transition: background 0.2s;
-}
-
-.rules-modal .modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(16, 24, 32, 0.5);
-}
-
-.rules-modal .modal-header {
-    background: var(--off-white);
-    padding: 16px 20px;
-}
-
-.rules-modal .modal-title {
-    font-family: var(--font-fraktur);
-    letter-spacing: 0.02em;
-    font-size: var(--font-2xl);
-}
-
-.rules-modal .modal-subtitle {
-    font-family: var(--font-propaganda);
-    font-size: var(--font-base);
-    color: #5a5a5a;
-    margin-top: 4px;
-}
-
-/* Rules content wrapper - constrain width for readability */
-.rules-content {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 16px 0;
-}
-
-/* Improve section spacing and readability */
-.rule-section {
-    padding: 0 8px 24px;
-}
-
-.rule-section .section-header {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid rgba(16, 24, 32, 0.1);
-}
-
-/* Navigation bar improvements */
-.rules-quicknav {
-    display: flex;
-    gap: 8px;
-    flex-wrap: nowrap;
-    padding: 12px 16px;
-    border-bottom: 3px solid var(--propaganda-black);
-    background: var(--bg-card);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.rules-quicknav .rule-nav-btn {
-    padding: 10px 16px;
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    transition: all 0.2s ease;
-    font-size: 0.95rem;
-}
-
-.rules-quicknav .rule-nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.rules-quicknav .rule-nav-btn.active {
-    background: var(--highlight-cream);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-    transform: none;
-}
-
-/* Accessibility: Focus indicators for keyboard navigation */
-.rules-quicknav .rule-nav-btn:focus-visible,
-.rules-bottomnav .btn:focus-visible,
-.rules-modal .modal-close:focus-visible {
-    outline: 3px solid var(--liberal-blue);
-    outline-offset: 2px;
-    z-index: 100;
-}
-
-/* Improve keyboard navigation visibility */
-.rules-quicknav .rule-nav-btn:focus {
-    outline: none;
-}
-
-.rules-quicknav .rule-nav-btn:focus-visible {
-    outline: 3px solid var(--liberal-blue);
-    outline-offset: 2px;
-}
-
-/* Better button states for accessibility */
-.rules-bottomnav .btn:active {
-    transform: scale(0.98);
-}
-
-.rules-bottomnav .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Accessibility: Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .rules-modal *,
-    .rules-quicknav .rule-nav-btn,
-    .rules-bottomnav .btn,
-    .rules-modal .overview-card,
-    .rules-modal .power-card {
-        animation: none !important;
-        transition: none !important;
-    }
-
-    .rules-modal .modal-body {
-        scroll-behavior: auto;
-    }
-}
-
-/* Skip to content link for screen readers */
-.rules-modal .skip-to-content {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: var(--propaganda-black);
-    color: white;
-    padding: 8px 16px;
-    text-decoration: none;
-    font-weight: bold;
-    z-index: 1000;
-}
-
-.rules-modal .skip-to-content:focus {
-    top: 0;
-}
+.rules-modal .modal-card { max-height: 86vh; display:flex; flex-direction:column; }
+.rules-modal .modal-body { overflow:auto; }
+.rules-modal .modal-header { background: var(--off-white); }
+.rules-modal .modal-title { font-family: var(--font-fraktur); letter-spacing: 0.02em; font-size: var(--font-2xl); }
+.rules-modal .modal-subtitle { font-family: var(--font-propaganda); font-size: var(--font-lg); color: var(--dark-beige); }
+.rules-quicknav { display:flex; gap:8px; flex-wrap:nowrap; padding: 10px 12px; border-bottom: 3px solid var(--propaganda-black); background: var(--bg-card); position: sticky; top: 0; z-index: 1; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; }
+.rules-quicknav .rule-nav-btn { padding: 6px 10px; flex: 0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; }
 /* Bottom nav for rules (mobile) */
-.rules-bottomnav {
-    display: none;
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(8px);
-    border-top: 3px solid var(--propaganda-black);
-    z-index: 10;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.rules-bottomnav-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    max-width: 720px;
-    margin: 0 auto;
-}
-
-.rules-bottomnav .indicator {
-    font-weight: 900;
-    letter-spacing: 0.03em;
-    font-size: 1rem;
-    color: var(--text-primary);
-}
+.rules-bottomnav { display:none; position: sticky; bottom: 0; left: 0; right: 0; padding: 8px; background: var(--bg-card); border-top: 3px solid var(--propaganda-black); z-index: 1; }
+.rules-bottomnav-inner { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.rules-bottomnav .indicator { font-weight: 900; letter-spacing: 0.03em; }
 @media (max-width: 768px) {
     /* Medium screens - start transitioning to mobile layout */
     .role-actions-main {
@@ -836,77 +556,15 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 }
 
 @media (max-width: 640px) {
-    .rules-modal .modal-card {
-        width: 96vw;
-        max-height: 94vh;
-    }
-
-    .rules-modal .modal-body {
-        padding: 12px;
-        padding-bottom: 80px;
-        font-size: 15px;
-    }
-
-    .rules-modal .modal-header {
-        padding: 12px 16px;
-    }
-
-    .rules-content {
-        padding: 8px 0;
-    }
-
-    .rule-section {
-        padding: 0 4px 20px;
-    }
-
-    .rule-section .section-header {
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-    }
-
-    /* Mobile navigation - grid layout with icons only */
-    .rules-quicknav {
-        gap: 6px;
-        padding: 8px;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        overflow-x: hidden;
-        overflow-y: visible;
-    }
-
-    .rules-quicknav .rule-nav-btn {
-        padding: 12px 8px;
-        min-width: 0;
-        width: 100%;
-        min-height: 48px;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .rules-quicknav .nav-text {
-        display: none;
-    }
-
-    .rules-quicknav .nav-icon {
-        font-size: 1.25rem;
-    }
-
-    /* Bottom navigation visible on mobile */
-    .rules-bottomnav {
-        display: block;
-    }
-
-    .rules-bottomnav .btn {
-        min-height: 48px;
-        flex: 1;
-        font-size: 0.95rem;
-    }
-
-    .rules-bottomnav .indicator {
-        flex: 0 0 auto;
-        min-width: 72px;
-        text-align: center;
-    }
+    .rules-modal .modal-card { width: 96vw; max-height: 92vh; }
+    .rules-modal .modal-body { padding: 8px; padding-bottom: 64px; }
+    .rules-quicknav { gap:6px; padding: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow-x: hidden; overflow-y: visible; }
+    .rules-quicknav .rule-nav-btn { padding: 10px; min-width: 0; width: 100%; }
+    .rules-quicknav .nav-text { display:none; }
+    .rules-quicknav .nav-icon { font-size: 1.125rem; }
+    .rules-bottomnav { display:block; }
+    .rules-bottomnav .btn { min-height: 44px; flex: 1; }
+    .rules-bottomnav .indicator { flex: 0 0 auto; min-width: 64px; text-align:center; }
     
     /* Role actions responsive styling */
     .role-actions .btn { 
@@ -928,38 +586,15 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     }
 }
 @media (max-width: 360px) {
-    /* Keep 4-column grid for consistency - just reduce icon size */
-    .rules-quicknav .nav-icon {
-        font-size: 1.1rem;
-    }
-
-    .rules-quicknav .rule-nav-btn {
-        padding: 10px 6px;
-        min-height: 44px;
-    }
-
-    .rules-modal .modal-body {
-        padding: 10px;
-        padding-bottom: 76px;
-        font-size: 14px;
-    }
-
-    .rule-section .section-header h3 {
-        font-size: 1.25rem;
-    }
-
-    .rules-bottomnav .btn {
-        padding: 10px 12px;
-        font-size: 0.9rem;
-    }
-
+    .rules-quicknav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    
     /* Extra small screen role actions */
-    .role-actions .btn {
-        min-height: 40px;
-        font-size: 0.9rem;
+    .role-actions .btn { 
+        min-height: 40px; 
+        font-size: 0.9rem; 
         padding: 8px 12px;
     }
-
+    
     .role-actions-main {
         gap: 6px !important;
     }

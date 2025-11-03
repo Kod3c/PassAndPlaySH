@@ -24,14 +24,13 @@ export function renderSlots(el, count) {
 
 export function renderTracker(el) {
     if (!el) return;
-
+    
     el.innerHTML = '';
     for (let i = 0; i < 3; i++) {
         const b = document.createElement('div');
         b.className = 'square';
         b.textContent = String(i + 1);
         b.dataset.index = String(i);
-        b.dataset.defaultNumber = String(i + 1);
         el.appendChild(b);
     }
 }
