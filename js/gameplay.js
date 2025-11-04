@@ -291,7 +291,7 @@ function addTrioCardsEyeToSlot(slot) {
             top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 40px;
+            width: 30px;
             height: auto;
             pointer-events: none;
             z-index: 20;
