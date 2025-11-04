@@ -515,9 +515,8 @@ function showSuperpowerModal(superpower, fascistSlot) {
     modal.className = 'modal-overlay superpower-modal';
     modal.innerHTML = `
         <div class="modal-card">
-            <div class="modal-header">
-                <div class="modal-title">🦸‍♂️ Executive Power Activated</div>
-                <div class="modal-subtitle">Fascist Policy ${fascistSlot}</div>
+            <div class="modal-header" style="justify-content: center;">
+                <div class="modal-title">🦸‍♂️ Executive Power Available</div>
             </div>
             <div class="modal-body">
                 <div class="superpower-info">
@@ -526,6 +525,7 @@ function showSuperpowerModal(superpower, fascistSlot) {
                 </div>
                 <div class="superpower-actions">
                     <button id="activate-superpower-btn" class="btn btn-primary">Activate Power</button>
+                    <button id="skip-superpower-btn" class="btn btn-secondary">Don't Use</button>
                     <div class="superpower-note">You must use this power before the next government</div>
                 </div>
             </div>
@@ -539,6 +539,15 @@ function showSuperpowerModal(superpower, fascistSlot) {
     activateBtn.addEventListener('click', () => {
         handleSuperpowerActivation(superpower.type);
         modal.remove();
+    });
+
+    // Handle skip
+    const skipBtn = document.getElementById('skip-superpower-btn');
+    skipBtn.addEventListener('click', () => {
+        if (confirm(`Are you sure you want to skip using ${superpower.name}? This power will be lost.`)) {
+            modal.remove();
+            completeSuperpower(getGameId(), superpower.type, true);
+        }
     });
 
     // Show modal
@@ -585,32 +594,41 @@ async function handlePolicyPeek() {
         modal.id = 'policy-peek-modal';
         modal.className = 'modal-overlay superpower-modal';
         modal.innerHTML = `
-            <div class="modal-card">
-                <div class="modal-header">
-                    <div class="modal-title">🔍 Policy Peek</div>
-                    <div class="modal-subtitle">Top 3 Cards from the Deck</div>
-                </div>
+            <div class="modal-card policy-peek-modal-card">
+                <button class="modal-close" aria-label="Close" id="policy-peek-close">×</button>
                 <div class="modal-body">
+                    <div class="policy-peek-header">
+                        <div class="policy-peek-icon">🔍</div>
+                        <h3 class="policy-peek-title">Policy Peek</h3>
+                        <p class="policy-peek-subtitle">Top 3 cards from the deck</p>
+                    </div>
                     <div class="policy-peek-cards">
                         ${topThreeCards.map((cardType, index) => `
-                            <div class="policy-peek-card ${cardType}" style="animation-delay: ${index * 0.1}s">
-                                <div class="card-icon">${cardType === 'liberal' ? '🕊️' : '☠️'}</div>
-                                <div class="card-label">${cardType}</div>
-                                <div class="card-number">${index + 1}</div>
+                            <div class="policy-peek-card-wrapper" style="animation-delay: ${index * 0.15}s">
+                                <div class="policy-peek-card-img">
+                                    <img src="../images/${cardType}.png" alt="${cardType} policy" />
+                                </div>
+                                <div class="policy-peek-card-position">#${index + 1}</div>
                             </div>
                         `).join('')}
                     </div>
-                    <div class="policy-peek-info">
-                        <p>These are the next 3 policy cards. They remain in the same order.</p>
+                    <div class="policy-peek-note">
+                        <p>Cards remain in this order and will be drawn by the next President.</p>
                     </div>
                     <div class="policy-peek-actions">
-                        <button id="policy-peek-done" class="btn btn-primary">Done</button>
+                        <button id="policy-peek-done" class="btn btn-primary">Got it!</button>
                     </div>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
+
+        // Handle close button
+        document.getElementById('policy-peek-close').addEventListener('click', async () => {
+            modal.remove();
+            await completeSuperpower(gameId, 'policy_peek');
+        });
 
         // Handle completion
         document.getElementById('policy-peek-done').addEventListener('click', async () => {

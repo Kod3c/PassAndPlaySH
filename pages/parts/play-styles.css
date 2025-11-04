@@ -384,94 +384,124 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 .superpower-info { text-align: center; margin: 20px 0; }
 .superpower-name { font-weight: 900; font-size: 1.5rem; margin-bottom: 8px; }
 .superpower-description { font-size: 1rem; opacity: 0.8; }
-.superpower-actions { text-align: center; margin-top: 24px; }
+.superpower-actions { text-align: center; margin-top: 24px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.superpower-actions .btn { min-width: 200px; }
+.superpower-actions .btn-secondary { background: #f3f4f6; color: #374151; border-color: #9ca3af; }
+.superpower-actions .btn-secondary:hover { background: #e5e7eb; color: #1f2937; }
 .superpower-note { font-size: 0.85rem; opacity: 0.7; margin-top: 12px; }
 
 /* Policy Peek specific */
+.policy-peek-modal-card {
+    max-width: 640px;
+}
+
+.policy-peek-modal-card .modal-body {
+    padding: 32px 24px;
+    text-align: center;
+}
+
+.policy-peek-header {
+    margin-bottom: 32px;
+}
+
+.policy-peek-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.policy-peek-title {
+    font-family: var(--font-propaganda);
+    font-weight: 900;
+    font-size: 1.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+    color: var(--propaganda-black);
+}
+
+.policy-peek-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.7;
+    margin: 0;
+}
+
 .policy-peek-cards {
     display: flex;
-    gap: 16px;
+    gap: 20px;
     justify-content: center;
-    margin: 24px 0;
+    align-items: flex-start;
+    margin: 0 auto 32px;
     flex-wrap: wrap;
 }
 
-.policy-peek-card {
-    width: 120px;
-    height: 168px;
-    border-radius: 8px;
-    border: 3px solid var(--propaganda-black);
+.policy-peek-card-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    position: relative;
-    transition: transform 0.2s ease;
-    animation: slideIn 0.3s ease-out both;
+    gap: 12px;
+    animation: slideInUp 0.4s ease-out both;
 }
 
-.policy-peek-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
-}
-
-.policy-peek-card.liberal {
-    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-}
-
-.policy-peek-card.fascist {
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-}
-
-.policy-peek-card .card-icon {
-    font-size: 2.5rem;
-    margin-bottom: 8px;
-}
-
-.policy-peek-card .card-label {
-    color: white;
-    font-weight: 800;
-    font-size: 1rem;
-    text-transform: uppercase;
-    text-align: center;
-    padding: 0 8px;
-}
-
-.policy-peek-card .card-number {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
-.policy-peek-info {
-    background: rgba(0, 0, 0, 0.05);
-    border: 2px solid rgba(0, 0, 0, 0.1);
+.policy-peek-card-img {
+    width: 120px;
+    height: auto;
     border-radius: 8px;
-    padding: 16px;
-    margin: 24px 0;
-    text-align: center;
+    border: 3px solid var(--propaganda-black);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+    background: #fff;
 }
 
-.policy-peek-info p {
+.policy-peek-card-img img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.policy-peek-card-img:hover {
+    transform: translateY(-6px) scale(1.05);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.policy-peek-card-position {
+    background: var(--propaganda-black);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 2px solid var(--propaganda-black);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.policy-peek-note {
+    background: rgba(16, 24, 32, 0.06);
+    border: 2px solid rgba(16, 24, 32, 0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 0 0 24px;
+}
+
+.policy-peek-note p {
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.5;
+    font-weight: 600;
+    opacity: 0.85;
 }
 
 .policy-peek-actions {
     text-align: center;
-    margin-top: 24px;
+    margin-top: 8px;
+}
+
+.policy-peek-actions .btn {
+    min-width: 140px;
+    padding: 12px 24px;
+    font-size: 1.05rem;
 }
 
 @keyframes slideIn {
@@ -482,6 +512,78 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive adjustments for Policy Peek modal */
+@media (max-width: 640px) {
+    .policy-peek-modal-card .modal-body {
+        padding: 24px 16px;
+    }
+
+    .policy-peek-icon {
+        font-size: 2.5rem;
+    }
+
+    .policy-peek-title {
+        font-size: 1.5rem;
+    }
+
+    .policy-peek-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .policy-peek-header {
+        margin-bottom: 24px;
+    }
+
+    .policy-peek-cards {
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .policy-peek-card-img {
+        width: 100px;
+    }
+
+    .policy-peek-card-position {
+        font-size: 0.85rem;
+        padding: 5px 12px;
+    }
+
+    .policy-peek-note {
+        padding: 12px 16px;
+    }
+
+    .policy-peek-note p {
+        font-size: 0.85rem;
+    }
+
+    .policy-peek-actions .btn {
+        min-width: 120px;
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .policy-peek-cards {
+        gap: 12px;
+    }
+
+    .policy-peek-card-img {
+        width: 85px;
     }
 }
 
@@ -1127,6 +1229,23 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     background: var(--bg-card);
     border-color: var(--border-color);
   }
+
+  .policy-peek-title {
+    color: var(--text-primary);
+  }
+
+  .policy-peek-subtitle {
+    color: var(--text-secondary);
+  }
+
+  .policy-peek-note {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-color);
+  }
+
+  .policy-peek-note p {
+    color: var(--text-secondary);
+  }
   
   .badge-pres {
     background: rgba(251, 191, 36, 0.2);
@@ -1240,6 +1359,23 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 [data-theme="dark"] .modal-card {
   background: var(--bg-card);
   border-color: var(--border-color);
+}
+
+[data-theme="dark"] .policy-peek-title {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .policy-peek-subtitle {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .policy-peek-note {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .policy-peek-note p {
+  color: var(--text-secondary);
 }
 
 [data-theme="dark"] .badge-pres {
