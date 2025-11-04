@@ -211,11 +211,12 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 }
 
 /* Slot 3 (index 2) - Trio cards eye module (only for 5-6 players) */
+/* Remove the skull ::after content entirely and let JavaScript overlay handle the icon */
 .track.fascist .slot:nth-child(3).trio-cards-eye-module:empty:not(.has-president-overlay)::after {
-    background-image: url('../../images/trio-cards-eye.png') !important;
-    background-size: 36.4px auto !important;
-    opacity: 1.0 !important;
-    filter: none !important;
+    content: none !important;
+    display: none !important;
+    background-image: none !important;
+    opacity: 0 !important;
 }
 
 /* Skull backgrounds for slots 4 and 5 are now handled by JavaScript */

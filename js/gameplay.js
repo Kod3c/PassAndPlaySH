@@ -291,14 +291,14 @@ function addTrioCardsEyeToSlot(slot) {
             top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 36.4px;
+            width: 40px;
             height: auto;
             pointer-events: none;
             z-index: 20;
             opacity: 1.0;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         `;
-        overlay.innerHTML = '<img src="../images/trio-cards-eye.png" alt="Policy Peek Power" style="width: 100%; height: auto;">';
+        overlay.innerHTML = '<img src="../images/human-eye.svg" alt="Policy Peek Power" style="width: 100%; height: auto; filter: brightness(0) invert(1);">';
         slot.appendChild(overlay);
     }
 }
@@ -347,12 +347,13 @@ window.debugFascistSlots = function(testPlayerCount) {
 // Add skull backgrounds to all fascist slots and bullet overlays to slots 4 and 5
 function addBulletOverlaysToFascistSlots(containerEl) {
     if (!containerEl || containerEl.children.length < 6) return;
-    
-    // Add skull backgrounds to slots 1, 2, and 3 (indices 0, 1, 2) using same method as slots 4 and 5
-    for (let i = 0; i < 3; i++) {
+
+    // Add skull backgrounds to slots 1 and 2 ONLY (indices 0, 1)
+    // Slot 3 (index 2) is handled by player-count-specific logic (human-eye, eyeglass, or president)
+    for (let i = 0; i < 2; i++) {
         const slot = containerEl.children[i];
         if (!slot) continue;
-        
+
         if (!slot.classList.contains('filled')) {
             // Add skull background or update existing one
             let skullBackground = slot.querySelector('.skull-background');
@@ -376,8 +377,8 @@ function addBulletOverlaysToFascistSlots(containerEl) {
             `;
         }
     }
-    
-    // Note: Trio-cards overlays are now handled by player-count-specific logic
+
+    // Note: Slot 3 overlays (trio-cards-eye/human-eye, eyeglass, president) are handled by player-count-specific logic
     
     const fourthSlot = containerEl.children[3]; // Index 3 = 4th slot
     const fifthSlot = containerEl.children[4]; // Index 4 = 5th slot
@@ -4139,6 +4140,8 @@ function showCompatriots(youPlayer, game, roleText) {
         refreshRoleOverlayPermissions();
         // Update actions (nomination UI etc.)
         renderActions(gid);
+        // Refresh fascist slot icons based on player count
+        refreshFascistSlotsForPlayerCount();
         // Attempt resolve vote if complete
         maybeResolveElectionVote(gid);
         
