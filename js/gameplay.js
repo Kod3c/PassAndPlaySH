@@ -298,7 +298,7 @@ function addTrioCardsEyeToSlot(slot) {
             opacity: 1.0;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         `;
-        overlay.innerHTML = '<img src="../images/human-eye.svg" alt="Policy Peek Power" style="width: 100%; height: auto; filter: brightness(0) invert(1);">';
+        overlay.innerHTML = '<img src="../images/eyeglass.png" alt="Policy Peek Power" style="width: 100%; height: auto;">';
         slot.appendChild(overlay);
     }
 }

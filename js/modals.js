@@ -104,6 +104,7 @@ export function openHistoryModal(historyModal, historyBody, historyItems, youPla
             'Order created',
             'Roles assigned',
             'Chancellor vote began',
+            'You acknowledged viewing your secret role',
         ];
 
         for (let i = 0; i < visibleItems.length; i++) {

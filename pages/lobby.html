@@ -930,8 +930,7 @@
                             await logPublic(gameId, 'Roles assigned', { type: 'setup' });
                             const initialPresident = arr.find(p => p.id === initialPresidentId);
                             await logPublic(gameId, `Game started: roles assigned. Initial President: ${initialPresident ? (initialPresident.name || 'Player') : 'Unknown'}`, { type: 'setup', actorId: initialPresidentId });
-                            await logPublic(gameId, 'Hitler role assigned', { type: 'setup' });
-                            await logPublic(gameId, 'Fascist team assigned', { type: 'setup' });
+                            await logPublic(gameId, 'Teams and Roles Assigned', { type: 'setup' });
                             for (let i = 0; i < arr.length; i++) {
                                 const p = arr[i];
                                 const roleName = (i === hitlerIndex) ? 'Hitler' : (assignedIds.has(p.id) && p.id !== arr[hitlerIndex].id) ? 'Fascist' : 'Liberal';
