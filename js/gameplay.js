@@ -513,6 +513,11 @@ function showSuperpowerModal(superpower, fascistSlot) {
     const modal = document.createElement('div');
     modal.id = 'superpower-modal';
     modal.className = 'modal-overlay superpower-modal';
+
+    // Execution is required, other powers can be skipped
+    const isExecutionPower = superpower.type === 'execution';
+    const skipButtonHTML = isExecutionPower ? '' : '<button id="skip-superpower-btn" class="btn btn-secondary">Don\'t Use</button>';
+
     modal.innerHTML = `
         <div class="modal-card">
             <div class="modal-header" style="justify-content: center;">
@@ -525,7 +530,7 @@ function showSuperpowerModal(superpower, fascistSlot) {
                 </div>
                 <div class="superpower-actions">
                     <button id="activate-superpower-btn" class="btn btn-primary">Activate Power</button>
-                    <button id="skip-superpower-btn" class="btn btn-secondary">Don't Use</button>
+                    ${skipButtonHTML}
                     <div class="superpower-note">You must use this power before the next government</div>
                 </div>
             </div>
@@ -541,14 +546,16 @@ function showSuperpowerModal(superpower, fascistSlot) {
         modal.remove();
     });
 
-    // Handle skip
-    const skipBtn = document.getElementById('skip-superpower-btn');
-    skipBtn.addEventListener('click', () => {
-        if (confirm(`Are you sure you want to skip using ${superpower.name}? This power will be lost.`)) {
-            modal.remove();
-            completeSuperpower(getGameId(), superpower.type, true);
-        }
-    });
+    // Handle skip (only if not execution)
+    if (!isExecutionPower) {
+        const skipBtn = document.getElementById('skip-superpower-btn');
+        skipBtn.addEventListener('click', () => {
+            if (confirm(`Are you sure you want to skip using ${superpower.name}? This power will be lost.`)) {
+                modal.remove();
+                completeSuperpower(getGameId(), superpower.type, true);
+            }
+        });
+    }
 
     // Show modal
     requestAnimationFrame(() => {
@@ -693,8 +700,8 @@ async function handleInvestigation() {
                 <div class="modal-body">
                     <div class="investigation-players">
                         ${eligiblePlayers.map(player => `
-                            <button class="investigation-player-btn" data-player-id="${player.id}">
-                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            <button class="btn investigation-player-btn" data-player-id="${player.id}">
+                                ${player.name || 'Unnamed Player'}
                             </button>
                         `).join('')}
                     </div>
@@ -768,8 +775,8 @@ async function handleSpecialElection() {
                 <div class="modal-body">
                     <div class="special-election-players">
                         ${eligiblePlayers.map(player => `
-                            <button class="special-election-player-btn" data-player-id="${player.id}">
-                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            <button class="btn special-election-player-btn" data-player-id="${player.id}">
+                                ${player.name || 'Unnamed Player'}
                             </button>
                         `).join('')}
                     </div>
@@ -843,12 +850,12 @@ async function handleExecution() {
                 <div class="modal-body">
                     <div class="execution-warning">
                         <div class="warning-icon">⚠️</div>
-                        <p><strong>Warning:</strong> If you execute Hitler, Liberals win immediately!</p>
+                        <p><strong>Note:</strong> If you execute Hitler, Liberals win immediately!</p>
                     </div>
                     <div class="execution-players">
                         ${eligiblePlayers.map(player => `
-                            <button class="execution-player-btn" data-player-id="${player.id}">
-                                <div class="player-name">${player.name || 'Unnamed Player'}</div>
+                            <button class="btn execution-player-btn" data-player-id="${player.id}">
+                                ${player.name || 'Unnamed Player'}
                             </button>
                         `).join('')}
                     </div>

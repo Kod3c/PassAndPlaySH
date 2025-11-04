@@ -619,16 +619,13 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 
 /* Rules modal specific */
 .rules-modal .modal-card {
-    max-height: 86vh;
-    display: flex;
-    flex-direction: column;
+    /* Inherits standard dimensions from .modal-card */
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .rules-modal .modal-body {
     overflow: auto;
-    padding: 20px;
-    line-height: 1.7;
+    line-height: 1.6;
     overflow-wrap: break-word;
     word-wrap: break-word;
     scroll-behavior: smooth;
@@ -837,19 +834,11 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 }
 
 @media (max-width: 640px) {
-    .rules-modal .modal-card {
-        width: 96vw;
-        max-height: 94vh;
-    }
+    /* Rules modal inherits responsive dimensions from base .modal-card */
 
     .rules-modal .modal-body {
-        padding: 12px;
         padding-bottom: 80px;
         font-size: 15px;
-    }
-
-    .rules-modal .modal-header {
-        padding: 12px 16px;
     }
 
     .rules-content {
