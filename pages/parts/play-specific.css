@@ -1039,7 +1039,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
 .spread-tooltip::after { content: ""; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid var(--propaganda-black); }
 /* Revealed fronts for table cards */
 .table-spread .table-card.is-front.liberal { background-image: url('../../images/liberal.png'); }
-.table-spread .table-card.is-front.facist { background-image: url('../../images/facist.png'); }
+.table-spread .table-card.is-front.fascist { background-image: url('../../images/fascist.png'); }
 .table-spread .table-card.lifting { transition: transform 140ms ease-out; }
 .table-spread .table-card.is-front { transform-origin: 50% 50%; z-index: 10; }
 .table-spread .table-card.revealed { transition: transform 220ms ease-out; }

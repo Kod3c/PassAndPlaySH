@@ -81,7 +81,7 @@ function renderPoliciesToSlots(containerEl, filledCount, type) {
                 const card = document.createElement('div');
                 card.className = 'policy-card ' + (type === 'liberal' ? 'liberal' : 'fascist');
                 // Use image backgrounds for authenticity
-                card.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
+                card.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/fascist.png')";
                 // Let CSS handle the transform for responsive sizing
                 card.style.zIndex = '3';
                 card.style.zIndex = '3';
@@ -92,7 +92,7 @@ function renderPoliciesToSlots(containerEl, filledCount, type) {
                 const bulletOverlay = slot.querySelector('.bullet-overlay');
                 if (bulletOverlay) bulletOverlay.remove();
             } else {
-                existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/facist.png')";
+                existing.style.backgroundImage = type === 'liberal' ? "url('../images/liberal.png')" : "url('../images/fascist.png')";
                 // Let CSS handle the transform for responsive sizing
                 existing.style.zIndex = '3';
                 slot.classList.add('filled');
@@ -603,14 +603,16 @@ async function handlePolicyPeek() {
                         <p class="policy-peek-subtitle">Top 3 cards from the deck</p>
                     </div>
                     <div class="policy-peek-cards">
-                        ${topThreeCards.map((cardType, index) => `
+                        ${topThreeCards.map((cardType, index) => {
+                            const imageName = cardType;
+                            return `
                             <div class="policy-peek-card-wrapper" style="animation-delay: ${index * 0.15}s">
                                 <div class="policy-peek-card-img">
-                                    <img src="../images/${cardType}.png" alt="${cardType} policy" />
+                                    <img src="../images/${imageName}.png" alt="${cardType} policy" />
                                 </div>
                                 <div class="policy-peek-card-position">#${index + 1}</div>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
                     <div class="policy-peek-note">
                         <p>Cards remain in this order and will be drawn by the next President.</p>
@@ -1558,7 +1560,7 @@ function showChancellorChoiceOverlay(game) {
 
             // Halfway through flip, change to front image
             setTimeout(() => {
-                clone.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
+                clone.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/fascist.png)';
                 clone.classList.add(policy);
                 clone.classList.add('flipped'); // Mark as flipped for CSS styling
             }, 150);
@@ -1737,7 +1739,7 @@ function teardownSpreadPresidentDrawUI() {
     if (!spread) return;
     const cards = Array.from(spread.querySelectorAll('.table-card'));
     const topThree = cards.slice(-3);
-    topThree.forEach(c => { c.classList.remove('glow', 'lifting', 'is-front', 'liberal', 'facist'); c.style.transform = ''; c.style.opacity = ''; c.style.pointerEvents = ''; });
+    topThree.forEach(c => { c.classList.remove('glow', 'lifting', 'is-front', 'liberal', 'fascist'); c.style.transform = ''; c.style.opacity = ''; c.style.pointerEvents = ''; });
     // remove listeners by cloning nodes
     topThree.forEach((card) => { const clone = card.cloneNode(true); card.parentNode.replaceChild(clone, card); });
     spreadPDListeners = false;
@@ -1783,7 +1785,7 @@ function initSpreadPresidentDrawUI(gameId) {
 
     // Clear any existing state
     topThree.forEach(c => {
-        c.classList.remove('glow', 'lifting', 'is-front', 'liberal', 'facist');
+        c.classList.remove('glow', 'lifting', 'is-front', 'liberal', 'fascist');
         c.style.transform = '';
         c.style.opacity = '';
         c.style.pointerEvents = '';
@@ -1882,7 +1884,7 @@ function initSpreadPresidentDrawUI(gameId) {
             // Reset the spread state and remove glow from cards
             spreadFanShown = false;
             topThree.forEach(c => { 
-                c.classList.remove('lifting', 'is-front', 'liberal', 'facist'); 
+                c.classList.remove('lifting', 'is-front', 'liberal', 'fascist'); 
                 c.style.transform = ''; 
                 c.style.opacity = ''; 
                 c.style.pointerEvents = ''; 
@@ -1987,7 +1989,7 @@ function initSpreadPresidentDrawUI(gameId) {
 
                       // Halfway through flip, change to front image
                       setTimeout(() => {
-                          clone.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/facist.png)';
+                          clone.style.backgroundImage = policy === 'liberal' ? 'url(../images/liberal.png)' : 'url(../images/fascist.png)';
                           clone.classList.add(policy);
                       }, 150);
 
@@ -2072,7 +2074,7 @@ function initSpreadPresidentDrawUI(gameId) {
                 // Clean up the spread state and remove glow from cards
                 spreadFanShown = false;
                 topThree.forEach(c => { 
-                    c.classList.remove('lifting', 'is-front', 'liberal', 'facist'); 
+                    c.classList.remove('lifting', 'is-front', 'liberal', 'fascist'); 
                     c.style.transform = ''; 
                     c.style.opacity = ''; 
                     c.style.pointerEvents = ''; 
