@@ -683,6 +683,15 @@ main {
   font-style: italic;
 }
 
+/* Prevent browser autofill from overriding form control colors */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--propaganda-black);
+  -webkit-box-shadow: 0 0 0 1000px var(--off-white) inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 select.form-control {
   appearance: none;
   -webkit-appearance: none;
@@ -1416,11 +1425,20 @@ footer,
     color: var(--white);
   }
 
+  /* Prevent browser autofill from overriding form control colors in dark mode */
+  .form-control:-webkit-autofill,
+  .form-control:-webkit-autofill:hover,
+  .form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--white);
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
   /* Player name inputs should keep black text in dark mode */
   input[id^="player-name-"] {
     color: var(--propaganda-black);
   }
-  
+
   .form-label {
     color: var(--text-primary);
   }
@@ -1825,6 +1843,15 @@ footer,
 [data-theme="dark"] select.form-control optgroup {
   background: var(--bg-elevated);
   color: var(--white);
+}
+
+/* Prevent browser autofill from overriding form control colors in dark mode */
+[data-theme="dark"] .form-control:-webkit-autofill,
+[data-theme="dark"] .form-control:-webkit-autofill:hover,
+[data-theme="dark"] .form-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--white);
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Player name inputs should keep black text in dark mode */

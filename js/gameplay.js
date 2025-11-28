@@ -4601,6 +4601,13 @@ function showCompatriots(youPlayer, game, roleText) {
             window.location.href = `./join.html?game=${encodeURIComponent(gid)}`;
             return;
         }
+        // Redirect to lobby if game is not yet in playing state
+        if (latestGame.state === 'lobby' || latestGame.state === 'reveal') {
+            setStatus(gid, 'Game not started yet');
+            hidePreloaderWithCleanup();
+            window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`;
+            return;
+        }
         
         // Initialize discard pile count from game state
         const discardCount = calculateDiscardCountFromGameState(latestGame);
