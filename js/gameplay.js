@@ -3629,6 +3629,7 @@ function openRoleOverlay() {
     const roleBtn = document.getElementById('role-btn');
     const compatriotsBtn = document.getElementById('compatriots-btn');
     const doneBtn = document.getElementById('role-done-btn');
+    const modalTitle = roleOverlay?.querySelector('.modal-title');
 
     // Only log element detection once (when state changes)
     const elementsFound = `${!!roleOverlay}${!!roleText}${!!membershipBtn}${!!roleBtn}${!!compatriotsBtn}${!!doneBtn}`;
@@ -3648,12 +3649,17 @@ function openRoleOverlay() {
         console.error('Role modal elements not found');
         return;
     }
-    
+
     // Get current player's data
     const gameId = getGameId();
     const youId = computeYouId(gameId);
     const youPlayer = (latestPlayers || []).find(p => p && p.id === youId);
     const game = latestGame;
+
+    // Update modal title with player name
+    if (modalTitle && youPlayer && youPlayer.name) {
+        modalTitle.textContent = `Your Secret Role - ${youPlayer.name}`;
+    }
     
     if (!youPlayer || !game) {
         roleText.textContent = 'Player not found or game not loaded';
@@ -4050,11 +4056,14 @@ function showRole(youPlayer, roleText, roleBtn) {
 function showCompatriots(youPlayer, game, roleText) {
     const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' ||
                       (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
+    const isHitler = (youPlayer.role || '').toString().toUpperCase() === 'HITLER';
+    const playerCount = game.playerCount || (latestPlayers || []).length;
 
     // Check if comrades view is currently shown
     const isCurrentlyShown = roleText.textContent.includes('Your Fascist Comrades:') ||
                             roleText.textContent.includes('No other Fascist players') ||
-                            roleText.textContent.includes('Your Liberal Comrades:');
+                            roleText.textContent.includes('Your Liberal Comrades:') ||
+                            roleText.textContent.includes('You know the Fascist:');
 
     if (isCurrentlyShown) {
         // Hide comrades - return to hidden state
@@ -4066,38 +4075,67 @@ function showCompatriots(youPlayer, game, roleText) {
     closeAllViews(roleText);
 
     if (isFascist) {
-        // Handle Fascist players
+        // Get all fascist team members (excluding self)
         const fascistPlayers = (latestPlayers || []).filter(p =>
             p && p.id !== youPlayer.id &&
             ((p.party || '').toString().toUpperCase() === 'FASCIST' ||
              (p.role || '').toString().toUpperCase() === 'FASCIST')
         );
 
-        if (fascistPlayers.length === 0) {
-            roleText.textContent = 'No other Fascist players to reveal';
-            roleText.style.color = '#000';
+        // 5-6 players: Hitler knows Fascist, Fascist knows Hitler
+        if (playerCount <= 6) {
+            if (isHitler) {
+                // Hitler sees the Fascist
+                const regularFascists = fascistPlayers.filter(p =>
+                    (p.role || '').toString().toUpperCase() !== 'HITLER'
+                );
 
-            // Add explanation
-            const helpText = document.createElement('div');
-            helpText.style.fontSize = '0.75rem';
-            helpText.style.color = '#666';
-            helpText.style.marginTop = '8px';
-            helpText.style.fontStyle = 'italic';
-            helpText.textContent = 'This means you are the only Fascist player in the game.';
-            roleText.appendChild(helpText);
-        } else {
-            const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
-            roleText.textContent = `Your Fascist Comrades:\n${names}`;
-            roleText.style.color = '#DA291C';
+                if (regularFascists.length === 0) {
+                    roleText.textContent = 'No other Fascist players';
+                    roleText.style.color = '#000';
+                } else {
+                    const names = regularFascists.map(p => p.name || 'Unknown Player').join('\n');
+                    roleText.textContent = `You know the Fascist:\n${names}`;
+                    roleText.style.color = '#DA291C';
+                }
+            } else {
+                // Regular Fascist sees Hitler
+                const names = fascistPlayers.map(p => {
+                    const pRole = (p.role || '').toString().toUpperCase();
+                    return pRole === 'HITLER' ? `${p.name || 'Unknown Player'} (Hitler)` : (p.name || 'Unknown Player');
+                }).join('\n');
+                roleText.textContent = `Your Fascist Comrades:\n${names}`;
+                roleText.style.color = '#DA291C';
+            }
+        }
+        // 7-10 players: Fascists know each other and Hitler, Hitler knows no one
+        else {
+            if (isHitler) {
+                // Hitler sees no one at 7+ players
+                roleText.textContent = 'You do not know who the other Fascists are';
+                roleText.style.color = '#000';
 
-            // Add explanation
-            const helpText = document.createElement('div');
-            helpText.style.fontSize = '0.75rem';
-            helpText.style.color = '#666';
-            helpText.style.marginTop = '8px';
-            helpText.style.fontStyle = 'italic';
-            helpText.textContent = `You know ${fascistPlayers.length} other Fascist player${fascistPlayers.length === 1 ? '' : 's'}. Work together to pass Fascist policies!`;
-            roleText.appendChild(helpText);
+                const helpText = document.createElement('div');
+                helpText.style.fontSize = '0.75rem';
+                helpText.style.color = '#666';
+                helpText.style.marginTop = '8px';
+                helpText.style.fontStyle = 'italic';
+                helpText.textContent = 'At 7+ players, Hitler does not know the Fascists. Stay hidden!';
+                roleText.appendChild(helpText);
+            } else {
+                // Regular Fascists see Hitler and other Fascists
+                if (fascistPlayers.length === 0) {
+                    roleText.textContent = 'No other Fascist players';
+                    roleText.style.color = '#000';
+                } else {
+                    const names = fascistPlayers.map(p => {
+                        const pRole = (p.role || '').toString().toUpperCase();
+                        return pRole === 'HITLER' ? `${p.name || 'Unknown Player'} (Hitler)` : (p.name || 'Unknown Player');
+                    }).join('\n');
+                    roleText.textContent = `Your Fascist Comrades:\n${names}`;
+                    roleText.style.color = '#DA291C';
+                }
+            }
         }
     } else {
         // Handle Liberal players with fun message
@@ -4241,18 +4279,6 @@ function showCompatriots(youPlayer, game, roleText) {
         myRoleBtn.textContent = '🎭 My Secret Role';
         list.appendChild(myRoleBtn);
 
-        const leaveBtn = document.createElement('button');
-        leaveBtn.id = 'leave-game-btn';
-        leaveBtn.className = 'btn';
-        leaveBtn.textContent = '↩️ Leave Game (rejoin later)';
-        list.appendChild(leaveBtn);
-
-        const pauseBtn = document.createElement('button');
-        pauseBtn.id = 'pause-toggle-btn';
-        pauseBtn.className = 'btn';
-        pauseBtn.textContent = localPaused ? '▶️ Resume Game' : '⏸️ Pause Game (AFK)';
-        list.appendChild(pauseBtn);
-
         const soundBtn = document.createElement('button');
         soundBtn.id = 'sound-toggle-btn';
         soundBtn.className = 'btn';
@@ -4356,20 +4382,6 @@ function showCompatriots(youPlayer, game, roleText) {
             return;
         }
 
-        if (t.id === 'leave-game-btn') {
-            try {
-                if (youId) {
-                    try { await updateDoc(doc(db, 'games', gid, 'players', youId), { uid: null, leftAt: serverTimestamp(), updatedAt: serverTimestamp() }); } catch (_) {}
-                    try { await logPublic(gid, `${yourName} left the game`, { type: 'leave', actorId: youId }); } catch (_) {}
-                }
-                try { sessionStorage.removeItem(`sh_playerId_${gid}`); } catch (_) {}
-            } finally {
-                closeMenuModal();
-                window.location.href = `./join.html?game=${encodeURIComponent(gid)}`;
-            }
-            return;
-        }
-
         if (t.id === 'quit-game-btn') {
             const ok = confirm('This will end the game for everyone and redirect to game creation with the same players. Are you sure?');
             if (!ok) return;
@@ -4422,18 +4434,6 @@ function showCompatriots(youPlayer, game, roleText) {
                 alert('Failed to end game and create new. Please try again.');
                 isHostQuitting = false; // Reset flag on error
             }
-            return;
-        }
-
-        if (t.id === 'pause-toggle-btn') {
-            localPaused = !localPaused;
-            try { localStorage.setItem(`sh_paused_${gid}`, localPaused ? 'true' : 'false'); } catch (_) {}
-            try {
-                if (localPaused) await logPublic(gid, `${yourName} is AFK`, { type: 'status', actorId: youId || null });
-                else await logPublic(gid, `${yourName} returned`, { type: 'status', actorId: youId || null });
-            } catch (_) {}
-            renderMenu();
-            renderActions(gid);
             return;
         }
 

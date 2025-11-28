@@ -276,10 +276,6 @@
             let heartbeatTimer = null;
             let removalHandled = false;
 
-            // Timer state for host override (persistent across renders)
-            let hostTimerInterval = null;
-            let hostSeenTime = null;
-
             function handleGameRemoved() {
                 if (removalHandled) return;
                 removalHandled = true;
@@ -716,11 +712,6 @@
                                 try { you.roleSeen = true; } catch (_) {}
                                 try { updateProgress(); } catch (_) {}
                                 try { await logPrivate(game.id, 'You acknowledged viewing your secret role', you.id, { type: 'ack', actorId: you.id }); } catch (_) {}
-
-                                // Start 10-second timer for host
-                                if (isHost) {
-                                    startHostTimer();
-                                }
                             } catch (_) {}
                         }
                         
@@ -830,11 +821,10 @@
                             ? expectedCount
                             : dedupedPlayers.length;
 
-                        // Allow start if everyone has seen OR if host has waited 10 seconds
+                        // Only allow start if everyone has seen their role
                         const allSeen = seen === totalExpected && totalExpected > 0;
-                        const hostWaitedEnough = hostSeenTime && ((Date.now() - hostSeenTime) >= 10000);
 
-                        if (!allSeen && !hostWaitedEnough) return;
+                        if (!allSeen) return;
 
                         // Prevent double clicks / rapid re-renders from causing multiple writes
                         hostBtn.disabled = true;
@@ -842,19 +832,10 @@
                         hostBtn.textContent = 'Starting…';
                         showPreloader('Preparing board…');
 
-                        // Stop timer if running
-                        if (hostTimerInterval) {
-                            clearInterval(hostTimerInterval);
-                            hostTimerInterval = null;
-                        }
-
                         try {
                             await ensureAuth();
                             await updateDoc(doc(db, 'games', game.id), { state: 'playing', updatedAt: serverTimestamp() });
-                            const logMessage = allSeen
-                                ? 'All players viewed roles — game is starting'
-                                : 'Host started game after waiting period';
-                            try { await logPublic(game.id, logMessage, { type: 'start' }); } catch (_) {}
+                            try { await logPublic(game.id, 'All players viewed roles — game is starting', { type: 'start' }); } catch (_) {}
                         } catch (_) {}
                         finally {
                             // If navigation hasn't occurred yet for some reason, re-enable button gracefully
@@ -869,18 +850,7 @@
                     const you = getYouPlayer();
                     if (you && !you.roleSeen) {
                         openRoleOverlay();
-                    } else if (you && you.roleSeen && isHost) {
-                        // If host has already seen their role (e.g., from refresh), start timer
-                        startHostTimer();
                     }
-
-                    // Clean up timer on page unload
-                    window.addEventListener('beforeunload', function() {
-                        if (hostTimerInterval) {
-                            clearInterval(hostTimerInterval);
-                            hostTimerInterval = null;
-                        }
-                    });
                 }
             }
 
@@ -1151,14 +1121,22 @@
                             }
                             const fascists = arr.filter((p, i) => i !== hitlerIndex && assignedIds.has(p.id));
                             const fascistNames = fascists.map(p => p.name || 'Player');
+                            const hitler = arr[hitlerIndex];
+
                             if (count <= 6) {
-                                const hitler = arr[hitlerIndex];
+                                // 5-6 players: Hitler knows Fascist
                                 if (hitler && fascistNames.length > 0) {
                                     await logPrivate(gameId, `You know the Fascist: ${fascistNames.join(', ')}`, hitler.id, { type: 'knowledge', actorId: hitler.id });
                                 }
                             } else {
-                                if (fascistNames.length > 0) {
-                                    await logPartied(gameId, `Fascists: ${fascistNames.join(', ')}`, 'fascist', { type: 'knowledge' });
+                                // 7-10 players: Only regular Fascists know each other and Hitler (Hitler doesn't see this)
+                                if (fascists.length > 0 && hitler) {
+                                    // Add Hitler to the list that Fascists see
+                                    const allFascistNames = [...fascistNames, `${hitler.name || 'Player'} (Hitler)`];
+                                    // Send to each regular Fascist individually (not Hitler)
+                                    for (const fascist of fascists) {
+                                        await logPrivate(gameId, `Your Fascist Comrades: ${allFascistNames.join(', ')}`, fascist.id, { type: 'knowledge', actorId: fascist.id });
+                                    }
                                 }
                             }
                         } catch (_) {}
