@@ -622,25 +622,15 @@
                             : dedupedPlayers.length;
                         const pct = totalExpected > 0 ? Math.min(100, Math.max(0, Math.round((seen / totalExpected) * 100))) : 0;
 
-                        // Don't update progress label if timer is running
-                        if (!hostTimerInterval) {
-                            progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
-                        }
+                        progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
                         progressBarInner.style.width = `${pct}%`;
 
-                        // Show host controls if everyone has seen OR if host has waited 10 seconds
+                        // Show host controls only if everyone has seen their role
                         if (isHost) {
                             const allSeen = seen === totalExpected && totalExpected > 0;
-                            const hostWaitedEnough = hostSeenTime && ((Date.now() - hostSeenTime) >= 10000);
 
-                            if (allSeen || hostWaitedEnough) {
+                            if (allSeen) {
                                 hostControls.style.display = '';
-                                // Stop timer if running and update label
-                                if (hostTimerInterval) {
-                                    clearInterval(hostTimerInterval);
-                                    hostTimerInterval = null;
-                                    progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
-                                }
                             } else {
                                 hostControls.style.display = 'none';
                             }
@@ -649,32 +639,6 @@
                         }
                     }
 
-                    function startHostTimer() {
-                        if (!isHost) return;
-                        if (hostTimerInterval) return; // Already running
-                        if (hostSeenTime) return; // Already started (timer may have completed)
-
-                        hostSeenTime = Date.now();
-
-                        const updateTimerDisplay = () => {
-                            const elapsed = Math.floor((Date.now() - hostSeenTime) / 1000);
-                            const remaining = Math.max(0, 10 - elapsed);
-
-                            if (remaining > 0) {
-                                progressLabel.textContent = `Waiting for others... (${remaining}s until you can continue)`;
-                            } else {
-                                progressLabel.textContent = `You can now start the game`;
-                                if (hostTimerInterval) {
-                                    clearInterval(hostTimerInterval);
-                                    hostTimerInterval = null;
-                                }
-                                updateProgress();
-                            }
-                        };
-
-                        updateTimerDisplay();
-                        hostTimerInterval = setInterval(updateTimerDisplay, 1000);
-                    }
 
                     // Full-screen role reveal overlay (centered, toggle, no timer)
                     function openRoleOverlay() {

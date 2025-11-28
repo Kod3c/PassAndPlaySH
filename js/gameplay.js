@@ -1901,9 +1901,6 @@ function showChancellorChoiceOverlay(game) {
     const actions = document.createElement('div');
     actions.className = 'reveal-actions';
 
-    // Check if veto is enabled (5 fascist policies enacted)
-    const vetoEnabled = (game.fascistPolicies >= 5);
-
     const enactBtn = document.createElement('button');
     enactBtn.className = 'reveal-btn';
     enactBtn.textContent = 'Enact Selected Policy';
@@ -3498,9 +3495,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 orderClose?.addEventListener('click', () => closeOrderModal(orderModal, setRoleBannerVisibility));
 orderModal?.addEventListener('click', function(e) { if (e.target === orderModal) closeOrderModal(orderModal, setRoleBannerVisibility); });
 
-// Role envelope event listener
-const roleEnvelope = document.getElementById('role-envelope');
-roleEnvelope?.addEventListener('click', openRoleOverlay);
+// Role envelope removed - role viewing is now in the menu
 
     // Function moved to modals.js
 
@@ -4240,6 +4235,12 @@ function showCompatriots(youPlayer, game, roleText) {
         list.style.flexDirection = 'column';
         list.style.gap = '8px';
 
+        const myRoleBtn = document.createElement('button');
+        myRoleBtn.id = 'my-role-btn';
+        myRoleBtn.className = 'btn btn-primary';
+        myRoleBtn.textContent = '🎭 My Secret Role';
+        list.appendChild(myRoleBtn);
+
         const leaveBtn = document.createElement('button');
         leaveBtn.id = 'leave-game-btn';
         leaveBtn.className = 'btn';
@@ -4348,6 +4349,12 @@ function showCompatriots(youPlayer, game, roleText) {
         const youId = computeYouId(gid);
         const youDoc = (latestPlayers || []).find(p => p && p.id === youId) || null;
         const yourName = youDoc ? (youDoc.name || 'Player') : 'Player';
+
+        if (t.id === 'my-role-btn') {
+            closeMenuModal();
+            openRoleOverlay();
+            return;
+        }
 
         if (t.id === 'leave-game-btn') {
             try {

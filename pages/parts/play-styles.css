@@ -328,7 +328,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     /* Cards area - scale down significantly to ensure visibility */
     .cards-area {
         margin: 8px 0 0;
-        padding: 8px 6px;
+        padding: 24px 32px;
         transform: scale(0.75);
         transform-origin: top center;
     }
@@ -387,7 +387,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .cards-area {
         transform: scale(0.65);
         margin: 6px 0 0;
-        padding: 8px 4px;
+        padding: 20px 28px;
     }
     .cards-row { gap: 26px; }
 
@@ -446,7 +446,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .cards-area {
         transform: scale(0.58);
         margin: 4px 0 0;
-        padding: 6px 4px;
+        padding: 18px 24px;
     }
     .cards-row { gap: 22px; }
 
@@ -508,7 +508,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     .cards-area {
         transform: scale(0.5);
         margin: 2px 0 0;
-        padding: 4px 2px;
+        padding: 16px 20px;
     }
     .cards-row { gap: 18px; }
 
@@ -1754,7 +1754,7 @@ body.role-banner-visible .players-strip { margin-top: 8px; }
     display: flex;
     justify-content: center;
     margin: 20px 0 0;
-    padding: 16px;
+    padding: 32px 48px;
     background: rgba(246, 240, 223, 0.3);
     border-radius: 12px;
     border: 2px solid rgba(16, 24, 32, 0.1);
