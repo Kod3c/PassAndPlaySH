@@ -367,17 +367,6 @@ function refreshFascistSlotsForPlayerCount() {
     updateFascistSlotsForPlayerCount(fascistSlotsEl, playerCount);
 }
 
-// Manual debug function - call this from browser console to force update slots for testing
-window.debugFascistSlots = function(testPlayerCount) {
-    if (testPlayerCount) {
-        const fascistSlotsEl = document.getElementById('fascist-slots');
-        if (fascistSlotsEl) {
-            updateFascistSlotsForPlayerCount(fascistSlotsEl, testPlayerCount);
-        }
-    } else {
-        refreshFascistSlotsForPlayerCount();
-    }
-};
 
 // Add skull backgrounds to all fascist slots and bullet overlays to slots 4 and 5
 function addBulletOverlaysToFascistSlots(containerEl) {
@@ -4313,12 +4302,6 @@ function showCompatriots(youPlayer, game, roleText) {
 
         list.appendChild(voteToggleBtn);
 
-        const debugBtn = document.createElement('button');
-        debugBtn.id = 'debug-menu-btn';
-        debugBtn.className = 'btn';
-        debugBtn.textContent = '🔧 Debug Menu';
-        list.appendChild(debugBtn);
-
         const quitBtn = document.createElement('button');
         quitBtn.id = 'quit-game-btn';
         quitBtn.className = 'btn';
@@ -4334,177 +4317,6 @@ function showCompatriots(youPlayer, game, roleText) {
         menuBody.appendChild(list);
     }
 
-    function renderDebugMenu() {
-        if (!menuBody) return;
-        menuBody.innerHTML = '';
-        const list = document.createElement('div');
-        list.style.display = 'flex';
-        list.style.flexDirection = 'column';
-        list.style.gap = '8px';
-
-        const backBtn = document.createElement('button');
-        backBtn.id = 'debug-back-btn';
-        backBtn.className = 'btn';
-        backBtn.textContent = '← Back to Host Options';
-        list.appendChild(backBtn);
-
-        const advanceBtn = document.createElement('button');
-        advanceBtn.id = 'debug-advance-btn';
-        advanceBtn.className = 'btn btn-primary';
-        advanceBtn.textContent = '⏭️ Force Advance to Next Election';
-        list.appendChild(advanceBtn);
-
-        const resetVotesBtn = document.createElement('button');
-        resetVotesBtn.id = 'debug-reset-votes-btn';
-        resetVotesBtn.className = 'btn';
-        resetVotesBtn.textContent = '🔄 Reset Election Votes';
-        list.appendChild(resetVotesBtn);
-
-        const viewDeckBtn = document.createElement('button');
-        viewDeckBtn.id = 'debug-view-deck-btn';
-        viewDeckBtn.className = 'btn';
-        viewDeckBtn.textContent = '🃏 View Deck Order';
-        list.appendChild(viewDeckBtn);
-
-        const rewindBtn = document.createElement('button');
-        rewindBtn.id = 'debug-rewind-btn';
-        rewindBtn.className = 'btn';
-        rewindBtn.textContent = '⏪ Rewind Last Election';
-        list.appendChild(rewindBtn);
-
-        menuBody.appendChild(list);
-    }
-
-    function showDeckOrderModal() {
-        const game = latestGame;
-        if (!game) {
-            alert('Game not loaded');
-            return;
-        }
-
-        const policyDeckOrder = game.policyDeckOrder || [];
-        const deckPosition = game.deckPosition || 0;
-        const liberalPolicies = game.liberalPolicies || 0;
-        const fascistPolicies = game.fascistPolicies || 0;
-        const discardedDeckPositions = game.discardedDeckPositions || [];
-
-        console.log(`🔍 Deck Viewer Debug:`);
-        console.log(`  - Deck Position: ${deckPosition}`);
-        console.log(`  - Discarded Positions: [${discardedDeckPositions.join(', ')}]`);
-        console.log(`  - Deck Order: [${policyDeckOrder.join(', ')}]`);
-
-        // Check if deck exists
-        if (!policyDeckOrder || policyDeckOrder.length === 0) {
-            alert('No deck order exists for this game.\n\nThis game was created before deck tracking was added. Please start a new game to use deck tracking.');
-            return;
-        }
-
-        // Create modal overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        overlay.style.display = 'flex';
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        overlay.style.zIndex = '10000';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-
-        // Create modal card
-        const card = document.createElement('div');
-        card.className = 'modal-card';
-        card.style.backgroundColor = '#fff';
-        card.style.borderRadius = '8px';
-        card.style.padding = '24px';
-        card.style.maxWidth = '90%';
-        card.style.maxHeight = '80vh';
-        card.style.overflow = 'auto';
-        card.style.position = 'relative';
-
-        // Header
-        const header = document.createElement('div');
-        header.style.marginBottom = '16px';
-        header.style.borderBottom = '2px solid #000';
-        header.style.paddingBottom = '12px';
-
-        const title = document.createElement('h2');
-        title.textContent = '🃏 Policy Deck Order';
-        title.style.margin = '0 0 8px 0';
-        header.appendChild(title);
-
-        const info = document.createElement('p');
-        info.style.margin = '0';
-        info.style.fontSize = '0.9rem';
-        info.innerHTML = `<strong>Total Cards:</strong> ${policyDeckOrder.length} | <strong>Position:</strong> ${deckPosition} | <strong>Remaining:</strong> ${policyDeckOrder.length - deckPosition}<br><strong>Enacted:</strong> ${liberalPolicies} Liberal, ${fascistPolicies} Fascist`;
-        header.appendChild(info);
-
-        card.appendChild(header);
-
-        // Deck display
-        const deckContainer = document.createElement('div');
-        deckContainer.style.display = 'flex';
-        deckContainer.style.flexWrap = 'wrap';
-        deckContainer.style.gap = '8px';
-        deckContainer.style.marginBottom = '16px';
-
-        policyDeckOrder.forEach((policy, index) => {
-            const cardDiv = document.createElement('div');
-            cardDiv.style.padding = '8px 12px';
-            cardDiv.style.border = '2px solid #000';
-            cardDiv.style.borderRadius = '4px';
-            cardDiv.style.fontWeight = 'bold';
-            cardDiv.style.minWidth = '100px';
-            cardDiv.style.textAlign = 'center';
-
-            const isDiscarded = discardedDeckPositions.includes(index);
-            const isDrawn = index < deckPosition;
-
-            if (isDiscarded) {
-                // Card was discarded (in discard pile, can be reshuffled)
-                cardDiv.style.backgroundColor = '#FFA500'; // Orange for discarded
-                cardDiv.style.color = '#fff';
-                cardDiv.style.opacity = '0.7';
-                cardDiv.textContent = `${index + 1}: ${policy === 'liberal' ? '🟦' : '🟥'} (discarded)`;
-            } else if (isDrawn) {
-                // Card was drawn and enacted (permanently removed)
-                cardDiv.style.backgroundColor = '#ddd';
-                cardDiv.style.opacity = '0.5';
-                cardDiv.textContent = `${index + 1}: ${policy === 'liberal' ? '🟦' : '🟥'} (enacted)`;
-            } else {
-                // Still in deck
-                cardDiv.style.backgroundColor = policy === 'liberal' ? '#00AEEF' : '#DA291C';
-                cardDiv.style.color = '#fff';
-                cardDiv.textContent = `${index + 1}: ${policy === 'liberal' ? '🟦 Liberal' : '🟥 Fascist'}`;
-            }
-
-            deckContainer.appendChild(cardDiv);
-        });
-
-        card.appendChild(deckContainer);
-
-        // Close button
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'btn btn-primary';
-        closeBtn.textContent = 'Close';
-        closeBtn.style.marginTop = '16px';
-        closeBtn.addEventListener('click', () => {
-            overlay.remove();
-        });
-        card.appendChild(closeBtn);
-
-        overlay.appendChild(card);
-        document.body.appendChild(overlay);
-
-        // Click overlay to close
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.remove();
-            }
-        });
-    }
 
     function openMenuModal() {
         renderMenu();
@@ -4667,153 +4479,6 @@ function showCompatriots(youPlayer, game, roleText) {
                 console.error('Failed to toggle vote details', err);
                 alert('Failed to update setting: ' + err.message);
             }
-            return;
-        }
-
-        if (t.id === 'debug-menu-btn') {
-            renderDebugMenu();
-            return;
-        }
-
-        if (t.id === 'debug-back-btn') {
-            renderHostOptionsMenu();
-            return;
-        }
-
-        if (t.id === 'debug-advance-btn') {
-            const ok = confirm('Force advance to next election? This will skip any pending actions.');
-            if (!ok) return;
-            try {
-                const gameRef = doc(db, 'games', gid);
-
-                // Force the game into a state where advancement can proceed
-                await updateDoc(gameRef, {
-                    policyPhase: 'completed',
-                    pendingSuperpower: null,
-                    updatedAt: serverTimestamp()
-                });
-
-                // Now advance
-                await advanceToNextGovernment(gid, gameRef);
-                await logPublic(gid, `${yourName} forced advancement to next election`, { type: 'debug', actorId: youId || null });
-                alert('Advanced to next election!');
-            } catch (err) {
-                console.error('Failed to advance', err);
-                alert('Failed to advance: ' + err.message);
-            }
-            closeMenuModal();
-            return;
-        }
-
-        if (t.id === 'debug-reset-votes-btn') {
-            const ok = confirm('Reset all election votes? This will clear all votes cast in the current election.');
-            if (!ok) return;
-            try {
-                const gameRef = doc(db, 'games', gid);
-                await updateDoc(gameRef, {
-                    electionVotes: {},
-                    updatedAt: serverTimestamp()
-                });
-                await logPublic(gid, `${yourName} reset all election votes`, { type: 'debug', actorId: youId || null });
-                alert('Election votes have been reset!');
-            } catch (err) {
-                console.error('Failed to reset votes', err);
-                alert('Failed to reset votes: ' + err.message);
-            }
-            closeMenuModal();
-            return;
-        }
-
-        if (t.id === 'debug-view-deck-btn') {
-            showDeckOrderModal();
-            closeMenuModal();
-            return;
-        }
-
-        if (t.id === 'debug-rewind-btn') {
-            const game = latestGame;
-            if (!game) {
-                alert('Game not loaded');
-                return;
-            }
-
-            const liberalPolicies = game.liberalPolicies || 0;
-            const fascistPolicies = game.fascistPolicies || 0;
-            const totalPolicies = liberalPolicies + fascistPolicies;
-
-            if (totalPolicies === 0) {
-                alert('Cannot rewind: No policies have been enacted yet.');
-                return;
-            }
-
-            // Determine which policy to remove (assume last enacted was fascist if fascist > 0, else liberal)
-            const removeFascist = fascistPolicies > 0;
-            const policyType = removeFascist ? 'Fascist' : 'Liberal';
-
-            const ok = confirm(`Rewind last election?\n\nThis will:\n- Remove 1 ${policyType} policy\n- Move president back one player\n- Reset election state\n\nAre you sure?`);
-            if (!ok) return;
-
-            try {
-                const gameRef = doc(db, 'games', gid);
-
-                // Get alive players to calculate previous president
-                const orderedAlive = (latestPlayers || [])
-                    .filter(p => p && p.alive !== false)
-                    .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
-
-                if (orderedAlive.length === 0) {
-                    alert('Cannot rewind: No alive players found.');
-                    return;
-                }
-
-                // Find current president index
-                const currentPresidentId = game.currentPresidentPlayerId;
-                const currentIndex = orderedAlive.findIndex(p => p.id === currentPresidentId);
-
-                // Calculate previous president index (go backward with wraparound)
-                let previousIndex;
-                if (currentIndex === -1) {
-                    // Current president not found, default to last player
-                    previousIndex = orderedAlive.length - 1;
-                } else {
-                    previousIndex = (currentIndex - 1 + orderedAlive.length) % orderedAlive.length;
-                }
-
-                const previousPresident = orderedAlive[previousIndex];
-
-                // Prepare updates
-                const updates = {
-                    // Decrement the appropriate policy count
-                    liberalPolicies: removeFascist ? liberalPolicies : Math.max(0, liberalPolicies - 1),
-                    fascistPolicies: removeFascist ? Math.max(0, fascistPolicies - 1) : fascistPolicies,
-                    // Reset to previous president
-                    presidentIndex: previousIndex,
-                    currentPresidentPlayerId: previousPresident.id,
-                    // Clear election state
-                    policyPhase: null,
-                    enactedPolicy: null,
-                    presidentDrawnCards: [],
-                    presidentDiscardedCard: null,
-                    chancellorDiscardedCard: null,
-                    currentChancellorPlayerId: null,
-                    nominatedChancellorPlayerId: null,
-                    voteResolution: null,
-                    electionVotes: {},
-                    electionTracker: 0, // Reset tracker on rewind
-                    pendingSuperpower: null, // Clear any pending superpowers
-                    termLimitLastPresidentId: null, // Clear term limits on rewind
-                    termLimitLastChancellorId: null, // Clear term limits on rewind
-                    updatedAt: serverTimestamp()
-                };
-
-                await updateDoc(gameRef, updates);
-                await logPublic(gid, `${yourName} rewound the last election (removed 1 ${policyType} policy)`, { type: 'debug', actorId: youId || null });
-                alert(`Rewound successfully! Removed 1 ${policyType} policy. President is now ${previousPresident.name || 'Player'}.`);
-            } catch (err) {
-                console.error('Failed to rewind', err);
-                alert('Failed to rewind: ' + err.message);
-            }
-            closeMenuModal();
             return;
         }
 
@@ -5379,14 +5044,6 @@ function showCompatriots(youPlayer, game, roleText) {
         }
     }
 
-    // Debug button handler
-    const debugBtn = document.getElementById('debug-btn');
-    if (debugBtn) {
-        debugBtn.addEventListener('click', function() {
-            debugGameState(gid);
-        });
-    }
-
 });
 
 // ===== DYNAMIC DISCARD PILE MODULE =====
@@ -5695,24 +5352,6 @@ function updateCountDisplay(count) {
     }
 }
 
-// Manual force refresh function for debugging
-function forceRefreshDiscardPile() {
-    const gameId = getGameId();
-    
-    if (latestGame) {
-        const calculatedCount = calculateDiscardCountFromGameState(latestGame);
-        
-        // Force update the visual
-        setDiscardCount(calculatedCount);
-        updateDiscardPileVisual(calculatedCount);
-        updateCountDisplay(calculatedCount);
-        
-    } else {
-    }
-}
-
-// Make it globally accessible for console debugging
-window.forceRefreshDiscardPile = forceRefreshDiscardPile;
 
 // ===== END DYNAMIC DISCARD PILE MODULE =====
 
@@ -5918,22 +5557,6 @@ function updateTableSpreadCountDisplay(count) {
     }
 }
 
-// Manual force refresh function for debugging table spread
-function forceRefreshTableSpread() {
-    const gameId = getGameId();
-    
-    if (latestGame) {
-        const calculatedCount = calculateTableSpreadCountFromGameState(latestGame);
-        
-        // Force update the visual
-        setTableSpreadCount(calculatedCount);
-        
-    } else {
-    }
-}
-
-// Make it globally accessible for console debugging
-window.forceRefreshTableSpread = forceRefreshTableSpread;
 
 // ===== END DYNAMIC TABLE SPREAD MODULE =====
 
@@ -6170,27 +5793,6 @@ function repairElectionTracker(gameId, game, repairUpdates) {
     return needsRepair;
 }
 
-// Enhanced debug function with repair capabilities
-function debugGameState(gameId) {
-    
-    if (latestGame) {
-        
-        const phase = computePhase(latestGame);
-        
-        // Check for common issues
-        const issues = detectGameIssues(gameId, latestGame, latestPlayers);
-        if (issues.length > 0) {
-            issues.forEach(issue => console.log(`- ${issue}`));
-        }
-    }
-    
-    if (latestPlayers && latestPlayers.length > 0) {
-        latestPlayers.forEach((player, index) => {
-            console.log(`  ${index + 1}. ${player.name || 'Player'} (ID: ${player.id}, Order: ${player.orderIndex}, Alive: ${player.alive !== false})`);
-        });
-    }
-    
-}
 
 // Detect common game issues
 function detectGameIssues(gameId, game, players) {
