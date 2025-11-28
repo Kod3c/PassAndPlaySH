@@ -1,0 +1,1217 @@
+/* ============================================
+   MODERN FLAT DESIGN FOR RULES PAGE
+   Mobile-first, sleek design with original color scheme
+   ============================================ */
+
+/* Modern rules page container */
+.rules-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Modern rules header */
+.rules-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 1rem;
+}
+
+.rules-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.rules-header h2 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--propaganda-black);
+  margin-bottom: 0.5rem;
+}
+
+.rules-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.rules-decoration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.decoration-line {
+  width: 60px;
+  height: 2px;
+  background: var(--neutral-beige);
+}
+
+.decoration-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--liberal-blue);
+}
+
+/* Modern navigation - horizontal scroll on mobile */
+.rules-navigation {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  margin-bottom: 2rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.rules-navigation::-webkit-scrollbar {
+  height: 4px;
+}
+
+.rules-navigation::-webkit-scrollbar-track {
+  background: var(--neutral-beige);
+  border-radius: 4px;
+}
+
+.rules-navigation::-webkit-scrollbar-thumb {
+  background: var(--liberal-blue);
+  border-radius: 4px;
+}
+
+.rule-nav-btn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  border: none;
+  border-radius: var(--modern-radius-sm);
+  background: var(--white);
+  color: var(--propaganda-black);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--modern-shadow);
+}
+
+.rule-nav-btn:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.rule-nav-btn.active {
+  background: var(--liberal-blue);
+  color: var(--white);
+  box-shadow: var(--modern-shadow-hover);
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+}
+
+.nav-text {
+  white-space: nowrap;
+}
+
+/* Modern rules content */
+.rules-content {
+  margin-bottom: 3rem;
+}
+
+.rule-section {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.rule-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modern section headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--neutral-beige);
+}
+
+.section-icon {
+  font-size: 2.5rem;
+}
+
+.section-header h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--propaganda-black);
+}
+
+/* Modern overview cards */
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.overview-card {
+  background: var(--white);
+  border: none;
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: var(--modern-shadow);
+  transition: all 0.2s ease;
+}
+
+.overview-card:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.overview-card .card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  filter: none;
+}
+
+.overview-card h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  margin-bottom: 0.5rem;
+  color: var(--propaganda-black);
+}
+
+.overview-card p {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.card-detail {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Modern objective cards */
+.game-objective {
+  background: var(--off-white);
+  border-radius: var(--modern-radius-lg);
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.objective-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.objective-icon {
+  font-size: 2rem;
+}
+
+.objective-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--propaganda-black);
+}
+
+.objective-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.objective-card {
+  background: var(--white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  box-shadow: var(--modern-shadow);
+}
+
+.objective-card.liberal {
+  border-left: 4px solid var(--liberal-blue);
+}
+
+.objective-card.fascist {
+  border-left: 4px solid var(--fascist-red);
+}
+
+.objective-card .objective-header {
+  margin-bottom: 1rem;
+}
+
+.team-icon {
+  font-size: 1.5rem;
+}
+
+.team-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--propaganda-black);
+}
+
+.objective-card p {
+  font-size: 0.938rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* Modern setup steps */
+.setup-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.setup-step {
+  display: flex;
+  gap: 1.5rem;
+  background: var(--white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  box-shadow: var(--modern-shadow);
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--liberal-blue);
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.75rem;
+  color: var(--propaganda-black);
+}
+
+.step-content p {
+  font-size: 0.938rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+/* Modern role distribution visual */
+.role-distribution-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.role-example {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--off-white);
+  border-radius: var(--modern-radius-sm);
+}
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--modern-radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.role-badge.liberal {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+.role-badge.fascist {
+  background: var(--fascist-red);
+  color: var(--white);
+}
+
+.role-badge.hitler {
+  background: var(--propaganda-black);
+  color: var(--highlight-cream);
+}
+
+.role-icon {
+  font-size: 1rem;
+}
+
+.role-count {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Modern policy deck visual */
+.policy-deck-visual {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.policy-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: var(--modern-radius);
+  color: var(--white);
+  text-align: center;
+}
+
+.liberal-policy {
+  background: var(--liberal-blue);
+}
+
+.fascist-policy {
+  background: var(--fascist-red);
+}
+
+.policy-icon {
+  font-size: 2rem;
+}
+
+.policy-text {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.policy-count {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* Modern board preview */
+.board-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.board-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.board-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.track {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.track-space {
+  flex: 1;
+  min-width: 40px;
+  padding: 0.75rem;
+  text-align: center;
+  background: var(--neutral-beige);
+  border-radius: var(--modern-radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--propaganda-black);
+}
+
+.liberal-track .track-space {
+  background: rgba(0, 174, 239, 0.1);
+}
+
+.fascist-track .track-space {
+  background: rgba(218, 41, 28, 0.1);
+}
+
+.track-space.win {
+  background: var(--success);
+  color: var(--white);
+}
+
+.track-space.power {
+  background: var(--warning);
+  color: var(--white);
+}
+
+/* Modern gameplay flow */
+.gameplay-flow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.flow-step {
+  background: var(--white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  box-shadow: var(--modern-shadow);
+  text-align: center;
+}
+
+.flow-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.flow-step h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+  color: var(--propaganda-black);
+}
+
+.flow-step p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.flow-arrow {
+  display: none;
+}
+
+/* Modern voting example */
+.voting-example {
+  background: var(--off-white);
+  border-radius: var(--modern-radius-lg);
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.voting-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.voting-icon {
+  font-size: 2rem;
+}
+
+.voting-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--propaganda-black);
+}
+
+.vote-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.vote-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border-radius: var(--modern-radius);
+  color: var(--white);
+  text-align: center;
+}
+
+.vote-card.ja {
+  background: var(--success);
+}
+
+.vote-card.nein {
+  background: var(--danger);
+}
+
+.vote-icon {
+  font-size: 2rem;
+}
+
+.vote-text {
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+}
+
+.vote-meaning {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.vote-note {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Modern role cards */
+.roles-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.role-card {
+  background: var(--white);
+  border-radius: var(--modern-radius);
+  overflow: hidden;
+  box-shadow: var(--modern-shadow);
+  transition: all 0.2s ease;
+}
+
+.role-card:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.role-card .role-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  color: var(--white);
+}
+
+.role-card.liberal .role-header {
+  background: var(--liberal-blue);
+}
+
+.role-card.fascist .role-header {
+  background: var(--fascist-red);
+}
+
+.role-card.hitler .role-header {
+  background: var(--propaganda-black);
+}
+
+.role-card .role-icon {
+  font-size: 2rem;
+}
+
+.role-card .role-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--white);
+}
+
+.role-info {
+  padding: 1.5rem;
+}
+
+.role-description {
+  font-size: 0.938rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.role-abilities,
+.role-knowledge {
+  margin-bottom: 1.5rem;
+}
+
+.role-abilities h5,
+.role-knowledge h5 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--propaganda-black);
+  margin-bottom: 0.75rem;
+}
+
+.role-abilities ul {
+  list-style: none;
+  padding: 0;
+}
+
+.role-abilities li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.role-abilities li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: var(--liberal-blue);
+  font-weight: 700;
+}
+
+.role-knowledge p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Modern powers grid */
+.powers-intro {
+  background: var(--off-white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.powers-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.powers-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.powers-header p {
+  font-size: 0.938rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.powers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.power-card {
+  background: var(--white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  box-shadow: var(--modern-shadow);
+  transition: all 0.2s ease;
+}
+
+.power-card:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.power-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.power-number {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--warning);
+  color: var(--white);
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+.power-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--propaganda-black);
+}
+
+.power-card > p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.power-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--off-white);
+  border-radius: var(--modern-radius-sm);
+}
+
+.power-notes {
+  background: var(--off-white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.notes-icon {
+  font-size: 1.5rem;
+}
+
+.notes-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--propaganda-black);
+}
+
+.power-notes ul {
+  list-style: none;
+  padding: 0;
+}
+
+.power-notes li {
+  padding: 0.75rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.power-notes li::before {
+  content: "⚡";
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+}
+
+/* Modern winning conditions */
+.winning-conditions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.win-condition {
+  background: var(--white);
+  border-radius: var(--modern-radius);
+  overflow: hidden;
+  box-shadow: var(--modern-shadow);
+}
+
+.win-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  color: var(--white);
+}
+
+.liberal-win .win-header {
+  background: var(--liberal-blue);
+}
+
+.fascist-win .win-header {
+  background: var(--fascist-red);
+}
+
+.win-icon {
+  font-size: 2rem;
+}
+
+.win-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.win-ways {
+  padding: 1.5rem;
+}
+
+.win-way {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--off-white);
+  border-radius: var(--modern-radius-sm);
+  margin-bottom: 1rem;
+}
+
+.win-way:last-child {
+  margin-bottom: 0;
+}
+
+.way-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.way-text {
+  font-size: 0.938rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.win-visual {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.game-end-notes {
+  background: var(--off-white);
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+}
+
+.end-notes-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.end-notes-icon {
+  font-size: 1.5rem;
+}
+
+.end-notes-header h4 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--propaganda-black);
+}
+
+.game-end-notes ul {
+  list-style: none;
+  padding: 0;
+}
+
+.game-end-notes li {
+  padding: 0.75rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.game-end-notes li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--liberal-blue);
+  font-weight: 700;
+}
+
+/* Modern rules actions */
+.rules-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding: 1.5rem;
+  background: var(--off-white);
+  border-radius: var(--modern-radius-lg);
+}
+
+.rules-actions .btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  border: none;
+  border-radius: var(--modern-radius-sm);
+  padding: 1rem 1.5rem;
+  min-height: 56px;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.rules-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--modern-shadow);
+}
+
+.rules-actions .btn-primary {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+.rules-actions .btn-secondary {
+  background: var(--fascist-red);
+  color: var(--white);
+}
+
+.btn-icon {
+  font-size: 1.25rem;
+}
+
+/* Modern footer */
+footer {
+  background: var(--propaganda-black);
+  color: var(--highlight-cream);
+  padding: 2rem 0;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+footer p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .rules-page {
+    padding: 2rem;
+  }
+
+  .overview-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .objective-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .policy-deck-visual {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gameplay-flow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .flow-arrow {
+    display: none;
+  }
+
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .powers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .winning-conditions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rules-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .rules-navigation {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .rule-nav-btn {
+    flex-direction: row;
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .overview-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .gameplay-flow {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .roles-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .powers-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .rule-nav-btn,
+  .overview-card,
+  .role-card,
+  .power-card {
+    transform: none !important;
+  }
+}
+
+/* Accessibility */
+.rule-nav-btn:focus-visible,
+.rules-actions .btn:focus-visible {
+  outline: 3px solid var(--liberal-blue);
+  outline-offset: 2px;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  .rule-nav-btn,
+  .overview-card,
+  .objective-card,
+  .rules-card,
+  .role-card,
+  .power-card,
+  .vote-card,
+  .way-card,
+  .step-card,
+  .tip-card,
+  .term-card {
+    background: var(--bg-card);
+    color: var(--white);
+  }
+
+  .rule-nav-btn:hover {
+    background: var(--bg-elevated);
+  }
+
+  .rule-nav-btn.active {
+    background: var(--liberal-blue);
+    color: var(--white);
+  }
+
+  .rules-subtitle,
+  .card-detail,
+  .flow-step p,
+  .role-count,
+  .board-label,
+  .vote-note,
+  .power-card > p,
+  .role-knowledge p {
+    color: var(--white);
+  }
+
+  .overview-card p,
+  .objective-card p,
+  .step-content p,
+  .role-description,
+  .role-abilities li,
+  .power-notes li,
+  .way-text,
+  .game-end-notes li,
+  .powers-header p {
+    color: var(--white);
+  }
+}
+
+[data-theme="dark"] .rule-nav-btn,
+[data-theme="dark"] .overview-card,
+[data-theme="dark"] .objective-card,
+[data-theme="dark"] .rules-card,
+[data-theme="dark"] .role-card,
+[data-theme="dark"] .power-card,
+[data-theme="dark"] .vote-card,
+[data-theme="dark"] .way-card,
+[data-theme="dark"] .step-card,
+[data-theme="dark"] .tip-card,
+[data-theme="dark"] .term-card {
+  background: var(--bg-card);
+  color: var(--white);
+}
+
+[data-theme="dark"] .rule-nav-btn:hover {
+  background: var(--bg-elevated);
+}
+
+[data-theme="dark"] .rule-nav-btn.active {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+[data-theme="dark"] .rules-subtitle,
+[data-theme="dark"] .card-detail,
+[data-theme="dark"] .flow-step p,
+[data-theme="dark"] .role-count,
+[data-theme="dark"] .board-label,
+[data-theme="dark"] .vote-note,
+[data-theme="dark"] .power-card > p,
+[data-theme="dark"] .role-knowledge p {
+  color: var(--white);
+}
+
+[data-theme="dark"] .overview-card p,
+[data-theme="dark"] .objective-card p,
+[data-theme="dark"] .step-content p,
+[data-theme="dark"] .role-description,
+[data-theme="dark"] .role-abilities li,
+[data-theme="dark"] .power-notes li,
+[data-theme="dark"] .way-text,
+[data-theme="dark"] .game-end-notes li,
+[data-theme="dark"] .powers-header p {
+  color: var(--white);
+}

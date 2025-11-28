@@ -1,0 +1,454 @@
+/* ============================================
+   MODERN FLAT DESIGN FOR HOMEPAGE
+   Mobile-first, sleek design with original color scheme
+   ============================================ */
+
+/* Override propaganda styling with modern flat design */
+:root {
+  /* Keep original colors */
+  --modern-shadow: 0 2px 8px rgba(16, 24, 32, 0.08);
+  --modern-shadow-hover: 0 4px 16px rgba(16, 24, 32, 0.12);
+  --modern-shadow-lg: 0 8px 24px rgba(16, 24, 32, 0.15);
+  --modern-radius: 12px;
+  --modern-radius-sm: 8px;
+  --modern-radius-lg: 16px;
+}
+
+/* Modern body styling */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Modern header - clean and minimal */
+.header {
+  background: var(--propaganda-black);
+  box-shadow: var(--modern-shadow);
+  border-bottom: none;
+}
+
+.logo {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.9;
+}
+
+.logo h1 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Modern card styling - flat with subtle shadows */
+.card {
+  background: var(--white);
+  color: var(--propaganda-black);
+  border: none;
+  border-radius: var(--modern-radius);
+  box-shadow: var(--modern-shadow);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  font-size: 3rem;
+  filter: none;
+}
+
+.card-title,
+.welcome-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  margin-bottom: 0.75rem;
+}
+
+.card-content,
+.welcome-description {
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: inherit;
+}
+
+/* Modern buttons - flat and clean */
+.btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  border: none;
+  border-radius: var(--modern-radius-sm);
+  padding: 0.875rem 1.5rem;
+  min-height: 48px;
+  box-shadow: none;
+  transition: all 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--modern-shadow);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--dark-beige);
+  color: var(--white);
+}
+
+.btn-primary {
+  background: var(--liberal-blue);
+  color: var(--white);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--secondary-dark);
+}
+
+.btn-secondary {
+  background: var(--fascist-red);
+  color: var(--white);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  color: inherit;
+  border: 2px solid var(--neutral-beige);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--neutral-beige);
+  border-color: var(--dark-beige);
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  min-height: 56px;
+}
+
+.btn-emoji {
+  font-size: 1.25rem;
+}
+
+/* Modern button layout */
+.welcome-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.primary-buttons,
+.secondary-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Modern feature grid - cards with subtle styling */
+.features-header {
+  margin-bottom: 2rem;
+}
+
+.features-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: inherit;
+  margin-bottom: 0.5rem;
+}
+
+.features-subtitle {
+  font-size: 1rem;
+  color: inherit;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.feature-card {
+  background: var(--white);
+  color: var(--propaganda-black);
+  border: none;
+  border-radius: var(--modern-radius);
+  padding: 1.5rem;
+  box-shadow: var(--modern-shadow);
+  transition: all 0.2s ease;
+}
+
+.feature-card::before {
+  display: none;
+}
+
+.feature-card:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.feature-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  margin-bottom: 0.5rem;
+  color: inherit;
+}
+
+.feature-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: inherit;
+}
+
+/* Modern game info cards */
+.game-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.game-info-card {
+  background: var(--white);
+  color: var(--propaganda-black);
+  border: none;
+  border-radius: var(--modern-radius);
+  box-shadow: var(--modern-shadow);
+  transition: all 0.2s ease;
+}
+
+.game-info-card:hover {
+  box-shadow: var(--modern-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.info-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: inherit;
+  margin-bottom: 0.5rem;
+}
+
+.info-description {
+  font-size: 0.875rem;
+  color: inherit;
+}
+
+/* Modern footer */
+.main-footer {
+  background: var(--propaganda-black);
+  border-top: none;
+  padding: 2rem 0;
+}
+
+.footer-text {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.footer-link {
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: opacity 0.2s ease;
+}
+
+.footer-link:hover {
+  opacity: 0.8;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .primary-buttons,
+  .secondary-buttons {
+    flex-direction: row;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .game-info-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .card {
+    padding: 2.5rem;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .feature-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .welcome-buttons {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    min-height: 48px;
+    padding: 1rem 1.5rem;
+  }
+
+  .btn-lg {
+    min-height: 56px;
+    padding: 1.25rem 2rem;
+  }
+
+  /* Disable hover transforms on touch devices */
+  .card:hover,
+  .feature-card:hover,
+  .game-info-card:hover,
+  .btn:hover {
+    transform: none;
+  }
+}
+
+/* Focus styles for accessibility */
+.btn:focus-visible,
+.card:focus-visible,
+.logo:focus-visible {
+  outline: 3px solid var(--liberal-blue);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Light mode explicit colors */
+@media (prefers-color-scheme: light) {
+  body {
+    color: var(--propaganda-black);
+  }
+
+  .card,
+  .feature-card,
+  .game-info-card {
+    color: var(--propaganda-black);
+  }
+
+  .btn-outline {
+    color: var(--propaganda-black);
+  }
+}
+
+[data-theme="light"] body {
+  color: var(--propaganda-black);
+}
+
+[data-theme="light"] .card,
+[data-theme="light"] .feature-card,
+[data-theme="light"] .game-info-card {
+  color: var(--propaganda-black);
+}
+
+[data-theme="light"] .btn-outline {
+  color: var(--propaganda-black);
+}
+
+/* Dark mode overrides for hardcoded colors */
+@media (prefers-color-scheme: dark) {
+  body {
+    color: var(--white);
+  }
+
+  .card,
+  .feature-card,
+  .game-info-card {
+    background: var(--bg-card);
+    color: var(--white);
+  }
+
+  .btn-outline {
+    color: var(--white);
+    border-color: var(--border-color);
+  }
+}
+
+[data-theme="dark"] body {
+  color: var(--white);
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .game-info-card {
+  background: var(--bg-card);
+  color: var(--white);
+}
+
+[data-theme="dark"] .btn-outline {
+  color: var(--white);
+  border-color: var(--border-color);
+}

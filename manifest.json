@@ -1,7 +1,7 @@
 {
   "name": "Secret Hitler - Mobile Edition",
   "short_name": "Secret Hitler",
-  "description": "Play Secret Hitler on one device with Mobile Edition mechanics",
+  "description": "Play Secret Hitler online with friends or locally with multi-device and local play modes",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#D6C6A9",

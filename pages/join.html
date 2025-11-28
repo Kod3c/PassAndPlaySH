@@ -67,7 +67,7 @@
 
                         <div id="game-status" class="mt-2 mb-4"></div>
 
-                        <div class="form-group">
+                        <div id="player-name-group" class="form-group" style="display: none;">
                             <label class="form-label" for="player-name">Player Name</label>
                             <input id="player-name" class="form-control" type="text" placeholder="Your name" maxlength="24" autocomplete="name" list="existing-names">
                             <datalist id="existing-names"></datalist>
@@ -75,10 +75,10 @@
                             <small class="form-help">Choose your name from the roster when a valid Game ID is entered</small>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label" for="player-pin">Reconnection PIN</label>
-                            <input id="player-pin" class="form-control" type="password" placeholder="Enter 4-digit PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="new-password">
-                            <small class="form-help">Set a 4-digit PIN to reconnect if you get disconnected. You can use this PIN to rejoin with the same name later.</small>
+                        <div id="player-pin-group" class="form-group" style="display: none;">
+                            <label class="form-label" for="player-pin">Reconnection PIN <span id="pin-status">(required)</span></label>
+                            <input id="player-pin" class="form-control" type="password" placeholder="Enter 4-digit PIN" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="new-password" required disabled>
+                            <small class="form-help" id="pin-help">Set a 4-digit PIN to reconnect if you get disconnected. You can use this PIN to rejoin with the same name later.</small>
                         </div>
                         <div class="btn-group">
                             <button id="join-btn" class="btn btn-primary">Join Lobby</button>
@@ -99,7 +99,7 @@
         <footer class="main-footer">
             <div class="container">
                 <div class="footer-content">
-                    <p class="footer-text">Built for offline play - no accounts or servers required</p>
+                    <p class="footer-text">Connect and play with friends anywhere</p>
                     <div class="footer-links">
                         <a href="../pages/rules.html" class="footer-link">📖 Rules</a>
                         <span class="footer-separator">•</span>
@@ -112,11 +112,13 @@
 
     <script type="module">
         import { app } from '../js/firebase.js';
+        import SessionManager from '../js/session-manager.js';
         import { getFirestore, doc, collection, serverTimestamp, getDoc, setDoc, query, getDocs, where, updateDoc, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         import recaptchaManager from '../js/recaptcha.js';
 
         const db = getFirestore(app);
+        const sessionManager = new SessionManager(app);
         let playersUnsubscribe = null; // Track the listener so we can unsubscribe when game changes
 
         function getGameIdFromUrl() {
@@ -183,19 +185,21 @@
                 const data = d.data() || {};
                 if (data.uid === uid) {
                     // Update existing claim with new PIN and timestamp
-                    await updateDoc(d.ref, { 
+                    await updateDoc(d.ref, {
                         lastSeen: serverTimestamp(),
-                        pin: pin || null
+                        pin: pin || null,
+                        sessionId: sessionManager.sessionId
                     });
                     claimedPlayerId = d.id;
                     break;
                 }
                 if (!data.uid) {
                     // Claim unclaimed player with PIN
-                    await updateDoc(d.ref, { 
-                        uid, 
+                    await updateDoc(d.ref, {
+                        uid,
                         lastSeen: serverTimestamp(),
-                        pin: pin || null
+                        pin: pin || null,
+                        sessionId: sessionManager.sessionId
                     });
                     claimedPlayerId = d.id;
                     break;
@@ -214,11 +218,15 @@
             return claimedPlayerId;
         }
 
+        let currentGameData = null; // Store current game data
+
         async function loadGameMeta(gameId) {
             const statusEl = document.getElementById('game-status');
             const datalist = document.getElementById('existing-names');
             const nameInput = document.getElementById('player-name');
             const nameSelect = document.getElementById('player-name-select');
+            const nameGroup = document.getElementById('player-name-group');
+            const pinGroup = document.getElementById('player-pin-group');
 
             // Unsubscribe from previous game's player updates
             if (playersUnsubscribe) {
@@ -229,6 +237,10 @@
             datalist.innerHTML = '';
             if (!gameId) {
                 statusEl.textContent = '';
+                currentGameData = null;
+                // Hide name and pin fields when no game
+                if (nameGroup) nameGroup.style.display = 'none';
+                if (pinGroup) pinGroup.style.display = 'none';
                 // Revert to free text when no game
                 if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.classList.add('hidden'); nameSelect.innerHTML = ''; }
                 if (nameInput) { nameInput.style.display = ''; nameInput.value = ''; }
@@ -240,6 +252,10 @@
             const snap = await getDoc(gameRef);
             if (!snap.exists()) {
                 statusEl.textContent = 'Game not found.';
+                currentGameData = null;
+                // Hide name and pin fields when game not found
+                if (nameGroup) nameGroup.style.display = 'none';
+                if (pinGroup) pinGroup.style.display = 'none';
                 if (nameSelect) { nameSelect.style.display = 'none'; nameSelect.classList.add('hidden'); nameSelect.innerHTML = ''; }
                 if (nameInput) { nameInput.style.display = ''; }
                 const btn = document.getElementById('join-btn');
@@ -247,13 +263,22 @@
                 return null;
             }
             const game = snap.data();
-            statusEl.textContent = `Found game: ${game.name || gameId} (${gameId})`;
+            statusEl.textContent = '';
+
+            // Show name and pin fields when game is found
+            if (nameGroup) nameGroup.style.display = 'block';
+            if (pinGroup) pinGroup.style.display = 'block';
+
             // Update join button label depending on game state
             try {
                 const state = (game && game.state) ? String(game.state) : 'lobby';
                 const btn = document.getElementById('join-btn');
                 if (btn) btn.textContent = (state === 'reveal' || state === 'playing') ? 'Join Game' : 'Join Lobby';
             } catch (_) {}
+
+            // CRITICAL: Set currentGameData BEFORE setting up the listener
+            // because onSnapshot fires immediately and needs access to game data
+            currentGameData = game;
 
             // Set up real-time listener for player changes
             const playersQuery = query(collection(gameRef, 'players'), orderBy('createdAt', 'asc'));
@@ -270,6 +295,9 @@
             const nameInput = document.getElementById('player-name');
             const nameSelect = document.getElementById('player-name-select');
 
+            // Get host name from current game data
+            const hostName = currentGameData ? (currentGameData.hostName || '').trim() : '';
+
             // Read host pass requirement from game
             const PRESENT_WINDOW_MS = 90 * 1000; // 90s: faster reclaim from a new device
             let currentUser = null;
@@ -285,14 +313,17 @@
                 if (!n) return;
                 idToName.set(d.id, n);
                 const uid = data.uid || null;
+                const isHost = hostName && n === hostName;
                 let info = nameInfo.get(n);
                 if (!info) {
-                    info = { name: n, unclaimed: 0, hasActive: false, staleClaimed: false, youMatches: 0 };
+                    info = { name: n, unclaimed: 0, hasActive: false, staleClaimed: false, youMatches: 0, hasClaimed: false, isHost: isHost };
                     nameInfo.set(n, info);
                 }
                 if (!uid) {
                     info.unclaimed += 1;
                 } else {
+                    // Mark that this name has been claimed by someone
+                    info.hasClaimed = true;
                     // Count if this name currently belongs to your UID
                     if (currentUid && uid === currentUid) info.youMatches += 1;
                     // Presence check for active session
@@ -349,8 +380,29 @@
                 const unavailableNames = [];
                 nameInfo.forEach(info => {
                     const isYourSeat = Boolean(youSeatName && info.name === youSeatName);
-                    // Your seat always selectable; others selectable if there is no active session (stale or unclaimed)
-                    const available = isYourSeat || (!info.hasActive);
+
+                    // Simplified availability logic:
+                    // 1. Your seat is ALWAYS available (you can reclaim your own seat)
+                    // 2. Host is ALWAYS unavailable (unless it's your seat) - even if unclaimed
+                    //    This prevents others from taking the host seat before the host joins
+                    // 3. Other players: available if unclaimed OR claimed but stale (not active)
+
+                    let available;
+                    if (isYourSeat) {
+                        // Your own seat is always available
+                        available = true;
+                    } else if (info.isHost) {
+                        // Host is ALWAYS unavailable unless it's your seat
+                        // This prevents others from joining as host even if host hasn't claimed seat yet
+                        available = false;
+                    } else if (info.hasActive) {
+                        // Someone else is actively present -> UNAVAILABLE
+                        available = false;
+                    } else {
+                        // Either unclaimed or stale (not actively present) -> AVAILABLE
+                        available = true;
+                    }
+
                     (available ? availableNames : unavailableNames).push(info);
                 });
                 availableNames.sort((a,b) => a.name.localeCompare(b.name));
@@ -367,7 +419,9 @@
                 unavailableNames.forEach(info => {
                     const o = document.createElement('option');
                     o.value = info.name;
-                    o.textContent = info.name + ' - Taken (PIN required)';
+                    // Show "Host" label if this is the host (regardless of active status)
+                    const label = info.isHost ? ' - Host (PIN required)' : ' - Taken (PIN required)';
+                    o.textContent = info.name + label;
                     // DO NOT disable - allow selection but require correct PIN
                     unavailableGroup.appendChild(o);
                 });
@@ -375,7 +429,7 @@
                 if (availableNames.length) nameSelect.appendChild(availableGroup);
                 if (unavailableNames.length) nameSelect.appendChild(unavailableGroup);
 
-                // Auto-select logic: prioritize available players
+                // Auto-select logic: prioritize available players (excluding host if active)
                 const stillExists = allNames.includes(currentSelection);
                 const currentlyAvailable = availableNames.some(info => info.name === currentSelection);
 
@@ -383,14 +437,20 @@
                 if (stillExists && currentSelection && currentlyAvailable) {
                     nameSelect.value = currentSelection;
                 } else {
-                    // Priority: 1) Your seat, 2) First available player, 3) Keep current if unavailable but exists
+                    // Priority: 1) Your seat, 2) First available non-host player, 3) First available player, 4) Keep current if unavailable but exists
                     const yours = youSeatName ? availableNames.find(i => i.name === youSeatName) : null;
                     if (yours) {
                         nameSelect.value = yours.name;
                         try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
                     } else if (availableNames.length > 0) {
-                        // Always select the first available player if there are any
-                        nameSelect.value = availableNames[0].name;
+                        // Prioritize non-host players for default selection
+                        const nonHostAvailable = availableNames.find(i => !i.isHost);
+                        if (nonHostAvailable) {
+                            nameSelect.value = nonHostAvailable.name;
+                        } else {
+                            // If only host is available (rare case), select them
+                            nameSelect.value = availableNames[0].name;
+                        }
                         try { nameSelect.dispatchEvent(new Event('change')); } catch (_) {}
                     } else if (stillExists && currentSelection) {
                         // No available players, but keep current selection if it exists
@@ -411,6 +471,56 @@
                     ? (nameSelect.value && nameSelect.selectedOptions.length)
                     : Boolean(nameInput && (nameInput.value || '').trim());
                 joinBtnEl.disabled = !(selectedValid && !!gameId);
+            }
+
+            // Update PIN field based on selected player
+            updatePinFieldForPlayer(playersSnap, gameId);
+        }
+
+        async function updatePinFieldForPlayer(playersSnap, gameId) {
+            const nameInput = document.getElementById('player-name');
+            const nameSelect = document.getElementById('player-name-select');
+            const pinInput = document.getElementById('player-pin');
+            const pinStatus = document.getElementById('pin-status');
+            const pinHelp = document.getElementById('pin-help');
+
+            // Get selected name
+            const selectedName = (nameSelect && nameSelect.style.display !== 'none')
+                ? nameSelect.value
+                : nameInput.value;
+
+            if (!selectedName || !playersSnap) {
+                // No player selected - show "setting the code" state
+                pinInput.disabled = true;
+                pinInput.value = '';
+                pinInput.placeholder = 'Setting the code...';
+                if (pinStatus) pinStatus.textContent = '(required)';
+                if (pinHelp) pinHelp.textContent = 'Select a player name first.';
+                return;
+            }
+
+            // Check if selected player has a PIN
+            let playerHasPin = false;
+            playersSnap.docs.forEach(d => {
+                const data = d.data() || {};
+                if (data.name === selectedName.trim() && data.pin) {
+                    playerHasPin = true;
+                }
+            });
+
+            // PIN is always required
+            pinInput.disabled = false;
+            pinInput.value = '';
+            pinInput.placeholder = 'Enter 4-digit PIN';
+            pinInput.required = true;
+            if (pinStatus) pinStatus.textContent = '(required)';
+
+            if (playerHasPin) {
+                // Player has a PIN - need to enter it to reconnect
+                if (pinHelp) pinHelp.textContent = 'This player has a PIN set. Enter it to reconnect.';
+            } else {
+                // Player doesn't have a PIN - need to set one
+                if (pinHelp) pinHelp.textContent = 'Set a 4-digit PIN to reconnect if you get disconnected.';
             }
         }
 
@@ -459,7 +569,10 @@
                 const gid = normalizeGameId(gameIdInput.value);
                 const pin = playerPinInput.value;
                 const validPin = pin && pin.length === 4 && /^\d{4}$/.test(pin);
-                joinBtn.disabled = !(name && gid && gid.length === 5 && validPin);
+
+                // PIN is always required
+                const canJoin = name && gid && gid.length === 5 && validPin;
+                joinBtn.disabled = !canJoin;
             }
 
             let debounceTimer = null;
@@ -489,8 +602,23 @@
             });
 
             nameInput.addEventListener('input', updateJoinEnabled);
-            if (nameSelect) nameSelect.addEventListener('change', updateJoinEnabled);
-            if (nameSelect) nameSelect.addEventListener('input', updateJoinEnabled);
+            if (nameSelect) {
+                nameSelect.addEventListener('change', function() {
+                    updateJoinEnabled();
+                    // Trigger PIN field update when player changes
+                    if (playersUnsubscribe) {
+                        const gid = normalizeGameId(gameIdInput.value);
+                        if (gid) {
+                            const gameRef = doc(db, 'games', gid);
+                            const playersQuery = query(collection(gameRef, 'players'), orderBy('createdAt', 'asc'));
+                            getDocs(playersQuery).then(snap => {
+                                updatePinFieldForPlayer(snap, gid);
+                            });
+                        }
+                    }
+                });
+                nameSelect.addEventListener('input', updateJoinEnabled);
+            }
             playerPinInput.addEventListener('input', updateJoinEnabled);
             updateJoinEnabled();
             
@@ -526,8 +654,10 @@
                 const pin = playerPinInput.value;
 
                 if (!name || !gid || gid.length !== 5) return;
+
+                // PIN is always required and must be 4 digits
                 if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) {
-                    status.textContent = 'PIN must be 4 digits.';
+                    status.textContent = 'PIN is required and must be 4 digits.';
                     return;
                 }
 
@@ -579,7 +709,8 @@
                         // PIN matches - allow reconnection
                         await updateDoc(doc(db, 'games', gid, 'players', playerId), {
                             uid: user.uid,
-                            lastSeen: serverTimestamp()
+                            lastSeen: serverTimestamp(),
+                            sessionId: sessionManager.sessionId
                         });
 
                         // Extend TTL by 15 minutes
@@ -596,25 +727,7 @@
                         return;
                     }
 
-                    // If attempting to join as host seat, and a password is set, prompt for it
-                    const gameSnap = await getDoc(gameRef);
-                    const hostPass = gameSnap.exists() ? (gameSnap.data().hostPasswordHash || null) : null;
-                    if (hostPass) {
-                        // Find if selected name is host (seat 1)
-                        const hostPlayersSnap = await getDocs(query(collection(gameRef, 'players'), where('seat', '==', 1)));
-                        let hostName = null;
-                        let hostDocRef = null;
-                        hostPlayersSnap.forEach(d => { const data = d.data() || {}; hostName = hostName || (data.name || null); if (!hostDocRef) hostDocRef = d.ref; });
-                        if (hostName && name === hostName) {
-                            const input = window.prompt('Enter host PIN to reclaim host:');
-                            const hash = input ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
-                            if (!hash || hash !== hostPass) throw new Error('Incorrect host PIN');
-                            // Password verified: transfer host seat to this device's UID
-                            if (hostDocRef) {
-                                await updateDoc(hostDocRef, { uid: user.uid, lastSeen: serverTimestamp() });
-                            }
-                        }
-                    }
+                    // PIN validation already handled above; just claim the player
                     await claimOrAddPlayer(gid, name, user.uid, pin);
                     status.textContent = 'Joined! Redirecting to lobby...';
                     setTimeout(() => { window.location.href = `./lobby.html?game=${encodeURIComponent(gid)}`; }, 600);
@@ -642,10 +755,11 @@
                                 if (!snap.empty) {
                                     // Force claim the first available player slot
                                     const playerDoc = snap.docs[0];
-                                    await updateDoc(playerDoc.ref, { 
-                                        uid: user.uid, 
+                                    await updateDoc(playerDoc.ref, {
+                                        uid: user.uid,
                                         lastSeen: serverTimestamp(),
-                                        pin: pin || null
+                                        pin: pin || null,
+                                        sessionId: sessionManager.sessionId
                                     });
                                     
                                     // Extend TTL by 15 minutes

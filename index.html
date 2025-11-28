@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Hitler - Mobile Edition</title>
-    <meta name="description" content="Play Secret Hitler on one device with pass-and-play mechanics">
+    <meta name="description" content="Play Secret Hitler online with friends or locally. Multi-device multiplayer and local gameplay modes available.">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="stylesheet" href="styles/app.css">
+    <link rel="stylesheet" href="styles/home-modern.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
@@ -49,28 +50,28 @@
                     <div class="card-content">
                         <span class="card-icon welcome-icon">🎮</span>
                         <h2 class="welcome-title">Welcome to Secret Hitler</h2>
-                        <p class="welcome-description">Experience the ultimate social deduction game on a single device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
+                        <p class="welcome-description">The ultimate social deduction game for online and local play. Connect with friends anywhere or play together on one device. Perfect for game nights, parties, or any gathering where you want to test your deception skills.</p>
                         
                         <div class="welcome-buttons">
                             <div class="primary-buttons">
                                 <button data-navigate="multidevice" class="btn btn-primary btn-lg">
-                                    <span class="btn-emoji">🚀</span>
-                                    <span class="btn-text">Create Game</span>
+                                    <span class="btn-emoji">🌐</span>
+                                    <span class="btn-text">Play Online</span>
                                 </button>
                                 <button id="join-game-btn" class="btn btn-secondary btn-lg">
                                     <span class="btn-emoji">🔗</span>
                                     <span class="btn-text">Join Game</span>
                                 </button>
                             </div>
-                            
+
                             <div class="secondary-buttons">
-                                <button data-navigate="setup" class="btn btn-outline" disabled>
+                                <button data-navigate="setup" class="btn btn-outline" disabled title="Coming soon">
                                     <span class="btn-emoji">📱</span>
-                                    <span class="btn-text">Pass & Play Game</span>
+                                    <span class="btn-text">Local Play</span>
                                 </button>
                                 <button id="view-rules-btn" class="btn btn-outline">
                                     <span class="btn-emoji">📖</span>
-                                    <span class="btn-text">View Rules</span>
+                                    <span class="btn-text">Rules</span>
                                 </button>
                             </div>
                         </div>
@@ -110,26 +111,26 @@
                     
                     <div class="feature-card">
                         <span class="feature-icon">🔒</span>
-                        <h4 class="feature-title">Privacy First</h4>
-                        <p class="feature-description">Pass-and-play mechanics ensure role secrecy</p>
+                        <h4 class="feature-title">Role Secrecy</h4>
+                        <p class="feature-description">Your secret identity stays hidden throughout the game</p>
                     </div>
-                    
-                    <div class="feature-card">
-                        <span class="feature-icon">📱</span>
-                        <h4 class="feature-title">Multi-Device</h4>
-                        <p class="feature-description">Play across multiple devices or on one screen</p>
-                    </div>
-                    
+
                     <div class="feature-card">
                         <span class="feature-icon">🌐</span>
-                        <h4 class="feature-title">Real-time Multiplayer</h4>
+                        <h4 class="feature-title">Online Multiplayer</h4>
                         <p class="feature-description">Connect with friends anywhere in the world</p>
                     </div>
-                    
+
+                    <div class="feature-card">
+                        <span class="feature-icon">📱</span>
+                        <h4 class="feature-title">Multi-Device Support</h4>
+                        <p class="feature-description">Each player uses their own device for private gameplay</p>
+                    </div>
+
                     <div class="feature-card">
                         <span class="feature-icon">💾</span>
-                        <h4 class="feature-title">Offline Capable</h4>
-                        <p class="feature-description">No internet required for local games</p>
+                        <h4 class="feature-title">Game Persistence</h4>
+                        <p class="feature-description">Resume games anytime with automatic save states</p>
                     </div>
                 </div>
             
@@ -168,7 +169,7 @@
         <footer class="main-footer">
             <div class="container">
                 <div class="footer-content">
-                    <p class="footer-text">Built for offline play - no accounts or servers required</p>
+                    <p class="footer-text">Connect and play with friends anywhere</p>
                     <div class="footer-links">
                         <a href="pages/rules.html" class="footer-link">📖 Rules</a>
                         <span class="footer-separator">•</span>

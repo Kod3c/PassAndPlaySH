@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Cleanup - Secret Hitler Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #DA291C;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        #login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #login-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #login-panel h2 {
+            color: #DA291C;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #login-panel .login-subtitle {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #login-panel input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+
+        #login-panel input[type="password"]:focus {
+            outline: none;
+            border-color: #DA291C;
+        }
+
+        #login-panel button {
+            width: 100%;
+            padding: 12px;
+            background: #DA291C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #login-panel button:hover {
+            background: #b82218;
+        }
+
+        #login-error {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        #main-content {
+            display: none;
+        }
+
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #101820;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .config-item {
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .config-item label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .config-item .value {
+            color: #DA291C;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #DA291C;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #b82218;
+        }
+
+        .btn-secondary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .game-list {
+            margin-top: 15px;
+        }
+
+        .game-item {
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #DA291C;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .game-item .game-id {
+            font-weight: 700;
+            color: #DA291C;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .game-item .game-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .game-item .reason-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .reason-expired {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .reason-completed {
+            background: #3498db;
+            color: white;
+        }
+
+        .reason-abandoned {
+            background: #f39c12;
+            color: white;
+        }
+
+        .reason-too-old {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #DA291C;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div id="login-panel">
+            <h2>🔒 Admin Access</h2>
+            <p class="login-subtitle">Enter password to access cleanup tools</p>
+            <form id="login-form" onsubmit="return false;">
+                <input
+                    type="password"
+                    id="password-input"
+                    placeholder="Enter password"
+                    autocomplete="off"
+                    autofocus
+                />
+                <button type="submit">Login</button>
+                <div id="login-error">❌ Incorrect password</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content (hidden until authenticated) -->
+    <div id="main-content">
+        <div class="container">
+            <div class="header">
+                <h1>🗑️ Game Cleanup</h1>
+                <p class="subtitle">Manage and remove old, closed, or unused Secret Hitler games</p>
+            </div>
+
+            <div class="panel">
+            <h2>Cleanup Configuration</h2>
+            <div class="config-grid">
+                <div class="config-item">
+                    <label>Lobby Expiry</label>
+                    <div class="value">15 minutes</div>
+                </div>
+                <div class="config-item">
+                    <label>Completed Game Retention</label>
+                    <div class="value">7 days</div>
+                </div>
+                <div class="config-item">
+                    <label>Abandoned Game Threshold</label>
+                    <div class="value">24 hours</div>
+                </div>
+                <div class="config-item">
+                    <label>Maximum Game Age</label>
+                    <div class="value">30 days</div>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                ⚠️ <strong>Warning:</strong> Cleanup operations are permanent and cannot be undone. Always run a dry run first to preview what will be deleted.
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" id="btn-dry-run">
+                    🔍 Preview Cleanup (Dry Run)
+                </button>
+                <button class="btn-danger" id="btn-cleanup" disabled>
+                    🗑️ Run Cleanup (Permanent)
+                </button>
+            </div>
+        </div>
+
+        <div class="panel" id="stats-panel" style="display: none;">
+            <h2>Cleanup Statistics</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number" id="stat-scanned">0</div>
+                    <div class="label">Games Scanned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="stat-expired">0</div>
+                    <div class="label">Expired Lobbies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="stat-completed">0</div>
+                    <div class="label">Old Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="stat-abandoned">0</div>
+                    <div class="label">Abandoned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="stat-too-old">0</div>
+                    <div class="label">Too Old</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                    <div class="number" id="stat-deleted">0</div>
+                    <div class="label">Deleted</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="results-panel" style="display: none;">
+            <h2>Games to Clean Up</h2>
+            <div id="results-content"></div>
+        </div>
+
+        <div class="panel loading" id="loading-panel" style="display: none;">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        // Password protection
+        const CORRECT_PASSWORD_HASH = '8f14e45fceea167a5a36dedd4bea2543a6f9e6e0'; // SHA1 hash of "Roobear0515!"
+
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function checkPassword() {
+            const passwordInput = document.getElementById('password-input');
+            const password = passwordInput.value;
+            const loginError = document.getElementById('login-error');
+
+            const hash = await hashPassword(password);
+
+            if (hash === CORRECT_PASSWORD_HASH) {
+                // Store authentication in sessionStorage
+                sessionStorage.setItem('adminAuth', 'true');
+
+                // Hide login screen and show main content
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                // Show error
+                loginError.style.display = 'block';
+                passwordInput.value = '';
+                passwordInput.focus();
+
+                // Shake animation
+                passwordInput.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    passwordInput.style.animation = '';
+                }, 500);
+            }
+        }
+
+        // Check if already authenticated
+        if (sessionStorage.getItem('adminAuth') === 'true') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        // Handle form submission
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            checkPassword();
+        });
+
+        // Handle Enter key
+        document.getElementById('password-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkPassword();
+            }
+        });
+
+        // Add shake animation style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                20%, 40%, 60%, 80% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+    <script type="module">
+        import { cleanupOldGames, getCleanupStats } from '../js/db.js';
+
+        const btnDryRun = document.getElementById('btn-dry-run');
+        const btnCleanup = document.getElementById('btn-cleanup');
+        const statsPanel = document.getElementById('stats-panel');
+        const resultsPanel = document.getElementById('results-panel');
+        const resultsContent = document.getElementById('results-content');
+        const loadingPanel = document.getElementById('loading-panel');
+
+        let lastResults = null;
+
+        function showLoading() {
+            loadingPanel.style.display = 'block';
+            btnDryRun.disabled = true;
+            btnCleanup.disabled = true;
+        }
+
+        function hideLoading() {
+            loadingPanel.style.display = 'none';
+            btnDryRun.disabled = false;
+        }
+
+        function updateStats(results) {
+            document.getElementById('stat-scanned').textContent = results.scanned || 0;
+            document.getElementById('stat-expired').textContent = results.reasons.expired || 0;
+            document.getElementById('stat-completed').textContent = results.reasons.completed || 0;
+            document.getElementById('stat-abandoned').textContent = results.reasons.abandoned || 0;
+            document.getElementById('stat-too-old').textContent = results.reasons.tooOld || 0;
+            document.getElementById('stat-deleted').textContent = results.deleted || 0;
+            statsPanel.style.display = 'block';
+        }
+
+        function displayResults(results) {
+            if (!results.games || results.games.length === 0) {
+                resultsContent.innerHTML = '<div class="alert alert-success">✅ No games found for cleanup. Database is clean!</div>';
+                resultsPanel.style.display = 'block';
+                return;
+            }
+
+            let html = `<div class="alert alert-warning">Found ${results.games.length} game(s) matching cleanup criteria</div>`;
+            html += '<div class="game-list">';
+
+            results.games.forEach(game => {
+                const reasonClass = `reason-${game.reason.replace('_', '-')}`;
+                const reasonText = {
+                    'expired': 'Expired',
+                    'completed_old': 'Completed & Old',
+                    'abandoned': 'Abandoned',
+                    'too_old': 'Too Old'
+                }[game.reason] || game.reason;
+
+                html += `
+                    <div class="game-item">
+                        <div class="game-id">${game.id} - ${game.name}</div>
+                        <div class="game-info">State: ${game.state}</div>
+                        ${game.createdAt ? `<div class="game-info">Created: ${new Date(game.createdAt).toLocaleString()}</div>` : ''}
+                        ${game.updatedAt ? `<div class="game-info">Updated: ${new Date(game.updatedAt).toLocaleString()}</div>` : ''}
+                        ${game.expireAt ? `<div class="game-info">Expires: ${new Date(game.expireAt).toLocaleString()}</div>` : ''}
+                        <span class="reason-badge ${reasonClass}">${reasonText}</span>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            resultsContent.innerHTML = html;
+            resultsPanel.style.display = 'block';
+        }
+
+        async function runDryRun() {
+            showLoading();
+            statsPanel.style.display = 'none';
+            resultsPanel.style.display = 'none';
+
+            try {
+                const results = await getCleanupStats();
+                lastResults = results;
+                updateStats(results);
+                displayResults(results);
+
+                // Enable cleanup button if there are games to clean
+                if (results.games && results.games.length > 0) {
+                    btnCleanup.disabled = false;
+                }
+            } catch (error) {
+                console.error('Dry run failed:', error);
+                resultsContent.innerHTML = `<div class="alert alert-error">❌ Error: ${error.message}</div>`;
+                resultsPanel.style.display = 'block';
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function runCleanup() {
+            if (!confirm('⚠️ This will permanently delete all games shown below. Are you sure you want to continue?')) {
+                return;
+            }
+
+            if (!confirm('⚠️ FINAL WARNING: This action cannot be undone. Delete now?')) {
+                return;
+            }
+
+            showLoading();
+            statsPanel.style.display = 'none';
+            resultsPanel.style.display = 'none';
+
+            try {
+                const results = await cleanupOldGames({ dryRun: false, maxGames: 100 });
+                lastResults = results;
+                updateStats(results);
+
+                let message = `✅ Cleanup complete! Deleted ${results.deleted} game(s).`;
+                if (results.failed > 0) {
+                    message += ` ${results.failed} deletion(s) failed.`;
+                }
+
+                resultsContent.innerHTML = `<div class="alert alert-success">${message}</div>`;
+                resultsPanel.style.display = 'block';
+
+                // Disable cleanup button after running
+                btnCleanup.disabled = true;
+            } catch (error) {
+                console.error('Cleanup failed:', error);
+                resultsContent.innerHTML = `<div class="alert alert-error">❌ Error: ${error.message}</div>`;
+                resultsPanel.style.display = 'block';
+            } finally {
+                hideLoading();
+            }
+        }
+
+        btnDryRun.addEventListener('click', runDryRun);
+        btnCleanup.addEventListener('click', runCleanup);
+    </script>
+</body>
+</html>

@@ -40,9 +40,61 @@
             text-align: center;
             font-size: 1.2em;
         }
-        
+
         #host-password-input::placeholder {
             letter-spacing: 0.2em;
+        }
+
+        /* Dark mode fixes */
+        @media (prefers-color-scheme: dark) {
+            #duplicate-notice {
+                background: linear-gradient(135deg, rgba(0, 174, 239, 0.15) 0%, rgba(0, 174, 239, 0.1) 100%);
+            }
+            #duplicate-notice .card-title {
+                color: #60a5fa;
+            }
+            #duplicate-notice .section-description {
+                color: #93c5fd;
+            }
+            .player-count-display,
+            .player-count-display span,
+            .current-count {
+                color: var(--white) !important;
+            }
+            .create-game-hint {
+                color: var(--white) !important;
+            }
+            .form-control,
+            input.form-control,
+            select.form-control {
+                background: var(--bg-elevated) !important;
+                color: var(--white) !important;
+                border-color: var(--border-color) !important;
+            }
+        }
+        [data-theme="dark"] #duplicate-notice {
+            background: linear-gradient(135deg, rgba(0, 174, 239, 0.15) 0%, rgba(0, 174, 239, 0.1) 100%);
+        }
+        [data-theme="dark"] #duplicate-notice .card-title {
+            color: #60a5fa;
+        }
+        [data-theme="dark"] #duplicate-notice .section-description {
+            color: #93c5fd;
+        }
+        [data-theme="dark"] .player-count-display,
+        [data-theme="dark"] .player-count-display span,
+        [data-theme="dark"] .current-count {
+            color: var(--white) !important;
+        }
+        [data-theme="dark"] .create-game-hint {
+            color: var(--white) !important;
+        }
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] input.form-control,
+        [data-theme="dark"] select.form-control {
+            background: var(--bg-elevated) !important;
+            color: var(--white) !important;
+            border-color: var(--border-color) !important;
         }
     </style>
     
@@ -102,9 +154,9 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-3">
                         <div class="form-group">
-                            <label for="host-password-input" class="form-label">Host Rejoin PIN (optional)</label>
-                            <input type="password" id="host-password-input" class="form-control" placeholder="Set a 4-digit PIN to reclaim host if disconnected" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off">
-                            <small class="form-help">If set, anyone joining as the host must enter this 4-digit PIN to reclaim the host seat.</small>
+                            <label for="host-password-input" class="form-label">Host Rejoin PIN</label>
+                            <input type="password" id="host-password-input" class="form-control" placeholder="Enter a 4-digit PIN to reclaim host if disconnected" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="off" required>
+                            <small class="form-help">Anyone joining as the host must enter this 4-digit PIN to reclaim the host seat.</small>
                         </div>
                         
                         <div class="form-group">
@@ -221,7 +273,7 @@
                     input.id = `player-name-${i}`;
                     input.name = `player-name-${i}`;
                     input.className = 'form-control';
-                    input.placeholder = 'Enter player name';
+                    input.placeholder = i === 1 ? 'Your Name' : 'Enter player name';
                     input.maxLength = 24;
                     input.autocomplete = 'name';
                     
@@ -364,11 +416,11 @@
                 // Game name will be generated after we get the game ID
                 const hostPasswordInput = document.getElementById('host-password-input');
                 const hostPassword = hostPasswordInput ? (hostPasswordInput.value || '').trim() : '';
-                
-                // Validate host PIN if provided
-                if (hostPassword && (!/^\d{4}$/.test(hostPassword))) {
+
+                // Validate host PIN (required)
+                if (!hostPassword || !/^\d{4}$/.test(hostPassword)) {
                     const err = document.getElementById(namesErrorId);
-                    if (err) err.textContent = 'Host PIN must be exactly 4 digits.';
+                    if (err) err.textContent = 'Host PIN is required and must be exactly 4 digits.';
                     return;
                 }
 
@@ -390,7 +442,12 @@
                         throw new Error('Verification failed. Please try again.');
                     }
 
-                    const hostPasswordHash = hostPassword ? await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')).catch(() => null) : null;
+                    // Check if crypto.subtle is available (requires HTTPS or localhost)
+                    if (!window.crypto || !window.crypto.subtle) {
+                        throw new Error('Secure context required. Please use HTTPS or localhost.');
+                    }
+
+                    const hostPasswordHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(hostPassword)).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''));
 
                     // Get vote visibility setting
                     const voteModeSelect = document.getElementById('vote-mode-select');

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cleanup Functions</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .test {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .test h3 {
+            margin-top: 0;
+            color: #4ec9b0;
+        }
+        .success {
+            color: #4ec9b0;
+        }
+        .error {
+            color: #f48771;
+        }
+        .info {
+            color: #4fc1ff;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Cleanup Function Tests</h1>
+    <p class="info">Open the browser console to see detailed test results</p>
+
+    <div class="test">
+        <h3>Test 1: Import Functions</h3>
+        <button onclick="testImports()">Run Test</button>
+        <div id="test1-result"></div>
+    </div>
+
+    <div class="test">
+        <h3>Test 2: Get Cleanup Stats (Dry Run)</h3>
+        <button onclick="testStats()">Run Test</button>
+        <div id="test2-result"></div>
+    </div>
+
+    <div class="test">
+        <h3>Test 3: Cleanup Old Games Configuration</h3>
+        <button onclick="testConfig()">Run Test</button>
+        <div id="test3-result"></div>
+    </div>
+
+    <script type="module">
+        import { cleanupOldGames, getCleanupStats, deleteGame } from '../js/db.js';
+
+        window.testFunctions = {
+            cleanupOldGames,
+            getCleanupStats,
+            deleteGame
+        };
+
+        window.testImports = async function() {
+            const result = document.getElementById('test1-result');
+            console.log('Test 1: Import Functions');
+
+            try {
+                const hasCleanup = typeof cleanupOldGames === 'function';
+                const hasStats = typeof getCleanupStats === 'function';
+                const hasDelete = typeof deleteGame === 'function';
+
+                console.log('cleanupOldGames:', hasCleanup ? '✅' : '❌');
+                console.log('getCleanupStats:', hasStats ? '✅' : '❌');
+                console.log('deleteGame:', hasDelete ? '✅' : '❌');
+
+                if (hasCleanup && hasStats && hasDelete) {
+                    result.innerHTML = '<p class="success">✅ All functions imported successfully</p>';
+                } else {
+                    result.innerHTML = '<p class="error">❌ Some functions failed to import</p>';
+                }
+            } catch (error) {
+                console.error('Test 1 failed:', error);
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        };
+
+        window.testStats = async function() {
+            const result = document.getElementById('test2-result');
+            result.innerHTML = '<p class="info">⏳ Running cleanup stats...</p>';
+            console.log('Test 2: Get Cleanup Stats');
+
+            try {
+                const stats = await getCleanupStats();
+                console.log('Stats result:', stats);
+
+                const output = `
+                    <p class="success">✅ Stats retrieved successfully</p>
+                    <pre>${JSON.stringify(stats, null, 2)}</pre>
+                `;
+                result.innerHTML = output;
+            } catch (error) {
+                console.error('Test 2 failed:', error);
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        };
+
+        window.testConfig = function() {
+            const result = document.getElementById('test3-result');
+            console.log('Test 3: Cleanup Configuration');
+
+            try {
+                // Test configuration values
+                const config = {
+                    LOBBY_EXPIRY_MINUTES: 15,
+                    COMPLETED_GAME_RETENTION_DAYS: 7,
+                    ABANDONED_GAME_HOURS: 24,
+                    MAX_GAME_AGE_DAYS: 30,
+                    BATCH_SIZE: 100
+                };
+
+                console.log('Configuration:', config);
+
+                // Calculate example thresholds
+                const now = new Date();
+                const examples = {
+                    'Completed threshold': new Date(now.getTime() - config.COMPLETED_GAME_RETENTION_DAYS * 24 * 60 * 60 * 1000),
+                    'Abandoned threshold': new Date(now.getTime() - config.ABANDONED_GAME_HOURS * 60 * 60 * 1000),
+                    'Max age threshold': new Date(now.getTime() - config.MAX_GAME_AGE_DAYS * 24 * 60 * 60 * 1000)
+                };
+
+                console.log('Threshold dates:', examples);
+
+                let output = '<p class="success">✅ Configuration validated</p><pre>';
+                output += JSON.stringify(config, null, 2);
+                output += '\n\nThreshold Dates:\n';
+                for (const [key, date] of Object.entries(examples)) {
+                    output += `${key}: ${date.toISOString()}\n`;
+                }
+                output += '</pre>';
+
+                result.innerHTML = output;
+            } catch (error) {
+                console.error('Test 3 failed:', error);
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        };
+
+        // Auto-run import test on load
+        console.log('🧪 Test page loaded. Use the buttons to run tests.');
+        window.testImports();
+    </script>
+</body>
+</html>

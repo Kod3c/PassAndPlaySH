@@ -661,7 +661,7 @@ main {
   font-size: var(--font-base);
   border: var(--border-medium) solid var(--propaganda-black);
   background: var(--off-white);
-  color: var(--text-primary);
+  color: var(--propaganda-black);
   transition: all var(--transition-fast);
 }
 
@@ -685,11 +685,25 @@ main {
 
 select.form-control {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23101820' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--space-md) center;
   padding-right: var(--space-2xl);
   cursor: pointer;
+}
+
+select.form-control option {
+  background: var(--off-white);
+  color: var(--propaganda-black);
+  padding: var(--space-sm);
+}
+
+select.form-control optgroup {
+  background: var(--neutral-beige);
+  color: var(--propaganda-black);
+  font-weight: bold;
 }
 
 
@@ -1092,7 +1106,7 @@ footer,
   .header {
     padding: var(--space-lg) 0;
   }
-  
+
   .logo-text h1 {
     font-size: var(--font-2xl);
   }
@@ -1380,17 +1394,28 @@ footer,
   
   /* Form Elements */
   .form-control {
-    background: var(--bg-card);
+    background: var(--bg-elevated);
     color: var(--white);
     border-color: var(--border-color);
   }
-  
+
   .form-control:focus {
     background: var(--bg-elevated);
     border-color: var(--liberal-blue);
     box-shadow: 0 0 0 2px rgba(0, 174, 239, 0.2);
   }
-  
+
+  /* Ensure proper contrast for select dropdowns in dark mode */
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  }
+
+  select.form-control option,
+  select.form-control optgroup {
+    background: var(--bg-elevated);
+    color: var(--white);
+  }
+
   /* Player name inputs should keep black text in dark mode */
   input[id^="player-name-"] {
     color: var(--propaganda-black);
@@ -1780,7 +1805,7 @@ footer,
 }
 
 [data-theme="dark"] .form-control {
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   color: var(--white);
   border-color: var(--border-color);
 }
@@ -1789,6 +1814,17 @@ footer,
   background: var(--bg-elevated);
   border-color: var(--liberal-blue);
   box-shadow: 0 0 0 2px rgba(0, 174, 239, 0.2);
+}
+
+/* Ensure proper contrast for select dropdowns in dark mode */
+[data-theme="dark"] select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] select.form-control option,
+[data-theme="dark"] select.form-control optgroup {
+  background: var(--bg-elevated);
+  color: var(--white);
 }
 
 /* Player name inputs should keep black text in dark mode */
