@@ -38,7 +38,7 @@ export function renderTracker(el) {
 
 export function renderPlayers(el, players) {
     if (!el) return;
-    
+
     el.innerHTML = '';
     (players || []).forEach(p => {
         const chip = document.createElement('div');
@@ -47,9 +47,11 @@ export function renderPlayers(el, players) {
         if (p.isPresident) icons.push('👑');
         if (p.isChancellor) icons.push('🔨');
         const prefix = icons.length ? icons.join('') + ' ' : '';
-        chip.textContent = prefix + (p.name || 'Player');
+        const deadEmoji = (p.alive === false) ? '💀 ' : '';
+        chip.textContent = deadEmoji + prefix + (p.name || 'Player');
         if (p.isPresident) chip.classList.add('is-president');
         if (p.isChancellor) chip.classList.add('is-chancellor');
+        if (p.alive === false) chip.classList.add('is-dead');
         el.appendChild(chip);
     });
 }

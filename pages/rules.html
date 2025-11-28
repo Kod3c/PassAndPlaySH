@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rules - Secret Hitler - Pass & Play</title>
-    <meta name="description" content="Learn how to play Secret Hitler - the ultimate social deduction game">
+    <title>Rules - Secret Hitler - Mobile Edition</title>
+    <meta name="description" content="Learn how to play Secret Hitler - the ultimate social deduction game for online and local play">
     <link rel="stylesheet" href="../styles/app.css">
+    <link rel="stylesheet" href="../styles/rules-modern.css">
     <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
@@ -23,7 +24,7 @@
                         <span class="logo-icon">🎭</span>
                         <div class="logo-text">
                             <h1>Secret Hitler</h1>
-                            <p class="subtitle">Pass & Play Edition</p>
+                            <p class="subtitle">Mobile Edition</p>
                         </div>
                     </div>
                     <div class="header-actions">
@@ -449,6 +450,42 @@
                                 <li><strong>Special Election:</strong> Choose players who will help your team's agenda</li>
                             </ul>
                         </div>
+
+                        <div class="veto-power-section">
+                            <div class="veto-header">
+                                <div class="veto-icon">🚫</div>
+                                <h4>Veto Power (Unlocked at 5 Fascist Policies)</h4>
+                            </div>
+                            <p>After 5 Fascist policies are enacted, the <strong>Veto Power</strong> is unlocked for the rest of the game.</p>
+                            <div class="veto-details">
+                                <div class="veto-step">
+                                    <span class="step-number">1</span>
+                                    <div class="step-content">
+                                        <h5>Chancellor Proposes Veto</h5>
+                                        <p>When reviewing the 2 policies, the Chancellor may propose to veto the agenda instead of enacting a policy.</p>
+                                    </div>
+                                </div>
+                                <div class="veto-step">
+                                    <span class="step-number">2</span>
+                                    <div class="step-content">
+                                        <h5>President Decides</h5>
+                                        <p>The President may <strong>accept</strong> or <strong>reject</strong> the veto proposal.</p>
+                                    </div>
+                                </div>
+                                <div class="veto-step">
+                                    <span class="step-number">3</span>
+                                    <div class="step-content">
+                                        <h5>Outcome</h5>
+                                        <p><strong>If accepted:</strong> Both policies are discarded, election tracker advances by 1.</p>
+                                        <p><strong>If rejected:</strong> Chancellor must enact one of the two policies.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="veto-warning">
+                                <span class="warning-icon">⚠️</span>
+                                <p><strong>Warning:</strong> If 3 elections fail in a row (including vetoes), a random policy is enacted from the top of the deck (Chaos Policy).</p>
+                            </div>
+                        </div>
                     </section>
 
                     <!-- Winning Section -->
@@ -537,13 +574,13 @@
                 </div>
 
                 <div class="rules-actions">
-                    <button onclick="window.location.href='../index.html'" class="btn btn-primary btn-large">
+                    <button onclick="window.location.href='../index.html'" class="btn btn-primary">
                         <span class="btn-icon">🏠</span>
                         <span class="btn-text">Back to Home</span>
                     </button>
-                    <button onclick="window.location.href='create.html'" class="btn btn-secondary btn-medium">
+                    <button onclick="window.location.href='create.html'" class="btn btn-secondary">
                         <span class="btn-icon">🎮</span>
-                        <span class="btn-text">Start New Game</span>
+                        <span class="btn-text">Play Online</span>
                     </button>
                 </div>
             </div>
@@ -552,7 +589,7 @@
         <!-- Footer -->
         <footer>
             <div class="container">
-                <p>Built for offline play - no accounts or servers required</p>
+                <p>Online multiplayer and local play modes available</p>
             </div>
         </footer>
     </div>

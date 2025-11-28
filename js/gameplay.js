@@ -1,8 +1,9 @@
 
 
 import { app } from '../js/firebase.js';
+import SessionManager from '../js/session-manager.js';
 import { onHistory, logPublic, logPrivate } from '../js/db.js?v=2';
-import { getFirestore, doc, getDoc, onSnapshot, collection, query, orderBy, updateDoc, serverTimestamp, runTransaction, increment } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, onSnapshot, collection, query, orderBy, updateDoc, serverTimestamp, runTransaction, increment } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Import extracted utility functions
@@ -13,6 +14,7 @@ import { eligibleChancellorIds, canSeeEvent, setRoleBannerVisibility } from './h
 import { openOrderModal, closeOrderModal, openHistoryModal, closeHistoryModal } from './modals.js';
 
 const db = getFirestore(app);
+const sessionManager = new SessionManager(app);
 let latestGame = null;
 let latestPlayers = [];
 let historyUnsub = null;
@@ -21,6 +23,7 @@ let localPaused = false;
 let lastStatusMessage = null;
 // Constant moved to constants.js
 let heartbeatTimer = null;
+let isProcessingSuperpower = false; // Flag to prevent modal re-showing during superpower processing
 let afkUnsub = null; let lastAfkSeenOrder = 0;
 let isNominating = false; // Flag to prevent modal re-opening during nomination
 let isHostQuitting = false; // Flag to prevent snapshot redirect when host is quitting to create page
@@ -54,6 +57,20 @@ function computeYouId(gameId) {
     if (!uid) return null;
     const m = (latestPlayers || []).find(p => p && p.uid === uid);
     return m ? m.id : null;
+}
+
+async function startSessionMonitoring(gameId) {
+    try {
+        const youId = computeYouId(gameId);
+        if (!youId) return;
+
+        await sessionManager.startMonitoring(gameId, youId, () => {
+            // Custom handler for play page - show modal and prevent further actions
+            sessionManager.showDefaultConflictModal();
+        });
+    } catch (error) {
+        console.error('Failed to start session monitoring:', error);
+    }
 }
 
 function heartbeatOnce(gameId) {
@@ -200,36 +217,42 @@ function addEyeglassToSlot(slot) {
     if (slot.classList.contains('filled')) {
         return;
     }
-    
+
     const existingOverlay = slot.querySelector('.eyeglass-overlay');
     if (existingOverlay) {
         return;
     }
-    
+
+    // Remove skull background if it exists
+    const skullBackground = slot.querySelector('.skull-background');
+    if (skullBackground) {
+        skullBackground.remove();
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'eyeglass-overlay';
     overlay.style.cssText = `
         position: absolute;
-        top: 50%;
+        top: 55%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 32px;
+        width: 30px;
         height: auto;
         pointer-events: none;
         z-index: 20;
-        opacity: 1.0;
+        opacity: 0.6;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     `;
-    
+
     // Create image element to handle loading errors
     const img = document.createElement('img');
-    img.src = '../images/eyeglass.png';
+    img.src = '../images/eyeglass.png?v=8';
     img.alt = 'Investigation Power';
     img.style.cssText = 'width: 100%; height: auto;';
-    
+
     img.onload = () => console.log('✅ Eyeglass image loaded successfully');
     img.onerror = () => console.error('❌ Failed to load eyeglass.png');
-    
+
     overlay.appendChild(img);
     slot.appendChild(overlay);
 }
@@ -243,30 +266,36 @@ function addPresidentToSlot(slot) {
     if (slot.classList.contains('filled')) {
         return;
     }
-    
+
     const existingOverlay = slot.querySelector('.president-overlay');
     if (existingOverlay) {
         return;
     }
-    
+
+    // Remove skull background if it exists
+    const skullBackground = slot.querySelector('.skull-background');
+    if (skullBackground) {
+        skullBackground.remove();
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'president-overlay';
     overlay.style.cssText = `
         position: absolute;
-        top: 50%;
+        top: 55%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 32px;
+        width: 30px;
         height: auto;
         pointer-events: none;
         z-index: 20;
-        opacity: 1.0;
+        opacity: 0.6;
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     `;
     
     // Create image element to handle loading errors
     const img = document.createElement('img');
-    img.src = '../images/president.png';
+    img.src = '../images/president.png?v=8';
     img.alt = 'Special Election Power';
     img.style.cssText = 'width: 100%; height: auto;';
     
@@ -281,9 +310,15 @@ function addPresidentToSlot(slot) {
 // Helper function to add trio-cards-eye overlay to a slot (for 5-6 players)
 function addTrioCardsEyeToSlot(slot) {
     if (!slot || slot.classList.contains('filled')) return;
-    
+
     const existingOverlay = slot.querySelector('.trio-cards-eye-overlay');
     if (!existingOverlay) {
+        // Remove skull background if it exists
+        const skullBackground = slot.querySelector('.skull-background');
+        if (skullBackground) {
+            skullBackground.remove();
+        }
+
         const overlay = document.createElement('div');
         overlay.className = 'trio-cards-eye-overlay';
         overlay.style.cssText = `
@@ -298,7 +333,7 @@ function addTrioCardsEyeToSlot(slot) {
             opacity: 1.0;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         `;
-        overlay.innerHTML = '<img src="../images/eyeglass.png" alt="Policy Peek Power" style="width: 100%; height: auto;">';
+        overlay.innerHTML = '<img src="../images/eyeglass.png?v=8" alt="Policy Peek Power" style="width: 100%; height: auto;">';
         slot.appendChild(overlay);
     }
 }
@@ -396,14 +431,14 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
-                width: 28px;
+                transform: translate(-50%, -50%) rotate(40deg);
+                width: 33px;
                 height: auto;
                 pointer-events: none;
                 z-index: 20;
-                opacity: 1.0;
+                opacity: 0.6;
             `;
-            bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
+            bulletOverlay.innerHTML = '<img src="../images/bullet.png?v=8" alt="Bullet" style="width: 100%; height: auto;">';
             fourthSlot.appendChild(bulletOverlay);
         }
     }
@@ -419,14 +454,14 @@ function addBulletOverlaysToFascistSlots(containerEl) {
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
-                width: 28px;
+                transform: translate(-50%, -50%) rotate(40deg);
+                width: 33px;
                 height: auto;
                 pointer-events: none;
                 z-index: 20;
-                opacity: 1.0;
+                opacity: 0.6;
             `;
-            bulletOverlay.innerHTML = '<img src="../images/bullet.png" alt="Bullet" style="width: 100%; height: auto;">';
+            bulletOverlay.innerHTML = '<img src="../images/bullet.png?v=8" alt="Bullet" style="width: 100%; height: auto;">';
             fifthSlot.appendChild(bulletOverlay);
         }
     }
@@ -675,10 +710,11 @@ async function handleInvestigation() {
     try {
         const youId = computeYouId(gameId);
         
-        // Get eligible players (everyone except president and previously investigated)
-        const eligiblePlayers = latestPlayers.filter(p => 
-            p.id !== latestGame.currentPresidentPlayerId && 
-            !p.investigated
+        // Get eligible players (everyone except president)
+        // Note: Players can be investigated multiple times
+        const eligiblePlayers = latestPlayers.filter(p =>
+            p.id !== latestGame.currentPresidentPlayerId &&
+            p.alive !== false
         );
         
         if (eligiblePlayers.length === 0) {
@@ -690,22 +726,24 @@ async function handleInvestigation() {
         // Create player selection modal
         const modal = document.createElement('div');
         modal.id = 'investigation-modal';
-        modal.className = 'modal-overlay investigation-modal';
+        modal.className = 'modal-overlay superpower-modal';
         modal.innerHTML = `
-            <div class="modal-card">
-                <div class="modal-header">
-                    <div class="modal-title">🔍 Investigation</div>
-                    <div class="modal-subtitle">Choose a player to investigate</div>
-                </div>
+            <div class="modal-card policy-peek-modal-card">
+                <button class="modal-close" aria-label="Close" id="investigation-close">×</button>
                 <div class="modal-body">
+                    <div class="policy-peek-header">
+                        <div class="policy-peek-icon">🔍</div>
+                        <h3 class="policy-peek-title">Investigation</h3>
+                        <p class="policy-peek-subtitle">Choose a player to investigate</p>
+                    </div>
                     <div class="investigation-players">
                         ${eligiblePlayers.map(player => `
-                            <button class="btn investigation-player-btn" data-player-id="${player.id}">
+                            <button class="btn btn-primary investigation-player-btn" data-player-id="${player.id}">
                                 ${player.name || 'Unnamed Player'}
                             </button>
                         `).join('')}
                     </div>
-                    <div class="investigation-note">
+                    <div class="policy-peek-note">
                         <p>You will see this player's party membership (Liberal or Fascist).</p>
                     </div>
                 </div>
@@ -713,21 +751,26 @@ async function handleInvestigation() {
         `;
         
         document.body.appendChild(modal);
-        
+
+        // Handle close button
+        document.getElementById('investigation-close').addEventListener('click', () => {
+            modal.remove();
+        });
+
         // Handle player selection
         modal.addEventListener('click', async (e) => {
             if (e.target.classList.contains('investigation-player-btn') || e.target.closest('.investigation-player-btn')) {
                 const btn = e.target.classList.contains('investigation-player-btn') ? e.target : e.target.closest('.investigation-player-btn');
                 const targetPlayerId = btn.dataset.playerId;
                 const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
-                
+
                 if (!targetPlayer) return;
-                
+
                 modal.remove();
                 await performInvestigation(gameId, targetPlayer);
             }
         });
-        
+
         // Show modal
         requestAnimationFrame(() => {
             modal.style.display = 'flex';
@@ -752,8 +795,8 @@ async function handleSpecialElection() {
         const youId = computeYouId(gameId);
         
         // Get eligible players (everyone except current president)
-        const eligiblePlayers = latestPlayers.filter(p => 
-            p.id !== latestGame.currentPresidentPlayerId
+        const eligiblePlayers = latestPlayers.filter(p =>
+            p.id !== latestGame.currentPresidentPlayerId && p.alive !== false
         );
         
         if (eligiblePlayers.length === 0) {
@@ -765,44 +808,51 @@ async function handleSpecialElection() {
         // Create player selection modal
         const modal = document.createElement('div');
         modal.id = 'special-election-modal';
-        modal.className = 'modal-overlay special-election-modal';
+        modal.className = 'modal-overlay superpower-modal';
         modal.innerHTML = `
-            <div class="modal-card">
-                <div class="modal-header">
-                    <div class="modal-title">🗳️ Special Election</div>
-                    <div class="modal-subtitle">Choose the next Presidential candidate</div>
-                </div>
+            <div class="modal-card policy-peek-modal-card">
+                <button class="modal-close" aria-label="Close" id="special-election-close">×</button>
                 <div class="modal-body">
+                    <div class="policy-peek-header">
+                        <div class="policy-peek-icon">🗳️</div>
+                        <h3 class="policy-peek-title">Special Election</h3>
+                        <p class="policy-peek-subtitle">Choose the next Presidential candidate</p>
+                    </div>
                     <div class="special-election-players">
                         ${eligiblePlayers.map(player => `
-                            <button class="btn special-election-player-btn" data-player-id="${player.id}">
+                            <button class="btn btn-primary special-election-player-btn" data-player-id="${player.id}">
                                 ${player.name || 'Unnamed Player'}
                             </button>
                         `).join('')}
                     </div>
-                    <div class="special-election-note">
+                    <div class="policy-peek-note">
                         <p>This player will become the next Presidential candidate, bypassing normal turn order.</p>
                     </div>
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
-        
+
+        // Handle close button
+        document.getElementById('special-election-close').addEventListener('click', () => {
+            modal.remove();
+        });
+
         // Handle player selection
         modal.addEventListener('click', async (e) => {
             if (e.target.classList.contains('special-election-player-btn') || e.target.closest('.special-election-player-btn')) {
                 const btn = e.target.classList.contains('special-election-player-btn') ? e.target : e.target.closest('.special-election-player-btn');
                 const targetPlayerId = btn.dataset.playerId;
                 const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
-                
+
                 if (!targetPlayer) return;
-                
+
                 modal.remove();
                 await performSpecialElection(gameId, targetPlayer);
             }
         });
-        
+
         // Show modal
         requestAnimationFrame(() => {
             modal.style.display = 'flex';
@@ -825,63 +875,68 @@ async function handleExecution() {
     
     try {
         const youId = computeYouId(gameId);
-        
-        // Get eligible players (everyone except president)
-        const eligiblePlayers = latestPlayers.filter(p => 
-            p.id !== latestGame.currentPresidentPlayerId
-        );
-        
+
+        // Get eligible players (all alive players - president can execute anyone including themselves)
+        const eligiblePlayers = latestPlayers.filter(p => p.alive !== false);
+
         if (eligiblePlayers.length === 0) {
             setStatus(gameId, 'No players available to execute');
             await completeSuperpower(gameId, 'execution');
             return;
         }
-        
+
         // Create player selection modal with warning
         const modal = document.createElement('div');
         modal.id = 'execution-modal';
-        modal.className = 'modal-overlay execution-modal';
+        modal.className = 'modal-overlay superpower-modal';
         modal.innerHTML = `
-            <div class="modal-card">
-                <div class="modal-header">
-                    <div class="modal-title">💀 Execution</div>
-                    <div class="modal-subtitle">Choose a player to execute</div>
-                </div>
+            <div class="modal-card policy-peek-modal-card">
+                <button class="modal-close" aria-label="Close" id="execution-close">×</button>
                 <div class="modal-body">
+                    <div class="policy-peek-header">
+                        <div class="policy-peek-icon">💀</div>
+                        <h3 class="policy-peek-title">Execution</h3>
+                        <p class="policy-peek-subtitle">Choose a player to execute</p>
+                    </div>
                     <div class="execution-warning">
                         <div class="warning-icon">⚠️</div>
                         <p><strong>Note:</strong> If you execute Hitler, Liberals win immediately!</p>
                     </div>
                     <div class="execution-players">
                         ${eligiblePlayers.map(player => `
-                            <button class="btn execution-player-btn" data-player-id="${player.id}">
+                            <button class="btn btn-primary execution-player-btn" data-player-id="${player.id}">
                                 ${player.name || 'Unnamed Player'}
                             </button>
                         `).join('')}
                     </div>
-                    <div class="execution-note">
+                    <div class="policy-peek-note">
                         <p>The executed player will be removed from the game permanently.</p>
                     </div>
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
-        
+
+        // Handle close button
+        document.getElementById('execution-close').addEventListener('click', () => {
+            modal.remove();
+        });
+
         // Handle player selection
         modal.addEventListener('click', async (e) => {
             if (e.target.classList.contains('execution-player-btn') || e.target.closest('.execution-player-btn')) {
                 const btn = e.target.classList.contains('execution-player-btn') ? e.target : e.target.closest('.execution-player-btn');
                 const targetPlayerId = btn.dataset.playerId;
                 const targetPlayer = latestPlayers.find(p => p.id === targetPlayerId);
-                
+
                 if (!targetPlayer) return;
-                
+
                 modal.remove();
                 await performExecution(gameId, targetPlayer);
             }
         });
-        
+
         // Show modal
         requestAnimationFrame(() => {
             modal.style.display = 'flex';
@@ -908,12 +963,16 @@ async function completeSuperpower(gameId, superpowerType) {
         await advanceToNextGovernment(gameId, gameRef);
     } catch (error) {
         console.error('❌ Failed to complete superpower:', error);
+    } finally {
+        // Clear the processing flag after superpower is complete
+        isProcessingSuperpower = false;
     }
 }
 
 // Helper function to perform investigation and show result
 async function performInvestigation(gameId, targetPlayer) {
     try {
+        isProcessingSuperpower = true; // Set flag to prevent modal re-showing
         // Mark player as investigated
         const playerRef = doc(db, 'games', gameId, 'players', targetPlayer.id);
         await updateDoc(playerRef, {
@@ -922,41 +981,49 @@ async function performInvestigation(gameId, targetPlayer) {
         });
         
         // Show investigation result to president
-        const membership = targetPlayer.membership || 'Liberal'; // Default to Liberal if not set
+        // Investigation reveals party membership (Hitler shows as Fascist, not as Hitler)
+        const party = targetPlayer.party || 'liberal';
+        const membership = party.charAt(0).toUpperCase() + party.slice(1).toLowerCase(); // Capitalize: Liberal or Fascist
         
         const resultModal = document.createElement('div');
         resultModal.id = 'investigation-result-modal';
-        resultModal.className = 'modal-overlay investigation-result-modal';
+        resultModal.className = 'modal-overlay superpower-modal';
         resultModal.innerHTML = `
-            <div class="modal-card">
-                <div class="modal-header">
-                    <div class="modal-title">🔍 Investigation Result</div>
-                    <div class="modal-subtitle">Player: ${targetPlayer.name || 'Unnamed Player'}</div>
-                </div>
+            <div class="modal-card policy-peek-modal-card">
+                <button class="modal-close" aria-label="Close" id="investigation-result-close">×</button>
                 <div class="modal-body">
+                    <div class="policy-peek-header">
+                        <div class="policy-peek-icon">🔍</div>
+                        <h3 class="policy-peek-title">Investigation Result</h3>
+                        <p class="policy-peek-subtitle">${targetPlayer.name || 'Unnamed Player'}</p>
+                    </div>
                     <div class="investigation-result">
                         <div class="membership-reveal ${membership.toLowerCase()}">
                             <div class="membership-icon">${membership === 'Liberal' ? '🟦' : '🟥'}</div>
                             <div class="membership-text">${membership}</div>
                         </div>
                     </div>
-                    <div class="investigation-instructions">
+                    <div class="policy-peek-note">
                         <p>You may share this information (or lie about it) with other players.</p>
-                        <p>This player cannot be investigated again.</p>
                     </div>
-                    <div class="modal-actions">
-                        <button id="investigation-result-done" class="btn btn-primary">Close</button>
+                    <div class="policy-peek-actions">
+                        <button id="investigation-result-done" class="btn btn-primary">Got it!</button>
                     </div>
                 </div>
             </div>
         `;
         
         document.body.appendChild(resultModal);
-        
+
+        // Handle close button
+        document.getElementById('investigation-result-close').addEventListener('click', () => {
+            resultModal.remove();
+        });
+
         document.getElementById('investigation-result-done').addEventListener('click', () => {
             resultModal.remove();
         });
-        
+
         requestAnimationFrame(() => {
             resultModal.style.display = 'flex';
         });
@@ -970,23 +1037,35 @@ async function performInvestigation(gameId, targetPlayer) {
         });
         
         await completeSuperpower(gameId, 'investigation');
-        
+
     } catch (error) {
         console.error('❌ Investigation failed:', error);
         setStatus(gameId, 'Investigation failed. Please try again.');
+        isProcessingSuperpower = false; // Clear flag on error
     }
 }
 
 // Helper function to perform special election
 async function performSpecialElection(gameId, targetPlayer) {
     try {
+        isProcessingSuperpower = true; // Set flag to prevent modal re-showing
         const gameRef = doc(db, 'games', gameId);
+
+        // Get current game state to preserve the president index
+        const gameSnap = await getDoc(gameRef);
+        if (!gameSnap.exists()) {
+            throw new Error('Game not found');
+        }
+        const currentGame = gameSnap.data();
+
+        // Save the current president index so we can restore normal rotation after special election
+        // Note: Do NOT set isSpecialElection here - it will be set when the special election round starts
         await updateDoc(gameRef, {
             specialElectionCandidate: targetPlayer.id,
-            nextPresidentPlayerId: targetPlayer.id,
+            savedPresidentIndex: currentGame.presidentIndex, // Save current index to restore later
             updatedAt: serverTimestamp()
         });
-        
+
         // Log the special election
         await logPublic(gameId, `President chose ${targetPlayer.name || 'a player'} as the next Presidential candidate`, {
             type: 'superpower_used',
@@ -994,21 +1073,23 @@ async function performSpecialElection(gameId, targetPlayer) {
             actorId: latestGame.currentPresidentPlayerId,
             targetId: targetPlayer.id
         });
-        
+
         setStatus(gameId, `Special Election: ${targetPlayer.name || 'Player'} will be the next Presidential candidate.`);
         await completeSuperpower(gameId, 'special_election');
-        
+
     } catch (error) {
         console.error('❌ Special Election failed:', error);
         setStatus(gameId, 'Special Election failed. Please try again.');
+        isProcessingSuperpower = false; // Clear flag on error
     }
 }
 
 // Helper function to perform execution
 async function performExecution(gameId, targetPlayer) {
     try {
+        isProcessingSuperpower = true; // Set flag to prevent modal re-showing
         // Check if target is Hitler - this ends the game with Liberal victory
-        if (targetPlayer.secretRole === 'hitler') {
+        if (targetPlayer.role === 'hitler') {
             const gameRef = doc(db, 'games', gameId);
             await updateDoc(gameRef, {
                 gamePhase: 'ended',
@@ -1028,6 +1109,7 @@ async function performExecution(gameId, targetPlayer) {
             });
             
             setStatus(gameId, '🎯 Hitler has been executed! Liberals win the game!');
+            isProcessingSuperpower = false; // Clear flag since we're not calling completeSuperpower
             return;
         }
         
@@ -1049,10 +1131,11 @@ async function performExecution(gameId, targetPlayer) {
         
         setStatus(gameId, `💀 ${targetPlayer.name || 'Player'} has been executed and removed from the game.`);
         await completeSuperpower(gameId, 'execution');
-        
+
     } catch (error) {
         console.error('❌ Execution failed:', error);
         setStatus(gameId, 'Execution failed. Please try again.');
+        isProcessingSuperpower = false; // Clear flag on error
     }
 }
 
@@ -1117,15 +1200,240 @@ function updateRoleBanner(game, gameId) {
     document.body.classList.add('role-banner-visible');
 }
 
+function updateDeadBanner(game, gameId) {
+    const banner = document.getElementById('dead-banner');
+    if (!banner) {
+        console.warn('💀 Dead banner element not found');
+        return;
+    }
+
+    const youId = computeYouId(gameId);
+    if (!game || !youId) {
+        console.log('💀 No game or youId, hiding banner', { game: !!game, youId });
+        banner.style.display = 'none';
+        return;
+    }
+
+    // Try to find player in latestPlayers first (more up-to-date), then fall back to game.players
+    const players = (latestPlayers && latestPlayers.length > 0) ? latestPlayers : (game.players || []);
+    const you = players.find(p => p && p.id === youId);
+
+    if (!you) {
+        console.log('💀 Player not found', {
+            youId,
+            latestPlayersCount: latestPlayers?.length || 0,
+            gamePlayersCount: game.players?.length || 0,
+            playersChecked: players.length
+        });
+        banner.style.display = 'none';
+        return;
+    }
+
+    const isDead = you.alive === false || you.executed === true;
+    console.log('💀 Dead banner check:', {
+        youId,
+        playerName: you.name,
+        alive: you.alive,
+        executed: you.executed,
+        isDead
+    });
+
+    if (isDead) {
+        console.log('💀 SHOWING DEAD BANNER');
+        banner.style.display = 'block';
+    } else {
+        banner.style.display = 'none';
+    }
+}
+
+async function showVictoryModal(game) {
+    // Don't show if game isn't ended or modal already exists
+    if (!game || game.gamePhase !== 'ended') return;
+    if (document.getElementById('victory-modal')) return;
+
+    const winner = game.winner; // 'liberal' or 'fascist'
+    const winCondition = game.winCondition; // 'policy', 'hitler_executed', 'hitler_elected'
+
+    // Fetch players from Firestore if latestPlayers is empty
+    let players = latestPlayers;
+    if (!players || players.length === 0) {
+        console.log('🎯 latestPlayers empty, fetching from Firestore...');
+        const gameId = getGameId();
+        const playersSnapshot = await getDocs(query(collection(db, 'games', gameId, 'players'), orderBy('orderIndex', 'asc')));
+        players = playersSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        console.log('🎯 Fetched players:', players);
+    }
+
+    // Determine victory reason text
+    let reasonText = '';
+    if (winCondition === 'policy') {
+        if (winner === 'liberal') {
+            reasonText = '5 Liberal Policies Enacted';
+        } else {
+            reasonText = '6 Fascist Policies Enacted';
+        }
+    } else if (winCondition === 'hitler_executed') {
+        reasonText = 'Hitler Was Executed';
+    } else if (winCondition === 'hitler_elected') {
+        reasonText = 'Hitler Elected Chancellor';
+    } else {
+        reasonText = 'Victory Achieved';
+    }
+
+    // Determine team display
+    const teamIcon = winner === 'liberal' ? '🕊️' : '🦅';
+    const teamName = winner === 'liberal' ? 'Liberals' : 'Fascists';
+    const teamClass = winner === 'liberal' ? 'liberal' : 'fascist';
+
+    // Organize players by team
+    const liberals = [];
+    const fascists = [];
+    let hitler = null;
+
+    console.log('🎯 Victory Modal - players:', players);
+    console.log('🎯 Victory Modal - players count:', players?.length);
+
+    (players || []).forEach(player => {
+        console.log('🎯 Processing player:', {
+            name: player.name,
+            role: player.role,
+            membership: player.membership,
+            alive: player.alive,
+            executed: player.executed
+        });
+
+        const isDead = player.alive === false || player.executed === true;
+        const playerData = {
+            name: player.name || 'Unknown',
+            role: player.role || 'unknown',
+            membership: player.membership || 'Liberal',
+            isDead: isDead
+        };
+
+        if (player.role === 'hitler') {
+            console.log('🎯 Found Hitler:', player.name);
+            hitler = playerData;
+        } else if (player.membership === 'Fascist' || player.role === 'fascist') {
+            console.log('🎯 Found Fascist:', player.name);
+            fascists.push(playerData);
+        } else {
+            console.log('🎯 Found Liberal:', player.name);
+            liberals.push(playerData);
+        }
+    });
+
+    console.log('🎯 Final teams:', { liberals, fascists, hitler });
+
+    // Build role reveals HTML
+    const liberalsHTML = liberals.map(p => `
+        <div class="victory-player ${p.isDead ? 'dead' : ''}">
+            <span class="victory-player-icon">${p.isDead ? '💀' : '👤'}</span>
+            <span class="victory-player-name">${p.name}</span>
+            <span class="victory-player-role">Liberal</span>
+        </div>
+    `).join('');
+
+    const fascistsHTML = fascists.map(p => `
+        <div class="victory-player ${p.isDead ? 'dead' : ''}">
+            <span class="victory-player-icon">${p.isDead ? '💀' : '👤'}</span>
+            <span class="victory-player-name">${p.name}</span>
+            <span class="victory-player-role">Fascist</span>
+        </div>
+    `).join('');
+
+    const hitlerHTML = hitler ? `
+        <div class="victory-player hitler ${hitler.isDead ? 'dead' : ''}">
+            <span class="victory-player-icon">${hitler.isDead ? '💀' : '👤'}</span>
+            <span class="victory-player-name">${hitler.name}</span>
+            <span class="victory-player-role">Hitler</span>
+        </div>
+    ` : '';
+
+    // Game stats
+    const liberalPolicies = game.liberalPolicies || 0;
+    const fascistPolicies = game.fascistPolicies || 0;
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'victory-modal';
+    modal.className = 'modal-overlay victory-modal';
+    modal.innerHTML = `
+        <div class="modal-card">
+            <div class="modal-body">
+                <div class="victory-header ${teamClass}">
+                    <div class="victory-icon">${teamIcon}</div>
+                    <h2 class="victory-title">${teamName} Win!</h2>
+                    <p class="victory-subtitle">${reasonText}</p>
+                </div>
+                <div class="victory-content">
+                    <div class="victory-section">
+                        <h3 class="victory-section-title">Final Policies</h3>
+                        <div class="victory-stats">
+                            <div class="victory-stat">
+                                <div class="victory-stat-value liberal">${liberalPolicies}</div>
+                                <div class="victory-stat-label">Liberal</div>
+                            </div>
+                            <div class="victory-stat">
+                                <div class="victory-stat-value fascist">${fascistPolicies}</div>
+                                <div class="victory-stat-label">Fascist</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="victory-section">
+                        <h3 class="victory-section-title">Role Reveals</h3>
+                        <div class="victory-roles">
+                            <div class="victory-team">
+                                <h4 class="victory-team-header liberal">🕊️ Liberal Team</h4>
+                                ${liberalsHTML || '<p style="text-align:center;opacity:0.5;font-size:0.85rem;">No liberals</p>'}
+                            </div>
+                            <div class="victory-team">
+                                <h4 class="victory-team-header fascist">🦅 Fascist Team</h4>
+                                ${hitlerHTML}
+                                ${fascistsHTML || ''}
+                                ${!hitlerHTML && !fascistsHTML ? '<p style="text-align:center;opacity:0.5;font-size:0.85rem;">No fascists</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="victory-actions">
+                    <button id="victory-lobby-btn" class="btn btn-primary">Back to Lobby</button>
+                    <button id="victory-history-btn" class="btn btn-secondary">View Log</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle back to lobby button
+    document.getElementById('victory-lobby-btn').addEventListener('click', () => {
+        const gameId = getGameId();
+        window.location.href = `./join.html?game=${encodeURIComponent(gameId)}`;
+    });
+
+    // Handle view history button
+    document.getElementById('victory-history-btn').addEventListener('click', () => {
+        modal.remove();
+        // Open history modal if available
+        const historyBtn = document.getElementById('history-btn');
+        if (historyBtn) historyBtn.click();
+    });
+
+    // Show modal
+    requestAnimationFrame(() => {
+        modal.style.display = 'flex';
+    });
+}
+
 function updateRoleEnvelope(game, gameId) {
     const envelope = document.getElementById('role-envelope');
     if (!envelope) return;
-    
+
     // Always show the role envelope at 100% opacity
     envelope.style.display = 'block';
     envelope.style.opacity = '1';
     envelope.style.filter = 'none';
-    
+
     if (!game || !gameId) {
         envelope.title = 'Role envelope (game loading...)';
         return;
@@ -1210,6 +1518,7 @@ function computePhase(game) {
     }
     if (passed) {
         const policyPhase = (game.policyPhase || null);
+        if (policyPhase === 'veto_proposed') return 'veto_proposed';
         if (policyPhase === 'chancellor_choice') return 'chancellor_choice';
         if (policyPhase === 'completed') return 'completed';
         return policyPhase || 'president_draw';
@@ -1320,6 +1629,25 @@ function renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter) {
 
                     await resetDiscardCount();
 
+                    // Wait for the game state to be updated with the new shuffled deck
+                    // We need to wait a bit for Firebase to propagate the changes
+                    await new Promise(resolve => {
+                        let attempts = 0;
+                        const maxAttempts = 50; // 5 seconds max (50 * 100ms)
+                        const checkInterval = setInterval(() => {
+                            attempts++;
+                            // Check if latestGame has been updated with deckPosition = 0
+                            if (latestGame && latestGame.deckPosition === 0 && latestGame.policyDeckOrder && latestGame.policyDeckOrder.length > 3) {
+                                clearInterval(checkInterval);
+                                resolve();
+                            } else if (attempts >= maxAttempts) {
+                                console.warn('Timeout waiting for game state update after reshuffle');
+                                clearInterval(checkInterval);
+                                resolve(); // Proceed anyway
+                            }
+                        }, 100);
+                    });
+
                     // Update status message after successful shuffle
                     setStatus(gameId, `${pres ? (pres.name || 'President') : 'President'}: Draw 3 policy cards`);
 
@@ -1391,6 +1719,83 @@ function renderPhaseChancellorChoice(gameId, youId, game, players, actionsCenter
         setStatus(gameId, `Waiting for ${chanc ? (chanc.name || 'Chancellor') : 'Chancellor'} to choose a policy…`);
         // Clean up overlays but preserve them during re-renders for the active chancellor
         cleanupAllPolicyOverlays(['chancellor_choice']);
+    }
+}
+
+function renderPhaseVetoProposed(gameId, youId, game, players, actionsCenter) {
+    const presId = game.currentPresidentPlayerId || null;
+    const pres = players.find(p => p && p.id === presId) || null;
+    const chancId = game.currentChancellorPlayerId || null;
+    const chanc = players.find(p => p && p.id === chancId) || null;
+
+    if (youId && youId === presId) {
+        setStatus(gameId, 'Chancellor proposes veto. Accept or reject?');
+
+        // Create veto decision buttons for the president
+        const vetoDecisionDiv = document.createElement('div');
+        vetoDecisionDiv.className = 'veto-decision-container';
+        vetoDecisionDiv.style.cssText = 'display: flex; gap: 12px; justify-content: center; align-items: center; margin: 16px auto;';
+
+        const acceptBtn = document.createElement('button');
+        acceptBtn.className = 'btn btn-primary';
+        acceptBtn.textContent = '✅ Accept Veto';
+        acceptBtn.style.minWidth = '140px';
+        acceptBtn.style.minHeight = '48px';
+        acceptBtn.title = 'Discard both policies and advance election tracker';
+
+        const rejectBtn = document.createElement('button');
+        rejectBtn.className = 'btn btn-secondary';
+        rejectBtn.textContent = '❌ Reject Veto';
+        rejectBtn.style.minWidth = '140px';
+        rejectBtn.style.minHeight = '48px';
+        rejectBtn.title = 'Chancellor must enact one policy';
+
+        acceptBtn.addEventListener('click', async function() {
+            if (!confirm('Accept the veto? Both policies will be discarded and the election tracker will advance.')) {
+                return;
+            }
+
+            try {
+                acceptBtn.disabled = true;
+                rejectBtn.disabled = true;
+                acceptBtn.textContent = 'Processing...';
+                await acceptVeto(gameId);
+            } catch (error) {
+                console.error('Failed to accept veto:', error);
+                alert('Failed to accept veto: ' + error.message);
+                acceptBtn.disabled = false;
+                rejectBtn.disabled = false;
+                acceptBtn.textContent = '✅ Accept Veto';
+            }
+        });
+
+        rejectBtn.addEventListener('click', async function() {
+            if (!confirm('Reject the veto? The Chancellor will be forced to enact one of the two policies.')) {
+                return;
+            }
+
+            try {
+                acceptBtn.disabled = true;
+                rejectBtn.disabled = true;
+                rejectBtn.textContent = 'Processing...';
+                await rejectVeto(gameId);
+            } catch (error) {
+                console.error('Failed to reject veto:', error);
+                alert('Failed to reject veto: ' + error.message);
+                acceptBtn.disabled = false;
+                rejectBtn.disabled = false;
+                rejectBtn.textContent = '❌ Reject Veto';
+            }
+        });
+
+        vetoDecisionDiv.appendChild(acceptBtn);
+        vetoDecisionDiv.appendChild(rejectBtn);
+        actionsCenter.appendChild(vetoDecisionDiv);
+
+    } else if (youId && youId === chancId) {
+        setStatus(gameId, `Waiting for ${pres ? (pres.name || 'President') : 'President'} to respond to veto proposal...`);
+    } else {
+        setStatus(gameId, `${chanc ? (chanc.name || 'Chancellor') : 'Chancellor'} proposed veto. Waiting for ${pres ? (pres.name || 'President') : 'President'} to respond...`);
     }
 }
 
@@ -1472,7 +1877,9 @@ function showChancellorChoiceOverlay(game) {
     // Add instruction banner
     const instr = document.createElement('div');
     instr.className = 'reveal-instruction';
-    instr.textContent = 'Click to flip, then select one to enact';
+    // Check if veto is enabled (5 fascist policies enacted)
+    const vetoEnabled = (game.fascistPolicies >= 5);
+    instr.textContent = vetoEnabled ? 'Click to flip, then enact one policy or propose veto' : 'Click to flip, then select one to enact';
     overlay.appendChild(instr);
 
     // Add a close (X) button to dismiss the overlay without changing state
@@ -1504,11 +1911,29 @@ function showChancellorChoiceOverlay(game) {
     // Add actions
     const actions = document.createElement('div');
     actions.className = 'reveal-actions';
+
+    // Check if veto is enabled (5 fascist policies enacted)
+    const vetoEnabled = (game.fascistPolicies >= 5);
+
     const enactBtn = document.createElement('button');
     enactBtn.className = 'reveal-btn';
     enactBtn.textContent = 'Enact Selected Policy';
     enactBtn.disabled = true;
     actions.appendChild(enactBtn);
+
+    // Add veto button if veto power is enabled
+    let vetoBtn = null;
+    if (vetoEnabled) {
+        vetoBtn = document.createElement('button');
+        vetoBtn.className = 'reveal-btn veto-btn';
+        vetoBtn.textContent = '🚫 Propose Veto';
+        vetoBtn.style.marginLeft = '12px';
+        vetoBtn.style.background = 'var(--fascist-red, #9B2226)';
+        vetoBtn.style.color = 'white';
+        vetoBtn.title = 'Request to veto this agenda (President must agree)';
+        actions.appendChild(vetoBtn);
+    }
+
     overlay.appendChild(actions);
 
     const centerX = Math.round(window.innerWidth / 2);
@@ -1641,6 +2066,28 @@ function showChancellorChoiceOverlay(game) {
             alert('Failed to enact policy. Please try again. Error: ' + error.message);
         }
     });
+
+    // Handle veto button click
+    if (vetoBtn) {
+        vetoBtn.addEventListener('click', async function() {
+            if (!confirm('Propose to veto this agenda? The President must agree for the veto to succeed.')) {
+                return;
+            }
+
+            try {
+                await proposeVeto();
+
+                // Close the overlay
+                if (overlay && overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+
+            } catch (error) {
+                console.error('Failed to propose veto:', error);
+                alert('Failed to propose veto. Please try again. Error: ' + error.message);
+            }
+        });
+    }
 }
 
 // Clean up all policy-related overlays
@@ -2322,7 +2769,129 @@ function addDiscardedCardToPile() {
     
     // Use our dynamic discard pile module to increment the count
     incrementDiscardCount();
-    
+
+}
+
+// Helper function for chancellor to propose a veto
+async function proposeVeto() {
+    const gameId = getGameId();
+    if (!gameId || !latestGame) {
+        throw new Error('Game not found');
+    }
+
+    const gameRef = doc(db, 'games', gameId);
+    const presidentCards = latestGame.presidentDrawnCards || [];
+
+    console.log('🚫 Chancellor proposing veto');
+
+    // Update game state to indicate veto is proposed
+    await updateDoc(gameRef, {
+        policyPhase: 'veto_proposed',
+        vetoProposed: {
+            chancellorId: latestGame.currentChancellorPlayerId,
+            presidentId: latestGame.currentPresidentPlayerId,
+            cards: presidentCards, // Store the 2 cards that would be vetoed
+            proposedAt: serverTimestamp()
+        },
+        updatedAt: serverTimestamp()
+    });
+
+    // Log the veto proposal
+    await logPublic(gameId, 'Chancellor proposes to veto the agenda', {
+        type: 'veto_proposed',
+        chancellorId: latestGame.currentChancellorPlayerId
+    });
+
+    setStatus(gameId, 'Chancellor proposes veto. Waiting for President\'s response...');
+}
+
+// Helper function for president to accept a veto
+async function acceptVeto(gameId) {
+    if (!latestGame) {
+        throw new Error('Game not found');
+    }
+
+    const gameRef = doc(db, 'games', gameId);
+    console.log('✅ President accepting veto');
+
+    // Discard both policies and advance election tracker
+    await updateDoc(gameRef, {
+        policyPhase: null,
+        presidentDrawnCards: [],
+        vetoProposed: null,
+        electionTracker: increment(1),
+        // Clear current government
+        currentChancellorPlayerId: null,
+        nominatedChancellorPlayerId: null,
+        voteResolution: null,
+        electionVotes: {},
+        // Set term limits
+        termLimitLastChancellorId: latestGame.currentChancellorPlayerId,
+        termLimitLastPresidentId: latestGame.currentPresidentPlayerId,
+        updatedAt: serverTimestamp()
+    });
+
+    // Log the veto acceptance
+    await logPublic(gameId, '🚫 Veto accepted! Both policies discarded. Election tracker advances.', {
+        type: 'veto_accepted',
+        presidentId: latestGame.currentPresidentPlayerId,
+        chancellorId: latestGame.currentChancellorPlayerId
+    });
+
+    // Increment discard count by 2 (both policies discarded)
+    incrementDiscardCount();
+    incrementDiscardCount();
+
+    setStatus(gameId, 'Veto accepted. Advancing to next government...');
+
+    // Check if election tracker reached 3 (chaos policy)
+    const newElectionTracker = (latestGame.electionTracker || 0) + 1;
+    if (newElectionTracker >= 3) {
+        // Three failed elections (including this veto) - enact chaos policy
+        await logPublic(gameId, `⚠️ Election tracker: 3/3 failed elections. Enacting chaos policy!`, { type: 'system' });
+        await enactChaosPolicy(gameId, gameRef);
+        return;
+    }
+
+    // Log warning if tracker is at 2
+    if (newElectionTracker === 2) {
+        await logPublic(gameId, '⚠️ Warning: One more failed election will enact a random policy!', { type: 'warning' });
+    }
+
+    // Advance to next government
+    setTimeout(async () => {
+        try {
+            await advanceToNextGovernment(gameId, gameRef);
+        } catch (error) {
+            console.error('Failed to advance after veto:', error);
+        }
+    }, 1500);
+}
+
+// Helper function for president to reject a veto
+async function rejectVeto(gameId) {
+    if (!latestGame) {
+        throw new Error('Game not found');
+    }
+
+    const gameRef = doc(db, 'games', gameId);
+    console.log('❌ President rejecting veto');
+
+    // Return to chancellor_choice phase, forcing chancellor to enact a policy
+    await updateDoc(gameRef, {
+        policyPhase: 'chancellor_choice',
+        vetoProposed: null,
+        updatedAt: serverTimestamp()
+    });
+
+    // Log the veto rejection
+    await logPublic(gameId, '❌ Veto rejected! Chancellor must enact a policy.', {
+        type: 'veto_rejected',
+        presidentId: latestGame.currentPresidentPlayerId,
+        chancellorId: latestGame.currentChancellorPlayerId
+    });
+
+    setStatus(gameId, 'Veto rejected. Chancellor must choose a policy to enact.');
 }
 
 // Helper function for chancellor to enact a policy
@@ -2431,6 +3000,47 @@ async function enactPolicyAsChancellor(enactedPolicy, discardedPolicy) {
 
         console.log(`📊 Policy enacted: ${enactedPolicy}, New fascist count: ${newFascistCount}, Previous count (captured): ${previousFascistCount}`);
 
+        // Check for policy win conditions
+        if (newLiberalCount >= 5) {
+            // Liberals win by enacting 5 policies
+            await updateDoc(gameRef, {
+                gamePhase: 'ended',
+                winner: 'liberal',
+                winCondition: 'policy',
+                endedAt: serverTimestamp()
+            });
+            await logPublic(gameId, `🟦 Liberals enacted 5 policies! Liberals win!`, {
+                type: 'game_end',
+                winner: 'liberal',
+                winCondition: 'policy'
+            });
+            setStatus(gameId, '🟦 5 Liberal policies enacted! Liberals win the game!');
+            return; // Stop here, don't advance to next government
+        } else if (newFascistCount >= 6) {
+            // Fascists win by enacting 6 policies
+            await updateDoc(gameRef, {
+                gamePhase: 'ended',
+                winner: 'fascist',
+                winCondition: 'policy',
+                endedAt: serverTimestamp()
+            });
+            await logPublic(gameId, `🟥 Fascists enacted 6 policies! Fascists win!`, {
+                type: 'game_end',
+                winner: 'fascist',
+                winCondition: 'policy'
+            });
+            setStatus(gameId, '🟥 6 Fascist policies enacted! Fascists win the game!');
+            return; // Stop here, don't advance to next government
+        }
+
+        // Check if veto power was just unlocked
+        if (newFascistCount === 5 && previousFascistCount < 5) {
+            await logPublic(gameId, `🚫 Veto Power Unlocked! The Chancellor may now propose to veto policies (President must agree).`, {
+                type: 'veto_unlocked',
+                fascistPolicies: newFascistCount
+            });
+        }
+
         // Only log and show UI if a superpower was set (already set in database above)
         if (superpower) {
             // Log the superpower activation
@@ -2506,12 +3116,45 @@ async function enactChaosPolicy(gameId, gameRef) {
         });
 
         // Update table spread count
+        const newLiberalCount = (latestGame.liberalPolicies || 0) + (chaosPolicy === 'liberal' ? 1 : 0);
+        const newFascistCount = (latestGame.fascistPolicies || 0) + (chaosPolicy === 'fascist' ? 1 : 0);
         const newTableSpreadCount = calculateTableSpreadCountFromGameState({
             ...latestGame,
-            liberalPolicies: (latestGame.liberalPolicies || 0) + (chaosPolicy === 'liberal' ? 1 : 0),
-            fascistPolicies: (latestGame.fascistPolicies || 0) + (chaosPolicy === 'fascist' ? 1 : 0)
+            liberalPolicies: newLiberalCount,
+            fascistPolicies: newFascistCount
         });
         setTableSpreadCount(newTableSpreadCount);
+
+        // Check for policy win conditions after chaos policy
+        if (newLiberalCount >= 5) {
+            await updateDoc(gameRef, {
+                gamePhase: 'ended',
+                winner: 'liberal',
+                winCondition: 'policy',
+                endedAt: serverTimestamp()
+            });
+            await logPublic(gameId, `🟦 Liberals enacted 5 policies! Liberals win!`, {
+                type: 'game_end',
+                winner: 'liberal',
+                winCondition: 'policy'
+            });
+            setStatus(gameId, '🟦 5 Liberal policies enacted! Liberals win the game!');
+            return; // Stop here, don't advance
+        } else if (newFascistCount >= 6) {
+            await updateDoc(gameRef, {
+                gamePhase: 'ended',
+                winner: 'fascist',
+                winCondition: 'policy',
+                endedAt: serverTimestamp()
+            });
+            await logPublic(gameId, `🟥 Fascists enacted 6 policies! Fascists win!`, {
+                type: 'game_end',
+                winner: 'fascist',
+                winCondition: 'policy'
+            });
+            setStatus(gameId, '🟥 6 Fascist policies enacted! Fascists win the game!');
+            return; // Stop here, don't advance
+        }
 
         // Note: Chaos policies do NOT trigger executive powers per game rules
 
@@ -2574,13 +3217,13 @@ async function advanceToNextGovernment(gameId, gameRef) {
     // Find current president index
     const currentPresidentId = currentGame.currentPresidentPlayerId;
     const currentIndex = orderedAlive.findIndex(p => p.id === currentPresidentId);
-    
-    
+
+
     if (currentIndex === -1) {
         console.error('Current president not found in alive players!');
         // Fallback: use the first player as next president
         const nextPresident = orderedAlive[0];
-        
+
         const fallbackUpdates = {
             // Clear out policy phase artifacts
             policyPhase: null,
@@ -2602,25 +3245,56 @@ async function advanceToNextGovernment(gameId, gameRef) {
             currentPresidentPlayerId: nextPresident.id,
             updatedAt: serverTimestamp()
         };
-        
+
         await updateDoc(gameRef, fallbackUpdates);
-        
+
         // Clean up any remaining overlays after fallback advancement
         cleanupAllPolicyOverlays();
-        
+
         // Announce rotation
         await logPublic(
             gameId,
             `Next President: ${nextPresident.name || 'Player'}. President, please nominate a Chancellor.`,
             { type: 'rotation', actorId: nextPresident.id }
         );
-        
+
         return;
     }
-    
-    // Calculate next president index
-    const nextIndex = (currentIndex + 1) % orderedAlive.length;
-    const nextPresident = orderedAlive[nextIndex];
+
+    // Check if we're ending a special election round or starting one
+    let nextPresident;
+    let nextIndex;
+
+    if (currentGame.isSpecialElection && currentGame.savedPresidentIndex !== undefined) {
+        // We just finished a special election round, restore normal rotation
+        console.log('🔄 Ending special election, restoring normal rotation from saved index:', currentGame.savedPresidentIndex);
+
+        // Resume from the saved index (which was the president who triggered the special election)
+        // Move to the NEXT president in the normal rotation
+        nextIndex = (currentGame.savedPresidentIndex + 1) % orderedAlive.length;
+        nextPresident = orderedAlive[nextIndex];
+
+    } else if (currentGame.specialElectionCandidate) {
+        // Starting a special election - use the chosen candidate as next president
+        console.log('🗳️ Starting special election with candidate:', currentGame.specialElectionCandidate);
+
+        nextPresident = orderedAlive.find(p => p.id === currentGame.specialElectionCandidate);
+
+        if (!nextPresident) {
+            console.error('Special election candidate not found in alive players!');
+            // Fallback to normal rotation
+            nextIndex = (currentIndex + 1) % orderedAlive.length;
+            nextPresident = orderedAlive[nextIndex];
+        } else {
+            // Find the index of the special election president
+            nextIndex = orderedAlive.findIndex(p => p.id === currentGame.specialElectionCandidate);
+        }
+
+    } else {
+        // Normal rotation - calculate next president index
+        nextIndex = (currentIndex + 1) % orderedAlive.length;
+        nextPresident = orderedAlive[nextIndex];
+    }
     
     
     if (!nextPresident) {
@@ -2650,6 +3324,21 @@ async function advanceToNextGovernment(gameId, gameRef) {
         currentPresidentPlayerId: nextPresident.id,
         updatedAt: serverTimestamp()
     };
+
+    // Handle special election state transitions
+    if (currentGame.isSpecialElection && currentGame.savedPresidentIndex !== undefined) {
+        // We just finished a special election round - clear all special election flags
+        advanceUpdates.isSpecialElection = false;
+        advanceUpdates.specialElectionCandidate = null;
+        advanceUpdates.savedPresidentIndex = null;
+        console.log('🔄 Cleared special election flags, returning to normal rotation');
+
+    } else if (currentGame.specialElectionCandidate) {
+        // We're starting a special election round - set the flag
+        advanceUpdates.isSpecialElection = true;
+        advanceUpdates.specialElectionCandidate = null; // Clear this after using it
+        console.log('🗳️ Started special election round');
+    }
 
     await updateDoc(gameRef, advanceUpdates);
 
@@ -2759,6 +3448,7 @@ function renderActions(gameId) {
     }
     if (phase === 'president_draw') return renderPhasePresidentDraw(gameId, youId, game, players, actionsCenter);
     if (phase === 'chancellor_choice') return renderPhaseChancellorChoice(gameId, youId, game, players, actionsCenter);
+    if (phase === 'veto_proposed') return renderPhaseVetoProposed(gameId, youId, game, players, actionsCenter);
     if (phase === 'completed') return renderPhaseCompleted(gameId, youId, game, players, actionsCenter);
     // For other phases not yet implemented, show a neutral status
     setStatus(gameId, 'Proceeding to next phase…');
@@ -3374,24 +4064,35 @@ function showRole(youPlayer, roleText, roleBtn) {
 }
 
 function showCompatriots(youPlayer, game, roleText) {
-    const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' || 
+    const isFascist = (youPlayer.party || '').toString().toUpperCase() === 'FASCIST' ||
                       (youPlayer.role || '').toString().toUpperCase() === 'FASCIST';
-    
+
+    // Check if comrades view is currently shown
+    const isCurrentlyShown = roleText.textContent.includes('Your Fascist Comrades:') ||
+                            roleText.textContent.includes('No other Fascist players') ||
+                            roleText.textContent.includes('Your Liberal Comrades:');
+
+    if (isCurrentlyShown) {
+        // Hide comrades - return to hidden state
+        closeAllViews(roleText);
+        return;
+    }
+
     // Close any other views first
     closeAllViews(roleText);
-    
+
     if (isFascist) {
         // Handle Fascist players
-        const fascistPlayers = (latestPlayers || []).filter(p => 
-            p && p.id !== youPlayer.id && 
-            ((p.party || '').toString().toUpperCase() === 'FASCIST' || 
+        const fascistPlayers = (latestPlayers || []).filter(p =>
+            p && p.id !== youPlayer.id &&
+            ((p.party || '').toString().toUpperCase() === 'FASCIST' ||
              (p.role || '').toString().toUpperCase() === 'FASCIST')
         );
-        
+
         if (fascistPlayers.length === 0) {
             roleText.textContent = 'No other Fascist players to reveal';
             roleText.style.color = '#000';
-            
+
             // Add explanation
             const helpText = document.createElement('div');
             helpText.style.fontSize = '0.75rem';
@@ -3404,7 +4105,7 @@ function showCompatriots(youPlayer, game, roleText) {
             const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('\n');
             roleText.textContent = `Your Fascist Comrades:\n${names}`;
             roleText.style.color = '#DA291C';
-            
+
             // Add explanation
             const helpText = document.createElement('div');
             helpText.style.fontSize = '0.75rem';
@@ -3418,7 +4119,7 @@ function showCompatriots(youPlayer, game, roleText) {
         // Handle Liberal players with fun message
         roleText.textContent = '🤷‍♂️ Your Liberal Comrades:';
         roleText.style.color = '#00AEEF';
-        
+
         // Add fun explanation about not knowing teammates
         const helpText = document.createElement('div');
         helpText.style.fontSize = '0.75rem';
@@ -3428,7 +4129,7 @@ function showCompatriots(youPlayer, game, roleText) {
         helpText.textContent = 'You have no idea who your Liberal teammates are - and that\'s part of the fun! Trust your instincts and work together to pass Liberal policies! 🕵️‍♀️';
         roleText.appendChild(helpText);
     }
-    
+
     // Add subtle animation
     roleText.style.animation = 'none';
     roleText.offsetHeight; // Trigger reflow
@@ -3664,6 +4365,12 @@ function showCompatriots(youPlayer, game, roleText) {
         viewDeckBtn.className = 'btn';
         viewDeckBtn.textContent = '🃏 View Deck Order';
         list.appendChild(viewDeckBtn);
+
+        const rewindBtn = document.createElement('button');
+        rewindBtn.id = 'debug-rewind-btn';
+        rewindBtn.className = 'btn';
+        rewindBtn.textContent = '⏪ Rewind Last Election';
+        list.appendChild(rewindBtn);
 
         menuBody.appendChild(list);
     }
@@ -4023,6 +4730,93 @@ function showCompatriots(youPlayer, game, roleText) {
             return;
         }
 
+        if (t.id === 'debug-rewind-btn') {
+            const game = latestGame;
+            if (!game) {
+                alert('Game not loaded');
+                return;
+            }
+
+            const liberalPolicies = game.liberalPolicies || 0;
+            const fascistPolicies = game.fascistPolicies || 0;
+            const totalPolicies = liberalPolicies + fascistPolicies;
+
+            if (totalPolicies === 0) {
+                alert('Cannot rewind: No policies have been enacted yet.');
+                return;
+            }
+
+            // Determine which policy to remove (assume last enacted was fascist if fascist > 0, else liberal)
+            const removeFascist = fascistPolicies > 0;
+            const policyType = removeFascist ? 'Fascist' : 'Liberal';
+
+            const ok = confirm(`Rewind last election?\n\nThis will:\n- Remove 1 ${policyType} policy\n- Move president back one player\n- Reset election state\n\nAre you sure?`);
+            if (!ok) return;
+
+            try {
+                const gameRef = doc(db, 'games', gid);
+
+                // Get alive players to calculate previous president
+                const orderedAlive = (latestPlayers || [])
+                    .filter(p => p && p.alive !== false)
+                    .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+
+                if (orderedAlive.length === 0) {
+                    alert('Cannot rewind: No alive players found.');
+                    return;
+                }
+
+                // Find current president index
+                const currentPresidentId = game.currentPresidentPlayerId;
+                const currentIndex = orderedAlive.findIndex(p => p.id === currentPresidentId);
+
+                // Calculate previous president index (go backward with wraparound)
+                let previousIndex;
+                if (currentIndex === -1) {
+                    // Current president not found, default to last player
+                    previousIndex = orderedAlive.length - 1;
+                } else {
+                    previousIndex = (currentIndex - 1 + orderedAlive.length) % orderedAlive.length;
+                }
+
+                const previousPresident = orderedAlive[previousIndex];
+
+                // Prepare updates
+                const updates = {
+                    // Decrement the appropriate policy count
+                    liberalPolicies: removeFascist ? liberalPolicies : Math.max(0, liberalPolicies - 1),
+                    fascistPolicies: removeFascist ? Math.max(0, fascistPolicies - 1) : fascistPolicies,
+                    // Reset to previous president
+                    presidentIndex: previousIndex,
+                    currentPresidentPlayerId: previousPresident.id,
+                    // Clear election state
+                    policyPhase: null,
+                    enactedPolicy: null,
+                    presidentDrawnCards: [],
+                    presidentDiscardedCard: null,
+                    chancellorDiscardedCard: null,
+                    currentChancellorPlayerId: null,
+                    nominatedChancellorPlayerId: null,
+                    voteResolution: null,
+                    electionVotes: {},
+                    electionTracker: 0, // Reset tracker on rewind
+                    pendingSuperpower: null, // Clear any pending superpowers
+                    termLimitLastPresidentId: null, // Clear term limits on rewind
+                    termLimitLastChancellorId: null, // Clear term limits on rewind
+                    updatedAt: serverTimestamp()
+                };
+
+                await updateDoc(gameRef, updates);
+                await logPublic(gid, `${yourName} rewound the last election (removed 1 ${policyType} policy)`, { type: 'debug', actorId: youId || null });
+                alert(`Rewound successfully! Removed 1 ${policyType} policy. President is now ${previousPresident.name || 'Player'}.`);
+            } catch (err) {
+                console.error('Failed to rewind', err);
+                alert('Failed to rewind: ' + err.message);
+            }
+            closeMenuModal();
+            return;
+        }
+
         if (t.id === 'duplicate-game-btn') {
             try {
                 // Collect current game data
@@ -4161,6 +4955,7 @@ function showCompatriots(youPlayer, game, roleText) {
         updateFromGame(latestGame);
                     // Update floating role banner for this device
         updateRoleBanner(latestGame, gid);
+        updateDeadBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
         
         // Refresh role overlay permissions if it's currently open
@@ -4178,14 +4973,27 @@ function showCompatriots(youPlayer, game, roleText) {
             isNominating = false;
         }
 
+
+        // Show victory modal if game has ended
+        if (latestGame && latestGame.gamePhase === 'ended') {
+            showVictoryModal(latestGame);
+        }
+
         // Check if there's a pending superpower and show modal (handles page refresh)
         if (latestGame && latestGame.pendingSuperpower) {
             const youId = computeYouId(gid);
             const superpowerPresidentId = latestGame.pendingSuperpower.presidentId;
 
             // Only show modal if this user is the president who needs to use the superpower
-            // AND if the modal isn't already visible
-            if (youId === superpowerPresidentId && !document.getElementById('superpower-modal')) {
+            // AND if no superpower-related modal is already visible
+            // AND we're not currently processing a superpower (prevents race condition)
+            const hasSuperpowerModal = document.getElementById('superpower-modal') ||
+                                      document.getElementById('policy-peek-modal') ||
+                                      document.getElementById('investigation-modal') ||
+                                      document.getElementById('special-election-modal') ||
+                                      document.getElementById('execution-modal');
+
+            if (youId === superpowerPresidentId && !hasSuperpowerModal && !isProcessingSuperpower) {
                 const superpower = {
                     type: latestGame.pendingSuperpower.type,
                     name: latestGame.pendingSuperpower.name,
@@ -4212,10 +5020,12 @@ function showCompatriots(youPlayer, game, roleText) {
         })));
         // Also refresh the banner after players load (needed for uid->id map)
         updateRoleBanner(latestGame, gid);
+        updateDeadBanner(latestGame, gid);
         updateRoleEnvelope(latestGame, gid);
-        
+
         // Refresh role overlay permissions if it's currently open
         refreshRoleOverlayPermissions();
+
 
         // Update actions when players change (eligibility)
         renderActions(gid);
@@ -4226,20 +5036,24 @@ function showCompatriots(youPlayer, game, roleText) {
 
     // Removed redirect for help-btn; now opens in-game modal
 
+    // Start session monitoring to detect conflicts
+    startSessionMonitoring(gid);
+
     // Presence heartbeat to keep this player's session marked active while playing
     heartbeatOnce(gid);
     if (heartbeatTimer) clearInterval(heartbeatTimer);
     heartbeatTimer = setInterval(function() { heartbeatOnce(gid); }, HEARTBEAT_INTERVAL_MS);
-    
+
     // Start stuck game checker to automatically fix stuck games
     const stuckGameChecker = startStuckGameChecker(gid);
-    
+
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') heartbeatOnce(gid);
     });
-    window.addEventListener('beforeunload', function() { 
-        heartbeatOnce(gid); 
+    window.addEventListener('beforeunload', function() {
+        heartbeatOnce(gid);
         if (stuckGameChecker) clearInterval(stuckGameChecker);
+        sessionManager.cleanup();
     });
 
     // Background: surface AFK/return notifications from history as a brief status banner
@@ -4457,7 +5271,7 @@ function showCompatriots(youPlayer, game, roleText) {
                 const totalNow = aliveNow.length || (latestPlayers || []).length;
                 const validVotes = Object.entries(gvotes).filter(([pid]) => aliveNow.includes(pid)).map(([,v]) => String(v));
                 if (totalNow === 0) return null;
-                
+
                 // Use the early resolution values we calculated above
                 // Note: This may resolve before all players have voted if outcome is certain
                 const ja = validVotes.filter(v => v === 'ja').length;
@@ -4469,6 +5283,29 @@ function showCompatriots(youPlayer, game, roleText) {
                     updatedAt: serverTimestamp()
                 };
                 if (passed) {
+                    // Check for Hitler election win condition
+                    // Fetch the nominee player to check if they are Hitler
+                    const nomineePlayerRef = doc(db, 'games', gameId, 'players', currentNominee);
+                    const nomineePlayerSnap = await tx.get(nomineePlayerRef);
+                    const isHitler = nomineePlayerSnap.exists() && nomineePlayerSnap.data().role === 'hitler';
+                    const fascistPolicies = g.fascistPolicies || 0;
+
+                    // If Hitler is elected Chancellor after 3+ fascist policies, Fascists win
+                    if (isHitler && fascistPolicies >= 3) {
+                        payload.gamePhase = 'ended';
+                        payload.winner = 'fascist';
+                        payload.winCondition = 'hitler_elected';
+                        payload.endedAt = serverTimestamp();
+                        payload.electionTracker = 0;
+                        payload.currentChancellorPlayerId = currentNominee;
+                        payload.nominatedChancellorPlayerId = null;
+                        payload.termLimitLastPresidentId = g.currentPresidentPlayerId || null;
+                        payload.termLimitLastChancellorId = currentNominee;
+                        tx.update(gameRef, payload);
+                        return { ja, nein, passed, electionTracker: 0, hitlerElected: true };
+                    }
+
+                    // Normal Chancellor election
                     payload.electionTracker = 0;
                     payload.currentChancellorPlayerId = currentNominee;
                     payload.nominatedChancellorPlayerId = null;
@@ -4483,7 +5320,7 @@ function showCompatriots(youPlayer, game, roleText) {
                     payload.nominatedChancellorPlayerId = null;
                 }
                 tx.update(gameRef, payload);
-                return { ja, nein, passed, electionTracker: payload.electionTracker };
+                return { ja, nein, passed, electionTracker: payload.electionTracker, hitlerElected: false };
             });
 
             if (outcome) {
@@ -4492,12 +5329,26 @@ function showCompatriots(youPlayer, game, roleText) {
                     if (outcome.passed) {
                         await logPublic(gameId, `Election passed`, { type: 'vote' });
 
-                        // Log the new government formation with President and Chancellor names
-                        const presPlayer = latestPlayers.find(p => p.id === latestGame.currentPresidentPlayerId);
-                        const chancPlayer = latestPlayers.find(p => p.id === nomineeId);
-                        const presName = presPlayer ? presPlayer.name : 'Unknown';
-                        const chancName = chancPlayer ? chancPlayer.name : 'Unknown';
-                        await logPublic(gameId, `${presName} (President) and ${chancName} (Chancellor) form the government`, { type: 'government' });
+                        // Check if Hitler was elected - if so, log the win and skip normal government formation
+                        if (outcome.hitlerElected) {
+                            const chancPlayer = latestPlayers.find(p => p.id === nomineeId);
+                            const chancName = chancPlayer ? chancPlayer.name : 'Unknown';
+                            await logPublic(gameId, `👑 ${chancName} (Hitler) elected Chancellor! Fascists win!`, {
+                                type: 'game_end',
+                                winner: 'fascist',
+                                winCondition: 'hitler_elected',
+                                chancellorId: nomineeId
+                            });
+                            setStatus(gameId, '👑 Hitler elected Chancellor! Fascists win the game!');
+                        } else {
+                            // Normal government formation
+                            // Log the new government formation with President and Chancellor names
+                            const presPlayer = latestPlayers.find(p => p.id === latestGame.currentPresidentPlayerId);
+                            const chancPlayer = latestPlayers.find(p => p.id === nomineeId);
+                            const presName = presPlayer ? presPlayer.name : 'Unknown';
+                            const chancName = chancPlayer ? chancPlayer.name : 'Unknown';
+                            await logPublic(gameId, `${presName} (President) and ${chancName} (Chancellor) form the government`, { type: 'government' });
+                        }
                     } else {
                         await logPublic(gameId, `Election failed`, { type: 'vote' });
 

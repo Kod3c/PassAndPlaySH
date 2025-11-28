@@ -12,16 +12,110 @@
     <link rel="icon" href="../icons/favicon.ico">
     <script src="../js/theme.js"></script>
     <style>
-        .badge { display:inline-block; padding: 0.125rem 0.5rem; border: var(--border-medium) solid var(--propaganda-black); background: var(--off-white); font-weight: 700; font-size: var(--font-sm); border-radius: 999px; margin-left: 0.5rem; }
+        .badge { display:inline-block; padding: 0.125rem 0.5rem; border: var(--border-medium) solid var(--propaganda-black); background: var(--off-white); color: var(--propaganda-black); font-weight: 700; font-size: var(--font-sm); border-radius: 999px; margin-left: 0.5rem; }
         .player-list-ul { list-style: none; padding-left: 0; margin: 0; display: grid; gap: var(--space-sm); }
-        .player-list-item { display: flex; align-items: center; gap: 8px; padding: 0.375rem 0.5rem; background: #fff; border: var(--border-thin) dashed var(--propaganda-black); }
+        .player-list-item { display: flex; align-items: center; gap: 8px; padding: 0.375rem 0.5rem; background: #fff; color: var(--propaganda-black); border: var(--border-thin) dashed var(--propaganda-black); }
         .player-name { font-weight: 600; letter-spacing: 0.02em; }
         .lobby-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
         .lobby-actions .btn { flex: 0 1 auto; }
+        .lobby-meta { margin-bottom: 1rem; color: var(--propaganda-black); }
+        .lobby-meta > div { margin-bottom: 0.5rem; }
+        .lobby-meta strong { color: var(--propaganda-black); }
+        .lobby-status { margin-top: 1rem; color: var(--propaganda-black); }
+        /* Game code display */
+        .game-code-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 1.25rem 1rem;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 3px solid var(--propaganda-black);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .game-code-label {
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+            color: var(--propaganda-black);
+            text-transform: uppercase;
+        }
+        .game-code-value {
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            color: var(--propaganda-black);
+            padding: 0.25rem 0.75rem;
+            background: rgba(255,255,255,0.8);
+            border-radius: 6px;
+            border: 2px solid var(--propaganda-black);
+        }
+        .game-code-copy-btn {
+            padding: 0.5rem 1rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+        @media (max-width: 640px) {
+            .game-code-display {
+                flex-direction: column;
+                gap: 8px;
+                padding: 1rem;
+            }
+            .game-code-value {
+                font-size: 1.5rem;
+            }
+            .game-code-copy-btn {
+                width: 100%;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            .game-code-display {
+                background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+                border-color: var(--border-color);
+            }
+            .game-code-label,
+            .game-code-value {
+                color: var(--white);
+            }
+            .game-code-value {
+                background: rgba(0,0,0,0.3);
+                border-color: var(--border-color);
+            }
+        }
+        [data-theme="dark"] .game-code-display {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            border-color: var(--border-color);
+        }
+        [data-theme="dark"] .game-code-label,
+        [data-theme="dark"] .game-code-value {
+            color: var(--white);
+        }
+        [data-theme="dark"] .game-code-value {
+            background: rgba(0,0,0,0.3);
+            border-color: var(--border-color);
+        }
         @media (max-width: 640px) {
             .lobby-actions { flex-direction: column; align-items: stretch; gap: 10px; }
             .lobby-actions .btn { width: 100%; }
         }
+        /* Dark mode fixes */
+        @media (prefers-color-scheme: dark) {
+            .badge { background: var(--bg-elevated); color: var(--white); border-color: var(--border-color); }
+            .player-list-item { background: var(--bg-elevated); color: var(--white); border-color: var(--border-color); }
+            .lobby-meta,
+            .lobby-meta > div,
+            .lobby-meta strong,
+            .lobby-status { color: var(--white) !important; }
+        }
+        [data-theme="dark"] .badge { background: var(--bg-elevated); color: var(--white); border-color: var(--border-color); }
+        [data-theme="dark"] .player-list-item { background: var(--bg-elevated); color: var(--white); border-color: var(--border-color); }
+        [data-theme="dark"] .lobby-meta,
+        [data-theme="dark"] .lobby-meta > div,
+        [data-theme="dark"] .lobby-meta strong,
+        [data-theme="dark"] .lobby-status { color: var(--white) !important; }
         /* Preloader overlay */
         .preloader-overlay { position: fixed; inset: 0; z-index: 10000; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
         .preloader-overlay .loader { display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -60,6 +154,11 @@
                         </div>
                     </div>
                     <div class="card-content">
+                        <div id="game-code-display" class="game-code-display">
+                            <span class="game-code-label">Game Code:</span>
+                            <span id="game-code-value" class="game-code-value">-----</span>
+                            <button id="copy-code-btn" class="btn btn-secondary game-code-copy-btn">📋 Copy Code</button>
+                        </div>
                         <div id="lobby-info" class="lobby-info"></div>
                         <div id="players-list" class="players-list mt-3"></div>
 
@@ -85,7 +184,7 @@
         <footer class="main-footer">
             <div class="container">
                 <div class="footer-content">
-                    <p class="footer-text">Built for offline play - no accounts or servers required</p>
+                    <p class="footer-text">Connect and play with friends anywhere</p>
                     <div class="footer-links">
                         <a href="../pages/rules.html" class="footer-link">📖 Rules</a>
                         <span class="footer-separator">•</span>
@@ -104,9 +203,11 @@
     <script type="module">
         import { onGameSnapshot, getGame, logPublic, logPrivate, logPartied, logSilent } from '../js/db.js?v=2';
         import { app } from '../js/firebase.js';
+        import SessionManager from '../js/session-manager.js';
         import { getFirestore, doc, updateDoc, serverTimestamp, collection, query, where, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         (function() {
+            const sessionManager = new SessionManager(app);
             let preloaderRotationInterval = null;
 
             function showPreloader(text) {
@@ -166,12 +267,18 @@
             const inviteInput = document.getElementById('invite-link');
             const copyInviteBtn = document.getElementById('copy-invite-btn');
             const startBtn = document.getElementById('start-game-btn');
+            const gameCodeValue = document.getElementById('game-code-value');
+            const copyCodeBtn = document.getElementById('copy-code-btn');
 
             const db = getFirestore(app);
             const PRESENT_WINDOW_MS = 90 * 1000; // 90s to match faster reclaim on join page
             const HEARTBEAT_INTERVAL_MS = 25 * 1000; // 25s
             let heartbeatTimer = null;
             let removalHandled = false;
+
+            // Timer state for host override (persistent across renders)
+            let hostTimerInterval = null;
+            let hostSeenTime = null;
 
             function handleGameRemoved() {
                 if (removalHandled) return;
@@ -216,6 +323,11 @@
                 const joinUrl = window.location.origin + window.location.pathname.replace(/\/pages\/lobby\.html$/, '/pages/join.html') + '?game=' + encodeURIComponent(game.id);
                 inviteInput.value = joinUrl;
 
+                // Update game code display
+                if (gameCodeValue) {
+                    gameCodeValue.textContent = game.id || '-----';
+                }
+
                 // Safely render lobby info without injecting user strings as HTML
                 lobbyInfo.innerHTML = '';
                 const contentRoot = document.querySelector('.card-content');
@@ -235,12 +347,6 @@
                 gameNameSpan.textContent = game.name || 'Secret Hitler Game';
                 gameRow.appendChild(gameNameSpan);
 
-                const idRow = document.createElement('div');
-                const idStrong = document.createElement('strong');
-                idStrong.textContent = 'Game Code:';
-                idRow.appendChild(idStrong);
-                idRow.appendChild(document.createTextNode(' ' + (game.id || '')));
-
                 const countRow = document.createElement('div');
                 const countStrong = document.createElement('strong');
                 countStrong.textContent = 'Players Expected:';
@@ -251,7 +357,6 @@
                 countRow.appendChild(document.createTextNode(' ' + expected));
 
                 metaDiv.appendChild(gameRow);
-                metaDiv.appendChild(idRow);
                 metaDiv.appendChild(countRow);
 
                 const statusDiv = document.createElement('div');
@@ -320,9 +425,12 @@
                 const notPresent = [];
                 for (const [name, p] of nameToPlayer.entries()) {
                     const lastSeen = p.lastSeen && p.lastSeen.toDate ? p.lastSeen.toDate().getTime() : 0;
-                    const isPresent = Boolean(p.uid) && (lastSeen > 0) && (now - lastSeen <= PRESENT_WINDOW_MS);
+                    const isClaimed = Boolean(p.uid);
+                    const isPresent = isClaimed && (lastSeen > 0) && (now - lastSeen <= PRESENT_WINDOW_MS);
                     const effectivePresent = (youPlayerId && p.id === youPlayerId) || isPresent;
-                    (effectivePresent ? present : notPresent).push({ name, p });
+                    // Show claimed players (with uid) in present list regardless of lastSeen status
+                    // Only show truly unclaimed players (no uid) in notPresent list
+                    (isClaimed ? present : notPresent).push({ name, p });
                 }
 
                 // Sort alphabetically by name within groups
@@ -449,14 +557,14 @@
                     reopenBtn.textContent = 'My Secret Role';
                     reopenWrap.appendChild(reopenBtn);
 
-                    // Progress UI (label + bar) placed in Present list
-                    const presentBody = presentCol.querySelector('.card-content');
+                    // Progress UI (label + bar) placed after player lists
                     const progressWrap = document.createElement('div');
                     progressWrap.id = 'reveal-progress';
                     progressWrap.style.display = 'flex';
                     progressWrap.style.flexDirection = 'column';
                     progressWrap.style.alignItems = 'center';
                     progressWrap.style.gap = '8px';
+                    progressWrap.style.marginTop = '16px';
                     progressWrap.style.marginBottom = '12px';
                     const progressLabel = document.createElement('div');
                     progressLabel.style.fontWeight = '800';
@@ -477,7 +585,6 @@
                     progressBarOuter.appendChild(progressBarInner);
                     progressWrap.appendChild(progressLabel);
                     progressWrap.appendChild(progressBarOuter);
-                    if (presentBody) presentBody.insertBefore(progressWrap, presentBody.firstChild);
 
                     const hostControls = document.createElement('div');
                     hostControls.id = 'host-continue';
@@ -493,6 +600,7 @@
                     reopenWrap.appendChild(hostControls);
 
                     reveal.appendChild(reopenWrap);
+                    reveal.appendChild(progressWrap);
                     if (contentRoot) contentRoot.appendChild(reveal);
 
                     function getYouPlayer() {
@@ -513,13 +621,59 @@
                             ? expectedCount
                             : dedupedPlayers.length;
                         const pct = totalExpected > 0 ? Math.min(100, Math.max(0, Math.round((seen / totalExpected) * 100))) : 0;
-                        progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
+
+                        // Don't update progress label if timer is running
+                        if (!hostTimerInterval) {
+                            progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
+                        }
                         progressBarInner.style.width = `${pct}%`;
-                        if (isHost && seen === totalExpected && totalExpected > 0) {
-                            hostControls.style.display = '';
+
+                        // Show host controls if everyone has seen OR if host has waited 10 seconds
+                        if (isHost) {
+                            const allSeen = seen === totalExpected && totalExpected > 0;
+                            const hostWaitedEnough = hostSeenTime && ((Date.now() - hostSeenTime) >= 10000);
+
+                            if (allSeen || hostWaitedEnough) {
+                                hostControls.style.display = '';
+                                // Stop timer if running and update label
+                                if (hostTimerInterval) {
+                                    clearInterval(hostTimerInterval);
+                                    hostTimerInterval = null;
+                                    progressLabel.textContent = `Seen: ${seen} / ${totalExpected}`;
+                                }
+                            } else {
+                                hostControls.style.display = 'none';
+                            }
                         } else {
                             hostControls.style.display = 'none';
                         }
+                    }
+
+                    function startHostTimer() {
+                        if (!isHost) return;
+                        if (hostTimerInterval) return; // Already running
+                        if (hostSeenTime) return; // Already started (timer may have completed)
+
+                        hostSeenTime = Date.now();
+
+                        const updateTimerDisplay = () => {
+                            const elapsed = Math.floor((Date.now() - hostSeenTime) / 1000);
+                            const remaining = Math.max(0, 10 - elapsed);
+
+                            if (remaining > 0) {
+                                progressLabel.textContent = `Waiting for others... (${remaining}s until you can continue)`;
+                            } else {
+                                progressLabel.textContent = `You can now start the game`;
+                                if (hostTimerInterval) {
+                                    clearInterval(hostTimerInterval);
+                                    hostTimerInterval = null;
+                                }
+                                updateProgress();
+                            }
+                        };
+
+                        updateTimerDisplay();
+                        hostTimerInterval = setInterval(updateTimerDisplay, 1000);
                     }
 
                     // Full-screen role reveal overlay (centered, toggle, no timer)
@@ -598,6 +752,11 @@
                                 try { you.roleSeen = true; } catch (_) {}
                                 try { updateProgress(); } catch (_) {}
                                 try { await logPrivate(game.id, 'You acknowledged viewing your secret role', you.id, { type: 'ack', actorId: you.id }); } catch (_) {}
+
+                                // Start 10-second timer for host
+                                if (isHost) {
+                                    startHostTimer();
+                                }
                             } catch (_) {}
                         }
                         
@@ -617,21 +776,48 @@
                             } else {
                                 const info = computeRoleText();
                                 const isFascist = (info.party === 'FASCIST' || info.role === 'FASCIST');
-                                
+                                const isHitler = (info.role === 'HITLER');
+
                                 if (isFascist) {
-                                    // For fascist players, show role and comrades together
                                     const allPlayers = Array.from(nameToPlayer.values());
-                                    const fascistPlayers = allPlayers.filter(p => 
-                                        p && p.id !== yp.id && 
-                                        ((p.party || '').toString().toUpperCase() === 'FASCIST' || 
+                                    const totalPlayers = allPlayers.length;
+
+                                    // Find all fascist team members (excluding self)
+                                    const fascistPlayers = allPlayers.filter(p =>
+                                        p && p.id !== yp.id &&
+                                        ((p.party || '').toString().toUpperCase() === 'FASCIST' ||
                                          (p.role || '').toString().toUpperCase() === 'FASCIST')
                                     );
-                                    
-                                    if (fascistPlayers.length === 0) {
-                                        roleLabel.innerHTML = `${info.label}<br><br>No other Fascist players to reveal`;
-                                    } else {
-                                        const names = fascistPlayers.map(p => p.name || 'Unknown Player').join('<br>');
-                                        roleLabel.innerHTML = `${info.label}<br><br>Your Fascist Comrades:<br>${names}`;
+
+                                    // 5-6 players: Hitler and Fascist know each other
+                                    if (totalPlayers <= 6) {
+                                        if (fascistPlayers.length === 0) {
+                                            roleLabel.innerHTML = `${info.label}<br><br>No other Fascist players to reveal`;
+                                        } else {
+                                            const names = fascistPlayers.map(p => {
+                                                const pRole = (p.role || '').toString().toUpperCase();
+                                                return pRole === 'HITLER' ? `${p.name || 'Unknown Player'} (Hitler)` : (p.name || 'Unknown Player');
+                                            }).join('<br>');
+                                            const subtitle = isHitler ? 'Your Fascist Comrade:' : 'Your Fascist Comrade:';
+                                            roleLabel.innerHTML = `${info.label}<br><br>${subtitle}<br>${names}`;
+                                        }
+                                    }
+                                    // 7-10 players: Fascists know Hitler and each other, Hitler knows nothing
+                                    else {
+                                        if (isHitler) {
+                                            roleLabel.innerHTML = `${info.label}<br><br><em style="font-size: 0.9rem;">You do not know who the other Fascists are</em>`;
+                                        } else {
+                                            // Regular fascist - show Hitler and other fascists
+                                            if (fascistPlayers.length === 0) {
+                                                roleLabel.innerHTML = `${info.label}<br><br>No other Fascist players to reveal`;
+                                            } else {
+                                                const names = fascistPlayers.map(p => {
+                                                    const pRole = (p.role || '').toString().toUpperCase();
+                                                    return pRole === 'HITLER' ? `${p.name || 'Unknown Player'} (Hitler)` : (p.name || 'Unknown Player');
+                                                }).join('<br>');
+                                                roleLabel.innerHTML = `${info.label}<br><br>Your Fascist Comrades:<br>${names}`;
+                                            }
+                                        }
                                     }
                                     roleLabel.style.color = '#DA291C';
                                 } else {
@@ -639,9 +825,9 @@
                                     roleLabel.textContent = info.label;
                                     roleLabel.style.color = '#00AEEF';
                                 }
-                                
+
                                 toggleBtn.textContent = '🙈 Hide my secret role';
-                                
+
                                 // First reveal counts as seen
                                 markSeenOnce();
                             }
@@ -673,21 +859,38 @@
                         e.preventDefault();
                         e.stopPropagation();
                         if (!isHost) return;
+
                         const dedupedPlayers = Array.from(nameToPlayer.values());
                         const seen = dedupedPlayers.filter(p => p && p.roleSeen).length;
                         const totalExpected = (typeof expectedCount === 'number' && expectedCount > 0)
                             ? expectedCount
                             : dedupedPlayers.length;
-                        if (seen !== totalExpected || totalExpected === 0) return;
+
+                        // Allow start if everyone has seen OR if host has waited 10 seconds
+                        const allSeen = seen === totalExpected && totalExpected > 0;
+                        const hostWaitedEnough = hostSeenTime && ((Date.now() - hostSeenTime) >= 10000);
+
+                        if (!allSeen && !hostWaitedEnough) return;
+
                         // Prevent double clicks / rapid re-renders from causing multiple writes
                         hostBtn.disabled = true;
                         const originalText = hostBtn.textContent;
                         hostBtn.textContent = 'Starting…';
                         showPreloader('Preparing board…');
+
+                        // Stop timer if running
+                        if (hostTimerInterval) {
+                            clearInterval(hostTimerInterval);
+                            hostTimerInterval = null;
+                        }
+
                         try {
                             await ensureAuth();
                             await updateDoc(doc(db, 'games', game.id), { state: 'playing', updatedAt: serverTimestamp() });
-                            try { await logPublic(game.id, 'All players viewed roles — game is starting', { type: 'start' }); } catch (_) {}
+                            const logMessage = allSeen
+                                ? 'All players viewed roles — game is starting'
+                                : 'Host started game after waiting period';
+                            try { await logPublic(game.id, logMessage, { type: 'start' }); } catch (_) {}
                         } catch (_) {}
                         finally {
                             // If navigation hasn't occurred yet for some reason, re-enable button gracefully
@@ -702,7 +905,18 @@
                     const you = getYouPlayer();
                     if (you && !you.roleSeen) {
                         openRoleOverlay();
+                    } else if (you && you.roleSeen && isHost) {
+                        // If host has already seen their role (e.g., from refresh), start timer
+                        startHostTimer();
                     }
+
+                    // Clean up timer on page unload
+                    window.addEventListener('beforeunload', function() {
+                        if (hostTimerInterval) {
+                            clearInterval(hostTimerInterval);
+                            hostTimerInterval = null;
+                        }
+                    });
                 }
             }
 
@@ -719,6 +933,28 @@
                     setTimeout(() => { copyInviteBtn.textContent = 'Copy Invite'; }, 1500);
                 } catch (e) {
                     console.warn('Copy failed, select manually');
+                }
+            }
+
+            async function copyGameCode() {
+                const code = gameCodeValue ? gameCodeValue.textContent : '';
+                if (!code || code === '-----') return;
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(code);
+                    } else {
+                        // Fallback for older browsers
+                        const tempInput = document.createElement('input');
+                        tempInput.value = code;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                    }
+                    copyCodeBtn.textContent = '✅ Copied!';
+                    setTimeout(() => { copyCodeBtn.textContent = '📋 Copy Code'; }, 1500);
+                } catch (e) {
+                    console.warn('Copy failed', e);
                 }
             }
 
@@ -797,6 +1033,16 @@
                 }
                 if (!playerId) return; // nothing to heartbeat yet
 
+                // Start session monitoring to detect conflicts
+                try {
+                    await sessionManager.startMonitoring(gameId, playerId, () => {
+                        // Custom handler for lobby - show modal and prevent further actions
+                        sessionManager.showDefaultConflictModal();
+                    });
+                } catch (error) {
+                    console.error('Failed to start session monitoring:', error);
+                }
+
                 const playerRef = doc(db, 'games', gameId, 'players', playerId);
 
                 async function beat() {
@@ -815,6 +1061,7 @@
                 window.addEventListener('beforeunload', function() {
                     // best-effort; may not complete
                     beat();
+                    sessionManager.cleanup();
                 });
             }
 
@@ -837,6 +1084,7 @@
                 });
                 startHeartbeat(gameId);
                 copyInviteBtn.addEventListener('click', copyInvite);
+                copyCodeBtn.addEventListener('click', copyGameCode);
                 startBtn.addEventListener('click', async function() {
                     try {
                         await ensureAuth();
